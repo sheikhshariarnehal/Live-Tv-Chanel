@@ -1,0 +1,67 @@
+{
+  "categories": {
+        "sports": {
+      "name": "Sports",
+      "channels": [
+        {
+          "id": "sony-ten-1",
+          "name": "Sony Ten 1",
+          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/sonyten1/tracks-v1a1/mono.m3u8",
+          "logo": "assets/image/ten1.png"
+        },
+        {
+          "id": "tsports",
+          "name": "T Sports",
+          "url": "http://10.10.10.2/live/fnf002/index.m3u8",
+          "logo": "assets/image/T SPORTS1744972630.png"
+        },
+        {
+          "id": "gazi-tv-sports",
+          "name": "Gazi TV",
+          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/GaziTV/tracks-v1a1/mono.m3u8",
+          "logo": "assets/image/gtv.png"
+        },
+        {
+          "id": "sony-six",
+          "name": "Sony Six",
+          "url": "",
+          "logo": "assets/image/sonysix.png"
+        }
+      ]
+    },
+    "News": {
+      "name": "News",
+      "channels": [
+        {
+          "id": "tsports-hd",
+          "name": "T Sports HD",
+          "url": "http://10.10.10.2/live/fnf002/index.m3u8",
+          "logo": "assets/image/T SPORTS1744972630.png"
+        },
+        {
+          "id": "rtv",
+          "name": "RTV",
+          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/RTV/tracks-v1a1/mono.m3u8",
+          "logo": ""
+        },
+        {
+          "id": "gazi-tv",
+          "name": "Gazi TV",
+          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/GaziTV/tracks-v1a1/mono.m3u8",
+          "logo": "assets/image/gtv.png"
+        }
+      ]
+    },
+    "kids": {
+      "name": "Kids",
+      "channels": [
+        {
+          "id": "coming-soon-kids",
+          "name": "Coming Soon",
+          "url": "",
+          "logo": ""
+        }
+      ]
+    }
+  }
+}

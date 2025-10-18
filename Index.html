@@ -2,115 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>📺 My Local IPTV Player</title>
+  <title>📺 Live TV - IPTV Player</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <script>
-    window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
-  </script>
-  <script defer src="/_vercel/speed-insights/script.js"></script>
-  <style>
-    body {
-      background-color: #0f0f0f;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #202020;
-      padding: 15px;
-      font-size: 1.5em;
-      font-weight: bold;
-    }
-    video {
-      width: 90%;
-      max-width: 900px;
-      margin: 30px auto;
-      display: block;
-      border-radius: 15px;
-      box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
-      background: black;
-    }
-    .channels {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-top: 20px;
-      padding: 10px;
-    }
-    .channels button {
-      background: #007BFF;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      margin: 8px;
-      font-size: 1em;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .channels button:hover {
-      background: #0056b3;
-    }
-    .channels button.active {
-      background: #ff3b3b;
-    }
-  </style>
+  <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
-  <header>📡 My Local IPTV Player</header>
+  <div class="container">
+    <!-- Video Player Section -->
+    <div class="video-section">
+      <video id="player" controls autoplay></video>
+    </div>
 
-  <video id="player" controls autoplay></video>
+    <!-- Sidebar Section -->
+    <div class="sidebar">
+      <!-- Category Tabs -->
+      <div class="category-tabs" id="categoryTabs">
+        <!-- Tabs will be dynamically loaded -->
+      </div>
 
-  <div class="channels">
-    <button onclick="playChannel(this, 'http://10.99.99.99:8082/T-SPORTS-HD/tracks-v1a1/mono.m3u8?token=4b6dbb147774f64da3e8ef8efec82eacf2a6c258-9fe984ed47337e15e0b79521b503a39c-1760804369-1760793569')">T-Sports HD</button>
-
-    <button onclick="playChannel(this, 'http://10.99.99.99:8082/STAR.SPORTS-SEL1.HD/tracks-v1a1/mono.m3u8?token=9666a2a8c71e304698aa6a31f5b317949812cd23-fc4aa41db4ac50a36aee2ae31354c806-1760805654-1760794854')">Star Sports Select 1 HD</button>
-
-    <button onclick="playChannel(this, 'http://10.99.99.99:8082/STAR.SPORTS1.HD/tracks-v1a1/mono.m3u8?token=13fa2123453909ffbefd83262c03dc8194e50024-fc01a4547b20bf3afc75f05586479427-1760805724-1760794924')">Star Sports 1 HD</button>
-
-    <button onclick="playChannel(this, 'http://10.99.99.99:8082/PTV-SPORTS-HD/tracks-v1a1/mono.m3u8?token=0c123069251ff1fa7cf5f62ce0037324ed16f99a-7af3bc478d7ac20554d0ee51f5dd22ab-1760805797-1760794997')">PTV Sports HD</button>
+      <!-- Channel Grid -->
+      <div class="channel-grid" id="channelGrid">
+        <!-- Channels will be dynamically loaded -->
+      </div>
+    </div>
   </div>
 
-  <script>
-    const video = document.getElementById('player');
-    let hls;
-
-    function playChannel(button, url) {
-      // Remove active state from all buttons
-      document.querySelectorAll('.channels button').forEach(btn => btn.classList.remove('active'));
-      button.classList.add('active');
-
-      if (hls) {
-        hls.destroy();
-      }
-
-      if (Hls.isSupported()) {
-        hls = new Hls();
-        hls.loadSource(url);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          video.play();
-        });
-        hls.on(Hls.Events.ERROR, (event, data) => {
-          console.error('HLS error:', data);
-          alert('⚠️ Stream failed to load. Check your network or token.');
-        });
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = url;
-        video.play();
-      } else {
-        alert('❌ Your browser does not support HLS streaming.');
-      }
-    }
-
-    // Auto play the first channel on page load
-    window.onload = () => {
-      const firstButton = document.querySelector('.channels button');
-      firstButton.click();
-    };
-  </script>
+  <script src="assets/js/script.js"></script>
 </body>
 </html>
