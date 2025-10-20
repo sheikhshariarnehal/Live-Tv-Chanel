@@ -50,10 +50,10 @@
       "name": "Shows",
       "channels": [
         {
-          "id": "coming-soon-shows",
-          "name": "Coming Soon",
-          "url": "",
-          "logo": ""
+          "id": "colorsbangla",
+          "name": "colors-bangla",
+          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/colors-bangla/tracks-v1a1/mono.m3u8",
+          "logo": "assets/image/colorsbangla.png"
         }
       ]
     },
