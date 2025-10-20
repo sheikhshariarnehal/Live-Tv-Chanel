@@ -65,6 +65,32 @@
   </div>
 
   <script>
+    // Proxy configuration for HTTPS deployment
+    // Set USE_PROXY to true if deploying to HTTPS (GitHub Pages, Netlify, Vercel, etc.)
+    // Set to false for local HTTP testing
+    const USE_PROXY = true;
+    const PROXY_URL = "https://corsproxy.io/?";
+    
+    // Helper function to wrap URLs with proxy if needed
+    function getStreamUrl(url) {
+      if (!url || url === "") return "";
+      
+      // Skip proxy for already HTTPS URLs
+      if (url.startsWith("https://")) return url;
+      
+      // Skip proxy for local IPs (won't work online anyway)
+      if (url.includes("10.10.10.2") || url.includes("localhost") || url.includes("127.0.0.1")) {
+        return url;
+      }
+      
+      // Use proxy for HTTP URLs when deployed
+      if (USE_PROXY && url.startsWith("http://")) {
+        return PROXY_URL + encodeURIComponent(url);
+      }
+      
+      return url;
+    }
+
     // Channel data embedded directly in HTML
     const channelsData = {
       "categories": {

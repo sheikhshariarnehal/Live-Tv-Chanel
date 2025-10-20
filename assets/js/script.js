@@ -166,6 +166,16 @@ function playChannel(button, url, channelName) {
   document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
   button.classList.add('active');
   
+  // Apply proxy to URL if needed (getStreamUrl function from index.html)
+  const processedUrl = typeof getStreamUrl === 'function' ? getStreamUrl(url) : url;
+  
+  // Check if URL is local IP and warn user
+  if (url.includes("10.10.10.2") || url.includes("localhost") || url.includes("127.0.0.1")) {
+    showError(`${channelName} uses a local IP address and won't work on public internet`);
+    videoOverlay.classList.remove('active');
+    return;
+  }
+  
   // Destroy existing HLS instance
   if (hls) {
     hls.destroy();
@@ -179,10 +189,14 @@ function playChannel(button, url, channelName) {
       maxBufferLength: 30,
       maxMaxBufferLength: 600,
       maxBufferSize: 60 * 1000 * 1000,
-      maxBufferHole: 0.5
+      maxBufferHole: 0.5,
+      xhrSetup: function(xhr, url) {
+        // Add headers to help with CORS
+        xhr.withCredentials = false;
+      }
     });
     
-    hls.loadSource(url);
+    hls.loadSource(processedUrl);
     hls.attachMedia(video);
     
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
@@ -201,14 +215,16 @@ function playChannel(button, url, channelName) {
         switch (data.type) {
           case Hls.ErrorTypes.NETWORK_ERROR:
             console.log('Network error, trying to recover...');
-            hls.startLoad();
+            showError(`Network error loading ${channelName}. This may be due to CORS or mixed content issues.`);
+            setTimeout(() => hls.startLoad(), 2000);
             break;
           case Hls.ErrorTypes.MEDIA_ERROR:
             console.log('Media error, trying to recover...');
+            showError(`Media error on ${channelName}. Attempting to recover...`);
             hls.recoverMediaError();
             break;
           default:
-            showError(`Failed to load ${channelName}. Please try another channel.`);
+            showError(`Failed to load ${channelName}. The stream may be offline or blocked.`);
             hls.destroy();
             break;
         }
@@ -216,12 +232,17 @@ function playChannel(button, url, channelName) {
     });
   } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
     // Native HLS support (Safari)
-    video.src = url;
+    video.src = processedUrl;
+    video.addEventListener('error', (e) => {
+      videoOverlay.classList.remove('active');
+      showError(`Failed to load ${channelName}. The stream may be blocked or offline.`);
+    });
     video.play().then(() => {
       videoOverlay.classList.remove('active');
     }).catch(err => {
       console.log('Autoplay prevented:', err);
       videoOverlay.classList.remove('active');
+      showError('Please click the play button to start the video');
     });
   } else {
     videoOverlay.classList.remove('active');
