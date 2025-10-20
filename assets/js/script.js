@@ -10,13 +10,89 @@ const videoOverlay = document.getElementById('videoOverlay');
 let hls;
 let currentCategory = 'sports';
 
+// ===== Channel Data =====
+const channelsData = {
+  "categories": {
+    "sports": {
+      "name": "Sports",
+      "channels": [
+        {
+          "id": "tsports",
+          "name": "T Sports",
+          "url": "http://10.10.10.2/live/fnf002/index.m3u8",
+          "logo": "assets/image/T SPORTS1744972630.png"
+        },
+        {
+          "id": "sony-ten-1",
+          "name": "Sony Ten 1",
+          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/sonyten1/tracks-v1a1/mono.m3u8",
+          "logo": "assets/image/ten1.png"
+        },
+        {
+          "id": "sony-six",
+          "name": "Sony Six",
+          "url": "",
+          "logo": "assets/image/sonysix.png"
+        }
+      ]
+    },
+    "News": {
+      "name": "News",
+      "channels": [
+        {
+          "id": "DBC",
+          "name": "DBC Tv",
+          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/DBC/tracks-v1a1/mono.m3u8",
+          "logo": "assets/image/dbcnews.png"
+        },
+        {
+          "id": "rtv",
+          "name": "RTV",
+          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/RTV/tracks-v1a1/mono.m3u8",
+          "logo": ""
+        },
+        {
+          "id": "gazi-tv",
+          "name": "Gazi TV",
+          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/GaziTV/tracks-v1a1/mono.m3u8",
+          "logo": "assets/image/gtv.png"
+        }
+      ]
+    },
+    "shows": {
+      "name": "Shows",
+      "channels": [
+        {
+          "id": "starJalsa",
+          "name": "Star Jalsa",
+          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/starJalsa/tracks-v1a1/mono.m3u8",
+          "logo": "assets/image/starjalsha.png"
+        },
+        {
+          "id": "colorsbangla",
+          "name": "colors-bangla",
+          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/colors-bangla/tracks-v1a1/mono.m3u8",
+          "logo": "assets/image/colorsbangla.png"
+        }
+      ]
+    },
+    "kids": {
+      "name": "Kids",
+      "channels": [
+        {
+          "id": "coming-soon-kids",
+          "name": "Coming Soon",
+          "url": "",
+          "logo": ""
+        }
+      ]
+    }
+  }
+};
+
 // ===== Initialize UI with tabs and channels =====
 function initializeUI() {
-  if (!channelsData) {
-    console.error('Channel data not found!');
-    showError('Failed to load channels data');
-    return;
-  }
+  if (!channelsData) return;
   
   createCategoryTabs();
   createChannelCategories();
@@ -166,16 +242,6 @@ function playChannel(button, url, channelName) {
   document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
   button.classList.add('active');
   
-  // Apply proxy to URL if needed (getStreamUrl function from index.html)
-  const processedUrl = typeof getStreamUrl === 'function' ? getStreamUrl(url) : url;
-  
-  // Check if URL is local IP and warn user
-  if (url.includes("10.10.10.2") || url.includes("localhost") || url.includes("127.0.0.1")) {
-    showError(`${channelName} uses a local IP address and won't work on public internet`);
-    videoOverlay.classList.remove('active');
-    return;
-  }
-  
   // Destroy existing HLS instance
   if (hls) {
     hls.destroy();
@@ -189,14 +255,10 @@ function playChannel(button, url, channelName) {
       maxBufferLength: 30,
       maxMaxBufferLength: 600,
       maxBufferSize: 60 * 1000 * 1000,
-      maxBufferHole: 0.5,
-      xhrSetup: function(xhr, url) {
-        // Add headers to help with CORS
-        xhr.withCredentials = false;
-      }
+      maxBufferHole: 0.5
     });
     
-    hls.loadSource(processedUrl);
+    hls.loadSource(url);
     hls.attachMedia(video);
     
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
@@ -215,16 +277,14 @@ function playChannel(button, url, channelName) {
         switch (data.type) {
           case Hls.ErrorTypes.NETWORK_ERROR:
             console.log('Network error, trying to recover...');
-            showError(`Network error loading ${channelName}. This may be due to CORS or mixed content issues.`);
-            setTimeout(() => hls.startLoad(), 2000);
+            hls.startLoad();
             break;
           case Hls.ErrorTypes.MEDIA_ERROR:
             console.log('Media error, trying to recover...');
-            showError(`Media error on ${channelName}. Attempting to recover...`);
             hls.recoverMediaError();
             break;
           default:
-            showError(`Failed to load ${channelName}. The stream may be offline or blocked.`);
+            showError(`Failed to load ${channelName}. Please try another channel.`);
             hls.destroy();
             break;
         }
@@ -232,17 +292,12 @@ function playChannel(button, url, channelName) {
     });
   } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
     // Native HLS support (Safari)
-    video.src = processedUrl;
-    video.addEventListener('error', (e) => {
-      videoOverlay.classList.remove('active');
-      showError(`Failed to load ${channelName}. The stream may be blocked or offline.`);
-    });
+    video.src = url;
     video.play().then(() => {
       videoOverlay.classList.remove('active');
     }).catch(err => {
       console.log('Autoplay prevented:', err);
       videoOverlay.classList.remove('active');
-      showError('Please click the play button to start the video');
     });
   } else {
     videoOverlay.classList.remove('active');
@@ -327,5 +382,4 @@ style.textContent = `
 document.head.appendChild(style);
 
 // ===== Initialize the app =====
-// channelsData is now loaded from the inline script in index.html
 initializeUI();
