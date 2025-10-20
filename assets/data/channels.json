@@ -49,6 +49,12 @@
     "shows": {
       "name": "Shows",
       "channels": [
+                {
+          "id": "starJalsa",
+          "name": "Star Jalsa",
+          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/starJalsa/tracks-v1a1/mono.m3u8",
+          "logo": "assets/image/starjalsha.png"
+        },
         {
           "id": "colorsbangla",
           "name": "colors-bangla",

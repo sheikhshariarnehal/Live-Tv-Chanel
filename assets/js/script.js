@@ -6,8 +6,6 @@ const sidebar = document.getElementById('sidebar');
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const closeSidebarBtn = document.getElementById('closeSidebarBtn');
 const videoOverlay = document.getElementById('videoOverlay');
-const channelInfo = document.getElementById('channelInfo');
-const currentChannelName = document.getElementById('currentChannelName');
 
 let hls;
 let channelsData = null;
@@ -176,10 +174,6 @@ function playChannel(button, url, channelName) {
   // Remove active state from all channel buttons
   document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
   button.classList.add('active');
-  
-  // Update channel info
-  currentChannelName.textContent = channelName;
-  channelInfo.classList.add('active');
   
   // Destroy existing HLS instance
   if (hls) {
