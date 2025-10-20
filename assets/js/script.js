@@ -14,7 +14,7 @@ let currentCategory = 'bangla';
 // ===== Load channels data from JSON =====
 async function loadChannelsData() {
   try {
-    const response = await fetch('assets/data/channels.json');
+    const response = await fetch('./assets/data/channels.json');
     channelsData = await response.json();
     initializeUI();
   } catch (error) {
