@@ -46,6 +46,17 @@
         }
       ]
     },
+    "shows": {
+      "name": "Shows",
+      "channels": [
+        {
+          "id": "coming-soon-shows",
+          "name": "Coming Soon",
+          "url": "",
+          "logo": ""
+        }
+      ]
+    },
     "kids": {
       "name": "Kids",
       "channels": [
