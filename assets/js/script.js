@@ -2,7 +2,6 @@
 const video = document.getElementById('player');
 const categoryTabsContainer = document.getElementById('categoryTabs');
 const channelGridContainer = document.getElementById('channelGrid');
-const searchInput = document.getElementById('searchInput');
 const sidebar = document.getElementById('sidebar');
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const closeSidebarBtn = document.getElementById('closeSidebarBtn');
@@ -14,23 +13,12 @@ const currentChannelName = document.getElementById('currentChannelName');
 let hls;
 let channelsData = null;
 let currentCategory = 'bangla';
-let allChannels = [];
 
 // ===== Load channels data from JSON =====
 async function loadChannelsData() {
   try {
     const response = await fetch('assets/data/channels.json');
     channelsData = await response.json();
-    
-    // Flatten all channels for search
-    Object.keys(channelsData.categories).forEach(categoryKey => {
-      const category = channelsData.categories[categoryKey];
-      allChannels = allChannels.concat(category.channels.map(ch => ({
-        ...ch,
-        category: categoryKey
-      })));
-    });
-    
     initializeUI();
   } catch (error) {
     console.error('Error loading channels data:', error);
@@ -133,11 +121,6 @@ function setupEventListeners() {
           cat.classList.add('hidden');
         }
       });
-      
-      // Clear search when switching categories
-      if (searchInput.value) {
-        searchInput.value = '';
-      }
     });
   });
   
@@ -150,8 +133,8 @@ function setupEventListeners() {
       
       if (url && url !== '') {
         playChannel(this, url, channelName);
-        // Close sidebar on mobile after selecting channel
-        if (window.innerWidth <= 768) {
+        // Close sidebar on mobile landscape after selecting channel (641px - 768px)
+        if (window.innerWidth > 640 && window.innerWidth <= 768) {
           sidebar.classList.remove('active');
         }
       } else {
@@ -160,12 +143,12 @@ function setupEventListeners() {
     });
   });
   
-  // Search functionality
-  searchInput.addEventListener('input', handleSearch);
-  
   // Mobile menu toggle
   mobileMenuBtn.addEventListener('click', () => {
-    sidebar.classList.add('active');
+    // Only toggle on landscape tablets (641px - 768px)
+    if (window.innerWidth > 640 && window.innerWidth <= 768) {
+      sidebar.classList.add('active');
+    }
   });
   
   closeSidebarBtn.addEventListener('click', () => {
@@ -180,52 +163,13 @@ function setupEventListeners() {
   
   // Close sidebar when clicking outside on mobile
   document.addEventListener('click', (e) => {
-    if (window.innerWidth <= 768 && 
+    if (window.innerWidth > 640 && window.innerWidth <= 768 && 
         sidebar.classList.contains('active') &&
         !sidebar.contains(e.target) && 
         !mobileMenuBtn.contains(e.target)) {
       sidebar.classList.remove('active');
     }
   });
-}
-
-// ===== Search functionality =====
-function handleSearch(e) {
-  const searchTerm = e.target.value.toLowerCase().trim();
-  
-  if (!searchTerm) {
-    // Show current category channels
-    const channelCategories = document.querySelectorAll('.channel-category');
-    channelCategories.forEach(cat => {
-      cat.classList.toggle('hidden', cat.dataset.category !== currentCategory);
-    });
-    return;
-  }
-  
-  // Hide all categories
-  const channelCategories = document.querySelectorAll('.channel-category');
-  channelCategories.forEach(cat => cat.classList.add('hidden'));
-  
-  // Filter and show matching channels
-  const allChannelButtons = document.querySelectorAll('.channel-btn');
-  let hasResults = false;
-  
-  allChannelButtons.forEach(btn => {
-    const channelName = btn.dataset.channelName.toLowerCase();
-    const parentCategory = btn.closest('.channel-category');
-    
-    if (channelName.includes(searchTerm)) {
-      parentCategory.classList.remove('hidden');
-      btn.style.display = 'flex';
-      hasResults = true;
-    } else {
-      btn.style.display = 'none';
-    }
-  });
-  
-  if (!hasResults) {
-    console.log('No channels found for:', searchTerm);
-  }
 }
 
 // ===== Play channel =====
@@ -353,12 +297,12 @@ function handleKeyboard(e) {
   }
   
   // Escape - Close sidebar on mobile
-  if (e.code === 'Escape' && window.innerWidth <= 768) {
+  if (e.code === 'Escape' && window.innerWidth > 640 && window.innerWidth <= 768) {
     sidebar.classList.remove('active');
   }
   
   // M - Toggle sidebar on mobile
-  if (e.code === 'KeyM' && window.innerWidth <= 768) {
+  if (e.code === 'KeyM' && window.innerWidth > 640 && window.innerWidth <= 768) {
     e.preventDefault();
     sidebar.classList.toggle('active');
   }
