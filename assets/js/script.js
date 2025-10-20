@@ -1,40 +1,54 @@
+// ===== DOM Elements =====
 const video = document.getElementById('player');
 const categoryTabsContainer = document.getElementById('categoryTabs');
 const channelGridContainer = document.getElementById('channelGrid');
+const searchInput = document.getElementById('searchInput');
+const sidebar = document.getElementById('sidebar');
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+const fullscreenBtn = document.getElementById('fullscreenBtn');
+const videoOverlay = document.getElementById('videoOverlay');
+const channelInfo = document.getElementById('channelInfo');
+const currentChannelName = document.getElementById('currentChannelName');
+
 let hls;
 let channelsData = null;
 let currentCategory = 'bangla';
+let allChannels = [];
 
-// Load channels data from JSON
+// ===== Load channels data from JSON =====
 async function loadChannelsData() {
   try {
     const response = await fetch('assets/data/channels.json');
     channelsData = await response.json();
+    
+    // Flatten all channels for search
+    Object.keys(channelsData.categories).forEach(categoryKey => {
+      const category = channelsData.categories[categoryKey];
+      allChannels = allChannels.concat(category.channels.map(ch => ({
+        ...ch,
+        category: categoryKey
+      })));
+    });
+    
     initializeUI();
   } catch (error) {
     console.error('Error loading channels data:', error);
-    alert('❌ Failed to load channels data.');
+    showError('Failed to load channels data');
   }
 }
 
-// Initialize UI with tabs and channels
+// ===== Initialize UI with tabs and channels =====
 function initializeUI() {
   if (!channelsData) return;
   
-  // Create category tabs
   createCategoryTabs();
-  
-  // Create channel categories
   createChannelCategories();
-  
-  // Setup event listeners
   setupEventListeners();
-  
-  // Auto play first available channel
   autoPlayFirstChannel();
 }
 
-// Create category tabs dynamically
+// ===== Create category tabs dynamically =====
 function createCategoryTabs() {
   categoryTabsContainer.innerHTML = '';
   
@@ -48,7 +62,7 @@ function createCategoryTabs() {
   });
 }
 
-// Create channel categories and buttons dynamically
+// ===== Create channel categories and buttons dynamically =====
 function createChannelCategories() {
   channelGridContainer.innerHTML = '';
   
@@ -58,7 +72,6 @@ function createChannelCategories() {
     categoryDiv.className = `channel-category ${index !== 0 ? 'hidden' : ''}`;
     categoryDiv.dataset.category = categoryKey;
     
-    // Create channel buttons
     category.channels.forEach(channel => {
       const channelBtn = createChannelButton(channel);
       categoryDiv.appendChild(channelBtn);
@@ -68,22 +81,22 @@ function createChannelCategories() {
   });
 }
 
-// Create individual channel button
+// ===== Create individual channel button =====
 function createChannelButton(channel) {
   const button = document.createElement('button');
   button.className = 'channel-btn';
   button.dataset.url = channel.url;
   button.dataset.channelId = channel.id;
+  button.dataset.channelName = channel.name;
   button.title = channel.name;
   
   if (channel.logo) {
-    // Channel has a logo
     const img = document.createElement('img');
     img.src = channel.logo;
     img.alt = channel.name;
     img.className = 'channel-logo';
+    img.loading = 'lazy';
     img.onerror = function() {
-      // If logo fails to load, show channel name
       this.remove();
       const span = document.createElement('span');
       span.className = 'channel-name';
@@ -92,7 +105,6 @@ function createChannelButton(channel) {
     };
     button.appendChild(img);
   } else {
-    // No logo, show channel name
     const span = document.createElement('span');
     span.className = 'channel-name';
     span.textContent = channel.name;
@@ -101,8 +113,7 @@ function createChannelButton(channel) {
   
   return button;
 }
-
-// Setup event listeners
+// ===== Setup event listeners =====
 function setupEventListeners() {
   // Category tab switching
   const tabButtons = document.querySelectorAll('.tab-btn');
@@ -111,11 +122,9 @@ function setupEventListeners() {
       const category = tab.dataset.category;
       currentCategory = category;
       
-      // Update active tab
       tabButtons.forEach(btn => btn.classList.remove('active'));
       tab.classList.add('active');
       
-      // Show selected category channels
       const channelCategories = document.querySelectorAll('.channel-category');
       channelCategories.forEach(cat => {
         if (cat.dataset.category === category) {
@@ -124,6 +133,11 @@ function setupEventListeners() {
           cat.classList.add('hidden');
         }
       });
+      
+      // Clear search when switching categories
+      if (searchInput.value) {
+        searchInput.value = '';
+      }
     });
   });
   
@@ -132,23 +146,102 @@ function setupEventListeners() {
   channelButtons.forEach(button => {
     button.addEventListener('click', function() {
       const url = this.dataset.url;
-      const channelName = this.title;
+      const channelName = this.dataset.channelName;
       
       if (url && url !== '') {
         playChannel(this, url, channelName);
+        // Close sidebar on mobile after selecting channel
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('active');
+        }
       } else {
-        alert(`📺 ${channelName} coming soon!`);
+        showError(`${channelName} is coming soon!`);
       }
     });
   });
+  
+  // Search functionality
+  searchInput.addEventListener('input', handleSearch);
+  
+  // Mobile menu toggle
+  mobileMenuBtn.addEventListener('click', () => {
+    sidebar.classList.add('active');
+  });
+  
+  closeSidebarBtn.addEventListener('click', () => {
+    sidebar.classList.remove('active');
+  });
+  
+  // Fullscreen toggle
+  fullscreenBtn.addEventListener('click', toggleFullscreen);
+  
+  // Keyboard shortcuts
+  document.addEventListener('keydown', handleKeyboard);
+  
+  // Close sidebar when clicking outside on mobile
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth <= 768 && 
+        sidebar.classList.contains('active') &&
+        !sidebar.contains(e.target) && 
+        !mobileMenuBtn.contains(e.target)) {
+      sidebar.classList.remove('active');
+    }
+  });
 }
 
-// Play channel
+// ===== Search functionality =====
+function handleSearch(e) {
+  const searchTerm = e.target.value.toLowerCase().trim();
+  
+  if (!searchTerm) {
+    // Show current category channels
+    const channelCategories = document.querySelectorAll('.channel-category');
+    channelCategories.forEach(cat => {
+      cat.classList.toggle('hidden', cat.dataset.category !== currentCategory);
+    });
+    return;
+  }
+  
+  // Hide all categories
+  const channelCategories = document.querySelectorAll('.channel-category');
+  channelCategories.forEach(cat => cat.classList.add('hidden'));
+  
+  // Filter and show matching channels
+  const allChannelButtons = document.querySelectorAll('.channel-btn');
+  let hasResults = false;
+  
+  allChannelButtons.forEach(btn => {
+    const channelName = btn.dataset.channelName.toLowerCase();
+    const parentCategory = btn.closest('.channel-category');
+    
+    if (channelName.includes(searchTerm)) {
+      parentCategory.classList.remove('hidden');
+      btn.style.display = 'flex';
+      hasResults = true;
+    } else {
+      btn.style.display = 'none';
+    }
+  });
+  
+  if (!hasResults) {
+    console.log('No channels found for:', searchTerm);
+  }
+}
+
+// ===== Play channel =====
 function playChannel(button, url, channelName) {
+  // Show loading overlay
+  videoOverlay.classList.add('active');
+  
   // Remove active state from all channel buttons
   document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
   button.classList.add('active');
-
+  
+  // Update channel info
+  currentChannelName.textContent = channelName;
+  channelInfo.classList.add('active');
+  
+  // Destroy existing HLS instance
   if (hls) {
     hls.destroy();
   }
@@ -157,18 +250,29 @@ function playChannel(button, url, channelName) {
     hls = new Hls({
       enableWorker: true,
       lowLatencyMode: true,
-      backBufferLength: 90
+      backBufferLength: 90,
+      maxBufferLength: 30,
+      maxMaxBufferLength: 600,
+      maxBufferSize: 60 * 1000 * 1000,
+      maxBufferHole: 0.5
     });
+    
     hls.loadSource(url);
     hls.attachMedia(video);
+    
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      video.play().catch(err => {
+      video.play().then(() => {
+        videoOverlay.classList.remove('active');
+      }).catch(err => {
         console.log('Autoplay prevented:', err);
+        videoOverlay.classList.remove('active');
       });
     });
+    
     hls.on(Hls.Events.ERROR, (event, data) => {
       console.error('HLS error:', data);
       if (data.fatal) {
+        videoOverlay.classList.remove('active');
         switch (data.type) {
           case Hls.ErrorTypes.NETWORK_ERROR:
             console.log('Network error, trying to recover...');
@@ -179,23 +283,28 @@ function playChannel(button, url, channelName) {
             hls.recoverMediaError();
             break;
           default:
-            alert(`⚠️ Failed to load ${channelName}. Please try another channel.`);
+            showError(`Failed to load ${channelName}. Please try another channel.`);
             hls.destroy();
             break;
         }
       }
     });
   } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    // Native HLS support (Safari)
     video.src = url;
-    video.play().catch(err => {
+    video.play().then(() => {
+      videoOverlay.classList.remove('active');
+    }).catch(err => {
       console.log('Autoplay prevented:', err);
+      videoOverlay.classList.remove('active');
     });
   } else {
-    alert('❌ Your browser does not support HLS streaming.');
+    videoOverlay.classList.remove('active');
+    showError('Your browser does not support HLS streaming.');
   }
 }
 
-// Auto play the first available channel on page load
+// ===== Auto play the first available channel on page load =====
 function autoPlayFirstChannel() {
   setTimeout(() => {
     const firstChannel = document.querySelector('.channel-btn[data-url]:not([data-url=""])');
@@ -205,8 +314,29 @@ function autoPlayFirstChannel() {
   }, 500);
 }
 
-// Keyboard shortcuts
-document.addEventListener('keydown', (e) => {
+// ===== Fullscreen functionality =====
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(err => {
+      console.error('Fullscreen error:', err);
+    });
+    document.body.classList.add('fullscreen');
+  } else {
+    document.exitFullscreen();
+    document.body.classList.remove('fullscreen');
+  }
+}
+
+// Handle fullscreen change
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement) {
+    document.body.classList.remove('fullscreen');
+  }
+});
+
+// ===== Keyboard shortcuts =====
+function handleKeyboard(e) {
+  // Space - Play/Pause
   if (e.code === 'Space' && e.target === document.body) {
     e.preventDefault();
     if (video.paused) {
@@ -215,7 +345,66 @@ document.addEventListener('keydown', (e) => {
       video.pause();
     }
   }
-});
+  
+  // F - Fullscreen
+  if (e.code === 'KeyF' && e.target === document.body) {
+    e.preventDefault();
+    toggleFullscreen();
+  }
+  
+  // Escape - Close sidebar on mobile
+  if (e.code === 'Escape' && window.innerWidth <= 768) {
+    sidebar.classList.remove('active');
+  }
+  
+  // M - Toggle sidebar on mobile
+  if (e.code === 'KeyM' && window.innerWidth <= 768) {
+    e.preventDefault();
+    sidebar.classList.toggle('active');
+  }
+}
 
-// Initialize the app
+// ===== Show error message =====
+function showError(message) {
+  // Create error toast
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(239, 68, 68, 0.95);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    z-index: 10000;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+  `;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.animation = 'slideDown 0.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+// Add animation styles
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideUp {
+    from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+    to { transform: translateX(-50%) translateY(0); opacity: 1; }
+  }
+  @keyframes slideDown {
+    from { transform: translateX(-50%) translateY(0); opacity: 1; }
+    to { transform: translateX(-50%) translateY(100px); opacity: 0; }
+  }
+`;
+document.head.appendChild(style);
+
+// ===== Initialize the app =====
 loadChannelsData();

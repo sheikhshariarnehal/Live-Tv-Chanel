@@ -4,22 +4,16 @@
       "name": "Sports",
       "channels": [
         {
-          "id": "sony-ten-1",
-          "name": "Sony Ten 1",
-          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/sonyten1/tracks-v1a1/mono.m3u8",
-          "logo": "assets/image/ten1.png"
-        },
-        {
           "id": "tsports",
           "name": "T Sports",
           "url": "http://10.10.10.2/live/fnf002/index.m3u8",
           "logo": "assets/image/T SPORTS1744972630.png"
         },
         {
-          "id": "gazi-tv-sports",
-          "name": "Gazi TV",
-          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/GaziTV/tracks-v1a1/mono.m3u8",
-          "logo": "assets/image/gtv.png"
+          "id": "sony-ten-1",
+          "name": "Sony Ten 1",
+          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/sonyten1/tracks-v1a1/mono.m3u8",
+          "logo": "assets/image/ten1.png"
         },
         {
           "id": "sony-six",
@@ -33,10 +27,10 @@
       "name": "News",
       "channels": [
         {
-          "id": "tsports-hd",
-          "name": "T Sports HD",
-          "url": "http://10.10.10.2/live/fnf002/index.m3u8",
-          "logo": "assets/image/T SPORTS1744972630.png"
+          "id": "DBC",
+          "name": "DBC Tv",
+          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/DBC/tracks-v1a1/mono.m3u8",
+          "logo": "assets/image/dbcnews.png"
         },
         {
           "id": "rtv",
