@@ -1,25 +1,25 @@
 {
   "categories": {
-    "sports": {
+        "sports": {
       "name": "Sports",
       "channels": [
         {
           "id": "tsports",
           "name": "T Sports",
           "url": "http://10.10.10.2/live/fnf002/index.m3u8",
-          "logo": "assets/image/T SPORTS1744972630.png"
+          "logo": "/assets/image/T SPORTS1744972630.png"
         },
         {
           "id": "sony-ten-1",
           "name": "Sony Ten 1",
           "url": "http://tv.dugdugilive.com:8080/0ne$ky23/sonyten1/tracks-v1a1/mono.m3u8",
-          "logo": "assets/image/ten1.png"
+          "logo": "/assets/image/ten1.png"
         },
         {
           "id": "sony-six",
           "name": "Sony Six",
           "url": "",
-          "logo": "assets/image/sonysix.png"
+          "logo": "/assets/image/sonysix.png"
         }
       ]
     },
@@ -30,7 +30,7 @@
           "id": "DBC",
           "name": "DBC Tv",
           "url": "http://tv.dugdugilive.com:8080/0ne$ky23/DBC/tracks-v1a1/mono.m3u8",
-          "logo": "assets/image/dbcnews.png"
+          "logo": "/assets/image/dbcnews.png"
         },
         {
           "id": "rtv",
@@ -42,7 +42,7 @@
           "id": "gazi-tv",
           "name": "Gazi TV",
           "url": "http://tv.dugdugilive.com:8080/0ne$ky23/GaziTV/tracks-v1a1/mono.m3u8",
-          "logo": "assets/image/gtv.png"
+          "logo": "/assets/image/gtv.png"
         }
       ]
     },
@@ -53,13 +53,13 @@
           "id": "starJalsa",
           "name": "Star Jalsa",
           "url": "http://tv.dugdugilive.com:8080/0ne$ky23/starJalsa/tracks-v1a1/mono.m3u8",
-          "logo": "assets/image/starjalsha.png"
+          "logo": "/assets/image/starjalsha.png"
         },
         {
           "id": "colorsbangla",
           "name": "colors-bangla",
           "url": "http://tv.dugdugilive.com:8080/0ne$ky23/colors-bangla/tracks-v1a1/mono.m3u8",
-          "logo": "assets/image/colorsbangla.png"
+          "logo": "/assets/image/colorsbangla.png"
         }
       ]
     },

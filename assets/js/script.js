@@ -14,53 +14,25 @@ let currentCategory = 'bangla';
 // ===== Load channels data from JSON =====
 async function loadChannelsData() {
   try {
-    // Try multiple paths to ensure compatibility with different deployment scenarios
-    const paths = [
-      'channels.json',           // Root relative (works on most servers)
-      './channels.json',         // Current directory
-      '../channels.json',        // Parent directory (if script is in subfolder)
-      '/channels.json'           // Absolute from domain root
-    ];
+    // Use absolute path from root to avoid deployment path issues
+    const response = await fetch('/assets/data/channels.json');
     
-    let loaded = false;
-    let lastError = null;
-    
-    for (const path of paths) {
-      try {
-        // Add cache-busting parameter to ensure fresh data after deployment
-        const cacheBuster = `?v=${new Date().getTime()}`;
-        const response = await fetch(path + cacheBuster);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        channelsData = await response.json();
-        console.log('✅ Channels loaded successfully from:', path);
-        loaded = true;
-        break;
-      } catch (err) {
-        lastError = err;
-        console.warn(`Failed to load from ${path}:`, err.message);
-      }
+    // Check if response is ok
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    if (loaded) {
-      initializeUI();
-    } else {
-      console.error('Error loading channels data from all paths:', lastError);
-      showError('Failed to load channels data. Please check your network connection.');
-    }
+    channelsData = await response.json();
+    initializeUI();
   } catch (error) {
     console.error('Error loading channels data:', error);
-    showError('Failed to load channels data. Please refresh the page.');
+    showError('Failed to load channels data');
   }
 }
 
 // ===== Initialize UI with tabs and channels =====
 function initializeUI() {
-  if (!channelsData || !channelsData.categories) {
-    showError('Invalid channels data format');
-    return;
-  }
+  if (!channelsData) return;
   
   createCategoryTabs();
   createChannelCategories();
@@ -84,7 +56,6 @@ function createCategoryTabs() {
 
 // ===== Create channel categories and buttons dynamically =====
 function createChannelCategories() {
-  // Clear loading indicator
   channelGridContainer.innerHTML = '';
   
   Object.keys(channelsData.categories).forEach((categoryKey, index) => {
