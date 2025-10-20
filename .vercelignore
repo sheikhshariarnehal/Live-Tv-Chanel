@@ -1,7 +1,0 @@
-# Vercel ignore file
-# Add files/folders that should not be deployed
-
-README.md
-.git
-.gitignore
-netlify.toml
