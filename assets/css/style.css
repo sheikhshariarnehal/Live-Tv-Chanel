@@ -771,28 +771,3 @@ video {
     grid-template-columns: repeat(2, 1fr);
   }
 }
-
-/* Fullscreen styles */
-body.fullscreen {
-  overflow: hidden;
-}
-
-body.fullscreen .header,
-body.fullscreen .sidebar {
-  display: none;
-}
-
-body.fullscreen .main-container {
-  margin-top: 0;
-  height: 100vh;
-}
-
-body.fullscreen .container {
-  padding: 0;
-  height: 100vh;
-}
-
-body.fullscreen .video-section {
-  border-radius: 0;
-  height: 100vh;
-}

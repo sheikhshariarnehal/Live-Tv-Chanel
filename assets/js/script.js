@@ -5,7 +5,6 @@ const channelGridContainer = document.getElementById('channelGrid');
 const sidebar = document.getElementById('sidebar');
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const closeSidebarBtn = document.getElementById('closeSidebarBtn');
-const fullscreenBtn = document.getElementById('fullscreenBtn');
 const videoOverlay = document.getElementById('videoOverlay');
 const channelInfo = document.getElementById('channelInfo');
 const currentChannelName = document.getElementById('currentChannelName');
@@ -155,9 +154,6 @@ function setupEventListeners() {
     sidebar.classList.remove('active');
   });
   
-  // Fullscreen toggle
-  fullscreenBtn.addEventListener('click', toggleFullscreen);
-  
   // Keyboard shortcuts
   document.addEventListener('keydown', handleKeyboard);
   
@@ -258,26 +254,6 @@ function autoPlayFirstChannel() {
   }, 500);
 }
 
-// ===== Fullscreen functionality =====
-function toggleFullscreen() {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen().catch(err => {
-      console.error('Fullscreen error:', err);
-    });
-    document.body.classList.add('fullscreen');
-  } else {
-    document.exitFullscreen();
-    document.body.classList.remove('fullscreen');
-  }
-}
-
-// Handle fullscreen change
-document.addEventListener('fullscreenchange', () => {
-  if (!document.fullscreenElement) {
-    document.body.classList.remove('fullscreen');
-  }
-});
-
 // ===== Keyboard shortcuts =====
 function handleKeyboard(e) {
   // Space - Play/Pause
@@ -288,12 +264,6 @@ function handleKeyboard(e) {
     } else {
       video.pause();
     }
-  }
-  
-  // F - Fullscreen
-  if (e.code === 'KeyF' && e.target === document.body) {
-    e.preventDefault();
-    toggleFullscreen();
   }
   
   // Escape - Close sidebar on mobile
