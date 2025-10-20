@@ -8,43 +8,15 @@ const closeSidebarBtn = document.getElementById('closeSidebarBtn');
 const videoOverlay = document.getElementById('videoOverlay');
 
 let hls;
-let channelsData = null;
-let currentCategory = 'bangla';
-
-// ===== Load channels data from JSON =====
-async function loadChannelsData() {
-  try {
-    // Try multiple path strategies for better compatibility
-    const basePath = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '');
-    let response;
-    
-    // Try absolute path first
-    try {
-      response = await fetch('/assets/data/channels.json');
-      if (!response.ok) throw new Error('Absolute path failed');
-    } catch (e) {
-      // Fallback to relative path
-      console.log('Trying relative path...');
-      response = await fetch('./assets/data/channels.json');
-    }
-    
-    // Check if response is ok
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    channelsData = await response.json();
-    console.log('Channels data loaded successfully:', channelsData);
-    initializeUI();
-  } catch (error) {
-    console.error('Error loading channels data:', error);
-    showError('Failed to load channels data. Check console for details.');
-  }
-}
+let currentCategory = 'sports';
 
 // ===== Initialize UI with tabs and channels =====
 function initializeUI() {
-  if (!channelsData) return;
+  if (!channelsData) {
+    console.error('Channel data not found!');
+    showError('Failed to load channels data');
+    return;
+  }
   
   createCategoryTabs();
   createChannelCategories();
@@ -190,14 +162,6 @@ function playChannel(button, url, channelName) {
   // Show loading overlay
   videoOverlay.classList.add('active');
   
-  // Check for mixed content issues
-  if (window.location.protocol === 'https:' && url.startsWith('http://')) {
-    videoOverlay.classList.remove('active');
-    showError(`${channelName}: HTTP streams are blocked on HTTPS sites. Stream needs HTTPS URL.`);
-    console.warn('Mixed Content Warning:', url);
-    return;
-  }
-  
   // Remove active state from all channel buttons
   document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
   button.classList.add('active');
@@ -215,11 +179,7 @@ function playChannel(button, url, channelName) {
       maxBufferLength: 30,
       maxMaxBufferLength: 600,
       maxBufferSize: 60 * 1000 * 1000,
-      maxBufferHole: 0.5,
-      xhrSetup: function(xhr, url) {
-        // Add timeout and error handling
-        xhr.timeout = 10000; // 10 second timeout
-      }
+      maxBufferHole: 0.5
     });
     
     hls.loadSource(url);
@@ -241,16 +201,14 @@ function playChannel(button, url, channelName) {
         switch (data.type) {
           case Hls.ErrorTypes.NETWORK_ERROR:
             console.log('Network error, trying to recover...');
-            showError(`${channelName}: Network error. Stream may be offline or blocked.`);
-            // Try to recover once
-            setTimeout(() => hls.startLoad(), 1000);
+            hls.startLoad();
             break;
           case Hls.ErrorTypes.MEDIA_ERROR:
             console.log('Media error, trying to recover...');
             hls.recoverMediaError();
             break;
           default:
-            showError(`Failed to load ${channelName}. Stream may be offline.`);
+            showError(`Failed to load ${channelName}. Please try another channel.`);
             hls.destroy();
             break;
         }
@@ -348,4 +306,5 @@ style.textContent = `
 document.head.appendChild(style);
 
 // ===== Initialize the app =====
-loadChannelsData();
+// channelsData is now loaded from the inline script in index.html
+initializeUI();
