@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Channels.json Validator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .status {
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .status.loading {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .details {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .details h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .stat:last-child {
+            border-bottom: none;
+        }
+        .stat-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        .stat-value {
+            font-weight: 700;
+            color: #667eea;
+        }
+        .channel-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        .channel-item {
+            padding: 8px;
+            background: white;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .channel-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .channel-status.valid {
+            background: #d4edda;
+            color: #155724;
+        }
+        .channel-status.invalid {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📺 Channels.json Validator</h1>
+        <p class="subtitle">Checking your channels configuration...</p>
+        
+        <div id="status" class="status loading">
+            <div class="spinner"></div>
+            Loading channels.json...
+        </div>
+        
+        <div id="details" class="details" style="display: none;"></div>
+        
+        <button onclick="location.reload()" style="display: none;" id="retryBtn">🔄 Retry</button>
+    </div>
+
+    <script>
+        async function validateChannels() {
+            const statusDiv = document.getElementById('status');
+            const detailsDiv = document.getElementById('details');
+            const retryBtn = document.getElementById('retryBtn');
+
+            try {
+                // Try to load channels.json
+                const response = await fetch('channels.json?v=' + Date.now());
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                // Validate structure
+                if (!data.categories) {
+                    throw new Error('Missing "categories" property in JSON');
+                }
+
+                // Count channels
+                let totalChannels = 0;
+                let validChannels = 0;
+                let invalidChannels = 0;
+                let categories = 0;
+                let channelDetails = [];
+
+                for (const [catKey, category] of Object.entries(data.categories)) {
+                    categories++;
+                    if (!category.channels || !Array.isArray(category.channels)) {
+                        throw new Error(`Category "${catKey}" missing channels array`);
+                    }
+
+                    for (const channel of category.channels) {
+                        totalChannels++;
+                        const isValid = channel.url && channel.url.trim() !== '';
+                        
+                        if (isValid) {
+                            validChannels++;
+                        } else {
+                            invalidChannels++;
+                        }
+
+                        channelDetails.push({
+                            name: channel.name || 'Unnamed',
+                            category: category.name || catKey,
+                            valid: isValid,
+                            url: channel.url || 'No URL'
+                        });
+                    }
+                }
+
+                // Show success
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = '✅ channels.json is valid and loaded successfully!';
+                
+                // Show details
+                detailsDiv.style.display = 'block';
+                detailsDiv.innerHTML = `
+                    <h3>📊 Statistics</h3>
+                    <div class="stat">
+                        <span class="stat-label">Total Categories:</span>
+                        <span class="stat-value">${categories}</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Total Channels:</span>
+                        <span class="stat-value">${totalChannels}</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Valid Channels (with URL):</span>
+                        <span class="stat-value">${validChannels}</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Invalid Channels (no URL):</span>
+                        <span class="stat-value">${invalidChannels}</span>
+                    </div>
+                    
+                    <h3 style="margin-top: 20px;">📺 All Channels</h3>
+                    <div class="channel-list">
+                        ${channelDetails.map(ch => `
+                            <div class="channel-item">
+                                <div>
+                                    <strong>${ch.name}</strong>
+                                    <div style="font-size: 12px; color: #666;">${ch.category}</div>
+                                </div>
+                                <span class="channel-status ${ch.valid ? 'valid' : 'invalid'}">
+                                    ${ch.valid ? '✓ Valid' : '✗ No URL'}
+                                </span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `❌ Error: ${error.message}`;
+                
+                detailsDiv.style.display = 'block';
+                detailsDiv.innerHTML = `
+                    <h3>🔍 Troubleshooting</h3>
+                    <p style="margin-bottom: 10px;"><strong>Possible causes:</strong></p>
+                    <ul style="margin-left: 20px; color: #666;">
+                        <li>channels.json file is missing or not in the root directory</li>
+                        <li>Invalid JSON syntax (missing comma, bracket, etc.)</li>
+                        <li>Server not serving .json files with correct MIME type</li>
+                        <li>File permissions issue on server</li>
+                        <li>CORS policy blocking the request</li>
+                    </ul>
+                    <p style="margin-top: 15px;"><strong>Next steps:</strong></p>
+                    <ol style="margin-left: 20px; color: #666;">
+                        <li>Verify channels.json exists in the root directory</li>
+                        <li>Check browser console (F12) for detailed errors</li>
+                        <li>Validate JSON at <a href="https://jsonlint.com" target="_blank">jsonlint.com</a></li>
+                        <li>Check server configuration and MIME types</li>
+                    </ol>
+                `;
+                
+                retryBtn.style.display = 'inline-block';
+            }
+        }
+
+        // Run validation
+        validateChannels();
+    </script>
+</body>
+</html>

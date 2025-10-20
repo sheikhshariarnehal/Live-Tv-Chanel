@@ -14,18 +14,53 @@ let currentCategory = 'bangla';
 // ===== Load channels data from JSON =====
 async function loadChannelsData() {
   try {
-    const response = await fetch('./channels.json');
-    channelsData = await response.json();
-    initializeUI();
+    // Try multiple paths to ensure compatibility with different deployment scenarios
+    const paths = [
+      'channels.json',           // Root relative (works on most servers)
+      './channels.json',         // Current directory
+      '../channels.json',        // Parent directory (if script is in subfolder)
+      '/channels.json'           // Absolute from domain root
+    ];
+    
+    let loaded = false;
+    let lastError = null;
+    
+    for (const path of paths) {
+      try {
+        // Add cache-busting parameter to ensure fresh data after deployment
+        const cacheBuster = `?v=${new Date().getTime()}`;
+        const response = await fetch(path + cacheBuster);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        channelsData = await response.json();
+        console.log('✅ Channels loaded successfully from:', path);
+        loaded = true;
+        break;
+      } catch (err) {
+        lastError = err;
+        console.warn(`Failed to load from ${path}:`, err.message);
+      }
+    }
+    
+    if (loaded) {
+      initializeUI();
+    } else {
+      console.error('Error loading channels data from all paths:', lastError);
+      showError('Failed to load channels data. Please check your network connection.');
+    }
   } catch (error) {
     console.error('Error loading channels data:', error);
-    showError('Failed to load channels data');
+    showError('Failed to load channels data. Please refresh the page.');
   }
 }
 
 // ===== Initialize UI with tabs and channels =====
 function initializeUI() {
-  if (!channelsData) return;
+  if (!channelsData || !channelsData.categories) {
+    showError('Invalid channels data format');
+    return;
+  }
   
   createCategoryTabs();
   createChannelCategories();
@@ -49,6 +84,7 @@ function createCategoryTabs() {
 
 // ===== Create channel categories and buttons dynamically =====
 function createChannelCategories() {
+  // Clear loading indicator
   channelGridContainer.innerHTML = '';
   
   Object.keys(channelsData.categories).forEach((categoryKey, index) => {
