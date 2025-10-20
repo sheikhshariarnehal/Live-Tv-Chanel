@@ -11,19 +11,6 @@ let hls;
 let channelsData = null;
 let currentCategory = 'bangla';
 
-// Helper: convert an upstream URL into the local proxy endpoint
-function toProxyUrl(upstreamUrl) {
-  if (!upstreamUrl) return upstreamUrl;
-  // If the URL already points to our proxy, return as-is
-  try {
-    const u = new URL(upstreamUrl, window.location.href);
-    if (u.pathname.startsWith('/api/proxy')) return upstreamUrl;
-  } catch (e) {
-    // ignore
-  }
-  return `/api/proxy?url=${encodeURIComponent(upstreamUrl)}`;
-}
-
 // ===== Load channels data from JSON =====
 async function loadChannelsData() {
   try {
@@ -204,7 +191,7 @@ function playChannel(button, url, channelName) {
       maxBufferHole: 0.5
     });
     
-  hls.loadSource(toProxyUrl(url));
+    hls.loadSource(url);
     hls.attachMedia(video);
     
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
@@ -238,7 +225,7 @@ function playChannel(button, url, channelName) {
     });
   } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
     // Native HLS support (Safari)
-  video.src = toProxyUrl(url);
+    video.src = url;
     video.play().then(() => {
       videoOverlay.classList.remove('active');
     }).catch(err => {
