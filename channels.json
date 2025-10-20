@@ -1,6 +1,6 @@
 {
   "categories": {
-        "sports": {
+    "sports": {
       "name": "Sports",
       "channels": [
         {
@@ -23,7 +23,7 @@
         }
       ]
     },
-    "News": {
+    "news": {
       "name": "News",
       "channels": [
         {
@@ -49,7 +49,7 @@
     "shows": {
       "name": "Shows",
       "channels": [
-                {
+        {
           "id": "starJalsa",
           "name": "Star Jalsa",
           "url": "http://tv.dugdugilive.com:8080/0ne$ky23/starJalsa/tracks-v1a1/mono.m3u8",
