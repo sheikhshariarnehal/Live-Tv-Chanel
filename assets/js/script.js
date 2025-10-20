@@ -14,8 +14,19 @@ let currentCategory = 'bangla';
 // ===== Load channels data from JSON =====
 async function loadChannelsData() {
   try {
-    // Use absolute path from root to avoid deployment path issues
-    const response = await fetch('/assets/data/channels.json');
+    // Try multiple path strategies for better compatibility
+    const basePath = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '');
+    let response;
+    
+    // Try absolute path first
+    try {
+      response = await fetch('/assets/data/channels.json');
+      if (!response.ok) throw new Error('Absolute path failed');
+    } catch (e) {
+      // Fallback to relative path
+      console.log('Trying relative path...');
+      response = await fetch('./assets/data/channels.json');
+    }
     
     // Check if response is ok
     if (!response.ok) {
@@ -23,10 +34,11 @@ async function loadChannelsData() {
     }
     
     channelsData = await response.json();
+    console.log('Channels data loaded successfully:', channelsData);
     initializeUI();
   } catch (error) {
     console.error('Error loading channels data:', error);
-    showError('Failed to load channels data');
+    showError('Failed to load channels data. Check console for details.');
   }
 }
 
@@ -178,6 +190,14 @@ function playChannel(button, url, channelName) {
   // Show loading overlay
   videoOverlay.classList.add('active');
   
+  // Check for mixed content issues
+  if (window.location.protocol === 'https:' && url.startsWith('http://')) {
+    videoOverlay.classList.remove('active');
+    showError(`${channelName}: HTTP streams are blocked on HTTPS sites. Stream needs HTTPS URL.`);
+    console.warn('Mixed Content Warning:', url);
+    return;
+  }
+  
   // Remove active state from all channel buttons
   document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
   button.classList.add('active');
@@ -195,7 +215,11 @@ function playChannel(button, url, channelName) {
       maxBufferLength: 30,
       maxMaxBufferLength: 600,
       maxBufferSize: 60 * 1000 * 1000,
-      maxBufferHole: 0.5
+      maxBufferHole: 0.5,
+      xhrSetup: function(xhr, url) {
+        // Add timeout and error handling
+        xhr.timeout = 10000; // 10 second timeout
+      }
     });
     
     hls.loadSource(url);
@@ -217,14 +241,16 @@ function playChannel(button, url, channelName) {
         switch (data.type) {
           case Hls.ErrorTypes.NETWORK_ERROR:
             console.log('Network error, trying to recover...');
-            hls.startLoad();
+            showError(`${channelName}: Network error. Stream may be offline or blocked.`);
+            // Try to recover once
+            setTimeout(() => hls.startLoad(), 1000);
             break;
           case Hls.ErrorTypes.MEDIA_ERROR:
             console.log('Media error, trying to recover...');
             hls.recoverMediaError();
             break;
           default:
-            showError(`Failed to load ${channelName}. Please try another channel.`);
+            showError(`Failed to load ${channelName}. Stream may be offline.`);
             hls.destroy();
             break;
         }
