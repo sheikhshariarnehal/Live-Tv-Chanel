@@ -35,7 +35,7 @@
         {
           "id": "rtv",
           "name": "RTV",
-          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/RTV/tracks-v1a1/mono.m3u8",
+          "url": "http://10.99.99.99:8082/SOMOY.TV.HD/tracks-v1a1/mono.m3u8?token=c97023e8dc8a0c86efb39a72772e0163e7f72c90-6f2add3ce73e9aa647040bd8c8145140-1766167686-1766156886",
           "logo": ""
         },
         {
