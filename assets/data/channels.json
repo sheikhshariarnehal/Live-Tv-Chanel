@@ -12,7 +12,7 @@
         {
           "id": "sony-ten-1",
           "name": "Sony Ten 1",
-          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/sonyten1/tracks-v1a1/mono.m3u8",
+          "url": "http://172.27.27.90:8080/tv2/index.m3u8",
           "logo": "assets/image/ten1.png"
         },
         {
