@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "start": "serve dist -l 3000",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -23,6 +24,7 @@
   "dependencies": {
     "@astrojs/check": "^0.9.9",
     "astro": "^6.4.6",
+    "serve": "^14.2.6",
     "typescript": "^6.0.3"
   }
 }
