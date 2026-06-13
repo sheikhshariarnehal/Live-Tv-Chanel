@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "start": "pm2-runtime start ecosystem.config.js --env production",
+    "start": "serve dist -l 3000",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -23,9 +23,9 @@
   "homepage": "https://github.com/sheikhshariarnehal/Live-Tv-Chanel#readme",
   "dependencies": {
     "@astrojs/check": "^0.9.9",
+    "@astrojs/node": "^10.1.4",
     "astro": "^6.4.6",
-    "express": "^4.22.2",
-    "pm2": "^5.3.0",
+    "node-fetch": "^3.3.2",
     "serve": "^14.2.6",
     "typescript": "^6.0.3"
   },
