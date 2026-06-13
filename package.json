@@ -1,0 +1,28 @@
+{
+  "name": "live-tv-chanel",
+  "version": "1.0.0",
+  "description": "",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sheikhshariarnehal/Live-Tv-Chanel.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sheikhshariarnehal/Live-Tv-Chanel/issues"
+  },
+  "homepage": "https://github.com/sheikhshariarnehal/Live-Tv-Chanel#readme",
+  "dependencies": {
+    "@astrojs/check": "^0.9.9",
+    "astro": "^6.4.6",
+    "typescript": "^6.0.3"
+  }
+}
