@@ -7,27 +7,195 @@ const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const closeSidebarBtn = document.getElementById('closeSidebarBtn');
 const videoOverlay = document.getElementById('videoOverlay');
 
+// New DOM Elements
+const errorOverlay = document.getElementById('errorOverlay');
+const errorDesc = document.getElementById('errorDesc');
+const btnSwitchPublic = document.getElementById('btnSwitchPublic');
+const btnReloadStream = document.getElementById('btnReloadStream');
+const btnLocalSource = document.getElementById('btnLocalSource');
+const btnPublicSource = document.getElementById('btnPublicSource');
+
 let hls;
 let mpegtsPlayer;
 let channelsData = null;
-let currentCategory = 'bangla';
+let currentCategory = '';
+let currentSource = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'local' : 'public';
 
-// ===== Load channels data from JSON =====
+let lastSelectedChannelBtn = null;
+let lastSelectedChannelUrl = null;
+let lastSelectedChannelName = null;
+
+// ===== Load channels data from selected source =====
 async function loadChannelsData() {
+  // Update source button active states
+  if (currentSource === 'local') {
+    btnLocalSource.classList.add('active');
+    btnPublicSource.classList.remove('active');
+  } else {
+    btnLocalSource.classList.remove('active');
+    btnPublicSource.classList.add('active');
+  }
+
   try {
-    const response = await fetch('./assets/data/channels.json');
-    channelsData = await response.json();
+    if (currentSource === 'local') {
+      const response = await fetch('./assets/data/channels.json');
+      channelsData = await response.json();
+    } else {
+      const response = await fetch('https://iptv-org.github.io/iptv/countries/bd.m3u');
+      if (!response.ok) throw new Error('Failed to fetch public M3U list');
+      const text = await response.text();
+      channelsData = parseM3U(text);
+    }
     initializeUI();
   } catch (error) {
     console.error('Error loading channels data:', error);
-    showError('Failed to load channels data');
+    showError(`Failed to load ${currentSource === 'local' ? 'BDIX' : 'Public'} channels`);
   }
+}
+
+// ===== Switch Stream Source =====
+async function switchSource(source) {
+  if (currentSource === source && channelsData) return;
+  
+  currentSource = source;
+  
+  // Update UI active buttons
+  if (source === 'local') {
+    btnLocalSource.classList.add('active');
+    btnPublicSource.classList.remove('active');
+  } else {
+    btnLocalSource.classList.remove('active');
+    btnPublicSource.classList.add('active');
+  }
+  
+  // Show loading in video player or category tabs
+  categoryTabsContainer.innerHTML = '<p class="loading-text" style="padding: 1rem;">Loading source...</p>';
+  channelGridContainer.innerHTML = '';
+  errorOverlay.classList.remove('active');
+  
+  // Destroy existing player instances
+  if (hls) {
+    hls.destroy();
+    hls = null;
+  }
+  if (mpegtsPlayer) {
+    mpegtsPlayer.destroy();
+    mpegtsPlayer = null;
+  }
+  
+  try {
+    if (source === 'local') {
+      const response = await fetch('./assets/data/channels.json');
+      channelsData = await response.json();
+    } else {
+      const response = await fetch('https://iptv-org.github.io/iptv/countries/bd.m3u');
+      if (!response.ok) throw new Error('Failed to fetch public M3U list');
+      const text = await response.text();
+      channelsData = parseM3U(text);
+    }
+    initializeUI();
+  } catch (error) {
+    console.error('Error switching source:', error);
+    categoryTabsContainer.innerHTML = '';
+    showError(`Failed to load ${source === 'local' ? 'BDIX' : 'Public'} channels`);
+  }
+}
+
+// ===== M3U Playlist Parser =====
+function parseM3U(text) {
+  const lines = text.split('\n');
+  const categories = {};
+  let currentChannel = null;
+  
+  for (let line of lines) {
+    line = line.trim();
+    if (line.startsWith('#EXTINF:')) {
+      const nameMatch = line.match(/,(.+)$/);
+      const logoMatch = line.match(/tvg-logo="([^"]+)"/);
+      const idMatch = line.match(/tvg-id="([^"]+)"/);
+      const groupMatch = line.match(/group-title="([^"]+)"/);
+      
+      const channelName = nameMatch ? nameMatch[1].trim() : 'Unknown';
+      const logo = logoMatch ? logoMatch[1] : '';
+      const id = idMatch ? idMatch[1].replace(/\s+/g, '-').toLowerCase() : 'pub-' + Math.random().toString(36).substr(2, 9);
+      const group = groupMatch ? groupMatch[1].trim() : 'General';
+      
+      currentChannel = {
+        id: id,
+        name: channelName,
+        logo: logo,
+        group: group
+      };
+    } else if (line && !line.startsWith('#')) {
+      if (currentChannel) {
+        let url = line;
+        // Proxy HTTP streams through HTTPS on Vercel to avoid mixed content
+        if (window.location.protocol === 'https:' && url.startsWith('http://')) {
+          url = '/proxy?url=' + encodeURIComponent(url);
+        }
+        
+        currentChannel.url = url;
+        
+        // Categorize
+        let groupKey = currentChannel.group.toLowerCase().replace(/\s+/g, '_');
+        if (!groupKey) groupKey = 'general';
+        
+        // Merge similar categories
+        if (groupKey.includes('news')) groupKey = 'news';
+        else if (groupKey.includes('sport')) groupKey = 'sports';
+        else if (groupKey.includes('religion') || groupKey.includes('islam') || groupKey.includes('peace')) groupKey = 'religion';
+        else if (groupKey.includes('movie') || groupKey.includes('cinema')) groupKey = 'movies';
+        else if (groupKey.includes('kid') || groupKey.includes('cartoon')) groupKey = 'kids';
+        else if (groupKey.includes('entertainment') || groupKey.includes('general')) groupKey = 'entertainment';
+        else groupKey = 'other';
+        
+        const groupNames = {
+          news: 'News',
+          sports: 'Sports',
+          religion: 'Religion',
+          movies: 'Movies',
+          kids: 'Kids',
+          entertainment: 'Entertainment',
+          other: 'Other'
+        };
+        
+        const categoryName = groupNames[groupKey] || currentChannel.group;
+        
+        if (!categories[groupKey]) {
+          categories[groupKey] = {
+            name: categoryName,
+            channels: []
+          };
+        }
+        
+        categories[groupKey].channels.push({
+          id: currentChannel.id,
+          name: currentChannel.name,
+          url: currentChannel.url,
+          logo: currentChannel.logo
+        });
+        
+        currentChannel = null;
+      }
+    }
+  }
+  
+  // Clean empty categories and return
+  const cleanCategories = {};
+  Object.keys(categories).forEach(key => {
+    if (categories[key].channels.length > 0) {
+      cleanCategories[key] = categories[key];
+    }
+  });
+  
+  return { categories: cleanCategories };
 }
 
 // ===== Initialize UI with tabs and channels =====
 function initializeUI() {
-  if (!channelsData) return;
+  if (!channelsData || !channelsData.categories) return;
   
+  // Reset category tabs & channels
   createCategoryTabs();
   createChannelCategories();
   setupEventListeners();
@@ -38,7 +206,13 @@ function initializeUI() {
 function createCategoryTabs() {
   categoryTabsContainer.innerHTML = '';
   
-  Object.keys(channelsData.categories).forEach((categoryKey, index) => {
+  const categoryKeys = Object.keys(channelsData.categories);
+  if (categoryKeys.length === 0) return;
+  
+  // Set current category to the first one available
+  currentCategory = categoryKeys[0];
+  
+  categoryKeys.forEach((categoryKey, index) => {
     const category = channelsData.categories[categoryKey];
     const tabBtn = document.createElement('button');
     tabBtn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
@@ -99,6 +273,32 @@ function createChannelButton(channel) {
   
   return button;
 }
+
+// ===== Display Custom Error Screen =====
+function showPlayerError(channelName, url) {
+  videoOverlay.classList.remove('active');
+  errorOverlay.classList.add('active');
+  
+  const isPrivateIp = url.includes('10.254.252.70') || url.includes('/proxy?url=http%3A%2F%2F10.');
+  
+  if (isPrivateIp) {
+    errorDesc.innerHTML = `
+      Failed to load <strong>${channelName}</strong>.<br><br>
+      This stream points to a private ISP local network (BDIX) which cannot be reached from Vercel's public cloud servers.<br><br>
+      <strong>Solutions:</strong><br>
+      1. Switch to <strong>Public (Global)</strong> streams using the sidebar.<br>
+      2. Or clone this repository and run the app locally on your computer.
+    `;
+    btnSwitchPublic.style.display = 'block';
+  } else {
+    errorDesc.innerHTML = `
+      Failed to load <strong>${channelName}</strong>.<br><br>
+      The stream might be temporarily offline or blocked by your browser's CORS/Mixed Content settings.
+    `;
+    btnSwitchPublic.style.display = 'none';
+  }
+}
+
 // ===== Setup event listeners =====
 function setupEventListeners() {
   // Category tab switching
@@ -140,41 +340,22 @@ function setupEventListeners() {
       }
     });
   });
-  
-  // Mobile menu toggle
-  mobileMenuBtn.addEventListener('click', () => {
-    // Only toggle on landscape tablets (641px - 768px)
-    if (window.innerWidth > 640 && window.innerWidth <= 768) {
-      sidebar.classList.add('active');
-    }
-  });
-  
-  closeSidebarBtn.addEventListener('click', () => {
-    sidebar.classList.remove('active');
-  });
-  
-  // Keyboard shortcuts
-  document.addEventListener('keydown', handleKeyboard);
-  
-  // Close sidebar when clicking outside on mobile
-  document.addEventListener('click', (e) => {
-    if (window.innerWidth > 640 && window.innerWidth <= 768 && 
-        sidebar.classList.contains('active') &&
-        !sidebar.contains(e.target) && 
-        !mobileMenuBtn.contains(e.target)) {
-      sidebar.classList.remove('active');
-    }
-  });
 }
 
 // ===== Play channel =====
 function playChannel(button, url, channelName) {
-  // Show loading overlay
+  // Hide error screen & show loading overlay
+  errorOverlay.classList.remove('active');
   videoOverlay.classList.add('active');
+  
+  // Save last selected context for reloads
+  lastSelectedChannelBtn = button;
+  lastSelectedChannelUrl = url;
+  lastSelectedChannelName = channelName;
   
   // Remove active state from all channel buttons
   document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
-  button.classList.add('active');
+  if (button) button.classList.add('active');
   
   // Destroy existing HLS instance
   if (hls) {
@@ -192,7 +373,7 @@ function playChannel(button, url, channelName) {
 
   if (isTs && typeof mpegts !== 'undefined' && mpegts.getFeatureList().mseLivePlayback) {
     mpegtsPlayer = mpegts.createPlayer({
-      type: 'mse', // Use mse for ts streaming
+      type: 'mse',
       isLive: true,
       url: url
     });
@@ -205,14 +386,12 @@ function playChannel(button, url, channelName) {
       })
       .catch(err => {
         console.log('Autoplay prevented or error:', err);
-        videoOverlay.classList.remove('active');
-        showError(`Failed to play ${channelName}. Browser blocked auto-play or format error.`);
+        showPlayerError(channelName, url);
       });
       
     mpegtsPlayer.on(mpegts.Events.ERROR, (errorType, errorDetail, errorInfo) => {
       console.error('MPEGTS error:', errorType, errorDetail, errorInfo);
-      showError(`Stream error for ${channelName}.`);
-      videoOverlay.classList.remove('active');
+      showPlayerError(channelName, url);
     });
 
   } else if (Hls.isSupported() && !isTs) {
@@ -238,21 +417,27 @@ function playChannel(button, url, channelName) {
       });
     });
     
+    let networkRetryCount = 0;
     hls.on(Hls.Events.ERROR, (event, data) => {
       console.error('HLS error:', data);
       if (data.fatal) {
-        videoOverlay.classList.remove('active');
         switch (data.type) {
           case Hls.ErrorTypes.NETWORK_ERROR:
-            console.log('Network error, trying to recover...');
-            hls.startLoad();
+            networkRetryCount++;
+            if (networkRetryCount > 2) {
+              showPlayerError(channelName, url);
+              hls.destroy();
+            } else {
+              console.log('Network error, trying to recover...');
+              hls.startLoad();
+            }
             break;
           case Hls.ErrorTypes.MEDIA_ERROR:
             console.log('Media error, trying to recover...');
             hls.recoverMediaError();
             break;
           default:
-            showError(`Failed to load ${channelName}. Please try another channel.`);
+            showPlayerError(channelName, url);
             hls.destroy();
             break;
         }
@@ -265,7 +450,7 @@ function playChannel(button, url, channelName) {
       videoOverlay.classList.remove('active');
     }).catch(err => {
       console.log('Autoplay prevented:', err);
-      videoOverlay.classList.remove('active');
+      showPlayerError(channelName, url);
     });
   } else {
     videoOverlay.classList.remove('active');
@@ -307,9 +492,8 @@ function handleKeyboard(e) {
   }
 }
 
-// ===== Show error message =====
+// ===== Show toast error message =====
 function showError(message) {
-  // Create error toast
   const toast = document.createElement('div');
   toast.style.cssText = `
     position: fixed;
@@ -335,7 +519,7 @@ function showError(message) {
   }, 3000);
 }
 
-// Add animation styles
+// Add animation styles dynamically
 const style = document.createElement('style');
 style.textContent = `
   @keyframes slideUp {
@@ -349,5 +533,49 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+// ===== Source Selection & Initial setup =====
+function setupSourceSelector() {
+  btnLocalSource.addEventListener('click', () => {
+    switchSource('local');
+  });
+  
+  btnPublicSource.addEventListener('click', () => {
+    switchSource('public');
+  });
+  
+  btnReloadStream.addEventListener('click', () => {
+    if (lastSelectedChannelUrl) {
+      playChannel(lastSelectedChannelBtn, lastSelectedChannelUrl, lastSelectedChannelName);
+    }
+  });
+  
+  btnSwitchPublic.addEventListener('click', () => {
+    switchSource('public');
+  });
+}
+
+// ===== Mobile layout triggers =====
+mobileMenuBtn.addEventListener('click', () => {
+  if (window.innerWidth > 640 && window.innerWidth <= 768) {
+    sidebar.classList.add('active');
+  }
+});
+
+closeSidebarBtn.addEventListener('click', () => {
+  sidebar.classList.remove('active');
+});
+
+document.addEventListener('keydown', handleKeyboard);
+
+document.addEventListener('click', (e) => {
+  if (window.innerWidth > 640 && window.innerWidth <= 768 && 
+      sidebar.classList.contains('active') &&
+      !sidebar.contains(e.target) && 
+      !mobileMenuBtn.contains(e.target)) {
+    sidebar.classList.remove('active');
+  }
+});
+
 // ===== Initialize the app =====
+setupSourceSelector();
 loadChannelsData();
