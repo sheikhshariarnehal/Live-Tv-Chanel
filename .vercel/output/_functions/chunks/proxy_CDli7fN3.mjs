@@ -6,14 +6,27 @@ async function GET({ request }) {
     return new Response('Target URL required', { status: 400 });
   }
 
+  // Set a timeout of 5 seconds to prevent the function from hanging on unreachable IP addresses
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   try {
     const response = await fetch(targetUrl, {
+      signal: controller.signal,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       }
     });
 
-    const headers = new Headers(response.headers);
+    clearTimeout(timeoutId);
+
+    const headers = new Headers();
+    // Copy only safe/essential headers to avoid encoding or transmission conflicts on Vercel
+    const headersToCopy = ['content-type', 'content-length', 'cache-control'];
+    headersToCopy.forEach(h => {
+      const val = response.headers.get(h);
+      if (val) headers.set(h, val);
+    });
     headers.set('Access-Control-Allow-Origin', '*');
     
     // Rewrite m3u8 playlists so they also proxy the TS segments
@@ -55,15 +68,20 @@ async function GET({ request }) {
       });
     }
 
-    // For other files (.ts segments or images), just return the body
-    return new Response(response.body, {
+    // For other files (.ts segments or images), read as ArrayBuffer to avoid Vercel streaming issues
+    const arrayBuffer = await response.arrayBuffer();
+    return new Response(arrayBuffer, {
       status: response.status,
       headers
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { 
+    clearTimeout(timeoutId);
+    return new Response(JSON.stringify({ error: error.message || 'Fetch failed' }), { 
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
     });
   }
 }
