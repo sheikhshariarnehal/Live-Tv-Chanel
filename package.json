@@ -23,7 +23,7 @@
   "homepage": "https://github.com/sheikhshariarnehal/Live-Tv-Chanel#readme",
   "dependencies": {
     "@astrojs/check": "^0.9.9",
-    "@astrojs/node": "^10.1.4",
+    "@astrojs/vercel": "^10.0.8",
     "astro": "^6.4.6",
     "node-fetch": "^3.3.2",
     "serve": "^14.2.6",
