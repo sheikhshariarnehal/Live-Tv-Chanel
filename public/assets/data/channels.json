@@ -1,18 +1,18 @@
-{
+﻿{
   "categories": {
-        "sports": {
+    "sports": {
       "name": "Sports",
       "channels": [
         {
           "id": "tsports",
           "name": "T Sports",
-          "url": "http://rgkkw.live:80/live/1Aoen7elp5/IgMJ60tmAa/130714.ts",
+          "url": "/proxy?url=http://10.254.252.70:3255/TSportsHD_sf_bdix/index.m3u8",
           "logo": "assets/image/T SPORTS1744972630.png"
         },
         {
           "id": "sony-ten-1",
           "name": "Sony Ten 1",
-          "url": "http://172.27.27.90:8080/tv2/index.m3u8",
+          "url": "/proxy?url=http%3A%2F%2F172.27.27.90%3A8080%2Ftv2%2Findex.m3u8",
           "logo": "assets/image/ten1.png"
         },
         {
@@ -29,19 +29,19 @@
         {
           "id": "DBC",
           "name": "DBC Tv",
-          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/DBC/tracks-v1a1/mono.m3u8",
+          "url": "/proxy?url=http%3A%2F%2Ftv.dugdugilive.com%3A8080%2F0ne%24ky23%2FDBC%2Ftracks-v1a1%2Fmono.m3u8",
           "logo": "assets/image/dbcnews.png"
         },
         {
           "id": "rtv",
           "name": "RTV",
-          "url": "http://10.99.99.99:8082/SOMOY.TV.HD/tracks-v1a1/mono.m3u8?token=c97023e8dc8a0c86efb39a72772e0163e7f72c90-6f2add3ce73e9aa647040bd8c8145140-1766167686-1766156886",
+          "url": "/proxy?url=http%3A%2F%2F10.99.99.99%3A8082%2FSOMOY.TV.HD%2Ftracks-v1a1%2Fmono.m3u8%3Ftoken%3Dc97023e8dc8a0c86efb39a72772e0163e7f72c90-6f2add3ce73e9aa647040bd8c8145140-1766167686-1766156886",
           "logo": ""
         },
         {
           "id": "gazi-tv",
           "name": "Gazi TV",
-          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/GaziTV/tracks-v1a1/mono.m3u8",
+          "url": "/proxy?url=http%3A%2F%2Ftv.dugdugilive.com%3A8080%2F0ne%24ky23%2FGaziTV%2Ftracks-v1a1%2Fmono.m3u8",
           "logo": "assets/image/gtv.png"
         }
       ]
@@ -49,16 +49,16 @@
     "shows": {
       "name": "Shows",
       "channels": [
-                {
+        {
           "id": "starJalsa",
           "name": "Star Jalsa",
-          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/starJalsa/tracks-v1a1/mono.m3u8",
+          "url": "/proxy?url=http%3A%2F%2Ftv.dugdugilive.com%3A8080%2F0ne%24ky23%2FstarJalsa%2Ftracks-v1a1%2Fmono.m3u8",
           "logo": "assets/image/starjalsha.png"
         },
         {
           "id": "colorsbangla",
           "name": "colors-bangla",
-          "url": "http://tv.dugdugilive.com:8080/0ne$ky23/colors-bangla/tracks-v1a1/mono.m3u8",
+          "url": "/proxy?url=http%3A%2F%2Ftv.dugdugilive.com%3A8080%2F0ne%24ky23%2Fcolors-bangla%2Ftracks-v1a1%2Fmono.m3u8",
           "logo": "assets/image/colorsbangla.png"
         }
       ]
