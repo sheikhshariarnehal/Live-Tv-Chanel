@@ -1,4 +1,6 @@
-import '@vercel/routing-utils';
+import require$$0 from 'url';
+import require$$1 from 'path-to-regexp';
+import require$$2 from 'path-to-regexp-updated';
 import nodePath from 'node:path';
 import colors from 'piccolore';
 import { parse, stringify as stringify$1, unflatten as unflatten$1 } from 'devalue';
@@ -380,6 +382,1780 @@ const CacheNotEnabled = {
   message: "`Astro.cache` is not available because the cache feature is not enabled. To use caching, configure a cache provider in your Astro config under `experimental.cache`.",
   hint: 'Use an adapter that provides a default cache provider, or set one explicitly: `experimental: { cache: { provider: "..." } }`. See https://docs.astro.build/en/reference/experimental-flags/route-caching/.'
 };
+
+var dist = {exports: {}};
+
+var superstatic;
+var hasRequiredSuperstatic;
+
+function requireSuperstatic () {
+	if (hasRequiredSuperstatic) return superstatic;
+	hasRequiredSuperstatic = 1;
+	var __defProp = Object.defineProperty;
+	var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+	var __getOwnPropNames = Object.getOwnPropertyNames;
+	var __hasOwnProp = Object.prototype.hasOwnProperty;
+	var __export = (target, all) => {
+	  for (var name in all)
+	    __defProp(target, name, { get: all[name], enumerable: true });
+	};
+	var __copyProps = (to, from, except, desc) => {
+	  if (from && typeof from === "object" || typeof from === "function") {
+	    for (let key of __getOwnPropNames(from))
+	      if (!__hasOwnProp.call(to, key) && key !== except)
+	        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+	  }
+	  return to;
+	};
+	var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+	var superstatic_exports = {};
+	__export(superstatic_exports, {
+	  collectHasSegments: () => collectHasSegments,
+	  convertCleanUrls: () => convertCleanUrls,
+	  convertHeaders: () => convertHeaders,
+	  convertRedirects: () => convertRedirects,
+	  convertRewrites: () => convertRewrites,
+	  convertTrailingSlash: () => convertTrailingSlash,
+	  getCleanUrls: () => getCleanUrls,
+	  pathToRegexp: () => pathToRegexp,
+	  sourceToRegex: () => sourceToRegex
+	});
+	superstatic = __toCommonJS(superstatic_exports);
+	var import_url = require$$0;
+	var import_path_to_regexp = require$$1;
+	var import_path_to_regexp_updated = require$$2;
+	function cloneKeys(keys) {
+	  if (typeof keys === "undefined") {
+	    return void 0;
+	  }
+	  return keys.slice(0);
+	}
+	function compareKeys(left, right) {
+	  const leftSerialized = typeof left === "undefined" ? "undefined" : left.toString();
+	  const rightSerialized = typeof right === "undefined" ? "undefined" : right.toString();
+	  return leftSerialized === rightSerialized;
+	}
+	function pathToRegexp(callerId, path, keys, options) {
+	  const newKeys = cloneKeys(keys);
+	  const currentRegExp = (0, import_path_to_regexp.pathToRegexp)(path, keys, options);
+	  try {
+	    const currentKeys = keys;
+	    const newRegExp = (0, import_path_to_regexp_updated.pathToRegexp)(path, newKeys, options);
+	    const isDiffRegExp = currentRegExp.toString() !== newRegExp.toString();
+	    if (process.env.FORCE_PATH_TO_REGEXP_LOG || isDiffRegExp) {
+	      const message = JSON.stringify({
+	        path,
+	        currentRegExp: currentRegExp.toString(),
+	        newRegExp: newRegExp.toString()
+	      });
+	      console.error(`[vc] PATH TO REGEXP PATH DIFF @ #${callerId}: ${message}`);
+	    }
+	    const isDiffKeys = !compareKeys(keys, newKeys);
+	    if (process.env.FORCE_PATH_TO_REGEXP_LOG || isDiffKeys) {
+	      const message = JSON.stringify({
+	        isDiffKeys,
+	        currentKeys,
+	        newKeys
+	      });
+	      console.error(`[vc] PATH TO REGEXP KEYS DIFF @ #${callerId}: ${message}`);
+	    }
+	  } catch (err) {
+	    const error = err;
+	    const message = JSON.stringify({
+	      path,
+	      error: error.message
+	    });
+	    console.error(`[vc] PATH TO REGEXP ERROR @ #${callerId}: ${message}`);
+	  }
+	  return currentRegExp;
+	}
+	const UN_NAMED_SEGMENT = "__UN_NAMED_SEGMENT__";
+	function getCleanUrls(filePaths) {
+	  const htmlFiles = filePaths.map(toRoute).filter((f) => f.endsWith(".html")).map((f) => ({
+	    html: f,
+	    clean: f.slice(0, -5)
+	  }));
+	  return htmlFiles;
+	}
+	function convertCleanUrls(cleanUrls, trailingSlash, status = 308) {
+	  const routes = [];
+	  if (cleanUrls) {
+	    const loc = trailingSlash ? "/$1/" : "/$1";
+	    routes.push({
+	      src: "^/(?:(.+)/)?index(?:\\.html)?/?$",
+	      headers: { Location: loc },
+	      status
+	    });
+	    routes.push({
+	      src: "^/(.*)\\.html/?$",
+	      headers: { Location: loc },
+	      status
+	    });
+	  }
+	  return routes;
+	}
+	function convertRedirects(redirects, defaultStatus = 308) {
+	  return redirects.map((r) => {
+	    const { src, segments } = sourceToRegex(r.source);
+	    const hasSegments = collectHasSegments(r.has);
+	    normalizeHasKeys(r.has);
+	    normalizeHasKeys(r.missing);
+	    try {
+	      const loc = replaceSegments(segments, hasSegments, r.destination, true);
+	      let status;
+	      if (typeof r.permanent === "boolean") {
+	        status = r.permanent ? 308 : 307;
+	      } else if (r.statusCode) {
+	        status = r.statusCode;
+	      } else {
+	        status = defaultStatus;
+	      }
+	      const route = {
+	        src,
+	        headers: { Location: loc },
+	        status
+	      };
+	      if (typeof r.env !== "undefined") {
+	        route.env = r.env;
+	      }
+	      if (r.has) {
+	        route.has = r.has;
+	      }
+	      if (r.missing) {
+	        route.missing = r.missing;
+	      }
+	      return route;
+	    } catch (e) {
+	      throw new Error(`Failed to parse redirect: ${JSON.stringify(r)}`);
+	    }
+	  });
+	}
+	function convertRewrites(rewrites, internalParamNames) {
+	  return rewrites.map((r) => {
+	    const { src, segments } = sourceToRegex(r.source);
+	    const hasSegments = collectHasSegments(r.has);
+	    normalizeHasKeys(r.has);
+	    normalizeHasKeys(r.missing);
+	    try {
+	      const dest = replaceSegments(
+	        segments,
+	        hasSegments,
+	        r.destination,
+	        false,
+	        internalParamNames
+	      );
+	      const route = { src, dest, check: true };
+	      if (typeof r.env !== "undefined") {
+	        route.env = r.env;
+	      }
+	      if (r.has) {
+	        route.has = r.has;
+	      }
+	      if (r.missing) {
+	        route.missing = r.missing;
+	      }
+	      if (r.statusCode) {
+	        route.status = r.statusCode;
+	      }
+	      return route;
+	    } catch (e) {
+	      throw new Error(`Failed to parse rewrite: ${JSON.stringify(r)}`);
+	    }
+	  });
+	}
+	function convertHeaders(headers) {
+	  return headers.map((h) => {
+	    const obj = {};
+	    const { src, segments } = sourceToRegex(h.source);
+	    const hasSegments = collectHasSegments(h.has);
+	    normalizeHasKeys(h.has);
+	    normalizeHasKeys(h.missing);
+	    const namedSegments = segments.filter((name) => name !== UN_NAMED_SEGMENT);
+	    const indexes = {};
+	    segments.forEach((name, index) => {
+	      indexes[name] = toSegmentDest(index);
+	    });
+	    hasSegments.forEach((name) => {
+	      indexes[name] = "$" + name;
+	    });
+	    h.headers.forEach(({ key, value }) => {
+	      if (namedSegments.length > 0 || hasSegments.length > 0) {
+	        if (key.includes(":")) {
+	          key = safelyCompile(key, indexes);
+	        }
+	        if (value.includes(":")) {
+	          value = safelyCompile(value, indexes);
+	        }
+	      }
+	      obj[key] = value;
+	    });
+	    const route = {
+	      src,
+	      headers: obj,
+	      continue: true
+	    };
+	    if (h.has) {
+	      route.has = h.has;
+	    }
+	    if (h.missing) {
+	      route.missing = h.missing;
+	    }
+	    return route;
+	  });
+	}
+	function convertTrailingSlash(enable, status = 308) {
+	  const routes = [];
+	  if (enable) {
+	    routes.push({
+	      src: "^/\\.well-known(?:/.*)?$"
+	    });
+	    routes.push({
+	      src: "^/((?:[^/]+/)*[^/\\.]+)$",
+	      headers: { Location: "/$1/" },
+	      status
+	    });
+	    routes.push({
+	      src: "^/((?:[^/]+/)*[^/]+\\.\\w+)/$",
+	      headers: { Location: "/$1" },
+	      status
+	    });
+	  } else {
+	    routes.push({
+	      src: "^/(.*)\\/$",
+	      headers: { Location: "/$1" },
+	      status
+	    });
+	  }
+	  return routes;
+	}
+	function sourceToRegex(source) {
+	  const keys = [];
+	  const r = pathToRegexp("632", source, keys, {
+	    strict: true,
+	    sensitive: true,
+	    delimiter: "/"
+	  });
+	  const segments = keys.map((k) => k.name).map((name) => {
+	    if (typeof name !== "string") {
+	      return UN_NAMED_SEGMENT;
+	    }
+	    return name;
+	  });
+	  return { src: r.source, segments };
+	}
+	const namedGroupsRegex = /\(\?<([a-zA-Z][a-zA-Z0-9_]*)>/g;
+	const normalizeHasKeys = (hasItems = []) => {
+	  for (const hasItem of hasItems) {
+	    if ("key" in hasItem && hasItem.type === "header") {
+	      hasItem.key = hasItem.key.toLowerCase();
+	    }
+	  }
+	  return hasItems;
+	};
+	function getStringValueForRegex(value) {
+	  if (typeof value === "string") {
+	    return value;
+	  }
+	  if (value && typeof value === "object" && value !== null) {
+	    if ("re" in value && typeof value.re === "string") {
+	      return value.re;
+	    }
+	  }
+	  return null;
+	}
+	function collectHasSegments(has) {
+	  const hasSegments = /* @__PURE__ */ new Set();
+	  for (const hasItem of has || []) {
+	    if (!hasItem.value && "key" in hasItem) {
+	      hasSegments.add(hasItem.key);
+	    }
+	    const stringValue = getStringValueForRegex(hasItem.value);
+	    if (stringValue) {
+	      for (const match of stringValue.matchAll(namedGroupsRegex)) {
+	        if (match[1]) {
+	          hasSegments.add(match[1]);
+	        }
+	      }
+	      if (hasItem.type === "host") {
+	        hasSegments.add("host");
+	      }
+	    }
+	  }
+	  return [...hasSegments];
+	}
+	const escapeSegment = (str, segmentName) => str.replace(new RegExp(`:${segmentName}`, "g"), `__ESC_COLON_${segmentName}`);
+	const unescapeSegments = (str) => str.replace(/__ESC_COLON_/gi, ":");
+	function replaceSegments(segments, hasItemSegments, destination, isRedirect, internalParamNames) {
+	  const namedSegments = segments.filter((name) => name !== UN_NAMED_SEGMENT);
+	  const canNeedReplacing = destination.includes(":") && namedSegments.length > 0 || hasItemSegments.length > 0 || !isRedirect;
+	  if (!canNeedReplacing) {
+	    return destination;
+	  }
+	  let escapedDestination = destination;
+	  const indexes = {};
+	  segments.forEach((name, index) => {
+	    indexes[name] = toSegmentDest(index);
+	    escapedDestination = escapeSegment(escapedDestination, name);
+	  });
+	  hasItemSegments.forEach((name) => {
+	    indexes[name] = "$" + name;
+	    escapedDestination = escapeSegment(escapedDestination, name);
+	  });
+	  const parsedDestination = (0, import_url.parse)(escapedDestination, true);
+	  delete parsedDestination.href;
+	  delete parsedDestination.path;
+	  delete parsedDestination.search;
+	  delete parsedDestination.host;
+	  let { pathname, hash, query, hostname, ...rest } = parsedDestination;
+	  pathname = unescapeSegments(pathname || "");
+	  hash = unescapeSegments(hash || "");
+	  hostname = unescapeSegments(hostname || "");
+	  let destParams = /* @__PURE__ */ new Set();
+	  const pathnameKeys = [];
+	  const hashKeys = [];
+	  const hostnameKeys = [];
+	  try {
+	    pathToRegexp("528", pathname, pathnameKeys);
+	    pathToRegexp("834", hash || "", hashKeys);
+	    pathToRegexp("712", hostname || "", hostnameKeys);
+	  } catch (_) {
+	  }
+	  destParams = new Set(
+	    [...pathnameKeys, ...hashKeys, ...hostnameKeys].map((key) => key.name).filter((val) => typeof val === "string")
+	  );
+	  pathname = safelyCompile(pathname, indexes, true);
+	  hash = hash ? safelyCompile(hash, indexes, true) : null;
+	  hostname = hostname ? safelyCompile(hostname, indexes, true) : null;
+	  for (const [key, strOrArray] of Object.entries(query)) {
+	    if (Array.isArray(strOrArray)) {
+	      query[key] = strOrArray.map(
+	        (str) => safelyCompile(unescapeSegments(str), indexes, true)
+	      );
+	    } else {
+	      query[key] = safelyCompile(
+	        unescapeSegments(strOrArray),
+	        indexes,
+	        true
+	      );
+	    }
+	  }
+	  const paramKeys = Object.keys(indexes);
+	  const needsQueryUpdating = (
+	    // we do not consider an internal param since it is added automatically
+	    !isRedirect && !paramKeys.some(
+	      (param) => !(internalParamNames && internalParamNames.includes(param)) && destParams.has(param)
+	    )
+	  );
+	  if (needsQueryUpdating) {
+	    for (const param of paramKeys) {
+	      if (!(param in query) && param !== UN_NAMED_SEGMENT) {
+	        query[param] = indexes[param];
+	      }
+	    }
+	  }
+	  destination = (0, import_url.format)({
+	    ...rest,
+	    hostname,
+	    pathname,
+	    query,
+	    hash
+	  });
+	  return destination.replace(/%24/g, "$");
+	}
+	function safelyCompile(value, indexes, attemptDirectCompile) {
+	  if (!value) {
+	    return value;
+	  }
+	  if (attemptDirectCompile) {
+	    try {
+	      return (0, import_path_to_regexp.compile)(value, { validate: false })(indexes);
+	    } catch (e) {
+	    }
+	  }
+	  for (const key of Object.keys(indexes)) {
+	    if (value.includes(`:${key}`)) {
+	      value = value.replace(
+	        new RegExp(`:${key}\\*`, "g"),
+	        `:${key}--ESCAPED_PARAM_ASTERISK`
+	      ).replace(
+	        new RegExp(`:${key}\\?`, "g"),
+	        `:${key}--ESCAPED_PARAM_QUESTION`
+	      ).replace(new RegExp(`:${key}\\+`, "g"), `:${key}--ESCAPED_PARAM_PLUS`).replace(
+	        new RegExp(`:${key}(?!\\w)`, "g"),
+	        `--ESCAPED_PARAM_COLON${key}`
+	      );
+	    }
+	  }
+	  value = value.replace(/(:|\*|\?|\+|\(|\)|\{|\})/g, "\\$1").replace(/--ESCAPED_PARAM_PLUS/g, "+").replace(/--ESCAPED_PARAM_COLON/g, ":").replace(/--ESCAPED_PARAM_QUESTION/g, "?").replace(/--ESCAPED_PARAM_ASTERISK/g, "*");
+	  return (0, import_path_to_regexp.compile)(`/${value}`, { validate: false })(indexes).slice(1);
+	}
+	function toSegmentDest(index) {
+	  const i = index + 1;
+	  return "$" + i.toString();
+	}
+	function toRoute(filePath) {
+	  return filePath.startsWith("/") ? filePath : "/" + filePath;
+	}
+	return superstatic;
+}
+
+var append;
+var hasRequiredAppend;
+
+function requireAppend () {
+	if (hasRequiredAppend) return append;
+	hasRequiredAppend = 1;
+	var __defProp = Object.defineProperty;
+	var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+	var __getOwnPropNames = Object.getOwnPropertyNames;
+	var __hasOwnProp = Object.prototype.hasOwnProperty;
+	var __export = (target, all) => {
+	  for (var name in all)
+	    __defProp(target, name, { get: all[name], enumerable: true });
+	};
+	var __copyProps = (to, from, except, desc) => {
+	  if (from && typeof from === "object" || typeof from === "function") {
+	    for (let key of __getOwnPropNames(from))
+	      if (!__hasOwnProp.call(to, key) && key !== except)
+	        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+	  }
+	  return to;
+	};
+	var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+	var append_exports = {};
+	__export(append_exports, {
+	  appendRoutesToPhase: () => appendRoutesToPhase
+	});
+	append = __toCommonJS(append_exports);
+	var import_index = requireDist();
+	function appendRoutesToPhase({
+	  routes: prevRoutes,
+	  newRoutes,
+	  phase
+	}) {
+	  const routes = prevRoutes ? [...prevRoutes] : [];
+	  if (newRoutes === null || newRoutes.length === 0) {
+	    return routes;
+	  }
+	  let isInPhase = false;
+	  let insertIndex = -1;
+	  routes.forEach((r, i) => {
+	    if ((0, import_index.isHandler)(r)) {
+	      if (r.handle === phase) {
+	        isInPhase = true;
+	      } else if (isInPhase) {
+	        insertIndex = i;
+	        isInPhase = false;
+	      }
+	    }
+	  });
+	  if (isInPhase) {
+	    routes.push(...newRoutes);
+	  } else if (phase === null) {
+	    const lastPhase = routes.findIndex((r) => (0, import_index.isHandler)(r) && r.handle);
+	    if (lastPhase === -1) {
+	      routes.push(...newRoutes);
+	    } else {
+	      routes.splice(lastPhase, 0, ...newRoutes);
+	    }
+	  } else if (insertIndex > -1) {
+	    routes.splice(insertIndex, 0, ...newRoutes);
+	  } else {
+	    routes.push({ handle: phase });
+	    routes.push(...newRoutes);
+	  }
+	  return routes;
+	}
+	return append;
+}
+
+var merge;
+var hasRequiredMerge;
+
+function requireMerge () {
+	if (hasRequiredMerge) return merge;
+	hasRequiredMerge = 1;
+	var __defProp = Object.defineProperty;
+	var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+	var __getOwnPropNames = Object.getOwnPropertyNames;
+	var __hasOwnProp = Object.prototype.hasOwnProperty;
+	var __export = (target, all) => {
+	  for (var name in all)
+	    __defProp(target, name, { get: all[name], enumerable: true });
+	};
+	var __copyProps = (to, from, except, desc) => {
+	  if (from && typeof from === "object" || typeof from === "function") {
+	    for (let key of __getOwnPropNames(from))
+	      if (!__hasOwnProp.call(to, key) && key !== except)
+	        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+	  }
+	  return to;
+	};
+	var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+	var merge_exports = {};
+	__export(merge_exports, {
+	  mergeRoutes: () => mergeRoutes
+	});
+	merge = __toCommonJS(merge_exports);
+	var import_index = requireDist();
+	function getBuilderRoutesMapping(builds) {
+	  const builderRoutes = {};
+	  for (const { entrypoint, routes, use } of builds) {
+	    if (routes) {
+	      if (!builderRoutes[entrypoint]) {
+	        builderRoutes[entrypoint] = {};
+	      }
+	      builderRoutes[entrypoint][use] = routes;
+	    }
+	  }
+	  return builderRoutes;
+	}
+	function getCheckAndContinue(routes) {
+	  const checks = [];
+	  const continues = [];
+	  const others = [];
+	  for (const route of routes) {
+	    if ((0, import_index.isHandler)(route)) {
+	      throw new Error(
+	        `Unexpected route found in getCheckAndContinue(): ${JSON.stringify(
+	          route
+	        )}`
+	      );
+	    } else if (route.check && !route.override) {
+	      checks.push(route);
+	    } else if (route.continue && !route.override) {
+	      continues.push(route);
+	    } else {
+	      others.push(route);
+	    }
+	  }
+	  return { checks, continues, others };
+	}
+	function mergeRoutes({ userRoutes, builds }) {
+	  const userHandleMap = /* @__PURE__ */ new Map();
+	  let userPrevHandle = null;
+	  (userRoutes || []).forEach((route) => {
+	    if ((0, import_index.isHandler)(route)) {
+	      userPrevHandle = route.handle;
+	    } else {
+	      const routes = userHandleMap.get(userPrevHandle);
+	      if (!routes) {
+	        userHandleMap.set(userPrevHandle, [route]);
+	      } else {
+	        routes.push(route);
+	      }
+	    }
+	  });
+	  const builderHandleMap = /* @__PURE__ */ new Map();
+	  const builderRoutes = getBuilderRoutesMapping(builds);
+	  const sortedPaths = Object.keys(builderRoutes).sort();
+	  sortedPaths.forEach((path) => {
+	    const br = builderRoutes[path];
+	    const sortedBuilders = Object.keys(br).sort();
+	    sortedBuilders.forEach((use) => {
+	      let builderPrevHandle = null;
+	      br[use].forEach((route) => {
+	        if ((0, import_index.isHandler)(route)) {
+	          builderPrevHandle = route.handle;
+	        } else {
+	          const routes = builderHandleMap.get(builderPrevHandle);
+	          if (!routes) {
+	            builderHandleMap.set(builderPrevHandle, [route]);
+	          } else {
+	            routes.push(route);
+	          }
+	        }
+	      });
+	    });
+	  });
+	  const outputRoutes = [];
+	  const uniqueHandleValues = /* @__PURE__ */ new Set([
+	    null,
+	    ...userHandleMap.keys(),
+	    ...builderHandleMap.keys()
+	  ]);
+	  for (const handle of uniqueHandleValues) {
+	    const userRoutes2 = userHandleMap.get(handle) || [];
+	    const builderRoutes2 = builderHandleMap.get(handle) || [];
+	    const builderSorted = getCheckAndContinue(builderRoutes2);
+	    if (handle !== null && (userRoutes2.length > 0 || builderRoutes2.length > 0)) {
+	      outputRoutes.push({ handle });
+	    }
+	    outputRoutes.push(...builderSorted.continues);
+	    outputRoutes.push(...userRoutes2);
+	    outputRoutes.push(...builderSorted.checks);
+	    outputRoutes.push(...builderSorted.others);
+	  }
+	  return outputRoutes;
+	}
+	return merge;
+}
+
+var serviceRouteOwnership;
+var hasRequiredServiceRouteOwnership;
+
+function requireServiceRouteOwnership () {
+	if (hasRequiredServiceRouteOwnership) return serviceRouteOwnership;
+	hasRequiredServiceRouteOwnership = 1;
+	var __defProp = Object.defineProperty;
+	var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+	var __getOwnPropNames = Object.getOwnPropertyNames;
+	var __hasOwnProp = Object.prototype.hasOwnProperty;
+	var __export = (target, all) => {
+	  for (var name in all)
+	    __defProp(target, name, { get: all[name], enumerable: true });
+	};
+	var __copyProps = (to, from, except, desc) => {
+	  if (from && typeof from === "object" || typeof from === "function") {
+	    for (let key of __getOwnPropNames(from))
+	      if (!__hasOwnProp.call(to, key) && key !== except)
+	        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+	  }
+	  return to;
+	};
+	var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+	var service_route_ownership_exports = {};
+	__export(service_route_ownership_exports, {
+	  getOwnershipGuard: () => getOwnershipGuard,
+	  normalizeRoutePrefix: () => normalizeRoutePrefix,
+	  scopeRouteSourceToOwnership: () => scopeRouteSourceToOwnership
+	});
+	serviceRouteOwnership = __toCommonJS(service_route_ownership_exports);
+	function normalizeRoutePrefix(routePrefix) {
+	  let normalized = routePrefix.startsWith("/") ? routePrefix : `/${routePrefix}`;
+	  if (normalized !== "/" && normalized.endsWith("/")) {
+	    normalized = normalized.slice(0, -1);
+	  }
+	  return normalized || "/";
+	}
+	function escapeForRegex(value) {
+	  return value.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&");
+	}
+	function toPrefixMatcher(routePrefix) {
+	  return `${escapeForRegex(routePrefix)}(?:/|$)`;
+	}
+	function isDescendantPrefix(candidate, prefix) {
+	  return candidate !== prefix && candidate.startsWith(`${prefix}/`);
+	}
+	function getOwnershipGuard(ownerPrefix, allRoutePrefixes) {
+	  const owner = normalizeRoutePrefix(ownerPrefix);
+	  const normalizedPrefixes = Array.from(
+	    new Set(allRoutePrefixes.map(normalizeRoutePrefix))
+	  );
+	  const nonRootPrefixes = normalizedPrefixes.filter((prefix) => prefix !== "/").sort((a, b) => b.length - a.length);
+	  if (owner === "/") {
+	    return nonRootPrefixes.map((prefix) => `(?!${toPrefixMatcher(prefix)})`).join("");
+	  }
+	  const descendants = nonRootPrefixes.filter(
+	    (prefix) => isDescendantPrefix(prefix, owner)
+	  );
+	  const positive = `(?=${toPrefixMatcher(owner)})`;
+	  const negative = descendants.map((prefix) => `(?!${toPrefixMatcher(prefix)})`).join("");
+	  return `${positive}${negative}`;
+	}
+	function scopeRouteSourceToOwnership(source, ownershipGuard) {
+	  if (!ownershipGuard) {
+	    return source;
+	  }
+	  const inner = source.startsWith("^") ? source.slice(1) : source;
+	  return `^${ownershipGuard}(?:${inner})`;
+	}
+	return serviceRouteOwnership;
+}
+
+var schemas;
+var hasRequiredSchemas;
+
+function requireSchemas () {
+	if (hasRequiredSchemas) return schemas;
+	hasRequiredSchemas = 1;
+	var __defProp = Object.defineProperty;
+	var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+	var __getOwnPropNames = Object.getOwnPropertyNames;
+	var __hasOwnProp = Object.prototype.hasOwnProperty;
+	var __export = (target, all) => {
+	  for (var name in all)
+	    __defProp(target, name, { get: all[name], enumerable: true });
+	};
+	var __copyProps = (to, from, except, desc) => {
+	  if (from && typeof from === "object" || typeof from === "function") {
+	    for (let key of __getOwnPropNames(from))
+	      if (!__hasOwnProp.call(to, key) && key !== except)
+	        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+	  }
+	  return to;
+	};
+	var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+	var schemas_exports = {};
+	__export(schemas_exports, {
+	  bulkRedirectsSchema: () => bulkRedirectsSchema,
+	  cleanUrlsSchema: () => cleanUrlsSchema,
+	  hasSchema: () => hasSchema,
+	  headersSchema: () => headersSchema,
+	  redirectsSchema: () => redirectsSchema,
+	  rewritesSchema: () => rewritesSchema,
+	  routesSchema: () => routesSchema,
+	  trailingSlashSchema: () => trailingSlashSchema
+	});
+	schemas = __toCommonJS(schemas_exports);
+	const mitigateSchema = {
+	  description: "Mitigation action to take on a route",
+	  type: "object",
+	  additionalProperties: false,
+	  required: ["action"],
+	  properties: {
+	    action: {
+	      description: "The mitigation action to take",
+	      type: "string",
+	      enum: ["challenge", "deny"]
+	    }
+	  }
+	};
+	const matchableValueSchema = {
+	  description: "A value to match against. Can be a string (regex) or a condition operation object",
+	  anyOf: [
+	    {
+	      description: "A regular expression used to match thev value. Named groups can be used in the destination.",
+	      type: "string",
+	      maxLength: 4096
+	    },
+	    {
+	      description: "A condition operation object",
+	      type: "object",
+	      additionalProperties: false,
+	      minProperties: 1,
+	      properties: {
+	        eq: {
+	          description: "Equal to",
+	          anyOf: [
+	            {
+	              type: "string",
+	              maxLength: 4096
+	            },
+	            {
+	              type: "number"
+	            }
+	          ]
+	        },
+	        neq: {
+	          description: "Not equal",
+	          type: "string",
+	          maxLength: 4096
+	        },
+	        inc: {
+	          description: "In array",
+	          type: "array",
+	          items: {
+	            type: "string",
+	            maxLength: 4096
+	          }
+	        },
+	        ninc: {
+	          description: "Not in array",
+	          type: "array",
+	          items: {
+	            type: "string",
+	            maxLength: 4096
+	          }
+	        },
+	        pre: {
+	          description: "Starts with",
+	          type: "string",
+	          maxLength: 4096
+	        },
+	        suf: {
+	          description: "Ends with",
+	          type: "string",
+	          maxLength: 4096
+	        },
+	        re: {
+	          description: "Regex",
+	          type: "string",
+	          maxLength: 4096
+	        },
+	        gt: {
+	          description: "Greater than",
+	          type: "number"
+	        },
+	        gte: {
+	          description: "Greater than or equal to",
+	          type: "number"
+	        },
+	        lt: {
+	          description: "Less than",
+	          type: "number"
+	        },
+	        lte: {
+	          description: "Less than or equal to",
+	          type: "number"
+	        }
+	      }
+	    }
+	  ]
+	};
+	const hasSchema = {
+	  description: "An array of requirements that are needed to match",
+	  type: "array",
+	  maxItems: 16,
+	  items: {
+	    anyOf: [
+	      {
+	        type: "object",
+	        additionalProperties: false,
+	        required: ["type", "value"],
+	        properties: {
+	          type: {
+	            description: "The type of request element to check",
+	            type: "string",
+	            enum: ["host"]
+	          },
+	          value: matchableValueSchema
+	        }
+	      },
+	      {
+	        type: "object",
+	        additionalProperties: false,
+	        required: ["type", "key"],
+	        properties: {
+	          type: {
+	            description: "The type of request element to check",
+	            type: "string",
+	            enum: ["header", "cookie", "query"]
+	          },
+	          key: {
+	            description: "The name of the element contained in the particular type",
+	            type: "string",
+	            maxLength: 4096
+	          },
+	          value: matchableValueSchema
+	        }
+	      }
+	    ]
+	  }
+	};
+	const transformsSchema = {
+	  description: "A list of transform rules to adjust the query parameters of a request or HTTP headers of request or response",
+	  type: "array",
+	  minItems: 1,
+	  items: {
+	    type: "object",
+	    additionalProperties: false,
+	    required: ["type", "op", "target"],
+	    properties: {
+	      type: {
+	        description: "The scope of the transform to apply",
+	        type: "string",
+	        enum: ["request.headers", "request.query", "response.headers"]
+	      },
+	      op: {
+	        description: "The operation to perform on the target",
+	        type: "string",
+	        enum: ["append", "set", "delete"]
+	      },
+	      target: {
+	        description: "The target of the transform",
+	        type: "object",
+	        required: ["key"],
+	        properties: {
+	          // re is not supported for transforms. Once supported, replace target.key with matchableValueSchema
+	          key: {
+	            description: "A value to match against. Can be a string or a condition operation object (without regex support)",
+	            anyOf: [
+	              {
+	                description: "A valid header name (letters, numbers, hyphens, underscores)",
+	                type: "string",
+	                maxLength: 4096
+	              },
+	              {
+	                description: "A condition operation object",
+	                type: "object",
+	                additionalProperties: false,
+	                minProperties: 1,
+	                properties: {
+	                  eq: {
+	                    description: "Equal to",
+	                    anyOf: [
+	                      {
+	                        type: "string",
+	                        maxLength: 4096
+	                      },
+	                      {
+	                        type: "number"
+	                      }
+	                    ]
+	                  },
+	                  neq: {
+	                    description: "Not equal",
+	                    type: "string",
+	                    maxLength: 4096
+	                  },
+	                  inc: {
+	                    description: "In array",
+	                    type: "array",
+	                    items: {
+	                      type: "string",
+	                      maxLength: 4096
+	                    }
+	                  },
+	                  ninc: {
+	                    description: "Not in array",
+	                    type: "array",
+	                    items: {
+	                      type: "string",
+	                      maxLength: 4096
+	                    }
+	                  },
+	                  pre: {
+	                    description: "Starts with",
+	                    type: "string",
+	                    maxLength: 4096
+	                  },
+	                  suf: {
+	                    description: "Ends with",
+	                    type: "string",
+	                    maxLength: 4096
+	                  },
+	                  gt: {
+	                    description: "Greater than",
+	                    type: "number"
+	                  },
+	                  gte: {
+	                    description: "Greater than or equal to",
+	                    type: "number"
+	                  },
+	                  lt: {
+	                    description: "Less than",
+	                    type: "number"
+	                  },
+	                  lte: {
+	                    description: "Less than or equal to",
+	                    type: "number"
+	                  }
+	                }
+	              }
+	            ]
+	          }
+	        }
+	      },
+	      args: {
+	        description: "The arguments to the operation",
+	        anyOf: [
+	          {
+	            type: "string",
+	            maxLength: 4096
+	          },
+	          {
+	            type: "array",
+	            minItems: 1,
+	            items: {
+	              type: "string",
+	              maxLength: 4096
+	            }
+	          }
+	        ]
+	      },
+	      env: {
+	        description: "An array of environment variable names that should be replaced at runtime in the args value",
+	        type: "array",
+	        minItems: 1,
+	        maxItems: 64,
+	        items: {
+	          type: "string",
+	          maxLength: 256
+	        }
+	      }
+	    },
+	    allOf: [
+	      {
+	        if: {
+	          properties: {
+	            op: {
+	              enum: ["append", "set"]
+	            }
+	          }
+	        },
+	        then: {
+	          required: ["args"]
+	        }
+	      },
+	      {
+	        if: {
+	          allOf: [
+	            {
+	              properties: {
+	                type: {
+	                  enum: ["request.headers", "response.headers"]
+	                }
+	              }
+	            },
+	            {
+	              properties: {
+	                op: {
+	                  enum: ["set", "append"]
+	                }
+	              }
+	            }
+	          ]
+	        },
+	        then: {
+	          properties: {
+	            target: {
+	              properties: {
+	                key: {
+	                  if: {
+	                    type: "string"
+	                  },
+	                  then: {
+	                    pattern: "^[a-zA-Z0-9_-]+$"
+	                  }
+	                }
+	              }
+	            },
+	            args: {
+	              anyOf: [
+	                {
+	                  type: "string",
+	                  pattern: "^[a-zA-Z0-9_ :;.,\"'?!(){}\\[\\]@<>=+*#$&`|~\\^%/-]+$"
+	                },
+	                {
+	                  type: "array",
+	                  items: {
+	                    type: "string",
+	                    pattern: "^[a-zA-Z0-9_ :;.,\"'?!(){}\\[\\]@<>=+*#$&`|~\\^%/-]+$"
+	                  }
+	                }
+	              ]
+	            }
+	          }
+	        }
+	      }
+	    ]
+	  }
+	};
+	const routesSchema = {
+	  type: "array",
+	  deprecated: true,
+	  description: "A list of routes objects used to rewrite paths to point towards other internal or external paths",
+	  example: [{ dest: "https://docs.example.com", src: "/docs" }],
+	  items: {
+	    anyOf: [
+	      {
+	        type: "object",
+	        required: ["src"],
+	        additionalProperties: false,
+	        properties: {
+	          src: {
+	            type: "string",
+	            maxLength: 4096
+	          },
+	          dest: {
+	            type: "string",
+	            maxLength: 4096
+	          },
+	          headers: {
+	            type: "object",
+	            additionalProperties: false,
+	            minProperties: 1,
+	            maxProperties: 100,
+	            patternProperties: {
+	              "^.{1,256}$": {
+	                type: "string",
+	                maxLength: 32768
+	              }
+	            }
+	          },
+	          methods: {
+	            type: "array",
+	            maxItems: 10,
+	            items: {
+	              type: "string",
+	              maxLength: 32
+	            }
+	          },
+	          caseSensitive: {
+	            type: "boolean"
+	          },
+	          important: {
+	            type: "boolean"
+	          },
+	          user: {
+	            type: "boolean"
+	          },
+	          continue: {
+	            type: "boolean"
+	          },
+	          override: {
+	            type: "boolean"
+	          },
+	          check: {
+	            type: "boolean"
+	          },
+	          isInternal: {
+	            type: "boolean"
+	          },
+	          status: {
+	            type: "integer",
+	            minimum: 100,
+	            maximum: 999
+	          },
+	          locale: {
+	            type: "object",
+	            additionalProperties: false,
+	            minProperties: 1,
+	            properties: {
+	              redirect: {
+	                type: "object",
+	                additionalProperties: false,
+	                minProperties: 1,
+	                maxProperties: 100,
+	                patternProperties: {
+	                  "^.{1,256}$": {
+	                    type: "string",
+	                    maxLength: 4096
+	                  }
+	                }
+	              },
+	              value: {
+	                type: "string",
+	                maxLength: 4096
+	              },
+	              path: {
+	                type: "string",
+	                maxLength: 4096
+	              },
+	              cookie: {
+	                type: "string",
+	                maxLength: 4096
+	              },
+	              default: {
+	                type: "string",
+	                maxLength: 4096
+	              }
+	            }
+	          },
+	          middleware: { type: "number" },
+	          middlewarePath: { type: "string" },
+	          middlewareRawSrc: {
+	            type: "array",
+	            items: {
+	              type: "string"
+	            }
+	          },
+	          has: hasSchema,
+	          missing: hasSchema,
+	          mitigate: mitigateSchema,
+	          transforms: transformsSchema,
+	          env: {
+	            description: "An array of environment variable names that should be replaced at runtime in the destination or headers",
+	            type: "array",
+	            minItems: 1,
+	            maxItems: 64,
+	            items: {
+	              type: "string",
+	              maxLength: 256
+	            }
+	          },
+	          respectOriginCacheControl: {
+	            description: "When set to true (default), external rewrites will respect the Cache-Control header from the origin. When false, caching is disabled for this rewrite.",
+	            type: "boolean"
+	          }
+	        }
+	      },
+	      {
+	        type: "object",
+	        required: ["handle"],
+	        additionalProperties: false,
+	        properties: {
+	          handle: {
+	            type: "string",
+	            maxLength: 32,
+	            enum: ["error", "filesystem", "hit", "miss", "resource", "rewrite"]
+	          }
+	        }
+	      }
+	    ]
+	  }
+	};
+	const rewritesSchema = {
+	  type: "array",
+	  maxItems: 2048,
+	  description: "A list of rewrite definitions.",
+	  items: {
+	    type: "object",
+	    additionalProperties: false,
+	    required: ["source", "destination"],
+	    properties: {
+	      source: {
+	        description: "A pattern that matches each incoming pathname (excluding querystring).",
+	        type: "string",
+	        maxLength: 4096
+	      },
+	      destination: {
+	        description: "An absolute pathname to an existing resource or an external URL.",
+	        type: "string",
+	        maxLength: 4096
+	      },
+	      has: hasSchema,
+	      missing: hasSchema,
+	      statusCode: {
+	        description: "An optional integer to override the status code of the response.",
+	        type: "integer",
+	        minimum: 100,
+	        maximum: 999
+	      },
+	      env: {
+	        description: "An array of environment variable names that should be replaced at runtime in the destination",
+	        type: "array",
+	        minItems: 1,
+	        maxItems: 64,
+	        items: {
+	          type: "string",
+	          maxLength: 256
+	        }
+	      },
+	      respectOriginCacheControl: {
+	        description: "When set to true (default), external rewrites will respect the Cache-Control header from the origin. When false, caching is disabled for this rewrite.",
+	        type: "boolean"
+	      }
+	    }
+	  }
+	};
+	const redirectsSchema = {
+	  title: "Redirects",
+	  type: "array",
+	  maxItems: 2048,
+	  description: "A list of redirect definitions.",
+	  items: {
+	    type: "object",
+	    additionalProperties: false,
+	    required: ["source", "destination"],
+	    properties: {
+	      source: {
+	        description: "A pattern that matches each incoming pathname (excluding querystring).",
+	        type: "string",
+	        maxLength: 4096
+	      },
+	      destination: {
+	        description: "A location destination defined as an absolute pathname or external URL.",
+	        type: "string",
+	        maxLength: 4096
+	      },
+	      permanent: {
+	        description: "A boolean to toggle between permanent and temporary redirect. When `true`, the status code is `308`. When `false` the status code is `307`.",
+	        type: "boolean"
+	      },
+	      statusCode: {
+	        description: "An optional integer to define the status code of the redirect.",
+	        private: true,
+	        type: "integer",
+	        minimum: 100,
+	        maximum: 999
+	      },
+	      has: hasSchema,
+	      missing: hasSchema,
+	      env: {
+	        description: "An array of environment variable names that should be replaced at runtime in the destination",
+	        type: "array",
+	        minItems: 1,
+	        maxItems: 64,
+	        items: {
+	          type: "string",
+	          maxLength: 256
+	        }
+	      }
+	    }
+	  }
+	};
+	const headersSchema = {
+	  type: "array",
+	  maxItems: 2048,
+	  description: "A list of header definitions.",
+	  items: {
+	    type: "object",
+	    additionalProperties: false,
+	    required: ["source", "headers"],
+	    properties: {
+	      source: {
+	        description: "A pattern that matches each incoming pathname (excluding querystring)",
+	        type: "string",
+	        maxLength: 4096
+	      },
+	      headers: {
+	        description: "An array of key/value pairs representing each response header.",
+	        type: "array",
+	        maxItems: 1024,
+	        items: {
+	          type: "object",
+	          additionalProperties: false,
+	          required: ["key", "value"],
+	          properties: {
+	            key: {
+	              type: "string",
+	              maxLength: 4096
+	            },
+	            value: {
+	              type: "string",
+	              maxLength: 32768
+	            }
+	          }
+	        }
+	      },
+	      has: hasSchema,
+	      missing: hasSchema
+	    }
+	  }
+	};
+	const cleanUrlsSchema = {
+	  description: "When set to `true`, all HTML files and Serverless Functions will have their extension removed. When visiting a path that ends with the extension, a 308 response will redirect the client to the extensionless path.",
+	  type: "boolean"
+	};
+	const trailingSlashSchema = {
+	  description: "When `false`, visiting a path that ends with a forward slash will respond with a `308` status code and redirect to the path without the trailing slash.",
+	  type: "boolean"
+	};
+	const bulkRedirectsSchema = {
+	  type: "array",
+	  description: "A list of bulk redirect definitions.",
+	  items: {
+	    type: "object",
+	    additionalProperties: false,
+	    required: ["source", "destination"],
+	    properties: {
+	      source: {
+	        description: "The exact URL path or pattern to match.",
+	        type: "string",
+	        maxLength: 2048
+	      },
+	      destination: {
+	        description: "The target URL path where traffic should be redirected.",
+	        type: "string",
+	        maxLength: 2048
+	      },
+	      permanent: {
+	        description: "A boolean to toggle between permanent and temporary redirect. When `true`, the status code is `308`. When `false` the status code is `307`.",
+	        type: "boolean"
+	      },
+	      statusCode: {
+	        description: "An optional integer to define the status code of the redirect.",
+	        type: "integer",
+	        enum: [301, 302, 307, 308]
+	      },
+	      sensitive: {
+	        description: "A boolean to toggle between case-sensitive and case-insensitive redirect. When `true`, the redirect is case-sensitive. When `false` the redirect is case-insensitive.",
+	        type: "boolean"
+	      },
+	      query: {
+	        description: "Whether the query string should be preserved by the redirect. The default is `false`.",
+	        type: "boolean"
+	      }
+	    }
+	  }
+	};
+	return schemas;
+}
+
+var types$1;
+var hasRequiredTypes;
+
+function requireTypes () {
+	if (hasRequiredTypes) return types$1;
+	hasRequiredTypes = 1;
+	var __defProp = Object.defineProperty;
+	var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+	var __getOwnPropNames = Object.getOwnPropertyNames;
+	var __hasOwnProp = Object.prototype.hasOwnProperty;
+	var __copyProps = (to, from, except, desc) => {
+	  if (from && typeof from === "object" || typeof from === "function") {
+	    for (let key of __getOwnPropNames(from))
+	      if (!__hasOwnProp.call(to, key) && key !== except)
+	        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+	  }
+	  return to;
+	};
+	var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+	var types_exports = {};
+	types$1 = __toCommonJS(types_exports);
+	return types$1;
+}
+
+var hasRequiredDist;
+
+function requireDist () {
+	if (hasRequiredDist) return dist.exports;
+	hasRequiredDist = 1;
+	(function (module) {
+		var __defProp = Object.defineProperty;
+		var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+		var __getOwnPropNames = Object.getOwnPropertyNames;
+		var __hasOwnProp = Object.prototype.hasOwnProperty;
+		var __export = (target, all) => {
+		  for (var name in all)
+		    __defProp(target, name, { get: all[name], enumerable: true });
+		};
+		var __copyProps = (to, from, except, desc) => {
+		  if (from && typeof from === "object" || typeof from === "function") {
+		    for (let key of __getOwnPropNames(from))
+		      if (!__hasOwnProp.call(to, key) && key !== except)
+		        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+		  }
+		  return to;
+		};
+		var __reExport = (target, mod, secondTarget) => (__copyProps(target, mod, "default"), secondTarget && __copyProps(secondTarget, mod, "default"));
+		var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+		var src_exports = {};
+		__export(src_exports, {
+		  appendRoutesToPhase: () => import_append.appendRoutesToPhase,
+		  getCleanUrls: () => import_superstatic2.getCleanUrls,
+		  getOwnershipGuard: () => import_service_route_ownership.getOwnershipGuard,
+		  getTransformedRoutes: () => getTransformedRoutes,
+		  isHandler: () => isHandler,
+		  isValidHandleValue: () => isValidHandleValue,
+		  mergeRoutes: () => import_merge.mergeRoutes,
+		  normalizeRoutePrefix: () => import_service_route_ownership.normalizeRoutePrefix,
+		  normalizeRoutes: () => normalizeRoutes,
+		  scopeRouteSourceToOwnership: () => import_service_route_ownership.scopeRouteSourceToOwnership,
+		  sourceToRegex: () => import_superstatic2.sourceToRegex
+		});
+		module.exports = __toCommonJS(src_exports);
+		var import_url = require$$0;
+		var import_superstatic = requireSuperstatic();
+		var import_append = requireAppend();
+		var import_merge = requireMerge();
+		var import_service_route_ownership = requireServiceRouteOwnership();
+		__reExport(src_exports, requireSchemas(), module.exports);
+		var import_superstatic2 = requireSuperstatic();
+		__reExport(src_exports, requireTypes(), module.exports);
+		const VALID_HANDLE_VALUES = [
+		  "filesystem",
+		  "hit",
+		  "miss",
+		  "rewrite",
+		  "error",
+		  "resource"
+		];
+		const validHandleValues = new Set(VALID_HANDLE_VALUES);
+		function isHandler(route) {
+		  return typeof route.handle !== "undefined";
+		}
+		function isValidHandleValue(handle) {
+		  return validHandleValues.has(handle);
+		}
+		function normalizeRoutes(inputRoutes) {
+		  if (!inputRoutes || inputRoutes.length === 0) {
+		    return { routes: inputRoutes, error: null };
+		  }
+		  const routes = [];
+		  const handling = [];
+		  const errors = [];
+		  inputRoutes.forEach((r, i) => {
+		    const route = { ...r };
+		    routes.push(route);
+		    const keys = Object.keys(route);
+		    if (isHandler(route)) {
+		      const { handle } = route;
+		      if (keys.length !== 1) {
+		        const unknownProp = keys.find((prop) => prop !== "handle");
+		        errors.push(
+		          `Route at index ${i} has unknown property \`${unknownProp}\`.`
+		        );
+		      } else if (!isValidHandleValue(handle)) {
+		        errors.push(
+		          `Route at index ${i} has unknown handle value \`handle: ${handle}\`.`
+		        );
+		      } else if (handling.includes(handle)) {
+		        errors.push(
+		          `Route at index ${i} is a duplicate. Please use one \`handle: ${handle}\` at most.`
+		        );
+		      } else {
+		        handling.push(handle);
+		      }
+		    } else if (route.src) {
+		      if (!route.src.startsWith("^")) {
+		        route.src = `^${route.src}`;
+		      }
+		      if (!route.src.endsWith("$")) {
+		        route.src = `${route.src}$`;
+		      }
+		      route.src = route.src.replace(/\\\//g, "/");
+		      const regError = checkRegexSyntax("Route", i, route.src);
+		      if (regError) {
+		        errors.push(regError);
+		      }
+		      const handleValue = handling[handling.length - 1];
+		      if (handleValue === "hit") {
+		        if (route.dest) {
+		          errors.push(
+		            `Route at index ${i} cannot define \`dest\` after \`handle: hit\`.`
+		          );
+		        }
+		        if (route.status) {
+		          errors.push(
+		            `Route at index ${i} cannot define \`status\` after \`handle: hit\`.`
+		          );
+		        }
+		        if (!route.continue) {
+		          errors.push(
+		            `Route at index ${i} must define \`continue: true\` after \`handle: hit\`.`
+		          );
+		        }
+		      } else if (handleValue === "miss") {
+		        if (route.dest && !route.check) {
+		          errors.push(
+		            `Route at index ${i} must define \`check: true\` after \`handle: miss\`.`
+		          );
+		        } else if (!route.dest && !route.continue) {
+		          errors.push(
+		            `Route at index ${i} must define \`continue: true\` after \`handle: miss\`.`
+		          );
+		        }
+		      }
+		    } else {
+		      errors.push(
+		        `Route at index ${i} must define either \`handle\` or \`src\` property.`
+		      );
+		    }
+		  });
+		  const error = errors.length > 0 ? createError(
+		    "invalid_route",
+		    errors,
+		    "https://vercel.link/routes-json",
+		    "Learn More"
+		  ) : null;
+		  return { routes, error };
+		}
+		function checkRegexSyntax(type, index, src) {
+		  try {
+		    new RegExp(src);
+		  } catch (err) {
+		    const prop = type === "Route" ? "src" : "source";
+		    return `${type} at index ${index} has invalid \`${prop}\` regular expression "${src}".`;
+		  }
+		  return null;
+		}
+		function checkPatternSyntax(type, index, {
+		  source,
+		  destination,
+		  has
+		}) {
+		  let sourceSegments = /* @__PURE__ */ new Set();
+		  const destinationSegments = /* @__PURE__ */ new Set();
+		  try {
+		    sourceSegments = new Set((0, import_superstatic.sourceToRegex)(source).segments);
+		  } catch (err) {
+		    return {
+		      message: `${type} at index ${index} has invalid \`source\` pattern "${source}".`,
+		      link: "https://vercel.link/invalid-route-source-pattern"
+		    };
+		  }
+		  if (destination) {
+		    try {
+		      const { hostname, pathname, query } = (0, import_url.parse)(destination, true);
+		      (0, import_superstatic.sourceToRegex)(hostname || "").segments.forEach(
+		        (name) => destinationSegments.add(name)
+		      );
+		      (0, import_superstatic.sourceToRegex)(pathname || "").segments.forEach(
+		        (name) => destinationSegments.add(name)
+		      );
+		      for (const strOrArray of Object.values(query)) {
+		        const value = Array.isArray(strOrArray) ? strOrArray[0] : strOrArray;
+		        (0, import_superstatic.sourceToRegex)(value || "").segments.forEach(
+		          (name) => destinationSegments.add(name)
+		        );
+		      }
+		    } catch (err) {
+		    }
+		    const hasSegments = (0, import_superstatic.collectHasSegments)(has);
+		    for (const segment of destinationSegments) {
+		      if (!sourceSegments.has(segment) && !hasSegments.includes(segment)) {
+		        return {
+		          message: `${type} at index ${index} has segment ":${segment}" in \`destination\` property but not in \`source\` or \`has\` property.`,
+		          link: "https://vercel.link/invalid-route-destination-segment"
+		        };
+		      }
+		    }
+		  }
+		  return null;
+		}
+		function checkRedirect(r, index) {
+		  if (typeof r.permanent !== "undefined" && typeof r.statusCode !== "undefined") {
+		    return `Redirect at index ${index} cannot define both \`permanent\` and \`statusCode\` properties.`;
+		  }
+		  return null;
+		}
+		function createError(code, allErrors, link, action) {
+		  const errors = Array.isArray(allErrors) ? allErrors : [allErrors];
+		  const message = errors[0];
+		  const error = {
+		    name: "RouteApiError",
+		    code,
+		    message,
+		    link,
+		    action,
+		    errors
+		  };
+		  return error;
+		}
+		function notEmpty(value) {
+		  return value !== null && value !== void 0;
+		}
+		function getTransformedRoutes(vercelConfig) {
+		  const { cleanUrls, rewrites, redirects, headers, trailingSlash } = vercelConfig;
+		  let { routes = null } = vercelConfig;
+		  if (routes) {
+		    const hasNewProperties = typeof cleanUrls !== "undefined" || typeof trailingSlash !== "undefined" || typeof redirects !== "undefined" || typeof headers !== "undefined" || typeof rewrites !== "undefined";
+		    if (hasNewProperties) {
+		      const error = createError(
+		        "invalid_mixed_routes",
+		        "If `rewrites`, `redirects`, `headers`, `cleanUrls` or `trailingSlash` are used, then `routes` cannot be present.",
+		        "https://vercel.link/mix-routing-props",
+		        "Learn More"
+		      );
+		      return { routes, error };
+		    }
+		    return normalizeRoutes(routes);
+		  }
+		  if (typeof cleanUrls !== "undefined") {
+		    const normalized = normalizeRoutes(
+		      (0, import_superstatic.convertCleanUrls)(cleanUrls, trailingSlash)
+		    );
+		    if (normalized.error) {
+		      normalized.error.code = "invalid_clean_urls";
+		      return { routes, error: normalized.error };
+		    }
+		    routes = routes || [];
+		    routes.push(...normalized.routes || []);
+		  }
+		  if (typeof trailingSlash !== "undefined") {
+		    const normalized = normalizeRoutes((0, import_superstatic.convertTrailingSlash)(trailingSlash));
+		    if (normalized.error) {
+		      normalized.error.code = "invalid_trailing_slash";
+		      return { routes, error: normalized.error };
+		    }
+		    routes = routes || [];
+		    routes.push(...normalized.routes || []);
+		  }
+		  if (typeof redirects !== "undefined") {
+		    const code = "invalid_redirect";
+		    const regexErrorMessage = redirects.map((r, i) => checkRegexSyntax("Redirect", i, r.source)).find(notEmpty);
+		    if (regexErrorMessage) {
+		      return {
+		        routes,
+		        error: createError(
+		          "invalid_redirect",
+		          regexErrorMessage,
+		          "https://vercel.link/invalid-route-source-pattern",
+		          "Learn More"
+		        )
+		      };
+		    }
+		    const patternError = redirects.map((r, i) => checkPatternSyntax("Redirect", i, r)).find(notEmpty);
+		    if (patternError) {
+		      return {
+		        routes,
+		        error: createError(
+		          code,
+		          patternError.message,
+		          patternError.link,
+		          "Learn More"
+		        )
+		      };
+		    }
+		    const redirectErrorMessage = redirects.map(checkRedirect).find(notEmpty);
+		    if (redirectErrorMessage) {
+		      return {
+		        routes,
+		        error: createError(
+		          code,
+		          redirectErrorMessage,
+		          "https://vercel.link/redirects-json",
+		          "Learn More"
+		        )
+		      };
+		    }
+		    const normalized = normalizeRoutes((0, import_superstatic.convertRedirects)(redirects));
+		    if (normalized.error) {
+		      normalized.error.code = code;
+		      return { routes, error: normalized.error };
+		    }
+		    routes = routes || [];
+		    routes.push(...normalized.routes || []);
+		  }
+		  if (typeof headers !== "undefined") {
+		    const code = "invalid_header";
+		    const regexErrorMessage = headers.map((r, i) => checkRegexSyntax("Header", i, r.source)).find(notEmpty);
+		    if (regexErrorMessage) {
+		      return {
+		        routes,
+		        error: createError(
+		          code,
+		          regexErrorMessage,
+		          "https://vercel.link/invalid-route-source-pattern",
+		          "Learn More"
+		        )
+		      };
+		    }
+		    const patternError = headers.map((r, i) => checkPatternSyntax("Header", i, r)).find(notEmpty);
+		    if (patternError) {
+		      return {
+		        routes,
+		        error: createError(
+		          code,
+		          patternError.message,
+		          patternError.link,
+		          "Learn More"
+		        )
+		      };
+		    }
+		    const normalized = normalizeRoutes((0, import_superstatic.convertHeaders)(headers));
+		    if (normalized.error) {
+		      normalized.error.code = code;
+		      return { routes, error: normalized.error };
+		    }
+		    routes = routes || [];
+		    routes.push(...normalized.routes || []);
+		  }
+		  if (typeof rewrites !== "undefined") {
+		    const code = "invalid_rewrite";
+		    const regexErrorMessage = rewrites.map((r, i) => checkRegexSyntax("Rewrite", i, r.source)).find(notEmpty);
+		    if (regexErrorMessage) {
+		      return {
+		        routes,
+		        error: createError(
+		          code,
+		          regexErrorMessage,
+		          "https://vercel.link/invalid-route-source-pattern",
+		          "Learn More"
+		        )
+		      };
+		    }
+		    const patternError = rewrites.map((r, i) => checkPatternSyntax("Rewrite", i, r)).find(notEmpty);
+		    if (patternError) {
+		      return {
+		        routes,
+		        error: createError(
+		          code,
+		          patternError.message,
+		          patternError.link,
+		          "Learn More"
+		        )
+		      };
+		    }
+		    const normalized = normalizeRoutes((0, import_superstatic.convertRewrites)(rewrites));
+		    if (normalized.error) {
+		      normalized.error.code = code;
+		      return { routes, error: normalized.error };
+		    }
+		    routes = routes || [];
+		    routes.push({ handle: "filesystem" });
+		    routes.push(...normalized.routes || []);
+		  }
+		  return { routes, error: null };
+		}
+	} (dist));
+	return dist.exports;
+}
+
+requireDist();
 
 function matchPattern(url, remotePattern) {
   return matchProtocol(url, remotePattern.protocol) && matchHostname(url, remotePattern.hostname, true) && matchPort(url, remotePattern.port) && matchPathname(url, remotePattern.pathname, true);
@@ -1502,7 +3278,7 @@ const ASTRO_PATH_PARAM = "x_astro_path";
 const ASTRO_LOCALS_HEADER = "x-astro-locals";
 const ASTRO_MIDDLEWARE_SECRET_HEADER = "x-astro-middleware-secret";
 
-const middlewareSecret = "2218da85-9d8e-4791-a6cf-2fa12053e3a7";
+const middlewareSecret = "12f570da-c388-4a17-8e25-487025757563";
 
 const ACTION_QUERY_PARAMS = {
   actionName: "_action"};
@@ -10912,16 +12688,16 @@ const renderers = [];
 const serializedData = [{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"type":"page","component":"_server-islands.astro","params":["name"],"segments":[[{"content":"_server-islands","dynamic":false,"spread":false}],[{"content":"name","dynamic":true,"spread":false}]],"pattern":"^\\/_server-islands\\/([^/]+?)\\/?$","prerender":false,"isIndex":false,"fallbackRoutes":[],"route":"/_server-islands/[name]","origin":"internal","distURL":[],"_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/_image","component":"node_modules/astro/dist/assets/endpoint/generic.js","params":[],"pathname":"/_image","pattern":"^\\/_image\\/?$","segments":[[{"content":"_image","dynamic":false,"spread":false}]],"type":"endpoint","prerender":false,"fallbackRoutes":[],"distURL":[],"isIndex":false,"origin":"internal","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/proxy","isIndex":false,"type":"endpoint","pattern":"^\\/proxy\\/?$","segments":[[{"content":"proxy","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/proxy.js","pathname":"/proxy","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/","isIndex":true,"type":"page","pattern":"^\\/$","segments":[],"params":[],"component":"src/pages/index.astro","pathname":"/","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}}];
 				serializedData.map(deserializeRouteInfo);
 
-const _page0 = () => import('./generic_CJZTQe_2.mjs').then(n => n.g);
+const _page0 = () => import('./generic_D5NAi8k9.mjs').then(n => n.g);
 const _page1 = () => import('./proxy_CDli7fN3.mjs');
-const _page2 = () => import('./index_D7k5Zsor.mjs');
+const _page2 = () => import('./index_9SngQ_dP.mjs');
 const pageMap = new Map([
     ["node_modules/astro/dist/assets/endpoint/generic.js", _page0],
     ["src/pages/proxy.js", _page1],
     ["src/pages/index.astro", _page2]
 ]);
 
-const _manifest = deserializeManifest(({"rootDir":"file:///D:/Poject/Live-Tv-Chanel/","cacheDir":"file:///D:/Poject/Live-Tv-Chanel/node_modules/.astro/","outDir":"file:///D:/Poject/Live-Tv-Chanel/dist/","srcDir":"file:///D:/Poject/Live-Tv-Chanel/src/","publicDir":"file:///D:/Poject/Live-Tv-Chanel/public/","buildClientDir":"file:///D:/Poject/Live-Tv-Chanel/dist/client/","buildServerDir":"file:///D:/Poject/Live-Tv-Chanel/dist/server/","adapterName":"@astrojs/vercel","assetsDir":"_astro","routes":[{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"type":"page","component":"_server-islands.astro","params":["name"],"segments":[[{"content":"_server-islands","dynamic":false,"spread":false}],[{"content":"name","dynamic":true,"spread":false}]],"pattern":"^\\/_server-islands\\/([^/]+?)\\/?$","prerender":false,"isIndex":false,"fallbackRoutes":[],"route":"/_server-islands/[name]","origin":"internal","distURL":[],"_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/_image","component":"node_modules/astro/dist/assets/endpoint/generic.js","params":[],"pathname":"/_image","pattern":"^\\/_image\\/?$","segments":[[{"content":"_image","dynamic":false,"spread":false}]],"type":"endpoint","prerender":false,"fallbackRoutes":[],"distURL":[],"isIndex":false,"origin":"internal","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/proxy","isIndex":false,"type":"endpoint","pattern":"^\\/proxy\\/?$","segments":[[{"content":"proxy","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/proxy.js","pathname":"/proxy","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[{"type":"external","src":"_astro/index.D91hmx_b.css"}],"routeData":{"route":"/","isIndex":true,"type":"page","pattern":"^\\/$","segments":[],"params":[],"component":"src/pages/index.astro","pathname":"/","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}}],"serverLike":true,"middlewareMode":"classic","base":"/","trailingSlash":"ignore","compressHTML":true,"experimentalQueuedRendering":{"enabled":false,"poolSize":0,"contentCache":false},"componentMetadata":[["D:/Poject/Live-Tv-Chanel/src/pages/index.astro",{"propagation":"none","containsHead":true}]],"renderers":[],"clientDirectives":[["idle","(()=>{var l=(n,t)=>{let i=async()=>{await(await n())()},e=typeof t.value==\"object\"?t.value:void 0,s={timeout:e==null?void 0:e.timeout};\"requestIdleCallback\"in window?window.requestIdleCallback(i,s):setTimeout(i,s.timeout||200)};(self.Astro||(self.Astro={})).idle=l;window.dispatchEvent(new Event(\"astro:idle\"));})();"],["load","(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event(\"astro:load\"));})();"],["media","(()=>{var n=(a,t)=>{let i=async()=>{await(await a())()};if(t.value){let e=matchMedia(t.value);e.matches?i():e.addEventListener(\"change\",i,{once:!0})}};(self.Astro||(self.Astro={})).media=n;window.dispatchEvent(new Event(\"astro:media\"));})();"],["only","(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).only=e;window.dispatchEvent(new Event(\"astro:only\"));})();"],["visible","(()=>{var a=(s,i,o)=>{let r=async()=>{await(await s())()},t=typeof i.value==\"object\"?i.value:void 0,c={rootMargin:t==null?void 0:t.rootMargin},n=new IntersectionObserver(e=>{for(let l of e)if(l.isIntersecting){n.disconnect(),r();break}},c);for(let e of o.children)n.observe(e)};(self.Astro||(self.Astro={})).visible=a;window.dispatchEvent(new Event(\"astro:visible\"));})();"]],"entryModules":{"astro/entrypoints/prerender":"prerender-entry.CNMDJh0E.mjs","\u0000virtual:astro:actions/noop-entrypoint":"chunks/noop-entrypoint_BOlrdqWF.mjs","\u0000noop-middleware":"virtual_astro_middleware.mjs","\u0000virtual:astro:session-driver":"chunks/_virtual_astro_session-driver_DYx9Bb3p.mjs","\u0000virtual:astro:server-island-manifest":"chunks/_virtual_astro_server-island-manifest_CQQ1F5PF.mjs","@astrojs/vercel/entrypoint":"entry.mjs","\u0000virtual:astro:page:src/pages/proxy@_@js":"chunks/proxy_CDli7fN3.mjs","\u0000virtual:astro:page:src/pages/index@_@astro":"chunks/index_D7k5Zsor.mjs","D:/Poject/Live-Tv-Chanel/node_modules/astro/dist/assets/services/sharp.js":"chunks/sharp_BIKBhLaT.mjs","D:/Poject/Live-Tv-Chanel/src/pages/index.astro?astro&type=script&index=0&lang.ts":"_astro/index.astro_astro_type_script_index_0_lang.BVJO19Nh.js","astro:scripts/before-hydration.js":""},"inlinedScripts":[],"assets":["/_astro/index.astro_astro_type_script_index_0_lang.BVJO19Nh.js","/assets/data/channels.json","/assets/image/colorsbangla.png","/assets/image/dbcnews.png","/assets/image/gtv.png","/assets/image/sonysix.png","/assets/image/starjalsha.png","/assets/image/T SPORTS1744972630.png","/assets/image/ten1.png","/_astro/index.D91hmx_b.css"],"buildFormat":"directory","checkOrigin":true,"actionBodySizeLimit":1048576,"serverIslandBodySizeLimit":1048576,"allowedDomains":[],"key":"TjZ/kk7hl3jyk0KyKLoM0W3uh4Y3pBuasDUE3CPBhS0=","image":{},"devToolbar":{"enabled":false,"debugInfoOutput":""},"logLevel":"info","shouldInjectCspMetaTags":false}));
+const _manifest = deserializeManifest(({"rootDir":"file:///D:/Poject/Live-Tv-Chanel/","cacheDir":"file:///D:/Poject/Live-Tv-Chanel/node_modules/.astro/","outDir":"file:///D:/Poject/Live-Tv-Chanel/dist/","srcDir":"file:///D:/Poject/Live-Tv-Chanel/src/","publicDir":"file:///D:/Poject/Live-Tv-Chanel/public/","buildClientDir":"file:///D:/Poject/Live-Tv-Chanel/dist/client/","buildServerDir":"file:///D:/Poject/Live-Tv-Chanel/dist/server/","adapterName":"@astrojs/vercel","assetsDir":"_astro","routes":[{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"type":"page","component":"_server-islands.astro","params":["name"],"segments":[[{"content":"_server-islands","dynamic":false,"spread":false}],[{"content":"name","dynamic":true,"spread":false}]],"pattern":"^\\/_server-islands\\/([^/]+?)\\/?$","prerender":false,"isIndex":false,"fallbackRoutes":[],"route":"/_server-islands/[name]","origin":"internal","distURL":[],"_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/_image","component":"node_modules/astro/dist/assets/endpoint/generic.js","params":[],"pathname":"/_image","pattern":"^\\/_image\\/?$","segments":[[{"content":"_image","dynamic":false,"spread":false}]],"type":"endpoint","prerender":false,"fallbackRoutes":[],"distURL":[],"isIndex":false,"origin":"internal","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/proxy","isIndex":false,"type":"endpoint","pattern":"^\\/proxy\\/?$","segments":[[{"content":"proxy","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/proxy.js","pathname":"/proxy","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[{"type":"external","src":"_astro/index.D91hmx_b.css"}],"routeData":{"route":"/","isIndex":true,"type":"page","pattern":"^\\/$","segments":[],"params":[],"component":"src/pages/index.astro","pathname":"/","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}}],"serverLike":true,"middlewareMode":"classic","base":"/","trailingSlash":"ignore","compressHTML":true,"experimentalQueuedRendering":{"enabled":false,"poolSize":0,"contentCache":false},"componentMetadata":[["D:/Poject/Live-Tv-Chanel/src/pages/index.astro",{"propagation":"none","containsHead":true}]],"renderers":[],"clientDirectives":[["idle","(()=>{var l=(n,t)=>{let i=async()=>{await(await n())()},e=typeof t.value==\"object\"?t.value:void 0,s={timeout:e==null?void 0:e.timeout};\"requestIdleCallback\"in window?window.requestIdleCallback(i,s):setTimeout(i,s.timeout||200)};(self.Astro||(self.Astro={})).idle=l;window.dispatchEvent(new Event(\"astro:idle\"));})();"],["load","(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event(\"astro:load\"));})();"],["media","(()=>{var n=(a,t)=>{let i=async()=>{await(await a())()};if(t.value){let e=matchMedia(t.value);e.matches?i():e.addEventListener(\"change\",i,{once:!0})}};(self.Astro||(self.Astro={})).media=n;window.dispatchEvent(new Event(\"astro:media\"));})();"],["only","(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).only=e;window.dispatchEvent(new Event(\"astro:only\"));})();"],["visible","(()=>{var a=(s,i,o)=>{let r=async()=>{await(await s())()},t=typeof i.value==\"object\"?i.value:void 0,c={rootMargin:t==null?void 0:t.rootMargin},n=new IntersectionObserver(e=>{for(let l of e)if(l.isIntersecting){n.disconnect(),r();break}},c);for(let e of o.children)n.observe(e)};(self.Astro||(self.Astro={})).visible=a;window.dispatchEvent(new Event(\"astro:visible\"));})();"]],"entryModules":{"astro/entrypoints/prerender":"prerender-entry.CNMDJh0E.mjs","\u0000virtual:astro:actions/noop-entrypoint":"chunks/noop-entrypoint_BOlrdqWF.mjs","\u0000noop-middleware":"virtual_astro_middleware.mjs","\u0000virtual:astro:session-driver":"chunks/_virtual_astro_session-driver_DYx9Bb3p.mjs","\u0000virtual:astro:server-island-manifest":"chunks/_virtual_astro_server-island-manifest_CQQ1F5PF.mjs","@astrojs/vercel/entrypoint":"entry.mjs","\u0000virtual:astro:page:src/pages/proxy@_@js":"chunks/proxy_CDli7fN3.mjs","\u0000virtual:astro:page:src/pages/index@_@astro":"chunks/index_9SngQ_dP.mjs","D:/Poject/Live-Tv-Chanel/node_modules/astro/dist/assets/services/sharp.js":"chunks/sharp_DiZis5zY.mjs","D:/Poject/Live-Tv-Chanel/src/pages/index.astro?astro&type=script&index=0&lang.ts":"_astro/index.astro_astro_type_script_index_0_lang.BVJO19Nh.js","astro:scripts/before-hydration.js":""},"inlinedScripts":[],"assets":["/_astro/index.astro_astro_type_script_index_0_lang.BVJO19Nh.js","/assets/data/channels.json","/assets/image/colorsbangla.png","/assets/image/dbcnews.png","/assets/image/gtv.png","/assets/image/sonysix.png","/assets/image/starjalsha.png","/assets/image/T SPORTS1744972630.png","/assets/image/ten1.png","/_astro/index.D91hmx_b.css"],"buildFormat":"directory","checkOrigin":true,"actionBodySizeLimit":1048576,"serverIslandBodySizeLimit":1048576,"allowedDomains":[],"key":"ty3pwOAxxy6RLHsVxrhAXQlCFAv8smc+p7UM84MuuTM=","image":{},"devToolbar":{"enabled":false,"debugInfoOutput":""},"logLevel":"info","shouldInjectCspMetaTags":false}));
 					const manifestRoutes = _manifest.routes;
 					
 					const manifest = Object.assign(_manifest, {
