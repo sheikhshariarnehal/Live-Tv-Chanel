@@ -625,13 +625,13 @@ function setupLogoCollapse() {
     logoElement.classList.add('collapsed');
   }
 
-  // Initial cycle: stays visible on page load, hides after 4 seconds
-  setTimeout(hideLogo, 4000);
+  // Initial cycle: stays visible on page load, hides after 5 seconds
+  setTimeout(hideLogo, 5000);
 
-  // Recurring cycle: every 1 minute (60 seconds), show the logo for 4 seconds, then hide it again
+  // Recurring cycle: every 1 minute (60 seconds), show the logo for 5 seconds, then hide it again
   setInterval(() => {
     showLogo();
-    setTimeout(hideLogo, 4000);
+    setTimeout(hideLogo, 5000);
   }, 60000);
 }
 
