@@ -628,8 +628,16 @@ video {
 
 /* Mobile Landscape */
 @media (max-width: 768px) {
+  .header-content {
+    gap: 0.75rem;
+  }
+
   .news-ticker {
-    display: none !important;
+    margin-right: 0;
+  }
+
+  .news-item {
+    font-size: 0.75rem;
   }
   
   .mobile-menu-toggle {
@@ -690,6 +698,10 @@ video {
 @media (max-width: 640px) {
   .header-content {
     padding: 0.625rem 0.75rem;
+  }
+
+  .news-ticker {
+    margin-right: -0.75rem;
   }
   
   .logo {
