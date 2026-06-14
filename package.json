@@ -2,7 +2,7 @@
   "name": "live-tv-chanel",
   "version": "1.0.0",
   "description": "",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
