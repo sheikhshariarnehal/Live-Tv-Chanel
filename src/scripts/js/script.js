@@ -41,7 +41,13 @@ async function loadChannelsData() {
       const response = await fetch('./assets/data/channels.json');
       channelsData = await response.json();
     } else {
-      const response = await fetch('https://iptv-org.github.io/iptv/countries/bd.m3u');
+      let response;
+      try {
+        response = await fetch('https://raw.githubusercontent.com/abusaeeidx/Mrgify-BDIX-IPTV/main/playlist.m3u');
+        if (!response.ok) throw new Error();
+      } catch (e) {
+        response = await fetch('https://iptv-org.github.io/iptv/countries/bd.m3u');
+      }
       if (!response.ok) throw new Error('Failed to fetch public M3U list');
       const text = await response.text();
       channelsData = parseM3U(text);
@@ -88,7 +94,13 @@ async function switchSource(source) {
       const response = await fetch('./assets/data/channels.json');
       channelsData = await response.json();
     } else {
-      const response = await fetch('https://iptv-org.github.io/iptv/countries/bd.m3u');
+      let response;
+      try {
+        response = await fetch('https://raw.githubusercontent.com/abusaeeidx/Mrgify-BDIX-IPTV/main/playlist.m3u');
+        if (!response.ok) throw new Error();
+      } catch (e) {
+        response = await fetch('https://iptv-org.github.io/iptv/countries/bd.m3u');
+      }
       if (!response.ok) throw new Error('Failed to fetch public M3U list');
       const text = await response.text();
       channelsData = parseM3U(text);
@@ -142,11 +154,13 @@ function parseM3U(text) {
         
         // Merge similar categories
         if (groupKey.includes('news')) groupKey = 'news';
-        else if (groupKey.includes('sport')) groupKey = 'sports';
-        else if (groupKey.includes('religion') || groupKey.includes('islam') || groupKey.includes('peace')) groupKey = 'religion';
+        else if (groupKey.includes('sport') || groupKey.includes('cricket') || groupKey.includes('fifa')) groupKey = 'sports';
+        else if (groupKey.includes('religion') || groupKey.includes('islam') || groupKey.includes('peace') || groupKey.includes('relagion')) groupKey = 'religion';
         else if (groupKey.includes('movie') || groupKey.includes('cinema')) groupKey = 'movies';
         else if (groupKey.includes('kid') || groupKey.includes('cartoon')) groupKey = 'kids';
-        else if (groupKey.includes('entertainment') || groupKey.includes('general')) groupKey = 'entertainment';
+        else if (groupKey.includes('music')) groupKey = 'music';
+        else if (groupKey.includes('infotainment') || groupKey.includes('documentary')) groupKey = 'infotainment';
+        else if (groupKey.includes('entertainment') || groupKey.includes('general') || groupKey.includes('bangla') || groupKey.includes('akash_go')) groupKey = 'entertainment';
         else groupKey = 'other';
         
         const groupNames = {
@@ -155,6 +169,8 @@ function parseM3U(text) {
           religion: 'Religion',
           movies: 'Movies',
           kids: 'Kids',
+          music: 'Music',
+          infotainment: 'Infotainment',
           entertainment: 'Entertainment',
           other: 'Other'
         };
