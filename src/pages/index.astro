@@ -1,5 +1,6 @@
 ---
 import '../styles/css/style.css';
+import Analytics from '@vercel/analytics/astro';
 
 export const prerender = true;
 ---
@@ -69,6 +70,7 @@ export const prerender = true;
   </script>
 </head>
 <body>
+  <Analytics />
   <!-- Header -->
   <header class="header">
     <div class="header-content">
