@@ -237,12 +237,26 @@ video {
   background: var(--bg-tertiary);
   border-bottom: 1px solid var(--border-color);
   overflow-x: auto;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-color) var(--bg-tertiary);
   -webkit-overflow-scrolling: touch;
 }
 
 .category-tabs::-webkit-scrollbar {
-  display: none;
+  height: 5px;
+}
+
+.category-tabs::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+}
+
+.category-tabs::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 3px;
+}
+
+.category-tabs::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
 }
 
 .tab-btn {

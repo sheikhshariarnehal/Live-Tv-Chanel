@@ -1,0 +1,17 @@
+{
+  "short_name": "Vibestream",
+  "name": "Vibestream Live TV Player",
+  "description": "Watch live TV channels in HD quality with Vibestream, the professional IPTV player.",
+  "icons": [
+    {
+      "src": "/assets/image/og-image.png",
+      "type": "image/png",
+      "sizes": "1200x630"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0a0a0a",
+  "theme_color": "#6366f1",
+  "display": "standalone",
+  "orientation": "any"
+}

@@ -503,6 +503,14 @@ function setupEventListeners() {
       }
     });
   });
+
+  // Horizontal scroll for category tabs via mouse wheel
+  categoryTabsContainer.addEventListener('wheel', (e) => {
+    if (e.deltaY !== 0 && e.deltaX === 0) {
+      e.preventDefault();
+      categoryTabsContainer.scrollLeft += e.deltaY;
+    }
+  });
 }
 
 // ===== Play channel =====
