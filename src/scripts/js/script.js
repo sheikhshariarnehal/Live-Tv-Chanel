@@ -43,6 +43,29 @@ function isPrivateIP(url) {
   }
 }
 
+// ===== Helper to dynamically load external scripts =====
+const loadedScripts = new Set();
+function loadScript(url) {
+  if (loadedScripts.has(url)) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector(`script[src="${url}"]`);
+    if (existing) {
+      loadedScripts.add(url);
+      resolve();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = url;
+    script.async = true;
+    script.onload = () => {
+      loadedScripts.add(url);
+      resolve();
+    };
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
 function getPlaybackUrl(url) {
   if (!url) return '';
   const rawUrl = getRawUrl(url);
@@ -70,274 +93,39 @@ function getPlaybackUrl(url) {
   return rawUrl;
 }
 
-// ===== Load channels data from both sources and merge =====
+// ===== Load channels data from cached server endpoint =====
 async function loadChannelsData() {
   categoryTabsContainer.innerHTML = '<p class="loading-text" style="padding: 1rem;">Loading channels...</p>';
   channelGridContainer.innerHTML = '';
   errorOverlay.classList.remove('active');
 
-  let localData = null;
-  let publicData = null;
-
-  // Fetch local BDIX channels
   try {
-    const response = await fetch('./assets/data/channels.json');
+    const response = await fetch('/api/channels');
     if (response.ok) {
-      localData = await response.json();
+      channelsData = await response.json();
+      initializeUI();
+      return;
     }
   } catch (error) {
-    console.error('Error loading local channels:', error);
+    console.error('Error loading channels from API:', error);
   }
 
-  // Fetch public global channels
-  try {
-    let response;
-    try {
-      response = await fetch('https://raw.githubusercontent.com/abusaeeidx/Mrgify-BDIX-IPTV/main/playlist.m3u');
-      if (!response.ok) throw new Error();
-    } catch (e) {
-      response = await fetch('https://iptv-org.github.io/iptv/countries/bd.m3u');
-    }
-    if (response && response.ok) {
-      const text = await response.text();
-      publicData = parseM3U(text);
-    }
-  } catch (error) {
-    console.error('Error loading public channels:', error);
-  }
-
-  if (!localData && !publicData) {
-    console.error('Failed to load any channels.');
-    categoryTabsContainer.innerHTML = '<p class="loading-text" style="padding: 1rem; color: #ef4444;">Failed to load channels.</p>';
-    return;
-  }
-
-  // Merge the sources
-  channelsData = mergeSources(localData, publicData);
-  initializeUI();
-}
-
-// ===== Merge BDIX and Public Channels with Fallbacks =====
-function mergeSources(local, publicData) {
-  const merged = { categories: {} };
-
-  // Define category layout configurations and ordering
-  const categoryConfig = {
-    'prime_play': { name: 'Prime Play' },
-    'top_picks': { name: 'Top Picks' },
-    'news': { name: 'News' },
-    'sports': { name: 'Sports' },
-    'sportzfy': { name: 'Sportzfy' },
-    'movies': { name: 'Movies' },
-    'entertainment': { name: 'Entertainment' },
-    'kids': { name: 'Kids' },
-    'music': { name: 'Music' },
-    'infotainment': { name: 'Infotainment' },
-    'religion': { name: 'Religion' },
-    'international': { name: 'International' },
-    'other': { name: 'Other' }
-  };
-
-  // Helper to map different category keys to standardized ones
-  function mapCategoryKey(key) {
-    const k = key.toLowerCase().trim();
-    if (k === 'movie' || k === 'movies') return 'movies';
-    if (k === 'ent' || k === 'entertainment') return 'entertainment';
-    if (k === 'info' || k === 'infotainment') return 'infotainment';
-    if (categoryConfig[k]) return k;
-    return 'other';
-  }
-
-  // Pre-populate standard categories
-  Object.keys(categoryConfig).forEach(key => {
-    merged.categories[key] = {
-      name: categoryConfig[key].name,
-      channels: []
-    };
-  });
-
-  const addedChannels = {}; // key: categoryKey_normalizedName -> channel reference
-
-  function normalizeChannelName(name) {
-    return name.toLowerCase()
-      .replace(/\s+/g, '')
-      .replace(/[^\w]/g, '')
-      .replace(/hd/g, '')
-      .replace(/sd/g, '')
-      .replace(/live/g, '')
-      .replace(/tv/g, '')
-      .replace(/spots/g, 'sports')
-      .replace(/sportzfy/g, 'sports');
-  }
-
-  function addChannel(categoryKey, channel, isLocal) {
-    const normKey = mapCategoryKey(categoryKey);
-    const normName = normalizeChannelName(channel.name);
-    const uniqueId = `${normKey}_${normName}`;
-
-    if (addedChannels[uniqueId]) {
-      const existing = addedChannels[uniqueId];
-      if (isLocal) {
-        // Local BDIX stream prioritized as primary
-        if (!existing.fallbackUrl && existing.url !== channel.url) {
-          existing.fallbackUrl = existing.url;
-        }
-        existing.url = channel.url;
-        if (channel.logo) {
-          existing.logo = channel.logo;
-        }
-      } else {
-        // Public stream added as fallback if it differs from local
-        if (!existing.fallbackUrl && existing.url !== channel.url) {
-          existing.fallbackUrl = channel.url;
-        }
-      }
-    } else {
-      const newChannel = {
-        id: channel.id || `${normKey}-${Math.random().toString(36).substr(2, 9)}`,
-        name: channel.name,
-        url: channel.url,
-        logo: channel.logo || '',
-        fallbackUrl: channel.fallbackUrl || null
-      };
-      merged.categories[normKey].channels.push(newChannel);
-      addedChannels[uniqueId] = newChannel;
-    }
-  }
-
-  // 1. Process BDIX channels (localData) first to prioritize their streams
-  if (local && local.categories) {
-    Object.keys(local.categories).forEach(catKey => {
-      const cat = local.categories[catKey];
-      if (cat.channels && cat.channels.length > 0) {
-        cat.channels.forEach(ch => {
-          addChannel(catKey, ch, true);
-        });
-      }
-    });
-  }
-
-  // 2. Process public global channels (publicData)
-  if (publicData && publicData.categories) {
-    Object.keys(publicData.categories).forEach(catKey => {
-      const cat = publicData.categories[catKey];
-      if (cat.channels && cat.channels.length > 0) {
-        cat.channels.forEach(ch => {
-          addChannel(catKey, ch, false);
-        });
-      }
-    });
-  }
-
-  // 3. Remove categories that remain empty
-  const finalCategories = {};
-  Object.keys(merged.categories).forEach(key => {
-    if (merged.categories[key].channels.length > 0) {
-      finalCategories[key] = merged.categories[key];
-    }
-  });
-  merged.categories = finalCategories;
-
-  return merged;
-}
-
-// ===== M3U Playlist Parser =====
-function parseM3U(text) {
-  const lines = text.split('\n');
-  const categories = {};
-  let currentChannel = null;
-  
-  for (let line of lines) {
-    line = line.trim();
-    if (line.startsWith('#EXTINF:')) {
-      const nameMatch = line.match(/,(.+)$/);
-      const logoMatch = line.match(/tvg-logo="([^"]+)"/);
-      const idMatch = line.match(/tvg-id="([^"]+)"/);
-      const groupMatch = line.match(/group-title="([^"]+)"/);
-      
-      const channelName = nameMatch ? nameMatch[1].trim() : 'Unknown';
-      const logo = logoMatch ? logoMatch[1] : '';
-      const id = idMatch ? idMatch[1].replace(/\s+/g, '-').toLowerCase() : 'pub-' + Math.random().toString(36).substr(2, 9);
-      const group = groupMatch ? groupMatch[1].trim() : 'General';
-      
-      currentChannel = {
-        id: id,
-        name: channelName,
-        logo: logo,
-        group: group
-      };
-    } else if (line && !line.startsWith('#')) {
-      if (currentChannel) {
-        let url = line;
-        if (window.location.protocol === 'https:' && url.startsWith('http://')) {
-          url = '/proxy?url=' + encodeURIComponent(url);
-        }
-        
-        currentChannel.url = url;
-        
-        let groupKey = currentChannel.group.toLowerCase().replace(/\s+/g, '_');
-        if (!groupKey) groupKey = 'general';
-        
-        if (groupKey.includes('news')) groupKey = 'news';
-        else if (groupKey.includes('sport') || groupKey.includes('cricket') || groupKey.includes('fifa')) groupKey = 'sports';
-        else if (groupKey.includes('religion') || groupKey.includes('islam') || groupKey.includes('peace') || groupKey.includes('relagion')) groupKey = 'religion';
-        else if (groupKey.includes('movie') || groupKey.includes('cinema')) groupKey = 'movies';
-        else if (groupKey.includes('kid') || groupKey.includes('cartoon')) groupKey = 'kids';
-        else if (groupKey.includes('music')) groupKey = 'music';
-        else if (groupKey.includes('infotainment') || groupKey.includes('documentary')) groupKey = 'infotainment';
-        else if (groupKey.includes('entertainment') || groupKey.includes('general') || groupKey.includes('bangla') || groupKey.includes('akash_go')) groupKey = 'entertainment';
-        else groupKey = 'other';
-        
-        const groupNames = {
-          news: 'News',
-          sports: 'Sports',
-          religion: 'Religion',
-          movies: 'Movies',
-          kids: 'Kids',
-          music: 'Music',
-          infotainment: 'Infotainment',
-          entertainment: 'Entertainment',
-          other: 'Other'
-        };
-        
-        const categoryName = groupNames[groupKey] || currentChannel.group;
-        
-        if (!categories[groupKey]) {
-          categories[groupKey] = {
-            name: categoryName,
-            channels: []
-          };
-        }
-        
-        categories[groupKey].channels.push({
-          id: currentChannel.id,
-          name: currentChannel.name,
-          url: currentChannel.url,
-          logo: currentChannel.logo
-        });
-        
-        currentChannel = null;
-      }
-    }
-  }
-  
-  const cleanCategories = {};
-  Object.keys(categories).forEach(key => {
-    if (categories[key].channels.length > 0) {
-      cleanCategories[key] = categories[key];
-    }
-  });
-  
-  return { categories: cleanCategories };
+  categoryTabsContainer.innerHTML = '<p class="loading-text" style="padding: 1rem; color: #ef4444;">Failed to load channels.</p>';
 }
 
 // ===== Initialize UI with tabs and channels =====
 function initializeUI() {
   if (!channelsData || !channelsData.categories) return;
   
-  // Reset category tabs & channels
   createCategoryTabs();
-  createChannelCategories();
+  
+  // Set current category & render initial channels
+  const categoryKeys = Object.keys(channelsData.categories);
+  if (categoryKeys.length > 0) {
+    currentCategory = categoryKeys[0];
+    renderChannelsForCategory(currentCategory);
+  }
+  
   setupEventListeners();
   autoPlayFirstChannel();
 }
@@ -349,9 +137,6 @@ function createCategoryTabs() {
   const categoryKeys = Object.keys(channelsData.categories);
   if (categoryKeys.length === 0) return;
   
-  // Set current category to the first one available
-  currentCategory = categoryKeys[0];
-  
   categoryKeys.forEach((categoryKey, index) => {
     const category = channelsData.categories[categoryKey];
     const tabBtn = document.createElement('button');
@@ -362,23 +147,31 @@ function createCategoryTabs() {
   });
 }
 
-// ===== Create channel categories and buttons dynamically =====
-function createChannelCategories() {
+// ===== Render channels only for the active category =====
+function renderChannelsForCategory(categoryKey) {
   channelGridContainer.innerHTML = '';
   
-  Object.keys(channelsData.categories).forEach((categoryKey, index) => {
-    const category = channelsData.categories[categoryKey];
-    const categoryDiv = document.createElement('div');
-    categoryDiv.className = `channel-category ${index !== 0 ? 'hidden' : ''}`;
-    categoryDiv.dataset.category = categoryKey;
-    
-    category.channels.forEach(channel => {
-      const channelBtn = createChannelButton(channel);
-      categoryDiv.appendChild(channelBtn);
-    });
-    
-    channelGridContainer.appendChild(categoryDiv);
+  const category = channelsData.categories[categoryKey];
+  if (!category || !category.channels) return;
+  
+  const fragment = document.createDocumentFragment();
+  
+  const categoryDiv = document.createElement('div');
+  categoryDiv.className = 'channel-category';
+  categoryDiv.dataset.category = categoryKey;
+  
+  category.channels.forEach(channel => {
+    const channelBtn = createChannelButton(channel);
+    // Restore active playing state visually
+    if (channel.url === lastSelectedChannelUrl || (channel.fallbackUrl && channel.fallbackUrl === lastSelectedChannelUrl)) {
+      channelBtn.classList.add('active');
+      lastSelectedChannelBtn = channelBtn;
+    }
+    categoryDiv.appendChild(channelBtn);
   });
+  
+  fragment.appendChild(categoryDiv);
+  channelGridContainer.appendChild(fragment);
 }
 
 // ===== Create individual channel button =====
@@ -475,33 +268,27 @@ function setupEventListeners() {
       tabButtons.forEach(btn => btn.classList.remove('active'));
       tab.classList.add('active');
       
-      const channelCategories = document.querySelectorAll('.channel-category');
-      channelCategories.forEach(cat => {
-        if (cat.dataset.category === category) {
-          cat.classList.remove('hidden');
-        } else {
-          cat.classList.add('hidden');
-        }
-      });
+      renderChannelsForCategory(category);
     });
   });
   
-  const channelButtons = document.querySelectorAll('.channel-btn');
-  channelButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      const url = this.dataset.url;
-      const fallbackUrl = this.dataset.fallbackUrl;
-      const channelName = this.dataset.channelName;
-      
-      if (url && url !== '') {
-        playChannel(this, url, channelName, fallbackUrl);
-        if (window.innerWidth > 640 && window.innerWidth <= 768) {
-          sidebar.classList.remove('active');
-        }
-      } else {
-        showError(`${channelName} is coming soon!`);
+  // Use event delegation for dynamic channel grid buttons
+  channelGridContainer.addEventListener('click', (e) => {
+    const button = e.target.closest('.channel-btn');
+    if (!button) return;
+    
+    const url = button.dataset.url;
+    const fallbackUrl = button.dataset.fallbackUrl;
+    const channelName = button.dataset.channelName;
+    
+    if (url && url !== '') {
+      playChannel(button, url, channelName, fallbackUrl);
+      if (window.innerWidth > 640 && window.innerWidth <= 768) {
+        sidebar.classList.remove('active');
       }
-    });
+    } else {
+      showError(`${channelName} is coming soon!`);
+    }
   });
 
   // Horizontal scroll for category tabs via mouse wheel
@@ -514,7 +301,7 @@ function setupEventListeners() {
 }
 
 // ===== Play channel =====
-function playChannel(button, url, channelName, fallbackUrl = null) {
+async function playChannel(button, url, channelName, fallbackUrl = null) {
   errorOverlay.classList.remove('active');
   videoOverlay.classList.add('active');
   
@@ -548,89 +335,107 @@ function playChannel(button, url, channelName, fallbackUrl = null) {
   const playbackUrl = getPlaybackUrl(url);
   const isTs = playbackUrl.includes('.ts');
 
-  if (isTs && typeof mpegts !== 'undefined' && mpegts.getFeatureList().mseLivePlayback) {
-    mpegtsPlayer = mpegts.createPlayer({
-      type: 'mse',
-      isLive: true,
-      url: playbackUrl
-    });
-    
-    mpegtsPlayer.attachMediaElement(video);
-    mpegtsPlayer.load();
-    mpegtsPlayer.play()
-      .then(() => {
-        videoOverlay.classList.remove('active');
-      })
-      .catch(err => {
-        console.log('Autoplay prevented or error:', err);
-        handlePlaybackError(button, url, channelName, fallbackUrl);
-      });
-      
-    mpegtsPlayer.on(mpegts.Events.ERROR, (errorType, errorDetail, errorInfo) => {
-      console.error('MPEGTS error:', errorType, errorDetail, errorInfo);
-      handlePlaybackError(button, url, channelName, fallbackUrl);
-    });
-
-  } else if (Hls.isSupported() && !isTs) {
-    hls = new Hls({
-      enableWorker: true,
-      lowLatencyMode: true,
-      backBufferLength: 90,
-      maxBufferLength: 30,
-      maxMaxBufferLength: 600,
-      maxBufferSize: 60 * 1000 * 1000,
-      maxBufferHole: 0.5
-    });
-    
-    hls.loadSource(playbackUrl);
-    hls.attachMedia(video);
-    
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      video.play().then(() => {
-        videoOverlay.classList.remove('active');
-      }).catch(err => {
-        console.log('Autoplay prevented:', err);
-        videoOverlay.classList.remove('active');
-      });
-    });
-    
-    let networkRetryCount = 0;
-    hls.on(Hls.Events.ERROR, (event, data) => {
-      console.error('HLS error:', data);
-      if (data.fatal) {
-        switch (data.type) {
-          case Hls.ErrorTypes.NETWORK_ERROR:
-            networkRetryCount++;
-            if (networkRetryCount > 2) {
-              handlePlaybackError(button, url, channelName, fallbackUrl);
-              hls.destroy();
-            } else {
-              console.log('Network error, trying to recover...');
-              hls.startLoad();
-            }
-            break;
-          case Hls.ErrorTypes.MEDIA_ERROR:
-            console.log('Media error, trying to recover...');
-            hls.recoverMediaError();
-            break;
-          default:
-            handlePlaybackError(button, url, channelName, fallbackUrl);
-            hls.destroy();
-            break;
-        }
+  try {
+    if (isTs) {
+      // Dynamic load mpegts.js if not present
+      if (typeof mpegts === 'undefined') {
+        await loadScript('https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js');
       }
-    });
-  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = playbackUrl;
-    video.play().then(() => {
-      videoOverlay.classList.remove('active');
-    }).catch(err => {
-      console.log('Autoplay prevented:', err);
-      handlePlaybackError(button, url, channelName, fallbackUrl);
-    });
-  } else {
-    videoOverlay.classList.remove('active');
-    showError('Your browser does not support HLS streaming.');
+      if (typeof mpegts !== 'undefined' && mpegts.getFeatureList().mseLivePlayback) {
+        mpegtsPlayer = mpegts.createPlayer({
+          type: 'mse',
+          isLive: true,
+          url: playbackUrl
+        });
+        
+        mpegtsPlayer.attachMediaElement(video);
+        mpegtsPlayer.load();
+        mpegtsPlayer.play()
+          .then(() => {
+            videoOverlay.classList.remove('active');
+          })
+          .catch(err => {
+            console.log('Autoplay prevented or error:', err);
+            handlePlaybackError(button, url, channelName, fallbackUrl);
+          });
+          
+        mpegtsPlayer.on(mpegts.Events.ERROR, (errorType, errorDetail, errorInfo) => {
+          console.error('MPEGTS error:', errorType, errorDetail, errorInfo);
+          handlePlaybackError(button, url, channelName, fallbackUrl);
+        });
+      } else {
+        handlePlaybackError(button, url, channelName, fallbackUrl);
+      }
+    } else {
+      // Dynamic load hls.js if not present
+      if (typeof Hls === 'undefined') {
+        await loadScript('https://cdn.jsdelivr.net/npm/hls.js@latest');
+      }
+      if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+        hls = new Hls({
+          enableWorker: true,
+          lowLatencyMode: true,
+          backBufferLength: 90,
+          maxBufferLength: 30,
+          maxMaxBufferLength: 600,
+          maxBufferSize: 60 * 1000 * 1000,
+          maxBufferHole: 0.5
+        });
+        
+        hls.loadSource(playbackUrl);
+        hls.attachMedia(video);
+        
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play().then(() => {
+            videoOverlay.classList.remove('active');
+          }).catch(err => {
+            console.log('Autoplay prevented:', err);
+            videoOverlay.classList.remove('active');
+          });
+        });
+        
+        let networkRetryCount = 0;
+        hls.on(Hls.Events.ERROR, (event, data) => {
+          console.error('HLS error:', data);
+          if (data.fatal) {
+            switch (data.type) {
+              case Hls.ErrorTypes.NETWORK_ERROR:
+                networkRetryCount++;
+                if (networkRetryCount > 2) {
+                  handlePlaybackError(button, url, channelName, fallbackUrl);
+                  hls.destroy();
+                } else {
+                  console.log('Network error, trying to recover...');
+                  hls.startLoad();
+                }
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                console.log('Media error, trying to recover...');
+                hls.recoverMediaError();
+                break;
+              default:
+                handlePlaybackError(button, url, channelName, fallbackUrl);
+                hls.destroy();
+                break;
+            }
+          }
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = playbackUrl;
+        video.play().then(() => {
+          videoOverlay.classList.remove('active');
+        }).catch(err => {
+          console.log('Autoplay prevented:', err);
+          handlePlaybackError(button, url, channelName, fallbackUrl);
+        });
+      } else {
+        videoOverlay.classList.remove('active');
+        showError('Your browser does not support HLS streaming.');
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load player engine script:', error);
+    handlePlaybackError(button, url, channelName, fallbackUrl);
   }
 }
 
