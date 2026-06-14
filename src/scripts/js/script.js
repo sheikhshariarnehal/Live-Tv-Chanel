@@ -10,107 +10,235 @@ const videoOverlay = document.getElementById('videoOverlay');
 // New DOM Elements
 const errorOverlay = document.getElementById('errorOverlay');
 const errorDesc = document.getElementById('errorDesc');
-const btnSwitchPublic = document.getElementById('btnSwitchPublic');
 const btnReloadStream = document.getElementById('btnReloadStream');
-const btnLocalSource = document.getElementById('btnLocalSource');
-const btnPublicSource = document.getElementById('btnPublicSource');
 
 let hls;
 let mpegtsPlayer;
 let channelsData = null;
 let currentCategory = '';
-let currentSource = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'local' : 'public';
 
 let lastSelectedChannelBtn = null;
 let lastSelectedChannelUrl = null;
 let lastSelectedChannelName = null;
 
-// ===== Load channels data from selected source =====
-async function loadChannelsData() {
-  // Update source button active states
-  if (currentSource === 'local') {
-    btnLocalSource.classList.add('active');
-    btnPublicSource.classList.remove('active');
-  } else {
-    btnLocalSource.classList.remove('active');
-    btnPublicSource.classList.add('active');
+// ===== URL Helper Functions for CORS & Mixed Content/BDIX Routing =====
+function getRawUrl(url) {
+  if (url && typeof url === 'string' && url.startsWith('/proxy?url=')) {
+    return decodeURIComponent(url.substring(11));
   }
+  return url;
+}
 
+function isPrivateIP(url) {
   try {
-    if (currentSource === 'local') {
-      const response = await fetch('./assets/data/channels.json');
-      channelsData = await response.json();
-    } else {
-      let response;
-      try {
-        response = await fetch('https://raw.githubusercontent.com/abusaeeidx/Mrgify-BDIX-IPTV/main/playlist.m3u');
-        if (!response.ok) throw new Error();
-      } catch (e) {
-        response = await fetch('https://iptv-org.github.io/iptv/countries/bd.m3u');
-      }
-      if (!response.ok) throw new Error('Failed to fetch public M3U list');
-      const text = await response.text();
-      channelsData = parseM3U(text);
-    }
-    initializeUI();
-  } catch (error) {
-    console.error('Error loading channels data:', error);
-    showError(`Failed to load ${currentSource === 'local' ? 'BDIX' : 'Public'} channels`);
+    const hostname = new URL(url).hostname;
+    // Check if hostname is private IP
+    if (/^(10|127)\./.test(hostname)) return true;
+    if (/^192\.168\./.test(hostname)) return true;
+    if (/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname)) return true;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') return true;
+    return false;
+  } catch (e) {
+    return false;
   }
 }
 
-// ===== Switch Stream Source =====
-async function switchSource(source) {
-  if (currentSource === source && channelsData) return;
+function getPlaybackUrl(url) {
+  if (!url) return '';
+  const rawUrl = getRawUrl(url);
   
-  currentSource = source;
-  
-  // Update UI active buttons
-  if (source === 'local') {
-    btnLocalSource.classList.add('active');
-    btnPublicSource.classList.remove('active');
+  if (window.location.protocol === 'https:') {
+    // On HTTPS (Vercel): private/BDIX IPs cannot be proxied by Vercel serverless function.
+    // They must be fetched directly.
+    if (isPrivateIP(rawUrl)) {
+      return rawUrl;
+    }
+    // Public HTTP urls must be proxied to prevent mixed content blocking
+    if (rawUrl.startsWith('http://')) {
+      return '/proxy?url=' + encodeURIComponent(rawUrl);
+    }
   } else {
-    btnLocalSource.classList.remove('active');
-    btnPublicSource.classList.add('active');
+    // On HTTP (local): proxy everything using the local proxy to bypass CORS
+    // since the local server has network connectivity.
+    if (url.startsWith('/proxy?url=')) {
+      return url;
+    }
+    if (rawUrl.startsWith('http://')) {
+      return '/proxy?url=' + encodeURIComponent(rawUrl);
+    }
   }
-  
-  // Show loading in video player or category tabs
-  categoryTabsContainer.innerHTML = '<p class="loading-text" style="padding: 1rem;">Loading source...</p>';
+  return rawUrl;
+}
+
+// ===== Load channels data from both sources and merge =====
+async function loadChannelsData() {
+  categoryTabsContainer.innerHTML = '<p class="loading-text" style="padding: 1rem;">Loading channels...</p>';
   channelGridContainer.innerHTML = '';
   errorOverlay.classList.remove('active');
-  
-  // Destroy existing player instances
-  if (hls) {
-    hls.destroy();
-    hls = null;
-  }
-  if (mpegtsPlayer) {
-    mpegtsPlayer.destroy();
-    mpegtsPlayer = null;
-  }
-  
+
+  let localData = null;
+  let publicData = null;
+
+  // Fetch local BDIX channels
   try {
-    if (source === 'local') {
-      const response = await fetch('./assets/data/channels.json');
-      channelsData = await response.json();
-    } else {
-      let response;
-      try {
-        response = await fetch('https://raw.githubusercontent.com/abusaeeidx/Mrgify-BDIX-IPTV/main/playlist.m3u');
-        if (!response.ok) throw new Error();
-      } catch (e) {
-        response = await fetch('https://iptv-org.github.io/iptv/countries/bd.m3u');
-      }
-      if (!response.ok) throw new Error('Failed to fetch public M3U list');
-      const text = await response.text();
-      channelsData = parseM3U(text);
+    const response = await fetch('./assets/data/channels.json');
+    if (response.ok) {
+      localData = await response.json();
     }
-    initializeUI();
   } catch (error) {
-    console.error('Error switching source:', error);
-    categoryTabsContainer.innerHTML = '';
-    showError(`Failed to load ${source === 'local' ? 'BDIX' : 'Public'} channels`);
+    console.error('Error loading local channels:', error);
   }
+
+  // Fetch public global channels
+  try {
+    let response;
+    try {
+      response = await fetch('https://raw.githubusercontent.com/abusaeeidx/Mrgify-BDIX-IPTV/main/playlist.m3u');
+      if (!response.ok) throw new Error();
+    } catch (e) {
+      response = await fetch('https://iptv-org.github.io/iptv/countries/bd.m3u');
+    }
+    if (response && response.ok) {
+      const text = await response.text();
+      publicData = parseM3U(text);
+    }
+  } catch (error) {
+    console.error('Error loading public channels:', error);
+  }
+
+  if (!localData && !publicData) {
+    console.error('Failed to load any channels.');
+    categoryTabsContainer.innerHTML = '<p class="loading-text" style="padding: 1rem; color: #ef4444;">Failed to load channels.</p>';
+    return;
+  }
+
+  // Merge the sources
+  channelsData = mergeSources(localData, publicData);
+  initializeUI();
+}
+
+// ===== Merge BDIX and Public Channels with Fallbacks =====
+function mergeSources(local, publicData) {
+  const merged = { categories: {} };
+
+  // Define category layout configurations and ordering
+  const categoryConfig = {
+    'prime_play': { name: 'Prime Play' },
+    'top_picks': { name: 'Top Picks' },
+    'news': { name: 'News' },
+    'sports': { name: 'Sports' },
+    'sportzfy': { name: 'Sportzfy' },
+    'movies': { name: 'Movies' },
+    'entertainment': { name: 'Entertainment' },
+    'kids': { name: 'Kids' },
+    'music': { name: 'Music' },
+    'infotainment': { name: 'Infotainment' },
+    'religion': { name: 'Religion' },
+    'international': { name: 'International' },
+    'other': { name: 'Other' }
+  };
+
+  // Helper to map different category keys to standardized ones
+  function mapCategoryKey(key) {
+    const k = key.toLowerCase().trim();
+    if (k === 'movie' || k === 'movies') return 'movies';
+    if (k === 'ent' || k === 'entertainment') return 'entertainment';
+    if (k === 'info' || k === 'infotainment') return 'infotainment';
+    if (categoryConfig[k]) return k;
+    return 'other';
+  }
+
+  // Pre-populate standard categories
+  Object.keys(categoryConfig).forEach(key => {
+    merged.categories[key] = {
+      name: categoryConfig[key].name,
+      channels: []
+    };
+  });
+
+  const addedChannels = {}; // key: categoryKey_normalizedName -> channel reference
+
+  function normalizeChannelName(name) {
+    return name.toLowerCase()
+      .replace(/\s+/g, '')
+      .replace(/[^\w]/g, '')
+      .replace(/hd/g, '')
+      .replace(/sd/g, '')
+      .replace(/live/g, '')
+      .replace(/tv/g, '')
+      .replace(/spots/g, 'sports')
+      .replace(/sportzfy/g, 'sports');
+  }
+
+  function addChannel(categoryKey, channel, isLocal) {
+    const normKey = mapCategoryKey(categoryKey);
+    const normName = normalizeChannelName(channel.name);
+    const uniqueId = `${normKey}_${normName}`;
+
+    if (addedChannels[uniqueId]) {
+      const existing = addedChannels[uniqueId];
+      if (isLocal) {
+        // Local BDIX stream prioritized as primary
+        if (!existing.fallbackUrl && existing.url !== channel.url) {
+          existing.fallbackUrl = existing.url;
+        }
+        existing.url = channel.url;
+        if (channel.logo) {
+          existing.logo = channel.logo;
+        }
+      } else {
+        // Public stream added as fallback if it differs from local
+        if (!existing.fallbackUrl && existing.url !== channel.url) {
+          existing.fallbackUrl = channel.url;
+        }
+      }
+    } else {
+      const newChannel = {
+        id: channel.id || `${normKey}-${Math.random().toString(36).substr(2, 9)}`,
+        name: channel.name,
+        url: channel.url,
+        logo: channel.logo || '',
+        fallbackUrl: channel.fallbackUrl || null
+      };
+      merged.categories[normKey].channels.push(newChannel);
+      addedChannels[uniqueId] = newChannel;
+    }
+  }
+
+  // 1. Process BDIX channels (localData) first to prioritize their streams
+  if (local && local.categories) {
+    Object.keys(local.categories).forEach(catKey => {
+      const cat = local.categories[catKey];
+      if (cat.channels && cat.channels.length > 0) {
+        cat.channels.forEach(ch => {
+          addChannel(catKey, ch, true);
+        });
+      }
+    });
+  }
+
+  // 2. Process public global channels (publicData)
+  if (publicData && publicData.categories) {
+    Object.keys(publicData.categories).forEach(catKey => {
+      const cat = publicData.categories[catKey];
+      if (cat.channels && cat.channels.length > 0) {
+        cat.channels.forEach(ch => {
+          addChannel(catKey, ch, false);
+        });
+      }
+    });
+  }
+
+  // 3. Remove categories that remain empty
+  const finalCategories = {};
+  Object.keys(merged.categories).forEach(key => {
+    if (merged.categories[key].channels.length > 0) {
+      finalCategories[key] = merged.categories[key];
+    }
+  });
+  merged.categories = finalCategories;
+
+  return merged;
 }
 
 // ===== M3U Playlist Parser =====
@@ -141,18 +269,15 @@ function parseM3U(text) {
     } else if (line && !line.startsWith('#')) {
       if (currentChannel) {
         let url = line;
-        // Proxy HTTP streams through HTTPS on Vercel to avoid mixed content
         if (window.location.protocol === 'https:' && url.startsWith('http://')) {
           url = '/proxy?url=' + encodeURIComponent(url);
         }
         
         currentChannel.url = url;
         
-        // Categorize
         let groupKey = currentChannel.group.toLowerCase().replace(/\s+/g, '_');
         if (!groupKey) groupKey = 'general';
         
-        // Merge similar categories
         if (groupKey.includes('news')) groupKey = 'news';
         else if (groupKey.includes('sport') || groupKey.includes('cricket') || groupKey.includes('fifa')) groupKey = 'sports';
         else if (groupKey.includes('religion') || groupKey.includes('islam') || groupKey.includes('peace') || groupKey.includes('relagion')) groupKey = 'religion';
@@ -196,7 +321,6 @@ function parseM3U(text) {
     }
   }
   
-  // Clean empty categories and return
   const cleanCategories = {};
   Object.keys(categories).forEach(key => {
     if (categories[key].channels.length > 0) {
@@ -262,13 +386,14 @@ function createChannelButton(channel) {
   const button = document.createElement('button');
   button.className = 'channel-btn';
   button.dataset.url = channel.url;
+  button.dataset.fallbackUrl = channel.fallbackUrl || '';
   button.dataset.channelId = channel.id;
   button.dataset.channelName = channel.name;
   button.title = channel.name;
   
   if (channel.logo) {
     const img = document.createElement('img');
-    img.src = channel.logo;
+    img.src = getPlaybackUrl(channel.logo);
     img.alt = channel.name;
     img.className = 'channel-logo';
     img.loading = 'lazy';
@@ -295,29 +420,52 @@ function showPlayerError(channelName, url) {
   videoOverlay.classList.remove('active');
   errorOverlay.classList.add('active');
   
-  const isPrivateIp = url.includes('10.254.252.70') || url.includes('/proxy?url=http%3A%2F%2F10.');
+  const rawUrl = getRawUrl(url);
+  const isPrivate = isPrivateIP(rawUrl);
   
-  if (isPrivateIp) {
-    errorDesc.innerHTML = `
-      Failed to load <strong>${channelName}</strong>.<br><br>
-      This stream points to a private ISP local network (BDIX) which cannot be reached from Vercel's public cloud servers.<br><br>
-      <strong>Solutions:</strong><br>
-      1. Switch to <strong>Public (Global)</strong> streams using the sidebar.<br>
-      2. Or clone this repository and run the app locally on your computer.
-    `;
-    btnSwitchPublic.style.display = 'block';
+  if (isPrivate) {
+    if (window.location.protocol === 'https:') {
+      errorDesc.innerHTML = `
+        Failed to load <strong>${channelName}</strong>.<br><br>
+        This stream points to a private ISP local network (BDIX) and cannot be proxied through secure Vercel servers.<br><br>
+        <strong>How to fix:</strong><br>
+        1. Ensure you are connected to a BDIX-compatible ISP.<br>
+        2. You must <strong>allow insecure content</strong> in your browser settings:<br>
+           &bull; Click the settings/padlock icon next to the URL in your address bar.<br>
+           &bull; Open <strong>Site settings</strong>.<br>
+           &bull; Find <strong>Insecure content</strong> and set it to <strong>Allow</strong>.<br>
+           &bull; Reload this page.
+      `;
+    } else {
+      errorDesc.innerHTML = `
+        Failed to load <strong>${channelName}</strong>.<br><br>
+        This stream points to a private ISP local network (BDIX) which cannot be reached from your connection.<br><br>
+        <strong>Solution:</strong> Ensure you are connected to a BDIX compatible ISP, or try playing a different channel.
+      `;
+    }
   } else {
     errorDesc.innerHTML = `
       Failed to load <strong>${channelName}</strong>.<br><br>
       The stream might be temporarily offline or blocked by your browser's CORS/Mixed Content settings.
     `;
-    btnSwitchPublic.style.display = 'none';
+  }
+}
+
+// ===== Handle Playback Errors & Fallback =====
+function handlePlaybackError(button, url, channelName, fallbackUrl) {
+  video.onerror = null;
+
+  if (fallbackUrl && fallbackUrl !== '' && fallbackUrl !== 'null' && fallbackUrl !== 'undefined') {
+    console.log(`Primary stream failed for ${channelName}. Trying fallback URL: ${fallbackUrl}`);
+    showError(`Switching to fallback stream for ${channelName}...`);
+    playChannel(button, fallbackUrl, channelName, null);
+  } else {
+    showPlayerError(channelName, url);
   }
 }
 
 // ===== Setup event listeners =====
 function setupEventListeners() {
-  // Category tab switching
   const tabButtons = document.querySelectorAll('.tab-btn');
   tabButtons.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -338,16 +486,15 @@ function setupEventListeners() {
     });
   });
   
-  // Channel button clicks
   const channelButtons = document.querySelectorAll('.channel-btn');
   channelButtons.forEach(button => {
     button.addEventListener('click', function() {
       const url = this.dataset.url;
+      const fallbackUrl = this.dataset.fallbackUrl;
       const channelName = this.dataset.channelName;
       
       if (url && url !== '') {
-        playChannel(this, url, channelName);
-        // Close sidebar on mobile landscape after selecting channel (641px - 768px)
+        playChannel(this, url, channelName, fallbackUrl);
         if (window.innerWidth > 640 && window.innerWidth <= 768) {
           sidebar.classList.remove('active');
         }
@@ -359,39 +506,45 @@ function setupEventListeners() {
 }
 
 // ===== Play channel =====
-function playChannel(button, url, channelName) {
-  // Hide error screen & show loading overlay
+function playChannel(button, url, channelName, fallbackUrl = null) {
   errorOverlay.classList.remove('active');
   videoOverlay.classList.add('active');
   
-  // Save last selected context for reloads
   lastSelectedChannelBtn = button;
   lastSelectedChannelUrl = url;
   lastSelectedChannelName = channelName;
   
-  // Remove active state from all channel buttons
   document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
-  if (button) button.classList.add('active');
+  if (button) {
+    button.classList.add('active');
+    if (fallbackUrl) {
+      button.dataset.fallbackUrl = fallbackUrl;
+    }
+  }
   
-  // Destroy existing HLS instance
   if (hls) {
     hls.destroy();
     hls = null;
   }
   
-  // Destroy existing mpegts instance
   if (mpegtsPlayer) {
     mpegtsPlayer.destroy();
     mpegtsPlayer = null;
   }
 
-  const isTs = url.includes('.ts');
+  video.onerror = null;
+  video.onerror = () => {
+    handlePlaybackError(button, url, channelName, fallbackUrl);
+  };
+
+  const playbackUrl = getPlaybackUrl(url);
+  const isTs = playbackUrl.includes('.ts');
 
   if (isTs && typeof mpegts !== 'undefined' && mpegts.getFeatureList().mseLivePlayback) {
     mpegtsPlayer = mpegts.createPlayer({
       type: 'mse',
       isLive: true,
-      url: url
+      url: playbackUrl
     });
     
     mpegtsPlayer.attachMediaElement(video);
@@ -402,12 +555,12 @@ function playChannel(button, url, channelName) {
       })
       .catch(err => {
         console.log('Autoplay prevented or error:', err);
-        showPlayerError(channelName, url);
+        handlePlaybackError(button, url, channelName, fallbackUrl);
       });
       
     mpegtsPlayer.on(mpegts.Events.ERROR, (errorType, errorDetail, errorInfo) => {
       console.error('MPEGTS error:', errorType, errorDetail, errorInfo);
-      showPlayerError(channelName, url);
+      handlePlaybackError(button, url, channelName, fallbackUrl);
     });
 
   } else if (Hls.isSupported() && !isTs) {
@@ -421,7 +574,7 @@ function playChannel(button, url, channelName) {
       maxBufferHole: 0.5
     });
     
-    hls.loadSource(url);
+    hls.loadSource(playbackUrl);
     hls.attachMedia(video);
     
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
@@ -441,7 +594,7 @@ function playChannel(button, url, channelName) {
           case Hls.ErrorTypes.NETWORK_ERROR:
             networkRetryCount++;
             if (networkRetryCount > 2) {
-              showPlayerError(channelName, url);
+              handlePlaybackError(button, url, channelName, fallbackUrl);
               hls.destroy();
             } else {
               console.log('Network error, trying to recover...');
@@ -453,20 +606,19 @@ function playChannel(button, url, channelName) {
             hls.recoverMediaError();
             break;
           default:
-            showPlayerError(channelName, url);
+            handlePlaybackError(button, url, channelName, fallbackUrl);
             hls.destroy();
             break;
         }
       }
     });
   } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    // Native HLS support (Safari)
-    video.src = url;
+    video.src = playbackUrl;
     video.play().then(() => {
       videoOverlay.classList.remove('active');
     }).catch(err => {
       console.log('Autoplay prevented:', err);
-      showPlayerError(channelName, url);
+      handlePlaybackError(button, url, channelName, fallbackUrl);
     });
   } else {
     videoOverlay.classList.remove('active');
@@ -486,7 +638,6 @@ function autoPlayFirstChannel() {
 
 // ===== Keyboard shortcuts =====
 function handleKeyboard(e) {
-  // Space - Play/Pause
   if (e.code === 'Space' && e.target === document.body) {
     e.preventDefault();
     if (video.paused) {
@@ -496,12 +647,10 @@ function handleKeyboard(e) {
     }
   }
   
-  // Escape - Close sidebar on mobile
   if (e.code === 'Escape' && window.innerWidth > 640 && window.innerWidth <= 768) {
     sidebar.classList.remove('active');
   }
   
-  // M - Toggle sidebar on mobile
   if (e.code === 'KeyM' && window.innerWidth > 640 && window.innerWidth <= 768) {
     e.preventDefault();
     sidebar.classList.toggle('active');
@@ -535,7 +684,6 @@ function showError(message) {
   }, 3000);
 }
 
-// Add animation styles dynamically
 const style = document.createElement('style');
 style.textContent = `
   @keyframes slideUp {
@@ -549,26 +697,13 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// ===== Source Selection & Initial setup =====
-function setupSourceSelector() {
-  btnLocalSource.addEventListener('click', () => {
-    switchSource('local');
-  });
-  
-  btnPublicSource.addEventListener('click', () => {
-    switchSource('public');
-  });
-  
-  btnReloadStream.addEventListener('click', () => {
-    if (lastSelectedChannelUrl) {
-      playChannel(lastSelectedChannelBtn, lastSelectedChannelUrl, lastSelectedChannelName);
-    }
-  });
-  
-  btnSwitchPublic.addEventListener('click', () => {
-    switchSource('public');
-  });
-}
+// ===== Setup Reload Handler =====
+btnReloadStream.addEventListener('click', () => {
+  if (lastSelectedChannelUrl) {
+    const fallbackUrl = lastSelectedChannelBtn ? lastSelectedChannelBtn.dataset.fallbackUrl : null;
+    playChannel(lastSelectedChannelBtn, lastSelectedChannelUrl, lastSelectedChannelName, fallbackUrl);
+  }
+});
 
 // ===== Mobile layout triggers =====
 mobileMenuBtn.addEventListener('click', () => {
@@ -593,5 +728,4 @@ document.addEventListener('click', (e) => {
 });
 
 // ===== Initialize the app =====
-setupSourceSelector();
 loadChannelsData();

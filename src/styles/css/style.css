@@ -231,13 +231,14 @@ video {
 /* ===== Category Tabs ===== */
 .category-tabs {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.5rem;
-  padding: 1.25rem 1.5rem 1rem;
+  padding: 1rem 1.5rem;
   background: var(--bg-tertiary);
   border-bottom: 1px solid var(--border-color);
   overflow-x: auto;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .category-tabs::-webkit-scrollbar {
@@ -713,44 +714,7 @@ video {
   }
 }
 
-/* ===== Source Selector ===== */
-.source-selector {
-  display: flex;
-  gap: 0.5rem;
-  padding: 1.25rem 1.5rem 0.5rem;
-  background: var(--bg-tertiary);
-}
-
-.source-btn {
-  flex: 1;
-  padding: 0.75rem 0.5rem;
-  background: var(--bg-primary);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 0.825rem;
-  font-weight: 600;
-  font-family: inherit;
-  transition: var(--transition);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-}
-
-.source-btn:hover {
-  border-color: var(--primary-color);
-  color: var(--text-primary);
-  background: var(--hover-overlay);
-}
-
-.source-btn.active {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-  border-color: transparent;
-  color: var(--text-primary);
-  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-}
+/* ===== Unused styles removed ===== */
 
 /* ===== Error Overlay ===== */
 .error-overlay {
