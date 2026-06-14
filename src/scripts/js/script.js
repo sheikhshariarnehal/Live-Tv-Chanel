@@ -542,13 +542,12 @@ document.addEventListener('click', (e) => {
 
 // ===== News Ticker Controller =====
 let newsArticles = [];
-let currentNewsIndex = 0;
-let newsIntervalId = null;
 const newsTicker = document.getElementById('newsTicker');
-const newsTickerTrack = document.getElementById('newsTickerTrack');
+const marqueeList1 = document.getElementById('marqueeList1');
+const marqueeList2 = document.getElementById('marqueeList2');
 
 async function loadNewsData() {
-  if (!newsTicker || !newsTickerTrack) return;
+  if (!newsTicker || !marqueeList1 || !marqueeList2) return;
   
   try {
     const response = await fetch('/api/news');
@@ -558,7 +557,6 @@ async function loadNewsData() {
     
     if (newsArticles.length > 0) {
       renderNewsTicker();
-      startNewsTickerRotation();
       // Only display the ticker container if we have news items to show
       newsTicker.style.display = 'flex';
     } else {
@@ -571,72 +569,44 @@ async function loadNewsData() {
 }
 
 function renderNewsTicker() {
-  newsTickerTrack.innerHTML = '';
+  marqueeList1.innerHTML = '';
+  marqueeList2.innerHTML = '';
   
-  newsArticles.forEach((article, index) => {
-    const link = document.createElement('a');
-    link.href = article.url;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    link.className = `news-item ${index === 0 ? 'active' : ''}`;
-    link.id = `news-item-${index}`;
+  const fragment1 = document.createDocumentFragment();
+  const fragment2 = document.createDocumentFragment();
+  
+  newsArticles.forEach((article) => {
+    // Create elements for marquee list 1
+    const link1 = createNewsItemElement(article);
+    fragment1.appendChild(link1);
     
-    const badge = document.createElement('span');
-    badge.className = 'source-badge';
-    badge.textContent = article.sourceName;
-    
-    const textSpan = document.createElement('span');
-    textSpan.className = 'headline-text';
-    textSpan.textContent = article.title;
-    
-    link.appendChild(badge);
-    link.appendChild(textSpan);
-    newsTickerTrack.appendChild(link);
+    // Create duplicate elements for marquee list 2 (for seamless infinite loop)
+    const link2 = createNewsItemElement(article);
+    fragment2.appendChild(link2);
   });
-}
-
-function rotateNewsTicker() {
-  if (newsArticles.length <= 1) return;
   
-  const currentEl = document.getElementById(`news-item-${currentNewsIndex}`);
-  const nextNewsIndex = (currentNewsIndex + 1) % newsArticles.length;
-  const nextEl = document.getElementById(`news-item-${nextNewsIndex}`);
+  marqueeList1.appendChild(fragment1);
+  marqueeList2.appendChild(fragment2);
+}
+
+function createNewsItemElement(article) {
+  const link = document.createElement('a');
+  link.href = article.url;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.className = 'news-item';
   
-  if (currentEl && nextEl) {
-    // Current element exits to left
-    currentEl.className = 'news-item exit';
-    
-    // Next element enters from right
-    nextEl.className = 'news-item enter';
-    
-    // Clean up classes after animation finishes (0.6s animation)
-    setTimeout(() => {
-      currentEl.className = 'news-item';
-      nextEl.className = 'news-item active';
-    }, 600);
-    
-    currentNewsIndex = nextNewsIndex;
-  }
-}
-
-function startNewsTickerRotation() {
-  stopNewsTickerRotation();
-  if (newsArticles.length <= 1) return;
+  const bullet = document.createElement('span');
+  bullet.className = 'red-bullet';
   
-  newsIntervalId = setInterval(rotateNewsTicker, 6000); // Rotate every 6 seconds
-}
-
-function stopNewsTickerRotation() {
-  if (newsIntervalId) {
-    clearInterval(newsIntervalId);
-    newsIntervalId = null;
-  }
-}
-
-// Set up hover to pause behavior
-if (newsTicker) {
-  newsTicker.addEventListener('mouseenter', stopNewsTickerRotation);
-  newsTicker.addEventListener('mouseleave', startNewsTickerRotation);
+  const textSpan = document.createElement('span');
+  textSpan.className = 'headline-text';
+  textSpan.textContent = article.title;
+  
+  link.appendChild(bullet);
+  link.appendChild(textSpan);
+  
+  return link;
 }
 
 // ===== Initialize the app =====

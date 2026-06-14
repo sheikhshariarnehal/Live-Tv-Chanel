@@ -93,64 +93,19 @@ body {
   display: flex;
   align-items: center;
   height: 38px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border-color);
-  border-radius: 20px;
-  padding: 2px 12px 2px 4px;
+  border-radius: 6px;
   overflow: hidden;
-  max-width: 700px;
   transition: var(--transition);
   backdrop-filter: blur(5px);
   position: relative;
 }
 
 .news-ticker:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   border-color: var(--primary-color);
-  box-shadow: 0 0 15px rgba(99, 102, 241, 0.15);
-}
-
-.news-ticker-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-  color: var(--text-primary);
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  padding: 0.35rem 0.75rem;
-  border-radius: 16px;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-  box-shadow: var(--shadow-sm);
-  margin-right: 0.75rem;
-  position: relative;
-  z-index: 2;
-  flex-shrink: 0;
-}
-
-.pulse-dot {
-  width: 6px;
-  height: 6px;
-  background-color: #ff4a4a;
-  border-radius: 50%;
-  animation: pulse-glow 1.5s infinite;
-}
-
-@keyframes pulse-glow {
-  0% {
-    transform: scale(0.9);
-    box-shadow: 0 0 0 0 rgba(255, 74, 74, 0.7);
-  }
-  70% {
-    transform: scale(1.1);
-    box-shadow: 0 0 0 6px rgba(255, 74, 74, 0);
-  }
-  100% {
-    transform: scale(0.9);
-    box-shadow: 0 0 0 0 rgba(255, 74, 74, 0);
-  }
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.1);
 }
 
 .news-ticker-content {
@@ -160,20 +115,35 @@ body {
   overflow: hidden;
   display: flex;
   align-items: center;
+  mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
 }
 
 .news-ticker-track {
-  position: relative;
-  width: 100%;
-  height: 100%;
+  display: flex;
+  width: max-content;
+  align-items: center;
+  animation: marquee 35s linear infinite;
+  will-change: transform;
+}
+
+.news-ticker:hover .news-ticker-track {
+  animation-play-state: paused;
+}
+
+.news-marquee-list {
   display: flex;
   align-items: center;
+  gap: 2.5rem;
+  padding-right: 2.5rem;
+  white-space: nowrap;
 }
 
 .news-ticker-placeholder {
   color: var(--text-secondary);
   font-size: 0.85rem;
   animation: pulse-placeholder 1.5s infinite ease-in-out;
+  padding-left: 1rem;
 }
 
 @keyframes pulse-placeholder {
@@ -182,77 +152,37 @@ body {
 }
 
 .news-item {
-  position: absolute;
-  left: 0;
-  width: 100%;
+  display: flex;
+  align-items: center;
   color: var(--text-secondary);
   text-decoration: none;
   font-size: 0.85rem;
   font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: none;
-  align-items: center;
-  gap: 0.5rem;
   transition: color 0.2s ease;
-  z-index: 1;
+  white-space: nowrap;
 }
 
 .news-item:hover {
   color: var(--text-primary);
 }
 
-.news-item .source-badge {
-  font-size: 0.7rem;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-secondary);
-  padding: 0.15rem 0.4rem;
-  border-radius: 4px;
-  font-weight: 600;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+.red-bullet {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px #ef4444;
 }
 
-.news-item:hover .source-badge {
-  background: rgba(99, 102, 241, 0.15);
-  color: var(--primary-color);
-  border-color: rgba(99, 102, 241, 0.3);
-}
-
-/* Sliding Animations */
-.news-item.active {
-  display: flex;
-}
-
-.news-item.enter {
-  display: flex;
-  animation: slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.news-item.exit {
-  display: flex;
-  animation: slideOutLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes slideInRight {
+@keyframes marquee {
   0% {
-    transform: translateX(100%);
-    opacity: 0;
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slideOutLeft {
-  0% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(-100%);
-    opacity: 0;
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
