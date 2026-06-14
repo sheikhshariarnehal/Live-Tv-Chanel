@@ -51,6 +51,12 @@ body {
   max-width: 1920px;
   margin: 0 auto;
   gap: 1.5rem;
+  transition: gap 2.5s cubic-bezier(0.25, 1, 0.5, 1);
+  overflow: hidden;
+}
+
+.header-content.collapsed-logo {
+  gap: 0;
 }
 
 .logo {
@@ -60,6 +66,16 @@ body {
   font-weight: 700;
   font-size: 1.25rem;
   flex-shrink: 0;
+  opacity: 1;
+  margin-left: 0;
+  transition: margin-left 2.5s cubic-bezier(0.25, 1, 0.5, 1),
+              opacity 2.0s ease;
+}
+
+.logo.collapsed {
+  margin-left: -200px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .logo-icon {
@@ -115,7 +131,7 @@ body {
   display: flex;
   width: max-content;
   align-items: center;
-  animation: marquee 35s linear infinite;
+  animation: marquee 45s linear infinite;
   will-change: transform;
 }
 

@@ -609,6 +609,33 @@ function createNewsItemElement(article) {
   return link;
 }
 
+// ===== Collapse Logo Animation =====
+function setupLogoCollapse() {
+  const headerContent = document.querySelector('.header-content');
+  const logoElement = document.querySelector('.logo');
+  if (!headerContent || !logoElement) return;
+
+  function showLogo() {
+    headerContent.classList.remove('collapsed-logo');
+    logoElement.classList.remove('collapsed');
+  }
+
+  function hideLogo() {
+    headerContent.classList.add('collapsed-logo');
+    logoElement.classList.add('collapsed');
+  }
+
+  // Initial cycle: stays visible on page load, hides after 4 seconds
+  setTimeout(hideLogo, 4000);
+
+  // Recurring cycle: every 1 minute (60 seconds), show the logo for 4 seconds, then hide it again
+  setInterval(() => {
+    showLogo();
+    setTimeout(hideLogo, 4000);
+  }, 60000);
+}
+
 // ===== Initialize the app =====
 loadChannelsData();
 loadNewsData();
+setupLogoCollapse();
