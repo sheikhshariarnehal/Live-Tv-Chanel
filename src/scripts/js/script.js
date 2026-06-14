@@ -540,5 +540,105 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// ===== News Ticker Controller =====
+let newsArticles = [];
+let currentNewsIndex = 0;
+let newsIntervalId = null;
+const newsTicker = document.getElementById('newsTicker');
+const newsTickerTrack = document.getElementById('newsTickerTrack');
+
+async function loadNewsData() {
+  if (!newsTicker || !newsTickerTrack) return;
+  
+  try {
+    const response = await fetch('/api/news');
+    if (!response.ok) throw new Error('Failed to fetch news');
+    const data = await response.json();
+    newsArticles = data.articles || [];
+    
+    if (newsArticles.length > 0) {
+      renderNewsTicker();
+      startNewsTickerRotation();
+      // Only display the ticker container if we have news items to show
+      newsTicker.style.display = 'flex';
+    } else {
+      newsTicker.style.display = 'none';
+    }
+  } catch (error) {
+    console.error('Error fetching sports news client-side:', error);
+    newsTicker.style.display = 'none';
+  }
+}
+
+function renderNewsTicker() {
+  newsTickerTrack.innerHTML = '';
+  
+  newsArticles.forEach((article, index) => {
+    const link = document.createElement('a');
+    link.href = article.url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.className = `news-item ${index === 0 ? 'active' : ''}`;
+    link.id = `news-item-${index}`;
+    
+    const badge = document.createElement('span');
+    badge.className = 'source-badge';
+    badge.textContent = article.sourceName;
+    
+    const textSpan = document.createElement('span');
+    textSpan.className = 'headline-text';
+    textSpan.textContent = article.title;
+    
+    link.appendChild(badge);
+    link.appendChild(textSpan);
+    newsTickerTrack.appendChild(link);
+  });
+}
+
+function rotateNewsTicker() {
+  if (newsArticles.length <= 1) return;
+  
+  const currentEl = document.getElementById(`news-item-${currentNewsIndex}`);
+  const nextNewsIndex = (currentNewsIndex + 1) % newsArticles.length;
+  const nextEl = document.getElementById(`news-item-${nextNewsIndex}`);
+  
+  if (currentEl && nextEl) {
+    // Current element exits to left
+    currentEl.className = 'news-item exit';
+    
+    // Next element enters from right
+    nextEl.className = 'news-item enter';
+    
+    // Clean up classes after animation finishes (0.6s animation)
+    setTimeout(() => {
+      currentEl.className = 'news-item';
+      nextEl.className = 'news-item active';
+    }, 600);
+    
+    currentNewsIndex = nextNewsIndex;
+  }
+}
+
+function startNewsTickerRotation() {
+  stopNewsTickerRotation();
+  if (newsArticles.length <= 1) return;
+  
+  newsIntervalId = setInterval(rotateNewsTicker, 6000); // Rotate every 6 seconds
+}
+
+function stopNewsTickerRotation() {
+  if (newsIntervalId) {
+    clearInterval(newsIntervalId);
+    newsIntervalId = null;
+  }
+}
+
+// Set up hover to pause behavior
+if (newsTicker) {
+  newsTicker.addEventListener('mouseenter', stopNewsTickerRotation);
+  newsTicker.addEventListener('mouseleave', startNewsTickerRotation);
+}
+
 // ===== Initialize the app =====
 loadChannelsData();
+loadNewsData();
