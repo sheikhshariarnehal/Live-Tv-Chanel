@@ -1,0 +1,10 @@
+node_modules
+.git
+.gitignore
+dist
+.astro
+.vercel
+README.md
+Dockerfile
+docker-compose.yml
+.env*
