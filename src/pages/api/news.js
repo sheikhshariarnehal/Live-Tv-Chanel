@@ -1,9 +1,26 @@
-function parseRSS(xmlText, sourceName) {
+function parseRSS(xmlText, sourceName, filterSports = false) {
   const articles = [];
   const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+  const sportsKeywords = ['খেলা', 'ফুটবল', 'ক্রিকেট', 'খেলাধুলা', 'ক্রীড়া', 'sports', 'cricket', 'football'];
   let match;
   while ((match = itemRegex.exec(xmlText)) !== null) {
     const itemContent = match[1];
+    
+    // If filterSports is enabled, check if categories match sports keywords
+    if (filterSports) {
+      const categories = [];
+      const catRegex = /<category>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/category>/g;
+      let catMatch;
+      while ((catMatch = catRegex.exec(itemContent)) !== null) {
+        categories.push(catMatch[1].trim());
+      }
+      
+      const isSports = categories.some(cat => 
+        sportsKeywords.some(keyword => cat.toLowerCase().includes(keyword.toLowerCase()))
+      );
+      
+      if (!isSports) continue;
+    }
     
     let title = '';
     const titleMatch = itemContent.match(/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/) || 
@@ -49,80 +66,80 @@ export async function GET() {
   const apikey = 'c5bf15e467bd15383b818fd266422399';
   const url = `https://gnews.io/api/v4/top-headlines?country=bd&category=sports&apikey=${apikey}`;
 
-  // Try GNews API first
+  // 1. Try Prothom Alo Sports RSS first (for Bangla news)
   try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`GNews API responded with status ${response.status}`);
-    }
-
-    const data = await response.json();
-    const articles = (data.articles || []).map(article => ({
-      title: article.title || '',
-      url: article.url || '#',
-      sourceName: article.source ? article.source.name : 'Sports News',
-      publishedAt: article.publishedAt || ''
-    }));
-
-    return new Response(JSON.stringify({ articles }), {
-      status: 200,
+    const paResponse = await fetch('https://www.prothomalo.com/feed/', {
       headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'public, max-age=900, stale-while-revalidate=1800'
-      }
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      },
+      signal: AbortSignal.timeout(5000)
     });
 
-  } catch (gnewsError) {
-    console.warn(`GNews API failed (${gnewsError.message}). Attempting RSS fallbacks...`);
+    if (!paResponse.ok) {
+      throw new Error(`Prothom Alo RSS responded with status ${paResponse.status}`);
+    }
 
-    // Try Daily Star Sports RSS
-    try {
-      const dsResponse = await fetch('https://www.thedailystar.net/sports/rss.xml', {
+    const xmlText = await paResponse.text();
+    const articles = parseRSS(xmlText, 'প্রথম আলো খেলা', true);
+
+    if (articles.length > 0) {
+      return new Response(JSON.stringify({ articles }), {
+        status: 200,
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        },
-        signal: AbortSignal.timeout(5000)
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=900, stale-while-revalidate=1800'
+        }
       });
-      
-      if (!dsResponse.ok) {
-        throw new Error(`Daily Star RSS responded with status ${dsResponse.status}`);
+    }
+    throw new Error('No sports articles found in Prothom Alo RSS');
+
+  } catch (paError) {
+    console.warn(`Prothom Alo RSS failed (${paError.message}). Attempting GNews API...`);
+
+    // 2. Try GNews API next
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`GNews API responded with status ${response.status}`);
       }
 
-      const xmlText = await dsResponse.text();
-      const articles = parseRSS(xmlText, 'The Daily Star');
-      
-      if (articles.length > 0) {
-        return new Response(JSON.stringify({ articles }), {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Cache-Control': 'public, max-age=900, stale-while-revalidate=1800'
-          }
-        });
-      }
-      throw new Error('No articles found in Daily Star RSS');
+      const data = await response.json();
+      const articles = (data.articles || []).map(article => ({
+        title: article.title || '',
+        url: article.url || '#',
+        sourceName: article.source ? article.source.name : 'Sports News',
+        publishedAt: article.publishedAt || ''
+      }));
 
-    } catch (dsError) {
-      console.warn(`Daily Star RSS failed (${dsError.message}). Attempting BBC Sport RSS...`);
+      return new Response(JSON.stringify({ articles }), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=900, stale-while-revalidate=1800'
+        }
+      });
 
-      // Try BBC Sport RSS
+    } catch (gnewsError) {
+      console.warn(`GNews API failed (${gnewsError.message}). Attempting English RSS fallbacks...`);
+
+      // 3. Try Daily Star Sports RSS (English fallback)
       try {
-        const bbcResponse = await fetch('https://feeds.bbci.co.uk/sport/rss.xml', {
+        const dsResponse = await fetch('https://www.thedailystar.net/sports/rss.xml', {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
           },
           signal: AbortSignal.timeout(5000)
         });
-
-        if (!bbcResponse.ok) {
-          throw new Error(`BBC RSS responded with status ${bbcResponse.status}`);
+        
+        if (!dsResponse.ok) {
+          throw new Error(`Daily Star RSS responded with status ${dsResponse.status}`);
         }
 
-        const xmlText = await bbcResponse.text();
-        const articles = parseRSS(xmlText, 'BBC Sport');
-
+        const xmlText = await dsResponse.text();
+        const articles = parseRSS(xmlText, 'The Daily Star');
+        
         if (articles.length > 0) {
           return new Response(JSON.stringify({ articles }), {
             status: 200,
@@ -133,41 +150,73 @@ export async function GET() {
             }
           });
         }
-        throw new Error('No articles found in BBC Sport RSS');
+        throw new Error('No articles found in Daily Star RSS');
 
-      } catch (bbcError) {
-        console.error('All sports news sources failed. Using static fallback headlines. Error:', bbcError.message);
+      } catch (dsError) {
+        console.warn(`Daily Star RSS failed (${dsError.message}). Attempting BBC Sport RSS...`);
 
-        // Fallback static sports headlines in case all live sources fail
-        const fallbackArticles = [
-          {
-            title: 'শরিফুলের ৬ উইকেটের পরও হোয়াইটওয়াশ থেকে বাঁচল অজিরা',
-            url: '#',
-            sourceName: 'Vibestream Sports',
-            publishedAt: new Date().toISOString()
-          },
-          {
-            title: 'জয় দিয়ে বিশ্বকাপ শুরু বাঘিনীদের',
-            url: '#',
-            sourceName: 'Vibestream Sports',
-            publishedAt: new Date().toISOString()
-          },
-          {
-            title: 'নাটকীয়ভাবে ম্যাচে ফিরেও অস্ট্রেলিয়াকে ধবলধোলাই করা হলো না বাংলাদেশের',
-            url: '#',
-            sourceName: 'Vibestream Sports',
-            publishedAt: new Date().toISOString()
+        // 4. Try BBC Sport RSS (English fallback)
+        try {
+          const bbcResponse = await fetch('https://feeds.bbci.co.uk/sport/rss.xml', {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            },
+            signal: AbortSignal.timeout(5000)
+          });
+
+          if (!bbcResponse.ok) {
+            throw new Error(`BBC RSS responded with status ${bbcResponse.status}`);
           }
-        ];
 
-        return new Response(JSON.stringify({ articles: fallbackArticles, error: bbcError.message }), {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Cache-Control': 'no-cache'
+          const xmlText = await bbcResponse.text();
+          const articles = parseRSS(xmlText, 'BBC Sport');
+
+          if (articles.length > 0) {
+            return new Response(JSON.stringify({ articles }), {
+              status: 200,
+              headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Cache-Control': 'public, max-age=900, stale-while-revalidate=1800'
+              }
+            });
           }
-        });
+          throw new Error('No articles found in BBC Sport RSS');
+
+        } catch (bbcError) {
+          console.error('All sports news sources failed. Using static fallback headlines. Error:', bbcError.message);
+
+          // Fallback static sports headlines in case all live sources fail
+          const fallbackArticles = [
+            {
+              title: 'শরিফুলের ৬ উইকেটের পরও হোয়াইটওয়াশ থেকে বাঁচল অজিরা',
+              url: '#',
+              sourceName: 'Vibestream Sports',
+              publishedAt: new Date().toISOString()
+            },
+            {
+              title: 'জয় দিয়ে বিশ্বকাপ শুরু বাঘিনীদের',
+              url: '#',
+              sourceName: 'Vibestream Sports',
+              publishedAt: new Date().toISOString()
+            },
+            {
+              title: 'নাটকীয়ভাবে ম্যাচে ফিরেও অস্ট্রেলিয়াকে ধবলধোলাই করা হলো না বাংলাদেশের',
+              url: '#',
+              sourceName: 'Vibestream Sports',
+              publishedAt: new Date().toISOString()
+            }
+          ];
+
+          return new Response(JSON.stringify({ articles: fallbackArticles, error: bbcError.message }), {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+              'Cache-Control': 'no-cache'
+            }
+          });
+        }
       }
     }
   }
