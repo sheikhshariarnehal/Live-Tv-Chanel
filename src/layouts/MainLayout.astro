@@ -1,0 +1,168 @@
+---
+import '../styles/css/style.css';
+import Analytics from '@vercel/analytics/astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  activeChannelId?: string;
+}
+
+const { 
+  title = "Vibestream - Watch Live TV & IPTV Channels | HD Stream Player", 
+  description = "Stream your favorite live TV channels, sports, news, and entertainment in HD quality with Vibestream. A fast, modern, and professional web-based IPTV player.",
+  image = "https://vibestream.app/assets/image/og-image.png",
+  activeChannelId = ""
+} = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  
+  <!-- Primary Meta Tags -->
+  <title>{title}</title>
+  <meta name="title" content={title} />
+  <meta name="description" content={description} />
+  <meta name="keywords" content="Vibestream, vibestream tv, live tv, online tv, free iptv, iptv player, watch live tv, live stream tv, bdix tv, streaming player" />
+  <meta name="author" content="Vibestream" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#0a0a0a" />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={Astro.url.href} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content={image} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:site_name" content="Vibestream" />
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:domain" content={Astro.url.host} />
+  <meta property="twitter:url" content={Astro.url.href} />
+  <meta property="twitter:title" content={title} />
+  <meta property="twitter:description" content={description} />
+  <meta property="twitter:image" content={image} />
+
+  <!-- Canonical Link -->
+  <link rel="canonical" href={Astro.url.href} />
+
+  <!-- Favicons & Manifest -->
+  <link rel="icon" type="image/webp" href="/assets/logo.webp" />
+  <link rel="apple-touch-icon" href="/assets/logo.webp" />
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- Scripts & Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Schema.org JSON-LD Structured Data -->
+  <script type="application/ld+json" is:inline>
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Vibestream",
+      "url": "https://vibestream.app/",
+      "description": "Watch live TV channels in HD quality with Vibestream, the professional IPTV player.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript. Requires HTML5.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0.00",
+        "priceCurrency": "USD"
+      }
+    }
+  </script>
+</head>
+<body data-active-channel-id={activeChannelId}>
+  <Analytics />
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <div class="logo" style="cursor: pointer;" onclick="window.location.href='/'">
+        <img src="/assets/logo.webp" alt="Vibestream Logo" class="logo-img" />
+        <span class="logo-text">Vibestream</span>
+      </div>
+
+      <!-- Sports News Ticker -->
+      <div class="news-ticker" id="newsTicker">
+        <div class="news-ticker-content">
+          <div class="news-ticker-track" id="newsTickerTrack">
+            <div class="news-marquee-list" id="marqueeList1">
+              <span class="news-ticker-placeholder">সংবাদ লোড হচ্ছে...</span>
+            </div>
+            <div class="news-marquee-list" id="marqueeList2"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn-icon mobile-menu-toggle" id="mobileMenuBtn" title="Menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12h18M3 6h18M3 18h18"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <div class="container">
+      <!-- Video Player Section -->
+      <div class="video-section">
+        <div class="video-wrapper">
+          <video id="player" controls autoplay playsinline muted></video>
+          <div class="video-overlay" id="videoOverlay">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Loading channel...</p>
+          </div>
+          <!-- Dynamic Error Overlay -->
+          <div class="error-overlay" id="errorOverlay">
+            <div class="error-card">
+              <div class="error-icon">⚠️</div>
+              <div class="error-title" id="errorTitle">Stream Load Failed</div>
+              <div class="error-desc" id="errorDesc">
+                This stream could not be loaded. It might be offline or unreachable.
+              </div>
+              <div class="error-actions">
+                <button class="btn-error-action secondary" id="btnReloadStream">Retry</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar Section -->
+      <div class="sidebar" id="sidebar">
+        <button class="btn-close" id="closeSidebarBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"></path>
+          </svg>
+        </button>
+
+        <!-- Category Tabs -->
+        <div class="category-tabs" id="categoryTabs">
+          <!-- Tabs will be dynamically loaded -->
+        </div>
+
+        <!-- Channel Grid -->
+        <div class="channel-grid" id="channelGrid">
+          <!-- Channels will be dynamically loaded -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import '../scripts/js/script.js';
+  </script>
+</body>
+</html>

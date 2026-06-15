@@ -137,21 +137,120 @@ async function loadChannelsData() {
   categoryTabsContainer.innerHTML = '<p class="loading-text" style="padding: 1rem; color: #ef4444;">Failed to load channels.</p>';
 }
 
+// ===== URL slugification helpers for routing =====
+function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '');
+}
+
+function getChannelSlug(channel) {
+  const nameSlug = slugify(channel.name);
+  const id = channel.id;
+  if (id.startsWith(nameSlug) || id.endsWith(nameSlug)) {
+    return id;
+  }
+  return `${nameSlug}-${id}`;
+}
+
+function findChannelByIdOrSlug(idOrSlug) {
+  if (!idOrSlug || !channelsData || !channelsData.categories) return null;
+  const categories = channelsData.categories;
+  for (const catKey in categories) {
+    const category = categories[catKey];
+    if (category.channels) {
+      const channel = category.channels.find(c => c.id === idOrSlug || getChannelSlug(c) === idOrSlug || slugify(c.id) === slugify(idOrSlug));
+      if (channel) {
+        return { channel, categoryKey: catKey };
+      }
+    }
+  }
+  return null;
+}
+
+function playChannelById(channelId) {
+  const match = findChannelByIdOrSlug(channelId);
+  if (!match) return;
+
+  const { channel, categoryKey } = match;
+
+  if (currentCategory !== categoryKey) {
+    currentCategory = categoryKey;
+    const tabs = categoryTabsContainer.querySelectorAll('.tab-btn');
+    tabs.forEach(tab => {
+      if (tab.dataset.category === categoryKey) {
+        tab.classList.add('active');
+      } else {
+        tab.classList.remove('active');
+      }
+    });
+    renderChannelsForCategory(categoryKey);
+  }
+
+  const button = channelGridContainer.querySelector(`.channel-btn[data-channel-id="${channel.id}"]`);
+  playChannel(button, channel.url, channel.name, channel.fallbackUrl);
+}
+
 // ===== Initialize UI with tabs and channels =====
 function initializeUI() {
   if (!channelsData || !channelsData.categories) return;
   
   createCategoryTabs();
   
-  // Set current category & render initial channels
-  const categoryKeys = Object.keys(channelsData.categories);
-  if (categoryKeys.length > 0) {
-    currentCategory = categoryKeys[0];
-    renderChannelsForCategory(currentCategory);
+  // Determine which channel to play first
+  const activeChannelId = document.body.dataset.activeChannelId;
+  let initialChannelId = activeChannelId;
+  if (!initialChannelId && window.location.pathname.startsWith('/watch/')) {
+    initialChannelId = window.location.pathname.split('/watch/')[1];
   }
   
-  setupEventListeners();
-  autoPlayFirstChannel();
+  const match = findChannelByIdOrSlug(initialChannelId);
+  if (match) {
+    currentCategory = match.categoryKey;
+    renderChannelsForCategory(currentCategory);
+    
+    const tabs = categoryTabsContainer.querySelectorAll('.tab-btn');
+    tabs.forEach(tab => {
+      if (tab.dataset.category === currentCategory) {
+        tab.classList.add('active');
+      } else {
+        tab.classList.remove('active');
+      }
+    });
+    
+    setupEventListeners();
+    
+    setTimeout(() => {
+      playChannelById(match.channel.id);
+    }, 500);
+  } else {
+    const categoryKeys = Object.keys(channelsData.categories);
+    if (categoryKeys.length > 0) {
+      currentCategory = categoryKeys[0];
+      renderChannelsForCategory(currentCategory);
+    }
+    
+    setupEventListeners();
+    
+    setTimeout(() => {
+      const firstChannelBtn = channelGridContainer.querySelector('.channel-btn[data-url]:not([data-url=""])');
+      if (firstChannelBtn) {
+        const channelId = firstChannelBtn.dataset.channelId;
+        const chanMatch = findChannelByIdOrSlug(channelId);
+        if (chanMatch) {
+          playChannelById(channelId);
+          const slug = getChannelSlug(chanMatch.channel);
+          history.replaceState({ channelId }, '', `/watch/${slug}`);
+        }
+      }
+    }, 500);
+  }
 }
 
 // ===== Create category tabs dynamically =====
@@ -304,9 +403,21 @@ function setupEventListeners() {
     const url = button.dataset.url;
     const fallbackUrl = button.dataset.fallbackUrl;
     const channelName = button.dataset.channelName;
+    const channelId = button.dataset.channelId;
     
     if (url && url !== '') {
       playChannel(button, url, channelName, fallbackUrl);
+      
+      // Update browser URL on user click
+      const match = findChannelByIdOrSlug(channelId);
+      if (match) {
+        const slug = getChannelSlug(match.channel);
+        const path = `/watch/${slug}`;
+        if (window.location.pathname !== path) {
+          history.pushState({ channelId }, '', path);
+        }
+      }
+      
       if (window.innerWidth > 640 && window.innerWidth <= 768) {
         sidebar.classList.remove('active');
       }
@@ -466,15 +577,29 @@ async function playChannel(button, url, channelName, fallbackUrl = null) {
   }
 }
 
-// ===== Auto play the first available channel on page load =====
-function autoPlayFirstChannel() {
-  setTimeout(() => {
-    const firstChannel = document.querySelector('.channel-btn[data-url]:not([data-url=""])');
-    if (firstChannel) {
-      firstChannel.click();
+// ===== Handle browser navigation (Back/Forward) =====
+window.addEventListener('popstate', (e) => {
+  let channelId = e.state?.channelId;
+  if (!channelId) {
+    const path = window.location.pathname;
+    if (path.startsWith('/watch/')) {
+      const slug = path.split('/watch/')[1];
+      const match = findChannelByIdOrSlug(slug);
+      if (match) {
+        channelId = match.channel.id;
+      }
     }
-  }, 500);
-}
+  }
+  
+  if (channelId) {
+    playChannelById(channelId);
+  } else {
+    const firstChannelBtn = channelGridContainer.querySelector('.channel-btn[data-url]:not([data-url=""])');
+    if (firstChannelBtn) {
+      playChannelById(firstChannelBtn.dataset.channelId);
+    }
+  }
+});
 
 // ===== Keyboard shortcuts =====
 function handleKeyboard(e) {

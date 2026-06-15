@@ -1,0 +1,69 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import channelsData from '../../../public/assets/data/channels.json';
+
+export const prerender = true;
+
+export function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '');
+}
+
+export function getChannelSlug(channel) {
+  const nameSlug = slugify(channel.name);
+  const id = channel.id;
+  if (id.startsWith(nameSlug) || id.endsWith(nameSlug)) {
+    return id;
+  }
+  return `${nameSlug}-${id}`;
+}
+
+export function getStaticPaths() {
+  const paths = [];
+  const categories = channelsData.categories;
+  
+  for (const catKey in categories) {
+    const category = categories[catKey];
+    if (category.channels) {
+      category.channels.forEach(channel => {
+        const slug = getChannelSlug(channel);
+        
+        // Add path for the custom slug
+        paths.push({
+          params: { id: slug },
+          props: { channel }
+        });
+        
+        // If the raw channel.id is different from the custom slug, add a path for it too
+        if (channel.id !== slug) {
+          paths.push({
+            params: { id: channel.id },
+            props: { channel }
+          });
+        }
+      });
+    }
+  }
+  
+  return paths;
+}
+
+const { channel } = Astro.props;
+
+if (!channel) {
+  return Astro.redirect('/');
+}
+
+const title = `Watch ${channel.name} Live | Vibestream`;
+const description = `Watch ${channel.name} live stream in HD quality. Access sports, movies, news, and entertainment with Vibestream player.`;
+const image = channel.logo || "https://vibestream.app/assets/image/og-image.png";
+const activeChannelId = channel.id;
+---
+<MainLayout title={title} description={description} image={image} activeChannelId={activeChannelId} />
