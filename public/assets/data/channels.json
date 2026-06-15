@@ -4,6 +4,12 @@
       "name": "Sports",
       "channels": [
         {
+          "id": "worldcup-sky-003",
+          "name": "World Cup 2026 (Sky)",
+          "url": "https://d1211whpimeups.cloudfront.net/smil:rtbgo/chunklist.m3u8",
+          "logo": "https://staytunedmag.com/wp-content/uploads/2026/06/FIFAWorldCup2026BB-678x381.jpg"
+        },
+        {
           "id": "sports-beinsports-1",
           "name": "BeINSports-1",
           "url": "http://starhub.pro/live/farhat-3379/67897-913379/744517.ts",
