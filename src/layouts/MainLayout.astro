@@ -91,13 +91,7 @@ const {
   )}
 </head>
 <body data-active-channel-id={activeChannelId}>
-  {import.meta.env.PUBLIC_UMAMI_WEBSITE_ID && import.meta.env.PUBLIC_UMAMI_URL && (
-    <script 
-      defer 
-      src={import.meta.env.PUBLIC_UMAMI_URL.endsWith('/') ? `${import.meta.env.PUBLIC_UMAMI_URL}script.js` : `${import.meta.env.PUBLIC_UMAMI_URL}/script.js`}
-      data-website-id={import.meta.env.PUBLIC_UMAMI_WEBSITE_ID}
-    />
-  )}
+  <script defer src="http://live-tv-umami-7a004d-98-84-25-233.sslip.io/script.js" data-website-id="33997810-5e40-4042-840a-f84fff1cc9ce"></script>
   <!-- Header -->
   <header class="header">
     <div class="header-content">
