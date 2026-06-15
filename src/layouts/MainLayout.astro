@@ -7,13 +7,15 @@ interface Props {
   description?: string;
   image?: string;
   activeChannelId?: string;
+  showPlayer?: boolean;
 }
 
 const { 
   title = "Vibestream - Watch Live TV & IPTV Channels | HD Stream Player", 
   description = "Stream your favorite live TV channels, sports, news, and entertainment in HD quality with Vibestream. A fast, modern, and professional web-based IPTV player.",
   image = "https://vibestream.app/assets/image/og-image.png",
-  activeChannelId = ""
+  activeChannelId = "",
+  showPlayer = true
 } = Astro.props;
 ---
 <!DOCTYPE html>
@@ -116,48 +118,52 @@ const {
   <!-- Main Container -->
   <div class="main-container">
     <div class="container">
-      <!-- Video Player Section -->
-      <div class="video-section">
-        <div class="video-wrapper">
-          <video id="player" controls autoplay playsinline muted></video>
-          <div class="video-overlay" id="videoOverlay">
-            <div class="loading-spinner"></div>
-            <p class="loading-text">Loading channel...</p>
-          </div>
-          <!-- Dynamic Error Overlay -->
-          <div class="error-overlay" id="errorOverlay">
-            <div class="error-card">
-              <div class="error-icon">⚠️</div>
-              <div class="error-title" id="errorTitle">Stream Load Failed</div>
-              <div class="error-desc" id="errorDesc">
-                This stream could not be loaded. It might be offline or unreachable.
-              </div>
-              <div class="error-actions">
-                <button class="btn-error-action secondary" id="btnReloadStream">Retry</button>
+      {showPlayer ? (
+        <!-- Video Player Section -->
+        <div class="video-section">
+          <div class="video-wrapper">
+            <video id="player" controls autoplay playsinline muted></video>
+            <div class="video-overlay" id="videoOverlay">
+              <div class="loading-spinner"></div>
+              <p class="loading-text">Loading channel...</p>
+            </div>
+            <!-- Dynamic Error Overlay -->
+            <div class="error-overlay" id="errorOverlay">
+              <div class="error-card">
+                <div class="error-icon">⚠️</div>
+                <div class="error-title" id="errorTitle">Stream Load Failed</div>
+                <div class="error-desc" id="errorDesc">
+                  This stream could not be loaded. It might be offline or unreachable.
+                </div>
+                <div class="error-actions">
+                  <button class="btn-error-action secondary" id="btnReloadStream">Retry</button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Sidebar Section -->
-      <div class="sidebar" id="sidebar">
-        <button class="btn-close" id="closeSidebarBtn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 6L6 18M6 6l12 12"></path>
-          </svg>
-        </button>
+        <!-- Sidebar Section -->
+        <div class="sidebar" id="sidebar">
+          <button class="btn-close" id="closeSidebarBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12"></path>
+            </svg>
+          </button>
 
-        <!-- Category Tabs -->
-        <div class="category-tabs" id="categoryTabs">
-          <!-- Tabs will be dynamically loaded -->
+          <!-- Category Tabs -->
+          <div class="category-tabs" id="categoryTabs">
+            <!-- Tabs will be dynamically loaded -->
+          </div>
+
+          <!-- Channel Grid -->
+          <div class="channel-grid" id="channelGrid">
+            <!-- Channels will be dynamically loaded -->
+          </div>
         </div>
-
-        <!-- Channel Grid -->
-        <div class="channel-grid" id="channelGrid">
-          <!-- Channels will be dynamically loaded -->
-        </div>
-      </div>
+      ) : (
+        <slot />
+      )}
     </div>
   </div>
 

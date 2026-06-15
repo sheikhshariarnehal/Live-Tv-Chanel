@@ -603,7 +603,7 @@ window.addEventListener('popstate', (e) => {
 
 // ===== Keyboard shortcuts =====
 function handleKeyboard(e) {
-  if (e.code === 'Space' && e.target === document.body) {
+  if (e.code === 'Space' && e.target === document.body && video) {
     e.preventDefault();
     if (video.paused) {
       video.play();
@@ -612,11 +612,11 @@ function handleKeyboard(e) {
     }
   }
   
-  if (e.code === 'Escape' && window.innerWidth > 640 && window.innerWidth <= 768) {
+  if (e.code === 'Escape' && window.innerWidth > 640 && window.innerWidth <= 768 && sidebar) {
     sidebar.classList.remove('active');
   }
   
-  if (e.code === 'KeyM' && window.innerWidth > 640 && window.innerWidth <= 768) {
+  if (e.code === 'KeyM' && window.innerWidth > 640 && window.innerWidth <= 768 && sidebar) {
     e.preventDefault();
     sidebar.classList.toggle('active');
   }
@@ -663,28 +663,36 @@ style.textContent = `
 document.head.appendChild(style);
 
 // ===== Setup Reload Handler =====
-btnReloadStream.addEventListener('click', () => {
-  if (lastSelectedChannelUrl) {
-    const fallbackUrl = lastSelectedChannelBtn ? lastSelectedChannelBtn.dataset.fallbackUrl : null;
-    playChannel(lastSelectedChannelBtn, lastSelectedChannelUrl, lastSelectedChannelName, fallbackUrl);
-  }
-});
+if (btnReloadStream) {
+  btnReloadStream.addEventListener('click', () => {
+    if (lastSelectedChannelUrl) {
+      const fallbackUrl = lastSelectedChannelBtn ? lastSelectedChannelBtn.dataset.fallbackUrl : null;
+      playChannel(lastSelectedChannelBtn, lastSelectedChannelUrl, lastSelectedChannelName, fallbackUrl);
+    }
+  });
+}
 
 // ===== Mobile layout triggers =====
-mobileMenuBtn.addEventListener('click', () => {
-  if (window.innerWidth > 640 && window.innerWidth <= 768) {
-    sidebar.classList.add('active');
-  }
-});
+if (mobileMenuBtn) {
+  mobileMenuBtn.addEventListener('click', () => {
+    if (window.innerWidth > 640 && window.innerWidth <= 768 && sidebar) {
+      sidebar.classList.add('active');
+    }
+  });
+}
 
-closeSidebarBtn.addEventListener('click', () => {
-  sidebar.classList.remove('active');
-});
+if (closeSidebarBtn) {
+  closeSidebarBtn.addEventListener('click', () => {
+    if (sidebar) {
+      sidebar.classList.remove('active');
+    }
+  });
+}
 
 document.addEventListener('keydown', handleKeyboard);
 
 document.addEventListener('click', (e) => {
-  if (window.innerWidth > 640 && window.innerWidth <= 768 && 
+  if (sidebar && mobileMenuBtn && window.innerWidth > 640 && window.innerWidth <= 768 && 
       sidebar.classList.contains('active') &&
       !sidebar.contains(e.target) && 
       !mobileMenuBtn.contains(e.target)) {
@@ -788,6 +796,8 @@ function setupLogoCollapse() {
 }
 
 // ===== Initialize the app =====
-loadChannelsData();
+if (video && categoryTabsContainer && channelGridContainer) {
+  loadChannelsData();
+}
 loadNewsData();
 setupLogoCollapse();
