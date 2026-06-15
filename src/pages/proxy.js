@@ -68,9 +68,8 @@ export async function GET({ request }) {
       });
     }
 
-    // For other files (.ts segments or images), read as ArrayBuffer to avoid Vercel streaming issues
-    const arrayBuffer = await response.arrayBuffer();
-    return new Response(arrayBuffer, {
+    // Stream the body directly to support live TV streams (.ts) and avoid infinite buffering
+    return new Response(response.body, {
       status: response.status,
       headers
     });
