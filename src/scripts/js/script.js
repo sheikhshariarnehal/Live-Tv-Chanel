@@ -12,6 +12,30 @@ const errorOverlay = document.getElementById('errorOverlay');
 const errorDesc = document.getElementById('errorDesc');
 const btnReloadStream = document.getElementById('btnReloadStream');
 
+let hasInteracted = false;
+
+// Unmute video player on first user interaction to bypass browser autoplay restrictions
+function enableSoundOnInteraction() {
+  const unmute = (e) => {
+    if (e && e.type === 'click' && !e.isTrusted) return;
+    
+    hasInteracted = true;
+    if (video) {
+      video.muted = false;
+      if (video.paused) {
+        video.play().catch(err => console.log('Interactive play failed:', err));
+      }
+    }
+    document.removeEventListener('click', unmute);
+    document.removeEventListener('keydown', unmute);
+    document.removeEventListener('touchstart', unmute);
+  };
+  document.addEventListener('click', unmute, { passive: true });
+  document.addEventListener('keydown', unmute, { passive: true });
+  document.addEventListener('touchstart', unmute, { passive: true });
+}
+enableSoundOnInteraction();
+
 let hls;
 let mpegtsPlayer;
 let channelsData = null;
@@ -302,6 +326,9 @@ function setupEventListeners() {
 
 // ===== Play channel =====
 async function playChannel(button, url, channelName, fallbackUrl = null) {
+  if (!hasInteracted) {
+    video.muted = true;
+  }
   errorOverlay.classList.remove('active');
   videoOverlay.classList.add('active');
   
