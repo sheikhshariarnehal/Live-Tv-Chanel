@@ -5,17 +5,21 @@ import Analytics from '@vercel/analytics/astro';
 interface Props {
   title?: string;
   description?: string;
+  keywords?: string;
   image?: string;
   activeChannelId?: string;
   showPlayer?: boolean;
+  schema?: Record<string, any>;
 }
 
 const { 
   title = "Vibestream - Watch Live TV & IPTV Channels | HD Stream Player", 
   description = "Stream your favorite live TV channels, sports, news, and entertainment in HD quality with Vibestream. A fast, modern, and professional web-based IPTV player.",
+  keywords = "Vibestream, vibestream tv, live tv, online tv, free iptv, iptv player, watch live tv, live stream tv, bdix tv, streaming player",
   image = "https://vibestream.app/assets/image/og-image.png",
   activeChannelId = "",
-  showPlayer = true
+  showPlayer = true,
+  schema
 } = Astro.props;
 ---
 <!DOCTYPE html>
@@ -28,7 +32,7 @@ const {
   <title>{title}</title>
   <meta name="title" content={title} />
   <meta name="description" content={description} />
-  <meta name="keywords" content="Vibestream, vibestream tv, live tv, online tv, free iptv, iptv player, watch live tv, live stream tv, bdix tv, streaming player" />
+  <meta name="keywords" content={keywords} />
   <meta name="author" content="Vibestream" />
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#0a0a0a" />
@@ -65,23 +69,27 @@ const {
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Schema.org JSON-LD Structured Data -->
-  <script type="application/ld+json" is:inline>
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Vibestream",
-      "url": "https://vibestream.app/",
-      "description": "Watch live TV channels in HD quality with Vibestream, the professional IPTV player.",
-      "applicationCategory": "MultimediaApplication",
-      "operatingSystem": "All",
-      "browserRequirements": "Requires JavaScript. Requires HTML5.",
-      "offers": {
-        "@type": "Offer",
-        "price": "0.00",
-        "priceCurrency": "USD"
+  {schema ? (
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+  ) : (
+    <script type="application/ld+json" is:inline>
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Vibestream",
+        "url": "https://vibestream.app/",
+        "description": "Watch live TV channels in HD quality with Vibestream, the professional IPTV player.",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "All",
+        "browserRequirements": "Requires JavaScript. Requires HTML5.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0.00",
+          "priceCurrency": "USD"
+        }
       }
-    }
-  </script>
+    </script>
+  )}
 </head>
 <body data-active-channel-id={activeChannelId}>
   <Analytics />

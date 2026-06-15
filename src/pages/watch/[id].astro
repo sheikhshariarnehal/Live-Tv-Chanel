@@ -63,13 +63,54 @@ if (!channel) {
 
 let title = `Watch ${channel.name} Live | Vibestream`;
 let description = `Watch ${channel.name} live stream in HD quality. Access sports, movies, news, and entertainment with Vibestream player.`;
+let keywords = `Watch ${channel.name} Live, ${channel.name} Live Stream, ${channel.name} Online, watch live tv, iptv player, Vibestream`;
 
-if (channel.id === 'sports-beinsports') {
-  title = `Watch BeinSports Live - FIFA World Cup Football | Vibestream`;
-  description = `Watch BeinSports live stream in HD quality on Vibestream. Stream the FIFA World Cup Football live and access top-tier sports streaming.`;
+if (channel.id === 'sports-cazetv') {
+  title = `Watch CazeTV Live - Live Sports & Football Streaming | Vibestream`;
+  description = `Watch CazeTV live stream in HD quality on Vibestream. Stream live football matches, Bundesliga, Pan American games, Olympics, and popular shows from Brazil's premier sports broadcaster.`;
+  keywords = `CazeTV, CazeTV Ao Vivo, watch CazeTV live, live football streaming, Casimiro Miguel, sports streaming, free live sports, Vibestream`;
+} else if (channel.id === 'sports-beinsports') {
+  title = `Watch beIN SPORTS Live - Live Soccer & Sports Streaming | Vibestream`;
+  description = `Watch beIN SPORTS live stream in HD quality on Vibestream. Stream live soccer matches from LaLiga, Ligue 1, Copa Libertadores, and elite international sports events.`;
+  keywords = `beIN SPORTS, watch beIN SPORTS live, beIN SPORTS live stream, live soccer streaming, LaLiga live stream, Ligue 1 live, live football online, sports streaming, Vibestream`;
 }
 
 const image = channel.logo || "https://vibestream.app/assets/image/og-image.png";
 const activeChannelId = channel.id;
+
+// Generate Schema.org structured data for rich snippet search results
+const schema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": `${Astro.url.href}#webpage`,
+      "url": Astro.url.href,
+      "name": title,
+      "description": description,
+      "isPartOf": {
+        "@type": "WebSite",
+        "@id": `${Astro.url.origin}/#website`,
+        "url": `${Astro.url.origin}/`,
+        "name": "Vibestream"
+      }
+    },
+    {
+      "@type": "BroadcastService",
+      "@id": `${Astro.url.href}#broadcastservice`,
+      "name": channel.name,
+      "broadcastDisplayName": channel.name,
+      "videoFormat": "HD",
+      "description": description,
+      "logo": image,
+      "url": Astro.url.href,
+      "provider": {
+        "@type": "Organization",
+        "name": "Vibestream",
+        "url": Astro.url.origin
+      }
+    }
+  ]
+};
 ---
-<MainLayout title={title} description={description} image={image} activeChannelId={activeChannelId} />
+<MainLayout title={title} description={description} keywords={keywords} image={image} activeChannelId={activeChannelId} schema={schema} />
