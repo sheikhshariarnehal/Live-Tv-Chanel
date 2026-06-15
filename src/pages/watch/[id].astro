@@ -61,8 +61,14 @@ if (!channel) {
   return Astro.redirect('/');
 }
 
-const title = `Watch ${channel.name} Live | Vibestream`;
-const description = `Watch ${channel.name} live stream in HD quality. Access sports, movies, news, and entertainment with Vibestream player.`;
+let title = `Watch ${channel.name} Live | Vibestream`;
+let description = `Watch ${channel.name} live stream in HD quality. Access sports, movies, news, and entertainment with Vibestream player.`;
+
+if (channel.id === 'sports-beinsports') {
+  title = `Watch BeinSports Live - FIFA World Cup Football | Vibestream`;
+  description = `Watch BeinSports live stream in HD quality on Vibestream. Stream the FIFA World Cup Football live and access top-tier sports streaming.`;
+}
+
 const image = channel.logo || "https://vibestream.app/assets/image/og-image.png";
 const activeChannelId = channel.id;
 ---
