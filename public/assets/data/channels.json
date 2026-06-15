@@ -19,6 +19,78 @@
           "name": "MBC Masr",
           "url": "https://bein-esp-xumo.amagi.tv/playlistR1080p.m3u8",
           "logo": "http://10.254.252.70/static/images/unnamed.png"
+        },
+        {
+          "id": "movie-bangla-12438",
+          "name": "Movie Bangla",
+          "url": "http://str2.v3v3v.xyz:2082/live/rokhsi25_951396/POm6KqnW/277428.ts",
+          "logo": "https://imglink.cc/cdn/B1Dn0E5UKs.png"
+        },
+        {
+          "id": "south-india-movie-12386",
+          "name": "South India Movie",
+          "url": "https://live20.bozztv.com/giatvplayout7/giatv-209593/tracks-v1a1/mono.ts.m3u8",
+          "logo": "https://imglink.cc/cdn/cScI5tEUjV.png"
+        },
+        {
+          "id": "goldmines-movies-12382",
+          "name": "Goldmines Movies",
+          "url": "https://cdn-2.pishow.tv/live/1461/master.m3u8",
+          "logo": "https://imglink.cc/cdn/E86bN6IAxl.jpg"
+        },
+        {
+          "id": "goldmines-12381",
+          "name": "Goldmines",
+          "url": "https://cdn-2.pishow.tv/live/1459/master.m3u8",
+          "logo": "https://imglink.cc/cdn/E86bN6IAxl.jpg"
+        },
+        {
+          "id": "goldmines-bollywood-12383",
+          "name": "Goldmines Bollywood",
+          "url": "https://tvsen6.aynaott.com/GoldminesBollywood/index.m3u8",
+          "logo": "https://imglink.cc/cdn/E86bN6IAxl.jpg"
+        },
+        {
+          "id": "jalsha-movies-12384",
+          "name": "Jalsha Movies",
+          "url": "http://198.195.239.50:8095/JalshaMovies/tracks-v1a1/mono.m3u8",
+          "logo": "https://imglink.cc/cdn/hEzUhoTW3x.jpg"
+        },
+        {
+          "id": "b4u-movies-12387",
+          "name": "B4U Movies",
+          "url": "https://amg00877-b4unew-amg00877c2-xiaomi-in-5489.playouts.now.amagi.tv/playlist.m3u8",
+          "logo": "https://imglink.cc/cdn/cScI5tEUjV.png"
+        },
+        {
+          "id": "action-hollywood-12388",
+          "name": "Action Hollywood",
+          "url": "https://cdn-apse1-prod.tsv2.amagi.tv/linear/amg01076-lightningintern-actionhollywood-samsungnz/playlist.m3u8",
+          "logo": "https://imglink.cc/cdn/cScI5tEUjV.png"
+        },
+        {
+          "id": "song-max-12389",
+          "name": "Song Max",
+          "url": "https://edge2.roarzone.net:8447/roarzone/edge3/sony_max_hd/index.m3u8?token=0acbc3381f074f74cd7db448c566c55fe7592a3c-efc9e16855524918b6a0e514aaddd012-1781061322-1781050522",
+          "logo": "https://imglink.cc/cdn/4mRBs1A-x_.png"
+        },
+        {
+          "id": "sony-max-2-12390",
+          "name": "Sony Max 2",
+          "url": "https://edge2.roarzone.net:8447/roarzone/edge3/sonymax_2/index.m3u8?token=1ae6cc9578f7e8a9fbeb42b32a9ea6e19c246ec6-aa37a828978035cc1450f0721cf5f067-1781061322-1781050522",
+          "logo": "https://imglink.cc/cdn/4mRBs1A-x_.png"
+        },
+        {
+          "id": "star-gold-12391",
+          "name": "Star Gold",
+          "url": "http://198.195.239.50:8095/StarGold/index.m3u8",
+          "logo": "https://imglink.cc/cdn/Nkj7hqlPz-.jpg"
+        },
+        {
+          "id": "hindi-classic-24-12385",
+          "name": "Hindi Classic 24",
+          "url": "https://vods2.aynaott.com/hindimovies/index.m3u8",
+          "logo": "https://imglink.cc/cdn/cScI5tEUjV.png"
         }
       ]
     },
@@ -30,6 +102,66 @@
           "name": "Al Jazeera",
           "url": "https://bein-esp-xumo.amagi.tv/playlistR1080p.m3u8",
           "logo": "http://10.254.252.70/static/images/unnamed.png"
+        },
+        {
+          "id": "channel-24-12421",
+          "name": "Channel 24",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1703/output/1703-audio_113332_eng=113200-video=2202800.m3u8",
+          "logo": "https://i.ibb.co.com/v65cfQ96/Channel-24.png"
+        },
+        {
+          "id": "dbc-news-12424",
+          "name": "DBC News",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1728/output/index.m3u8",
+          "logo": "https://i.ibb.co.com/TMKLMXs9/DBC-News.png"
+        },
+        {
+          "id": "somoy-tv-12312",
+          "name": "Somoy Tv",
+          "url": "https://sm-monirul.top/toffee/play/somoy_tv.m3u8",
+          "logo": "https://blocinoapi.com/uploads/logos/logo_6a2a3badb5621.png"
+        },
+        {
+          "id": "ekhon-tv-12427",
+          "name": "Ekhon TV",
+          "url": "https://tvsen6.aynaott.com/ekhontv/tracks-v1a1/mono.ts.m3u8",
+          "logo": "https://i.ibb.co.com/YrDVpDt/Ekhon-Tv.png"
+        },
+        {
+          "id": "ekattor-tv-hd-12428",
+          "name": "Ekattor TV HD",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1705/output/1705.m3u8",
+          "logo": "https://i.ibb.co.com/DPZrfqzr/Ekattor-TV-HD.png"
+        },
+        {
+          "id": "star-news-12443",
+          "name": "Star News",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1710/output/1710-audio_113402_eng=113200-video=1181200.m3u8",
+          "logo": "https://i.ibb.co.com/cXTjmmtP/Star-News.png"
+        },
+        {
+          "id": "jago-news-24-12433",
+          "name": "Jago News 24",
+          "url": "https://app.ncare.live/live-orgin/jagonews24.stream/live-orgin/jagonews24.stream/chunks.m3u8",
+          "logo": "https://i.ibb.co.com/KpRt3cT5/Jago-News-24.png"
+        },
+        {
+          "id": "independent-tv-12432",
+          "name": "Independent TV",
+          "url": "https://tvsen6.aynaott.com/independenttv/tracks-v1a1/mono.ts.m3u8",
+          "logo": "https://e7.pngegg.com/pngimages/500/179/png-clipart-bangladesh-logo-independent-television-television-channel-bd-logo-television-text-thumbnail.png"
+        },
+        {
+          "id": "jamuna-tv-12434",
+          "name": "Jamuna TV",
+          "url": "https://tvsen6.aynaott.com/jamunatv/index.m3u8?e=1779283771&u=78be6644-0a65-48ec-81a4-089ac65a2619&token=2592d440f00d65738bd7f6c5158ce486",
+          "logo": "https://www.jamuna.tv/uploads/settings/default_img_1.jpg"
+        },
+        {
+          "id": "news-24-12440",
+          "name": "News 24",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1708/output/index.m3u8",
+          "logo": "https://i.ibb.co.com/gLx9fX5N/News-24.png"
         }
       ]
     }
