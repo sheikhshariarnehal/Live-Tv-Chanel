@@ -4,6 +4,12 @@
       "name": "Sports",
       "channels": [
         {
+          "id": "sports-cazetv-1080p",
+          "name": "Caze TV",
+          "url": "https://dfr80qz435crc.cloudfront.net/MNOP/Amagi/Caze/Caze_TV_BR/1080p-vtt/index.m3u8",
+          "logo": "https://images.seeklogo.com/logo-png/61/1/cazetv-logo-png_seeklogo-619708.png"
+        },
+        {
           "id": "sports-beinsports",
           "name": "BeinSports",
           "url": "https://bein-esp-xumo.amagi.tv/playlistR1080p.m3u8",
@@ -14,6 +20,60 @@
           "name": "T Sports HD",
           "url": "http://rgkkw.live/live/1Aoen7elp5/IgMJ60tmAa/130714.ts",
           "logo": "/assets/image/T SPORTS1744972630.png"
+        },
+        {
+          "id": "worldcup-hindi-002",
+          "name": "World Cup 2026 Hindi",
+          "url": "http://starhub.pro/live/farhat-3379/67897-913379/741567.ts",
+          "logo": "https://exchange4media.gumlet.io/news-photo/155155-Z1.jpg"
+        },
+        {
+          "id": "worldcup-fifa-010",
+          "name": "FIFA World Cup 2026",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1702/output/1702-audio_113322_eng=113200-video=2202800.m3u8",
+          "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/e/e3/2026_FIFA_World_Cup_emblem.svg/300px-2026_FIFA_World_Cup_emblem.svg.png"
+        },
+        {
+          "id": "bein-xtra-esp-1080-002",
+          "name": "beIN Sport Extra Ñ 1080p 🇪🇸",
+          "url": "https://bein-esp-xumo.amagi.tv/playlistR1080p.m3u8",
+          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
+        },
+        {
+          "id": "bein-2hd-010",
+          "name": "beIN Sports 2 HD",
+          "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78379.ts",
+          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
+        },
+        {
+          "id": "bein-4hd-012",
+          "name": "beIN Sports 4 HD",
+          "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78381.ts",
+          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
+        },
+        {
+          "id": "bein-5hd-013",
+          "name": "beIN Sports 5 HD",
+          "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78382.ts",
+          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
+        },
+        {
+          "id": "fox-sports-720-001",
+          "name": "FOX Sports (720p)",
+          "url": "https://d1jzu95oc8fgt3.cloudfront.net/FOX_Sports720p.m3u8",
+          "logo": "https://upload.wikimedia.org/wikipedia/commons/3/3c/FOX_Sports_2012_logo.png"
+        },
+        {
+          "id": "sports-fox-sports",
+          "name": "Fox Sports",
+          "url": "http://84.17.50.102/fox/index.m3u8",
+          "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Fox_Sports_logo.svg/512px-Fox_Sports_logo.svg.png"
+        },
+        {
+          "id": "worldcup-bein-001",
+          "name": "World Cup 2026 (beIN Sports)",
+          "url": "http://starhub.pro/live/farhat-3379/67897-913379/744517.ts",
+          "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/e/e3/2026_FIFA_World_Cup_emblem.svg/300px-2026_FIFA_World_Cup_emblem.svg.png"
         }
       ]
     },
