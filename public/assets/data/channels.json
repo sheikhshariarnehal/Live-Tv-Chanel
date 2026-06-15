@@ -4,10 +4,10 @@
       "name": "Sports",
       "channels": [
         {
-          "id": "fifa-world-cup-2026",
-          "name": "FIFA World Cup 2026",
-          "url": "http://84.17.50.102/fox/index.m3u8",
-          "logo": "https://images.goodreturns.in/img/2026/06/fifaindiatimings1-1781177759.jpg"
+          "id": "sports-beinsports-1",
+          "name": "BeINSports-1",
+          "url": "http://starhub.pro/live/farhat-3379/67897-913379/744517.ts",
+          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
         },
         {
           "id": "sports-cazetv",
@@ -61,12 +61,6 @@
           "id": "sports-beinsports-5",
           "name": "BeINSports-5",
           "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78382.ts",
-          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
-        },
-        {
-          "id": "sports-beinsports-1",
-          "name": "BeINSports-1",
-          "url": "http://starhub.pro/live/farhat-3379/67897-913379/744517.ts",
           "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
         }
       ]
