@@ -24,7 +24,6 @@
   "dependencies": {
     "@astrojs/check": "^0.9.9",
     "@astrojs/node": "^10.1.4",
-    "@vercel/analytics": "^2.0.1",
     "astro": "^6.4.6",
     "node-fetch": "^3.3.2",
     "serve": "^14.2.6",
