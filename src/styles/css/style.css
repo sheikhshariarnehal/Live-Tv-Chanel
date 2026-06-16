@@ -30,6 +30,30 @@ body {
   overflow: hidden;
 }
 
+/* ===== Portal Page (Directory) Layout ===== */
+body.portal-layout {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+body.portal-layout .main-container {
+  height: auto;
+  min-height: calc(100vh - 72px);
+  overflow: visible;
+}
+
+body.portal-layout .container {
+  height: auto;
+  overflow: visible;
+}
+
+@media (max-width: 640px) {
+  body.portal-layout .main-container {
+    min-height: calc(100vh - 56px);
+  }
+}
+
+
 /* ===== Header ===== */
 .header {
   position: fixed;
