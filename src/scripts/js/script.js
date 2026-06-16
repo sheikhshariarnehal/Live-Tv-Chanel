@@ -1,11 +1,9 @@
 // ===== DOM Elements =====
-const video = document.getElementById('player');
 const categoryTabsContainer = document.getElementById('categoryTabs');
 const channelGridContainer = document.getElementById('channelGrid');
 const sidebar = document.getElementById('sidebar');
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const closeSidebarBtn = document.getElementById('closeSidebarBtn');
-const videoOverlay = document.getElementById('videoOverlay');
 
 // New DOM Elements
 const errorOverlay = document.getElementById('errorOverlay');
@@ -13,6 +11,7 @@ const errorDesc = document.getElementById('errorDesc');
 const btnReloadStream = document.getElementById('btnReloadStream');
 
 let hasInteracted = false;
+let art = null;
 
 // Unmute video player on first user interaction to bypass browser autoplay restrictions
 function enableSoundOnInteraction() {
@@ -20,10 +19,10 @@ function enableSoundOnInteraction() {
     if (e && e.type === 'click' && !e.isTrusted) return;
     
     hasInteracted = true;
-    if (video) {
-      video.muted = false;
-      if (video.paused) {
-        video.play().catch(err => console.log('Interactive play failed:', err));
+    if (art) {
+      art.muted = false;
+      if (art.video && art.video.paused) {
+        art.play().catch(err => console.log('Interactive play failed:', err));
       }
     }
     document.removeEventListener('click', unmute);
@@ -36,8 +35,6 @@ function enableSoundOnInteraction() {
 }
 enableSoundOnInteraction();
 
-let hls;
-let mpegtsPlayer;
 let channelsData = null;
 let currentCategory = '';
 
@@ -333,7 +330,6 @@ function createChannelButton(channel) {
 
 // ===== Display Custom Error Screen =====
 function showPlayerError(channelName, url) {
-  videoOverlay.classList.remove('active');
   errorOverlay.classList.add('active');
   
   const rawUrl = getRawUrl(url);
@@ -369,8 +365,6 @@ function showPlayerError(channelName, url) {
 
 // ===== Handle Playback Errors & Fallback =====
 function handlePlaybackError(button, url, channelName, fallbackUrl) {
-  video.onerror = null;
-
   if (fallbackUrl && fallbackUrl !== '' && fallbackUrl !== 'null' && fallbackUrl !== 'undefined') {
     console.log(`Primary stream failed for ${channelName}. Trying fallback URL: ${fallbackUrl}`);
     showError(`Switching to fallback stream for ${channelName}...`);
@@ -435,13 +429,132 @@ function setupEventListeners() {
   });
 }
 
+// ===== HLS & TS Playback Helpers for ArtPlayer =====
+function playM3u8(video, url, artPlayer) {
+  if (Hls.isSupported()) {
+    if (artPlayer.hls) {
+      try {
+        artPlayer.hls.destroy();
+      } catch (e) {
+        console.error('Error destroying HLS instance on playM3u8:', e);
+      }
+      artPlayer.hls = null;
+    }
+    const hls = new Hls({
+      enableWorker: true,
+      lowLatencyMode: true,
+      backBufferLength: 90,
+      maxBufferLength: 30,
+      maxMaxBufferLength: 600,
+      maxBufferSize: 60 * 1000 * 1000,
+      maxBufferHole: 0.5
+    });
+    hls.loadSource(url);
+    hls.attachMedia(video);
+    artPlayer.hls = hls;
+
+    let networkRetryCount = 0;
+    hls.on(Hls.Events.ERROR, (event, data) => {
+      console.error('HLS error inside ArtPlayer:', data);
+      if (data.fatal) {
+        switch (data.type) {
+          case Hls.ErrorTypes.NETWORK_ERROR:
+            networkRetryCount++;
+            if (networkRetryCount > 2) {
+              try {
+                hls.destroy();
+              } catch (e) {
+                console.error('Error destroying HLS in error event:', e);
+              }
+              artPlayer.hls = null;
+              artPlayer.emit('video:error', data);
+            } else {
+              console.log('Network error, trying to recover...');
+              hls.startLoad();
+            }
+            break;
+          case Hls.ErrorTypes.MEDIA_ERROR:
+            console.log('Media error, trying to recover...');
+            hls.recoverMediaError();
+            break;
+          default:
+            try {
+              hls.destroy();
+            } catch (e) {
+              console.error('Error destroying HLS in default error event:', e);
+            }
+            artPlayer.hls = null;
+            artPlayer.emit('video:error', data);
+            break;
+        }
+      }
+    });
+
+    artPlayer.on('destroy', () => {
+      if (artPlayer.hls) {
+        try {
+          artPlayer.hls.destroy();
+        } catch (e) {
+          console.error('Error destroying HLS on player destroy:', e);
+        }
+        artPlayer.hls = null;
+      }
+    });
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = url;
+  } else {
+    showError('Your browser does not support HLS streaming.');
+  }
+}
+
+function playTs(video, url, artPlayer) {
+  if (typeof mpegts !== 'undefined' && mpegts.getFeatureList().mseLivePlayback) {
+    if (artPlayer.mpegtsPlayer) {
+      try {
+        artPlayer.mpegtsPlayer.destroy();
+      } catch (e) {
+        console.error('Error destroying mpegtsPlayer on playTs:', e);
+      }
+      artPlayer.mpegtsPlayer = null;
+    }
+    const mpegtsPlayer = mpegts.createPlayer({
+      type: 'mse',
+      isLive: true,
+      url: url
+    });
+    mpegtsPlayer.attachMediaElement(video);
+    mpegtsPlayer.load();
+    artPlayer.mpegtsPlayer = mpegtsPlayer;
+
+    mpegtsPlayer.on(mpegts.Events.ERROR, (errorType, errorDetail, errorInfo) => {
+      console.error('MPEGTS error inside ArtPlayer:', errorType, errorDetail, errorInfo);
+      try {
+        mpegtsPlayer.destroy();
+      } catch (e) {
+        console.error('Error destroying mpegtsPlayer in error event:', e);
+      }
+      artPlayer.mpegtsPlayer = null;
+      artPlayer.emit('video:error', { errorType, errorDetail, errorInfo });
+    });
+
+    artPlayer.on('destroy', () => {
+      if (artPlayer.mpegtsPlayer) {
+        try {
+          artPlayer.mpegtsPlayer.destroy();
+        } catch (e) {
+          console.error('Error destroying mpegtsPlayer on player destroy:', e);
+        }
+        artPlayer.mpegtsPlayer = null;
+      }
+    });
+  } else {
+    showError('Your browser does not support TS streaming.');
+  }
+}
+
 // ===== Play channel =====
 async function playChannel(button, url, channelName, fallbackUrl = null) {
-  if (!hasInteracted) {
-    video.muted = true;
-  }
   errorOverlay.classList.remove('active');
-  videoOverlay.classList.add('active');
   
   lastSelectedChannelBtn = button;
   lastSelectedChannelUrl = url;
@@ -454,125 +567,69 @@ async function playChannel(button, url, channelName, fallbackUrl = null) {
       button.dataset.fallbackUrl = fallbackUrl;
     }
   }
-  
-  if (hls) {
-    hls.destroy();
-    hls = null;
-  }
-  
-  if (mpegtsPlayer) {
-    mpegtsPlayer.destroy();
-    mpegtsPlayer = null;
-  }
-
-  video.onerror = null;
-  video.onerror = () => {
-    handlePlaybackError(button, url, channelName, fallbackUrl);
-  };
 
   const playbackUrl = getPlaybackUrl(url);
   const isTs = playbackUrl.includes('.ts');
 
   try {
+    // Destroy previous player inside try block safely using destroy(false) to keep container
+    if (art) {
+      try {
+        art.destroy(false);
+      } catch (destroyError) {
+        console.error('Failed to destroy previous ArtPlayer instance:', destroyError);
+      }
+      art = null;
+    }
+
+    // 1. Dynamic load ArtPlayer if not present
+    if (typeof Artplayer === 'undefined') {
+      await loadScript('https://cdn.jsdelivr.net/npm/artplayer/dist/artplayer.js');
+    }
+
+    // 2. Load the specific playback engine if needed
     if (isTs) {
-      // Dynamic load mpegts.js if not present
       if (typeof mpegts === 'undefined') {
         await loadScript('https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js');
       }
-      if (typeof mpegts !== 'undefined' && mpegts.getFeatureList().mseLivePlayback) {
-        mpegtsPlayer = mpegts.createPlayer({
-          type: 'mse',
-          isLive: true,
-          url: playbackUrl
-        });
-        
-        mpegtsPlayer.attachMediaElement(video);
-        mpegtsPlayer.load();
-        mpegtsPlayer.play()
-          .then(() => {
-            videoOverlay.classList.remove('active');
-          })
-          .catch(err => {
-            console.log('Autoplay prevented or error:', err);
-            handlePlaybackError(button, url, channelName, fallbackUrl);
-          });
-          
-        mpegtsPlayer.on(mpegts.Events.ERROR, (errorType, errorDetail, errorInfo) => {
-          console.error('MPEGTS error:', errorType, errorDetail, errorInfo);
-          handlePlaybackError(button, url, channelName, fallbackUrl);
-        });
-      } else {
-        handlePlaybackError(button, url, channelName, fallbackUrl);
-      }
     } else {
-      // Dynamic load hls.js if not present
       if (typeof Hls === 'undefined') {
         await loadScript('https://cdn.jsdelivr.net/npm/hls.js@latest');
       }
-      if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-        hls = new Hls({
-          enableWorker: true,
-          lowLatencyMode: true,
-          backBufferLength: 90,
-          maxBufferLength: 30,
-          maxMaxBufferLength: 600,
-          maxBufferSize: 60 * 1000 * 1000,
-          maxBufferHole: 0.5
-        });
-        
-        hls.loadSource(playbackUrl);
-        hls.attachMedia(video);
-        
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          video.play().then(() => {
-            videoOverlay.classList.remove('active');
-          }).catch(err => {
-            console.log('Autoplay prevented:', err);
-            videoOverlay.classList.remove('active');
-          });
-        });
-        
-        let networkRetryCount = 0;
-        hls.on(Hls.Events.ERROR, (event, data) => {
-          console.error('HLS error:', data);
-          if (data.fatal) {
-            switch (data.type) {
-              case Hls.ErrorTypes.NETWORK_ERROR:
-                networkRetryCount++;
-                if (networkRetryCount > 2) {
-                  handlePlaybackError(button, url, channelName, fallbackUrl);
-                  hls.destroy();
-                } else {
-                  console.log('Network error, trying to recover...');
-                  hls.startLoad();
-                }
-                break;
-              case Hls.ErrorTypes.MEDIA_ERROR:
-                console.log('Media error, trying to recover...');
-                hls.recoverMediaError();
-                break;
-              default:
-                handlePlaybackError(button, url, channelName, fallbackUrl);
-                hls.destroy();
-                break;
-            }
-          }
-        });
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = playbackUrl;
-        video.play().then(() => {
-          videoOverlay.classList.remove('active');
-        }).catch(err => {
-          console.log('Autoplay prevented:', err);
-          handlePlaybackError(button, url, channelName, fallbackUrl);
-        });
-      } else {
-        videoOverlay.classList.remove('active');
-        showError('Your browser does not support HLS streaming.');
-      }
     }
+
+    // 3. Initialize ArtPlayer
+    art = new Artplayer({
+      container: '#player',
+      url: playbackUrl,
+      type: isTs ? 'ts' : 'm3u8',
+      isLive: true,
+      autoplay: true,
+      muted: !hasInteracted,
+      volume: 0.8,
+      pip: true,
+      fullscreen: true,
+      fullscreenWeb: true,
+      playbackRate: false,
+      aspectRatio: true,
+      setting: true,
+      theme: '#6366f1',
+      autoSize: false,
+      autoMini: false,
+      customType: {
+        m3u8: playM3u8,
+        ts: playTs
+      }
+    });
+
+    // 4. Hook lifecycle events for our overlays and error handling
+    art.on('video:error', (e) => {
+      console.error('Artplayer video error:', e);
+      handlePlaybackError(button, url, channelName, fallbackUrl);
+    });
+
   } catch (error) {
-    console.error('Failed to load player engine script:', error);
+    console.error('Failed to load player engine script or initialize player:', error);
     handlePlaybackError(button, url, channelName, fallbackUrl);
   }
 }
@@ -603,13 +660,9 @@ window.addEventListener('popstate', (e) => {
 
 // ===== Keyboard shortcuts =====
 function handleKeyboard(e) {
-  if (e.code === 'Space' && e.target === document.body && video) {
+  if (e.code === 'Space' && e.target === document.body && art) {
     e.preventDefault();
-    if (video.paused) {
-      video.play();
-    } else {
-      video.pause();
-    }
+    art.toggle();
   }
   
   if (e.code === 'Escape' && window.innerWidth > 640 && window.innerWidth <= 768 && sidebar) {
@@ -796,7 +849,8 @@ function setupLogoCollapse() {
 }
 
 // ===== Initialize the app =====
-if (video && categoryTabsContainer && channelGridContainer) {
+const playerContainer = document.getElementById('player');
+if (playerContainer && categoryTabsContainer && channelGridContainer) {
   loadChannelsData();
 }
 loadNewsData();
