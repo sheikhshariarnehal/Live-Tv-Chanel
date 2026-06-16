@@ -31,6 +31,41 @@ export async function GET({ request }) {
     
     // Rewrite m3u8 playlists so they also proxy the TS segments
     const contentType = response.headers.get('content-type') || '';
+
+    // Handle DASH manifests (.mpd) to resolve relative segment paths
+    if (targetUrl.includes('.mpd') || contentType.includes('application/dash+xml') || contentType.includes('video/vnd.mpeg.dash.mpd')) {
+      let text = await response.text();
+      const baseUrl = new URL(targetUrl);
+      const basePath = baseUrl.origin + baseUrl.pathname.substring(0, baseUrl.pathname.lastIndexOf('/') + 1);
+      
+      // If the manifest already contains <BaseURL> tags, make sure they are absolute
+      if (text.includes('<BaseURL>') || text.includes('<BaseURL/>')) {
+        text = text.replace(/<BaseURL>([^<]*)<\/BaseURL>/gi, (match, urlValue) => {
+          urlValue = urlValue.trim();
+          if (urlValue.startsWith('http://') || urlValue.startsWith('https://')) {
+            return match; // Already absolute
+          }
+          if (urlValue.startsWith('/')) {
+            return `<BaseURL>${baseUrl.origin}${urlValue}</BaseURL>`; // Path-absolute
+          }
+          return `<BaseURL>${basePath}${urlValue}</BaseURL>`; // Relative path
+        });
+      } else {
+        // Inject absolute <BaseURL> right after <MPD> tag
+        text = text.replace(/<MPD([^>]*)>/i, (match, attrs) => {
+          return `<MPD${attrs}>\n  <BaseURL>${basePath}</BaseURL>`;
+        });
+      }
+      
+      return new Response(text, {
+        status: response.status,
+        headers: {
+          'Content-Type': 'application/dash+xml',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
+
     if (contentType.includes('application/vnd.apple.mpegurl') || contentType.includes('application/x-mpegurl') || targetUrl.includes('.m3u8')) {
       const text = await response.text();
       const baseUrl = new URL(targetUrl);

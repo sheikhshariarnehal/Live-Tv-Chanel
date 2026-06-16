@@ -101,14 +101,20 @@ function getPlaybackUrl(url) {
     if (rawUrl.startsWith('http://')) {
       return '/proxy?url=' + encodeURIComponent(rawUrl);
     }
+    // Proxy HTTPS manifest files (m3u8/mpd) to bypass CORS issues on restricted CDNs
+    if (rawUrl.startsWith('https://') && (rawUrl.includes('.m3u8') || rawUrl.includes('.mpd'))) {
+      return '/proxy?url=' + encodeURIComponent(rawUrl);
+    }
   } else {
     // On HTTP (local): proxy everything using the local proxy to bypass CORS
     // since the local server has network connectivity.
     if (url.startsWith('/proxy?url=')) {
       return url;
     }
-    if (rawUrl.startsWith('http://')) {
-      return '/proxy?url=' + encodeURIComponent(rawUrl);
+    if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) {
+      if (!isPrivateIP(rawUrl)) {
+        return '/proxy?url=' + encodeURIComponent(rawUrl);
+      }
     }
   }
   return rawUrl;
@@ -552,6 +558,84 @@ function playTs(video, url, artPlayer) {
   }
 }
 
+function playMpd(video, url, artPlayer) {
+  if (typeof shaka === 'undefined') {
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/shaka-player.compiled.js')
+      .then(() => {
+        initializeShakaPlayer(video, url, artPlayer);
+      })
+      .catch(err => {
+        console.error('Failed to load Shaka Player script:', err);
+        showError('Your browser does not support DASH streaming.');
+      });
+  } else {
+    initializeShakaPlayer(video, url, artPlayer);
+  }
+}
+
+function initializeShakaPlayer(video, url, artPlayer) {
+  shaka.polyfill.installAll();
+  
+  if (!shaka.Player.isBrowserSupported()) {
+    console.error('Browser not supported for Shaka Player.');
+    showError('DASH playback is not supported by your browser.');
+    return;
+  }
+  
+  if (artPlayer.shaka) {
+    try {
+      artPlayer.shaka.destroy();
+    } catch (e) {
+      console.error('Error destroying previous Shaka Player instance:', e);
+    }
+    artPlayer.shaka = null;
+  }
+  
+  const player = new shaka.Player(video);
+  artPlayer.shaka = player;
+  
+  player.addEventListener('error', (event) => {
+    console.error('Shaka Player error event:', event.detail);
+    if (event.detail && event.detail.severity === shaka.util.Error.Severity.CRITICAL) {
+      artPlayer.emit('video:error', event.detail);
+    }
+  });
+
+  const channelId = lastSelectedChannelBtn ? lastSelectedChannelBtn.dataset.channelId : null;
+  const match = findChannelByIdOrSlug(channelId);
+  const channel = match ? match.channel : null;
+  const drm = channel ? channel.drm : null;
+  
+  if (drm && drm.kid && drm.key) {
+    console.log(`Configuring ClearKey DRM for channel: ${channel.name}`);
+    player.configure({
+      drm: {
+        clearKeys: {
+          [drm.kid.trim()]: drm.key.trim()
+        }
+      }
+    });
+  }
+  
+  player.load(url).then(() => {
+    console.log('Shaka Player successfully loaded the stream:', url);
+  }).catch((error) => {
+    console.error('Shaka Player load error:', error);
+    artPlayer.emit('video:error', error);
+  });
+  
+  artPlayer.on('destroy', () => {
+    if (artPlayer.shaka) {
+      try {
+        artPlayer.shaka.destroy();
+      } catch (e) {
+        console.error('Error destroying Shaka Player on destroy:', e);
+      }
+      artPlayer.shaka = null;
+    }
+  });
+}
+
 // ===== Play channel =====
 async function playChannel(button, url, channelName, fallbackUrl = null) {
   errorOverlay.classList.remove('active');
@@ -570,11 +654,16 @@ async function playChannel(button, url, channelName, fallbackUrl = null) {
 
   const playbackUrl = getPlaybackUrl(url);
   const isTs = playbackUrl.includes('.ts');
+  const isMpd = playbackUrl.includes('.mpd');
 
   try {
     // Destroy previous player inside try block safely using destroy(false) to keep container
     if (art) {
       try {
+        if (art.shaka) {
+          art.shaka.destroy().catch(e => console.error('Error destroying Shaka:', e));
+          art.shaka = null;
+        }
         art.destroy(false);
       } catch (destroyError) {
         console.error('Failed to destroy previous ArtPlayer instance:', destroyError);
@@ -592,6 +681,10 @@ async function playChannel(button, url, channelName, fallbackUrl = null) {
       if (typeof mpegts === 'undefined') {
         await loadScript('https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js');
       }
+    } else if (isMpd) {
+      if (typeof shaka === 'undefined') {
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/shaka-player.compiled.js');
+      }
     } else {
       if (typeof Hls === 'undefined') {
         await loadScript('https://cdn.jsdelivr.net/npm/hls.js@latest');
@@ -602,7 +695,7 @@ async function playChannel(button, url, channelName, fallbackUrl = null) {
     art = new Artplayer({
       container: '#player',
       url: playbackUrl,
-      type: isTs ? 'ts' : 'm3u8',
+      type: isTs ? 'ts' : (isMpd ? 'mpd' : 'm3u8'),
       isLive: true,
       autoplay: true,
       muted: !hasInteracted,
@@ -619,7 +712,8 @@ async function playChannel(button, url, channelName, fallbackUrl = null) {
       autoMini: false,
       customType: {
         m3u8: playM3u8,
-        ts: playTs
+        ts: playTs,
+        mpd: playMpd
       }
     });
 

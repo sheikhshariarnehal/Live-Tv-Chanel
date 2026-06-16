@@ -74,6 +74,26 @@
           "name": "DSports",
           "url": "http://147.135.114.221:8001/play/a00m/index.m3u8",
           "logo": "https://imglink.cc/cdn/eYP_0o2cnt.jpg"
+        },
+        {
+          "id": "telemundo-aq",
+          "name": "TELEMUNDO-AQ",
+          "url": "https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s-v2/Live/channel(kvea)/master.mpd",
+          "logo": "https://duckduckgo.com/i/2e3815a5b7ddd3c9.png",
+          "drm": {
+            "kid": "ce7ab3022e753307997f58afe001bac4",
+            "key": "72d631a66e635c60829a0fe7705516c1"
+          }
+        },
+        {
+          "id": "sporza-dutch-aq",
+          "name": "Sporza DUTCH AQ",
+          "url": "https://live.vrtcdn.be/groupd/live/0761024f-37fe-4254-bc37-e95d7c62b2d1/live.isml/.mpd",
+          "logo": "https://cdn.uc.assets.prezly.com/870d12f1-d1f4-4668-8d25-0e8d79dd8e81/-/preview/-/format/auto/Untitled%20design%20(22).png",
+          "drm": {
+            "kid": "893bc63340876605f52886a42e0ccce5",
+            "key": "d6c46d2d691056fbd091bf1f01b21a91"
+          }
         }
       ]
     },
