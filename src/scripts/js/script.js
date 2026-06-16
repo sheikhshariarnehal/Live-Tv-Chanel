@@ -610,6 +610,7 @@ async function playChannel(button, url, channelName, fallbackUrl = null) {
       pip: true,
       fullscreen: true,
       fullscreenWeb: true,
+      autoOrientation: true,
       playbackRate: false,
       aspectRatio: true,
       setting: true,
