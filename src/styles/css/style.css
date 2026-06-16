@@ -828,6 +828,7 @@ body.portal-layout .container {
     min-height: unset;
     border-radius: 0;
     flex-shrink: 0;
+    flex: none;
   }
   
   .channel-info {
