@@ -28,6 +28,12 @@ export async function GET({ request }) {
       if (val) headers.set(h, val);
     });
     headers.set('Access-Control-Allow-Origin', '*');
+
+    // Optimize caching for video segments (they are static/immutable and do not change)
+    const lowerUrl = targetUrl.toLowerCase();
+    if (lowerUrl.includes('.ts') || lowerUrl.includes('.m4s') || lowerUrl.includes('.m4i') || lowerUrl.includes('.dash') || lowerUrl.includes('.mp4') || lowerUrl.includes('.m4v')) {
+      headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+    }
     
     // Rewrite m3u8 playlists so they also proxy the TS segments
     const contentType = response.headers.get('content-type') || '';
@@ -81,8 +87,8 @@ export async function GET({ request }) {
           // Wrap the matched absolute URL in our proxy
           return '/proxy?url=' + encodeURIComponent(absoluteUrl);
         }
-        // Handle URI inside tags like #EXT-X-STREAM-INF or #EXT-X-KEY:METHOD=AES-128,URI="some_key.key"
-        if (line.startsWith('#EXT-X-KEY')) {
+        // Handle URI inside tags like #EXT-X-KEY or #EXT-X-MAP
+        if (line.startsWith('#EXT-X-KEY') || line.startsWith('#EXT-X-MAP')) {
           return line.replace(/URI="([^"]+)"/, (match, uri) => {
              let absoluteUrl = uri;
              if (!uri.startsWith('http')) {

@@ -671,6 +671,22 @@ async function playChannel(button, url, channelName, fallbackUrl = null) {
       art = null;
     }
 
+    // Show visual loading indicator while loading the player engine and dependencies
+    const playerEl = document.getElementById('player');
+    if (playerEl) {
+      playerEl.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; background: #000; color: #fff; font-family: 'Inter', sans-serif;">
+          <div style="width: 40px; height: 40px; border: 3px solid rgba(255, 255, 255, 0.1); border-top-color: #6366f1; border-radius: 50%; animation: spin-loader 1s linear infinite; margin-bottom: 12px;"></div>
+          <div style="font-size: 0.875rem; color: #a1a1aa; font-weight: 500;">Loading Player Engines...</div>
+        </div>
+        <style>
+          @keyframes spin-loader {
+            to { transform: rotate(360deg); }
+          }
+        </style>
+      `;
+    }
+
     // 1. Dynamic load ArtPlayer if not present
     if (typeof Artplayer === 'undefined') {
       await loadScript('https://cdn.jsdelivr.net/npm/artplayer/dist/artplayer.js');
