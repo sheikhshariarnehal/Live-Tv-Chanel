@@ -1,3 +1,17 @@
+const cache = new Map();
+
+// Clean up expired cache entries periodically to prevent memory leaks
+if (typeof globalThis.proxyCacheInterval === 'undefined') {
+  globalThis.proxyCacheInterval = setInterval(() => {
+    const now = Date.now();
+    for (const [key, value] of cache.entries()) {
+      if (now > value.expiresAt) {
+        cache.delete(key);
+      }
+    }
+  }, 10000);
+}
+
 export async function OPTIONS() {
   return new Response(null, {
     status: 204,
@@ -16,6 +30,17 @@ export async function GET({ request }) {
 
   if (!targetUrl) {
     return new Response('Target URL required', { status: 400 });
+  }
+
+  // 1. Check in-memory cache first
+  const cached = cache.get(targetUrl);
+  if (cached && Date.now() < cached.expiresAt) {
+    const headers = new Headers(cached.headers);
+    headers.set('X-Proxy-Cache', 'HIT');
+    return new Response(cached.body, {
+      status: cached.status,
+      headers
+    });
   }
 
   // Set a timeout of 5 seconds to prevent the function from hanging on unreachable IP addresses
@@ -37,9 +62,6 @@ export async function GET({ request }) {
     clearTimeout(timeoutId);
 
     const headers = new Headers();
-    // Copy only safe/essential headers to avoid encoding or transmission conflicts on Vercel
-    // Note: Do not copy 'content-length' because Node's fetch decompresses gzip/deflate/br bodies automatically,
-    // which results in a mismatch between the decompressed body and the original compressed content-length.
     const headersToCopy = ['content-type', 'cache-control'];
     headersToCopy.forEach(h => {
       const val = response.headers.get(h);
@@ -48,23 +70,25 @@ export async function GET({ request }) {
     headers.set('Access-Control-Allow-Origin', '*');
     headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
     headers.set('Access-Control-Allow-Headers', '*');
+    headers.set('X-Proxy-Cache', 'MISS');
+
+    const lowerUrl = targetUrl.toLowerCase();
+    const contentType = response.headers.get('content-type') || '';
+    const isMpd = targetUrl.includes('.mpd') || contentType.includes('application/dash+xml') || contentType.includes('video/vnd.mpeg.dash.mpd');
+    const isM3u8 = contentType.includes('application/vnd.apple.mpegurl') || contentType.includes('application/x-mpegurl') || targetUrl.includes('.m3u8');
+    const isSegment = lowerUrl.includes('.ts') || lowerUrl.includes('.m4s') || lowerUrl.includes('.m4i') || lowerUrl.includes('.dash') || lowerUrl.includes('.mp4') || lowerUrl.includes('.m4v');
 
     // Optimize caching for video segments (they are static/immutable and do not change)
-    const lowerUrl = targetUrl.toLowerCase();
-    if (lowerUrl.includes('.ts') || lowerUrl.includes('.m4s') || lowerUrl.includes('.m4i') || lowerUrl.includes('.dash') || lowerUrl.includes('.mp4') || lowerUrl.includes('.m4v')) {
+    if (isSegment) {
       headers.set('Cache-Control', 'public, max-age=31536000, immutable');
     }
-    
-    // Rewrite m3u8 playlists so they also proxy the TS segments
-    const contentType = response.headers.get('content-type') || '';
 
-    // Handle DASH manifests (.mpd) to resolve relative segment paths
-    if (targetUrl.includes('.mpd') || contentType.includes('application/dash+xml') || contentType.includes('video/vnd.mpeg.dash.mpd')) {
+    // A. Handle DASH manifests (.mpd) to resolve relative segment paths
+    if (isMpd) {
       let text = await response.text();
       const baseUrl = new URL(targetUrl);
       const basePath = baseUrl.origin + baseUrl.pathname.substring(0, baseUrl.pathname.lastIndexOf('/') + 1);
       
-      // If the manifest already contains <BaseURL> tags, make sure they are absolute
       if (text.includes('<BaseURL>') || text.includes('<BaseURL/>')) {
         text = text.replace(/<BaseURL>([^<]*)<\/BaseURL>/gi, (match, urlValue) => {
           urlValue = urlValue.trim();
@@ -77,22 +101,37 @@ export async function GET({ request }) {
           return `<BaseURL>${basePath}${urlValue}</BaseURL>`; // Relative path
         });
       } else {
-        // Inject absolute <BaseURL> right after <MPD> tag
         text = text.replace(/<MPD([^>]*)>/i, (match, attrs) => {
           return `<MPD${attrs}>\n  <BaseURL>${basePath}</BaseURL>`;
         });
       }
       
+      const responseHeaders = {
+        'Content-Type': 'application/dash+xml',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': '*'
+      };
+
+      if (response.ok) {
+        cache.set(targetUrl, {
+          body: text,
+          status: response.status,
+          headers: responseHeaders,
+          expiresAt: Date.now() + 2000 // Cache playlists for 2 seconds
+        });
+      }
+
+      const resHeaders = new Headers(responseHeaders);
+      resHeaders.set('X-Proxy-Cache', 'MISS');
       return new Response(text, {
         status: response.status,
-        headers: {
-          'Content-Type': 'application/dash+xml',
-          'Access-Control-Allow-Origin': '*'
-        }
+        headers: resHeaders
       });
     }
 
-    if (contentType.includes('application/vnd.apple.mpegurl') || contentType.includes('application/x-mpegurl') || targetUrl.includes('.m3u8')) {
+    // B. Rewrite m3u8 playlists so they also proxy the TS segments
+    if (isM3u8) {
       const text = await response.text();
       const baseUrl = new URL(targetUrl);
       const basePath = baseUrl.origin + baseUrl.pathname.substring(0, baseUrl.pathname.lastIndexOf('/') + 1);
@@ -104,22 +143,17 @@ export async function GET({ request }) {
           if (!line.startsWith('http')) {
             absoluteUrl = line.startsWith('/') ? baseUrl.origin + line : basePath + line;
           }
-          // Only proxy nested playlists (.m3u8).
-          // Serve video segments (.ts, .mp4, etc.) directly from the original CDN.
           if (absoluteUrl.includes('.m3u8')) {
             return '/proxy?url=' + encodeURIComponent(absoluteUrl);
           }
           return absoluteUrl;
         }
-        // Handle URI inside tags like #EXT-X-KEY or #EXT-X-MAP
         if (line.startsWith('#EXT-X-KEY') || line.startsWith('#EXT-X-MAP')) {
           return line.replace(/URI="([^"]+)"/, (match, uri) => {
              let absoluteUrl = uri;
              if (!uri.startsWith('http')) {
                absoluteUrl = uri.startsWith('/') ? baseUrl.origin + uri : basePath + uri;
              }
-             // For DRM keys (EXT-X-KEY), proxying is fine since they are tiny.
-             // For initialization maps (EXT-X-MAP), keep direct if it's a media segment.
              if (line.startsWith('#EXT-X-KEY') || absoluteUrl.includes('.m3u8')) {
                return `URI="/proxy?url=${encodeURIComponent(absoluteUrl)}"`;
              }
@@ -128,17 +162,62 @@ export async function GET({ request }) {
         }
         return line;
       });
-      
-      return new Response(rewrittenLines.join('\n'), {
+
+      const rewrittenText = rewrittenLines.join('\n');
+      const responseHeaders = {
+        'Content-Type': 'application/vnd.apple.mpegurl',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': '*'
+      };
+
+      if (response.ok) {
+        cache.set(targetUrl, {
+          body: rewrittenText,
+          status: response.status,
+          headers: responseHeaders,
+          expiresAt: Date.now() + 2000 // Cache playlists for 2 seconds
+        });
+      }
+
+      const resHeaders = new Headers(responseHeaders);
+      resHeaders.set('X-Proxy-Cache', 'MISS');
+      return new Response(rewrittenText, {
         status: response.status,
-        headers: {
-          'Content-Type': 'application/vnd.apple.mpegurl',
-          'Access-Control-Allow-Origin': '*'
-        }
+        headers: resHeaders
       });
     }
 
-    // Stream the body directly to support live TV streams (.ts) and avoid infinite buffering
+    // C. Cache video segments in memory to prevent duplicate requests from spikes
+    if (isSegment && response.ok) {
+      const buffer = await response.arrayBuffer();
+
+      const cachedHeaders = {};
+      headersToCopy.forEach(h => {
+        const val = response.headers.get(h);
+        if (val) cachedHeaders[h] = val;
+      });
+      cachedHeaders['Access-Control-Allow-Origin'] = '*';
+      cachedHeaders['Access-Control-Allow-Methods'] = 'GET, OPTIONS';
+      cachedHeaders['Access-Control-Allow-Headers'] = '*';
+      cachedHeaders['Cache-Control'] = 'public, max-age=31536000, immutable';
+
+      cache.set(targetUrl, {
+        body: buffer,
+        status: response.status,
+        headers: cachedHeaders,
+        expiresAt: Date.now() + 15000 // Cache segments for 15 seconds
+      });
+
+      const resHeaders = new Headers(cachedHeaders);
+      resHeaders.set('X-Proxy-Cache', 'MISS');
+      return new Response(buffer, {
+        status: response.status,
+        headers: resHeaders
+      });
+    }
+
+    // Default fallback (uncached)
     return new Response(response.body, {
       status: response.status,
       headers
