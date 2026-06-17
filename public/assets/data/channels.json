@@ -70,22 +70,6 @@
           "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
         },
         {
-          "id": "sports-dsports",
-          "name": "DSports",
-          "url": "http://147.135.114.221:8001/play/a00m/index.m3u8",
-          "logo": "https://imglink.cc/cdn/eYP_0o2cnt.jpg"
-        },
-        {
-          "id": "telemundo-aq",
-          "name": "TELEMUNDO-AQ",
-          "url": "https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s-v2/Live/channel(kvea)/master.mpd",
-          "logo": "https://duckduckgo.com/i/2e3815a5b7ddd3c9.png",
-          "drm": {
-            "kid": "ce7ab3022e753307997f58afe001bac4",
-            "key": "72d631a66e635c60829a0fe7705516c1"
-          }
-        },
-        {
           "id": "sporza-dutch-aq",
           "name": "Sporza DUTCH AQ",
           "url": "https://live.vrtcdn.be/groupd/live/0761024f-37fe-4254-bc37-e95d7c62b2d1/live.isml/.mpd",
