@@ -104,8 +104,12 @@ export async function GET({ request }) {
           if (!line.startsWith('http')) {
             absoluteUrl = line.startsWith('/') ? baseUrl.origin + line : basePath + line;
           }
-          // Wrap the matched absolute URL in our proxy
-          return '/proxy?url=' + encodeURIComponent(absoluteUrl);
+          // Only proxy nested playlists (.m3u8).
+          // Serve video segments (.ts, .mp4, etc.) directly from the original CDN.
+          if (absoluteUrl.includes('.m3u8')) {
+            return '/proxy?url=' + encodeURIComponent(absoluteUrl);
+          }
+          return absoluteUrl;
         }
         // Handle URI inside tags like #EXT-X-KEY or #EXT-X-MAP
         if (line.startsWith('#EXT-X-KEY') || line.startsWith('#EXT-X-MAP')) {
@@ -114,7 +118,12 @@ export async function GET({ request }) {
              if (!uri.startsWith('http')) {
                absoluteUrl = uri.startsWith('/') ? baseUrl.origin + uri : basePath + uri;
              }
-             return `URI="/proxy?url=${encodeURIComponent(absoluteUrl)}"`;
+             // For DRM keys (EXT-X-KEY), proxying is fine since they are tiny.
+             // For initialization maps (EXT-X-MAP), keep direct if it's a media segment.
+             if (line.startsWith('#EXT-X-KEY') || absoluteUrl.includes('.m3u8')) {
+               return `URI="/proxy?url=${encodeURIComponent(absoluteUrl)}"`;
+             }
+             return `URI="${absoluteUrl}"`;
           });
         }
         return line;
