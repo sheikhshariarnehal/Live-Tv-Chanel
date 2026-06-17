@@ -122,9 +122,16 @@ function getPlaybackUrl(url) {
 
 // ===== Load channels data from cached server endpoint =====
 async function loadChannelsData() {
+  errorOverlay.classList.remove('active');
+
+  if (window.initialChannelsData) {
+    channelsData = window.initialChannelsData;
+    initializeUI();
+    return;
+  }
+
   categoryTabsContainer.innerHTML = '<p class="loading-text" style="padding: 1rem;">Loading channels...</p>';
   channelGridContainer.innerHTML = '';
-  errorOverlay.classList.remove('active');
 
   try {
     const response = await fetch('/api/channels');
@@ -200,11 +207,27 @@ function playChannelById(channelId) {
   playChannel(button, channel.url, channel.name, channel.fallbackUrl);
 }
 
+// ===== Toggle Category Visibility for Pre-rendered Grid =====
+function toggleCategoryVisibility(categoryKey) {
+  const categoryDivs = channelGridContainer.querySelectorAll('.channel-category');
+  categoryDivs.forEach(div => {
+    if (div.dataset.category === categoryKey) {
+      div.style.display = '';
+    } else {
+      div.style.display = 'none';
+    }
+  });
+}
+
 // ===== Initialize UI with tabs and channels =====
 function initializeUI() {
   if (!channelsData || !channelsData.categories) return;
   
-  createCategoryTabs();
+  const hasPrerendered = channelGridContainer.querySelector('.channel-category') !== null;
+  
+  if (!hasPrerendered) {
+    createCategoryTabs();
+  }
   
   // Determine which channel to play first
   const activeChannelId = document.body.dataset.activeChannelId;
@@ -216,7 +239,11 @@ function initializeUI() {
   const match = findChannelByIdOrSlug(initialChannelId);
   if (match) {
     currentCategory = match.categoryKey;
-    renderChannelsForCategory(currentCategory);
+    if (!hasPrerendered) {
+      renderChannelsForCategory(currentCategory);
+    } else {
+      toggleCategoryVisibility(currentCategory);
+    }
     
     const tabs = categoryTabsContainer.querySelectorAll('.tab-btn');
     tabs.forEach(tab => {
@@ -236,7 +263,11 @@ function initializeUI() {
     const categoryKeys = Object.keys(channelsData.categories);
     if (categoryKeys.length > 0) {
       currentCategory = categoryKeys[0];
-      renderChannelsForCategory(currentCategory);
+      if (!hasPrerendered) {
+        renderChannelsForCategory(currentCategory);
+      } else {
+        toggleCategoryVisibility(currentCategory);
+      }
     }
     
     setupEventListeners();
@@ -275,6 +306,12 @@ function createCategoryTabs() {
 
 // ===== Render channels only for the active category =====
 function renderChannelsForCategory(categoryKey) {
+  const hasPrerendered = channelGridContainer.querySelector('.channel-category') !== null;
+  if (hasPrerendered) {
+    toggleCategoryVisibility(categoryKey);
+    return;
+  }
+
   channelGridContainer.innerHTML = '';
   
   const category = channelsData.categories[categoryKey];
@@ -687,24 +724,28 @@ async function playChannel(button, url, channelName, fallbackUrl = null) {
       `;
     }
 
-    // 1. Dynamic load ArtPlayer if not present
+    // Load player engine and specific playback engine in parallel to optimize latency
+    const enginePromises = [];
     if (typeof Artplayer === 'undefined') {
-      await loadScript('https://cdn.jsdelivr.net/npm/artplayer/dist/artplayer.js');
+      enginePromises.push(loadScript('https://cdn.jsdelivr.net/npm/artplayer/dist/artplayer.js'));
     }
 
-    // 2. Load the specific playback engine if needed
     if (isTs) {
       if (typeof mpegts === 'undefined') {
-        await loadScript('https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js');
+        enginePromises.push(loadScript('https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js'));
       }
     } else if (isMpd) {
       if (typeof shaka === 'undefined') {
-        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/shaka-player.compiled.js');
+        enginePromises.push(loadScript('https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/shaka-player.compiled.js'));
       }
     } else {
       if (typeof Hls === 'undefined') {
-        await loadScript('https://cdn.jsdelivr.net/npm/hls.js@latest');
+        enginePromises.push(loadScript('https://cdn.jsdelivr.net/npm/hls.js@latest'));
       }
+    }
+
+    if (enginePromises.length > 0) {
+      await Promise.all(enginePromises);
     }
 
     // 3. Initialize ArtPlayer

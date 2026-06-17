@@ -1,5 +1,38 @@
 ---
 import '../styles/css/style.css';
+import channelsData from '../../public/assets/data/channels.json';
+
+const categories = channelsData.categories;
+const categoryKeys = Object.keys(categories);
+
+function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '');
+}
+
+function getChannelSlug(channel) {
+  const nameSlug = slugify(channel.name);
+  const id = channel.id;
+  if (id.startsWith(nameSlug) || id.endsWith(nameSlug)) {
+    return id;
+  }
+  return `${nameSlug}-${id}`;
+}
+
+function getPlaybackUrl(url) {
+  if (!url) return '';
+  if (url.startsWith('http://')) {
+    return '/proxy?url=' + encodeURIComponent(url);
+  }
+  return url;
+}
 
 interface Props {
   title?: string;
@@ -65,6 +98,8 @@ const {
   <!-- Scripts & Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Schema.org JSON-LD Structured Data -->
@@ -156,12 +191,54 @@ const {
 
           <!-- Category Tabs -->
           <div class="category-tabs" id="categoryTabs">
-            <!-- Tabs will be dynamically loaded -->
+            {categoryKeys.map((catKey, index) => (
+              <button 
+                class={`tab-btn ${index === 0 ? 'active' : ''}`} 
+                data-category={catKey}
+              >
+                {categories[catKey].name}
+              </button>
+            ))}
           </div>
 
           <!-- Channel Grid -->
           <div class="channel-grid" id="channelGrid">
-            <!-- Channels will be dynamically loaded -->
+            {categoryKeys.map((catKey, index) => (
+              <div 
+                class="channel-category" 
+                data-category={catKey} 
+                style={index === 0 ? '' : 'display: none;'}
+              >
+                {categories[catKey].channels.map((channel, chIndex) => {
+                  const logoSrc = getPlaybackUrl(channel.logo);
+                  const loadType = (index === 0 && chIndex < 8) ? 'eager' : 'lazy';
+                  return (
+                    <button 
+                      class="channel-btn" 
+                      data-url={channel.url} 
+                      data-fallback-url={channel.fallbackUrl || ''} 
+                      data-channel-id={channel.id} 
+                      data-channel-name={channel.name}
+                      title={channel.name}
+                    >
+                      {channel.logo ? (
+                        <img 
+                          src={logoSrc} 
+                          alt={channel.name} 
+                          class="channel-logo" 
+                          loading={loadType}
+                          style="opacity: 0; transition: opacity 0.2s ease-in;"
+                          onload="this.style.opacity='1'"
+                          onerror="this.remove(); const span = document.createElement('span'); span.className = 'channel-name'; span.textContent = this.alt; this.parentNode.appendChild(span);"
+                        />
+                      ) : (
+                        <span class="channel-name">{channel.name}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
       ) : (
@@ -170,6 +247,7 @@ const {
     </div>
   </div>
 
+  <script is:inline set:html={`window.initialChannelsData = ${JSON.stringify(channelsData)};`} />
   <script>
     import '../scripts/js/security.js';
     import '../scripts/js/script.js';
