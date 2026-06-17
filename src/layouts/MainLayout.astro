@@ -247,7 +247,7 @@ const {
     </div>
   </div>
 
-  <script is:inline set:html={`window.initialChannelsData = ${JSON.stringify(channelsData)};`} />
+  <script is:inline set:html={"window.initialChannelsData = " + JSON.stringify(channelsData).replace(/</g, '\\u003c') + ";"} />
   <script>
     import '../scripts/js/security.js';
     import '../scripts/js/script.js';
