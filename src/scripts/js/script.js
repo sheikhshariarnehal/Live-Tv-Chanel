@@ -87,27 +87,55 @@ function loadScript(url) {
   });
 }
 
-function getPlaybackUrl(url) {
+function getLogoUrl(url) {
   if (!url) return '';
-  
-  // If already proxied, return as-is
-  if (url.startsWith('/proxy?url=')) {
-    return url;
-  }
-  
   const rawUrl = getRawUrl(url);
+  if (window.location.protocol === 'https:' && rawUrl.startsWith('http://') && !isPrivateIP(rawUrl)) {
+    return '/proxy?url=' + encodeURIComponent(rawUrl);
+  }
+  return rawUrl;
+}
+
+function getPlaybackStrategy(channel, forceProxy = false) {
+  if (!channel || !channel.url) return 'direct';
+  const url = channel.url;
   
-  if (window.location.protocol === 'https:') {
-    // On HTTPS: public HTTP urls must be proxied to prevent mixed content blocking.
-    // Private IPs cannot be proxied (they won't be reachable by the VPS anyway), so return them as-is.
-    if (rawUrl.startsWith('http://') && !isPrivateIP(rawUrl)) {
-      return '/proxy?url=' + encodeURIComponent(rawUrl);
+  if (forceProxy) {
+    if (url.endsWith('.ts') || url.includes('.ts?')) {
+      return 'proxy-stream';
+    }
+    return 'proxy';
+  }
+
+  if (url.endsWith('.mpd') || url.includes('.mpd?') || channel.drm) {
+    return 'drm';
+  }
+
+  if (url.endsWith('.ts') || url.includes('.ts?')) {
+    return 'proxy-stream';
+  }
+
+  if (url.startsWith('http://')) {
+    return 'proxy';
+  }
+
+  return 'direct';
+}
+
+function enrichChannelsMetadata() {
+  if (!channelsData || !channelsData.categories) return;
+  const categories = channelsData.categories;
+  for (const catKey in categories) {
+    const category = categories[catKey];
+    if (category.channels) {
+      category.channels = category.channels.map(channel => {
+        return {
+          ...channel,
+          playbackMode: getPlaybackStrategy(channel)
+        };
+      });
     }
   }
-  
-  // Otherwise, return rawUrl and let it try direct playback.
-  // If it fails, the error handler will fallback to the proxy.
-  return rawUrl;
 }
 
 // ===== Load channels data from cached server endpoint =====
@@ -212,6 +240,7 @@ function toggleCategoryVisibility(categoryKey) {
 // ===== Initialize UI with tabs and channels =====
 function initializeUI() {
   if (!channelsData || !channelsData.categories) return;
+  enrichChannelsMetadata();
   
   const hasPrerendered = channelGridContainer.querySelector('.channel-category') !== null;
   
@@ -339,7 +368,7 @@ function createChannelButton(channel) {
   
   if (channel.logo) {
     const img = document.createElement('img');
-    img.src = getPlaybackUrl(channel.logo);
+    img.src = getLogoUrl(channel.logo);
     img.alt = channel.name;
     img.className = 'channel-logo';
     img.loading = 'lazy';
@@ -398,21 +427,20 @@ function showPlayerError(channelName, url) {
 
 // ===== Handle Playback Errors & Fallback =====
 function handlePlaybackError(button, url, channelName, fallbackUrl) {
-  // If this stream was played directly (not proxied) and it's not a private IP,
-  // we can try proxying it as a fallback.
-  if (url && !url.startsWith('/proxy?url=') && !isPrivateIP(url)) {
-    const proxiedUrl = '/proxy?url=' + encodeURIComponent(url);
-    console.log(`Direct playback failed for ${channelName}. Retrying via proxy: ${proxiedUrl}`);
+  // If direct playback (direct or drm played directly) failed, retry via proxy
+  const wasProxied = url.startsWith('/proxy?url=');
+  if (!wasProxied && !isPrivateIP(url)) {
+    console.log(`[PLAYBACK] Direct failed, falling back to proxy: ${channelName}`);
     showError(`Retrying ${channelName} via proxy...`);
-    playChannel(button, proxiedUrl, channelName, fallbackUrl);
+    playChannel(button, url, channelName, fallbackUrl, true);
     return;
   }
 
   // If already proxied or direct failed and cannot be proxied, try the fallback URL
   if (fallbackUrl && fallbackUrl !== '' && fallbackUrl !== 'null' && fallbackUrl !== 'undefined') {
-    console.log(`Primary stream failed for ${channelName}. Trying fallback URL: ${fallbackUrl}`);
+    console.log(`[PLAYBACK] Proxy failed for ${channelName}. Trying fallback URL: ${fallbackUrl}`);
     showError(`Switching to fallback stream for ${channelName}...`);
-    playChannel(button, fallbackUrl, channelName, null);
+    playChannel(button, fallbackUrl, channelName, null, false);
   } else {
     showPlayerError(channelName, url);
   }
@@ -675,7 +703,7 @@ function initializeShakaPlayer(video, url, artPlayer) {
 }
 
 // ===== Play channel =====
-async function playChannel(button, url, channelName, fallbackUrl = null) {
+async function playChannel(button, url, channelName, fallbackUrl = null, forceProxy = false) {
   errorOverlay.classList.remove('active');
   
   lastSelectedChannelBtn = button;
@@ -690,9 +718,34 @@ async function playChannel(button, url, channelName, fallbackUrl = null) {
     }
   }
 
-  const playbackUrl = getPlaybackUrl(url);
-  const isTs = playbackUrl.includes('.ts');
-  const isMpd = playbackUrl.includes('.mpd');
+  // Find the enriched channel object to classify playback mode
+  const channelId = button ? button.dataset.channelId : null;
+  const match = findChannelByIdOrSlug(channelId);
+  const channel = match ? match.channel : { url, name: channelName };
+
+  // Classify strategy
+  const strategy = getPlaybackStrategy(channel, forceProxy);
+
+  // Log play mode
+  const logPrefix = '[PLAYBACK]';
+  if (strategy === 'direct') {
+    console.log(`${logPrefix} Direct: ${channel.name}`);
+  } else if (strategy === 'proxy') {
+    console.log(`${logPrefix} Proxy: ${channel.name}`);
+  } else if (strategy === 'proxy-stream') {
+    console.log(`${logPrefix} Proxy Stream: ${channel.name}`);
+  } else if (strategy === 'drm') {
+    console.log(`${logPrefix} DRM: ${channel.name}`);
+  }
+
+  // Determine actual playback URL
+  let playbackUrl = url;
+  if (strategy === 'proxy' || strategy === 'proxy-stream') {
+    playbackUrl = '/proxy?url=' + encodeURIComponent(url);
+  }
+
+  const isTs = (strategy === 'proxy-stream');
+  const isMpd = (strategy === 'drm');
 
   try {
     // Destroy previous player inside try block safely using destroy(false) to keep container

@@ -32,7 +32,7 @@ export async function GET({ request }) {
     return new Response('Target URL required', { status: 400 });
   }
 
-  // 1. Check in-memory cache first
+  // 1. Check in-memory cache first (only for m3u8 and mpd playlists)
   const cached = cache.get(targetUrl);
   if (cached && Date.now() < cached.expiresAt) {
     const headers = new Headers(cached.headers);
@@ -72,16 +72,9 @@ export async function GET({ request }) {
     headers.set('Access-Control-Allow-Headers', '*');
     headers.set('X-Proxy-Cache', 'MISS');
 
-    const lowerUrl = targetUrl.toLowerCase();
     const contentType = response.headers.get('content-type') || '';
     const isMpd = targetUrl.includes('.mpd') || contentType.includes('application/dash+xml') || contentType.includes('video/vnd.mpeg.dash.mpd');
     const isM3u8 = contentType.includes('application/vnd.apple.mpegurl') || contentType.includes('application/x-mpegurl') || targetUrl.includes('.m3u8');
-    const isSegment = lowerUrl.includes('.ts') || lowerUrl.includes('.m4s') || lowerUrl.includes('.m4i') || lowerUrl.includes('.dash') || lowerUrl.includes('.mp4') || lowerUrl.includes('.m4v');
-
-    // Optimize caching for video segments (they are static/immutable and do not change)
-    if (isSegment) {
-      headers.set('Cache-Control', 'public, max-age=31536000, immutable');
-    }
 
     // A. Handle DASH manifests (.mpd) to resolve relative segment paths
     if (isMpd) {
@@ -188,36 +181,8 @@ export async function GET({ request }) {
       });
     }
 
-    // C. Cache video segments in memory to prevent duplicate requests from spikes
-    if (isSegment && response.ok) {
-      const buffer = await response.arrayBuffer();
-
-      const cachedHeaders = {};
-      headersToCopy.forEach(h => {
-        const val = response.headers.get(h);
-        if (val) cachedHeaders[h] = val;
-      });
-      cachedHeaders['Access-Control-Allow-Origin'] = '*';
-      cachedHeaders['Access-Control-Allow-Methods'] = 'GET, OPTIONS';
-      cachedHeaders['Access-Control-Allow-Headers'] = '*';
-      cachedHeaders['Cache-Control'] = 'public, max-age=31536000, immutable';
-
-      cache.set(targetUrl, {
-        body: buffer,
-        status: response.status,
-        headers: cachedHeaders,
-        expiresAt: Date.now() + 15000 // Cache segments for 15 seconds
-      });
-
-      const resHeaders = new Headers(cachedHeaders);
-      resHeaders.set('X-Proxy-Cache', 'MISS');
-      return new Response(buffer, {
-        status: response.status,
-        headers: resHeaders
-      });
-    }
-
-    // Default fallback (uncached)
+    // Default fallback (uncached continuous MPEG-TS streams or general redirects/errors)
+    // Streams the body directly to prevent buffering infinite live streams in memory
     return new Response(response.body, {
       status: response.status,
       headers
