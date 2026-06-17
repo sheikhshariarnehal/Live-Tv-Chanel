@@ -1,3 +1,15 @@
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': '*',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
+
 export async function GET({ request }) {
   const url = new URL(request.url);
   const targetUrl = url.searchParams.get('url');
@@ -14,7 +26,11 @@ export async function GET({ request }) {
     const response = await fetch(targetUrl, {
       signal: controller.signal,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        'Accept': '*/*',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
       }
     });
 
@@ -22,12 +38,16 @@ export async function GET({ request }) {
 
     const headers = new Headers();
     // Copy only safe/essential headers to avoid encoding or transmission conflicts on Vercel
-    const headersToCopy = ['content-type', 'content-length', 'cache-control'];
+    // Note: Do not copy 'content-length' because Node's fetch decompresses gzip/deflate/br bodies automatically,
+    // which results in a mismatch between the decompressed body and the original compressed content-length.
+    const headersToCopy = ['content-type', 'cache-control'];
     headersToCopy.forEach(h => {
       const val = response.headers.get(h);
       if (val) headers.set(h, val);
     });
     headers.set('Access-Control-Allow-Origin', '*');
+    headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    headers.set('Access-Control-Allow-Headers', '*');
 
     // Optimize caching for video segments (they are static/immutable and do not change)
     const lowerUrl = targetUrl.toLowerCase();

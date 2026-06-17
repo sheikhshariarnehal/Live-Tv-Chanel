@@ -89,34 +89,24 @@ function loadScript(url) {
 
 function getPlaybackUrl(url) {
   if (!url) return '';
+  
+  // If already proxied, return as-is
+  if (url.startsWith('/proxy?url=')) {
+    return url;
+  }
+  
   const rawUrl = getRawUrl(url);
   
   if (window.location.protocol === 'https:') {
-    // On HTTPS (Vercel): private/BDIX IPs cannot be proxied by Vercel serverless function.
-    // They must be fetched directly.
-    if (isPrivateIP(rawUrl)) {
-      return rawUrl;
-    }
-    // Public HTTP urls must be proxied to prevent mixed content blocking
-    if (rawUrl.startsWith('http://')) {
+    // On HTTPS: public HTTP urls must be proxied to prevent mixed content blocking.
+    // Private IPs cannot be proxied (they won't be reachable by the VPS anyway), so return them as-is.
+    if (rawUrl.startsWith('http://') && !isPrivateIP(rawUrl)) {
       return '/proxy?url=' + encodeURIComponent(rawUrl);
-    }
-    // Proxy HTTPS manifest files (m3u8/mpd) to bypass CORS issues on restricted CDNs
-    if (rawUrl.startsWith('https://') && (rawUrl.includes('.m3u8') || rawUrl.includes('.mpd'))) {
-      return '/proxy?url=' + encodeURIComponent(rawUrl);
-    }
-  } else {
-    // On HTTP (local): proxy everything using the local proxy to bypass CORS
-    // since the local server has network connectivity.
-    if (url.startsWith('/proxy?url=')) {
-      return url;
-    }
-    if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) {
-      if (!isPrivateIP(rawUrl)) {
-        return '/proxy?url=' + encodeURIComponent(rawUrl);
-      }
     }
   }
+  
+  // Otherwise, return rawUrl and let it try direct playback.
+  // If it fails, the error handler will fallback to the proxy.
   return rawUrl;
 }
 
@@ -408,6 +398,17 @@ function showPlayerError(channelName, url) {
 
 // ===== Handle Playback Errors & Fallback =====
 function handlePlaybackError(button, url, channelName, fallbackUrl) {
+  // If this stream was played directly (not proxied) and it's not a private IP,
+  // we can try proxying it as a fallback.
+  if (url && !url.startsWith('/proxy?url=') && !isPrivateIP(url)) {
+    const proxiedUrl = '/proxy?url=' + encodeURIComponent(url);
+    console.log(`Direct playback failed for ${channelName}. Retrying via proxy: ${proxiedUrl}`);
+    showError(`Retrying ${channelName} via proxy...`);
+    playChannel(button, proxiedUrl, channelName, fallbackUrl);
+    return;
+  }
+
+  // If already proxied or direct failed and cannot be proxied, try the fallback URL
   if (fallbackUrl && fallbackUrl !== '' && fallbackUrl !== 'null' && fallbackUrl !== 'undefined') {
     console.log(`Primary stream failed for ${channelName}. Trying fallback URL: ${fallbackUrl}`);
     showError(`Switching to fallback stream for ${channelName}...`);
