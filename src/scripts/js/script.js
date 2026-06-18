@@ -396,8 +396,20 @@ function showPlayerError(channelName, url) {
   
   const rawUrl = getRawUrl(url);
   const isPrivate = isPrivateIP(rawUrl);
+  const channelId = lastSelectedChannelBtn ? lastSelectedChannelBtn.dataset.channelId : null;
+  const match = findChannelByIdOrSlug(channelId);
+  const channel = match ? match.channel : null;
+  const isDrm = url.endsWith('.mpd') || url.includes('.mpd?') || (channel && !!channel.drm);
   
-  if (isPrivate) {
+  if (isDrm) {
+    errorDesc.innerHTML = `
+      Failed to load <strong>${channelName}</strong>.<br><br>
+      This channel uses DRM protection. Your browser or device might not support the required decryption technologies, or the stream keys may have expired.<br><br>
+      <strong>How to fix:</strong><br>
+      1. Ensure you are using a modern browser like Google Chrome, Microsoft Edge, or Firefox.<br>
+      2. If you are on an older device, DRM playback may not be supported.
+    `;
+  } else if (isPrivate) {
     if (window.location.protocol === 'https:') {
       errorDesc.innerHTML = `
         Failed to load <strong>${channelName}</strong>.<br><br>
@@ -427,6 +439,17 @@ function showPlayerError(channelName, url) {
 
 // ===== Handle Playback Errors & Fallback =====
 function handlePlaybackError(button, url, channelName, fallbackUrl) {
+  const channelId = button ? button.dataset.channelId : null;
+  const match = findChannelByIdOrSlug(channelId);
+  const channel = match ? match.channel : { url, name: channelName };
+  const isDrm = (channel.url.endsWith('.mpd') || channel.url.includes('.mpd?') || !!channel.drm);
+
+  if (isDrm) {
+    console.error(`[DRM] Shaka error / playback failed for: ${channelName}`);
+    showPlayerError(channelName, url);
+    return;
+  }
+
   // If direct playback (direct or drm played directly) failed, retry via proxy
   const wasProxied = url.startsWith('/proxy?url=');
   if (!wasProxied && !isPrivateIP(url)) {
@@ -633,6 +656,7 @@ function playMpd(video, url, artPlayer) {
       .catch(err => {
         console.error('Failed to load Shaka Player script:', err);
         showError('Your browser does not support DASH streaming.');
+        handlePlaybackError(lastSelectedChannelBtn, url, lastSelectedChannelName, null);
       });
   } else {
     initializeShakaPlayer(video, url, artPlayer);
@@ -659,9 +683,11 @@ function initializeShakaPlayer(video, url, artPlayer) {
   
   const player = new shaka.Player(video);
   artPlayer.shaka = player;
+  console.log('[DRM] Shaka initialized');
   
   player.addEventListener('error', (event) => {
-    console.error('Shaka Player error event:', event.detail);
+    console.error('[DRM] Shaka error', event.detail);
+    console.log('[DRM] Shaka error');
     if (event.detail && event.detail.severity === shaka.util.Error.Severity.CRITICAL) {
       artPlayer.emit('video:error', event.detail);
     }
@@ -673,20 +699,29 @@ function initializeShakaPlayer(video, url, artPlayer) {
   const drm = channel ? channel.drm : null;
   
   if (drm && drm.kid && drm.key) {
-    console.log(`Configuring ClearKey DRM for channel: ${channel.name}`);
-    player.configure({
-      drm: {
-        clearKeys: {
-          [drm.kid.trim()]: drm.key.trim()
+    try {
+      player.configure({
+        drm: {
+          clearKeys: {
+            [drm.kid.trim()]: drm.key.trim()
+          }
         }
-      }
-    });
+      });
+      console.log('[DRM] ClearKey configured');
+    } catch (e) {
+      console.error('[DRM] License configuration failed', e);
+      console.log('[DRM] License configuration failed');
+    }
   }
   
   player.load(url).then(() => {
-    console.log('Shaka Player successfully loaded the stream:', url);
+    console.log('[DRM] Manifest loaded');
+    video.addEventListener('playing', () => {
+      console.log('[DRM] Playback started');
+    }, { once: true });
   }).catch((error) => {
-    console.error('Shaka Player load error:', error);
+    console.error('[DRM] Manifest load failed', error);
+    console.log('[DRM] Manifest load failed');
     artPlayer.emit('video:error', error);
   });
   

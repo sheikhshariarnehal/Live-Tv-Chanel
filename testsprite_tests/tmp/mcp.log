@@ -4053,3 +4053,5 @@
 {"timestamp":"2026-06-18T07:39:41.684Z","level":"warn","message":"[TunnelClient] Control websocket closed (code=1006, reason=<empty>)","context":{"tunnelVersion":"2"}}
 {"timestamp":"2026-06-18T07:39:41.454Z","level":"debug","message":"[TunnelClient] Yamux session closed: tunnel_OHvpfmWxceEVFqQw"}
 {"timestamp":"2026-06-18T07:39:41.455Z","level":"debug","message":"[TunnelClient] Tunnel stream close: 806a4d37-4cbe-4d32-ac83-612133e93c7b (proxy_TuL07Q3fYQQcglJJ, tunnel_OHvpfmWxceEVFqQw, stream 378)"}
+{"timestamp":"2026-06-18T07:39:55.756Z","level":"debug","message":"[TunnelClient] Target close: 806a4d37-4cbe-4d32-ac83-612133e93c7b (proxy_TuL07Q3fYQQcglJJ, tunnel_OHvpfmWxceEVFqQw, stream 378)","context":{"tunnelVersion":"2"}}
+{"timestamp":"2026-06-18T07:39:55.755Z","level":"debug","message":"[TunnelClient] Target end: 806a4d37-4cbe-4d32-ac83-612133e93c7b (proxy_TuL07Q3fYQQcglJJ, tunnel_OHvpfmWxceEVFqQw, stream 378)","context":{"tunnelVersion":"2"}}
