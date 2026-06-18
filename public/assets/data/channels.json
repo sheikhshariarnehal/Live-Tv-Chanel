@@ -10,34 +10,16 @@
           "logo": "https://staytunedmag.com/wp-content/uploads/2026/06/FIFAWorldCup2026BB-678x381.jpg"
         },
         {
-          "id": "sports-beinsports-1",
-          "name": "BeINSports-1",
-          "url": "http://starhub.pro/live/farhat-3379/67897-913379/744517.ts",
-          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
-        },
-        {
           "id": "sports-cazetv",
           "name": "CazeTV",
           "url": "https://dfr80qz435crc.cloudfront.net/MNOP/Amagi/Caze/Caze_TV_BR/1080p-vtt/index.m3u8",
           "logo": "https://images.seeklogo.com/logo-png/61/1/cazetv-logo-png_seeklogo-619708.png"
         },
         {
-          "id": "sports-foxsports",
-          "name": "FoxSports",
-          "url": "http://84.17.50.102/fox/index.m3u8",
-          "logo": "https://variety.com/wp-content/uploads/2023/08/Fox-Sports.png?w=1000&h=563&crop=1"
-        },
-        {
           "id": "sports-beinsports",
           "name": "BeinSports",
           "url": "https://bein-esp-xumo.amagi.tv/playlistR1080p.m3u8",
           "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCXstZBALCMN8PSOTNgRTE_cVr2p1U7m5SLQ&s"
-        },
-        {
-          "id": "worldcup-hindi-002",
-          "name": "World Cup 2026 Hindi",
-          "url": "http://starhub.pro/live/farhat-3379/67897-913379/741567.ts",
-          "logo": "https://exchange4media.gumlet.io/news-photo/155155-Z1.jpg"
         },
         {
           "id": "sports-channelone",
@@ -52,22 +34,14 @@
           "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
         },
         {
-          "id": "sports-beinsports-2",
-          "name": "BeINSports-2",
-          "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78379.ts",
-          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
-        },
-        {
-          "id": "sports-beinsports-4",
-          "name": "BeINSports-4",
-          "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78381.ts",
-          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
-        },
-        {
-          "id": "sports-beinsports-5",
-          "name": "BeINSports-5",
-          "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78382.ts",
-          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
+          "id": "telemundo-aq",
+          "name": "TELEMUNDO-AQ",
+          "url": "https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s-v2/Live/channel(kvea)/master.mpd",
+          "logo": "https://duckduckgo.com/i/2e3815a5b7ddd3c9.png",
+          "drm": {
+            "kid": "ce7ab3022e753307997f58afe001bac4",
+            "key": "72d631a66e635c60829a0fe7705516c1"
+          }
         },
         {
           "id": "sporza-dutch-aq",
@@ -78,18 +52,22 @@
             "kid": "893bc63340876605f52886a42e0ccce5",
             "key": "d6c46d2d691056fbd091bf1f01b21a91"
           }
+        },
+        {
+          "id": "clkj29ujuws52g1vw",
+          "name": "FOX SPORTS AQ",
+          "url": "https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s-v2/Live/channel(kvea)/master.mpd",
+          "logo": "https://images.seeklogo.com/logo-png/28/1/fox-sports-logo-png_seeklogo-284763.png",
+          "drm": {
+            "kid": "ce7ab3022e753307997f58afe001bac4",
+            "key": "72d631a66e635c60829a0fe7705516c1"
+          }
         }
       ]
     },
     "movies": {
       "name": "Movies",
       "channels": [
-        {
-          "id": "movie-bangla-12438",
-          "name": "Movie Bangla",
-          "url": "http://str2.v3v3v.xyz:2082/live/rokhsi25_951396/POm6KqnW/277428.ts",
-          "logo": "https://imglink.cc/cdn/B1Dn0E5UKs.png"
-        },
         {
           "id": "goldmines-12381",
           "name": "Goldmines",

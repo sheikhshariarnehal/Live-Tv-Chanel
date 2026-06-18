@@ -1,0 +1,299 @@
+[
+  {
+    "id": "TC001",
+    "title": "Load the homepage live player and start watching a channel",
+    "description": "This verifies that a viewer can open the homepage, see the live player and channel list, pick a category, and start playback successfully.",
+    "category": "Streaming Video Player",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the live player and channel list to load"
+      },
+      {
+        "type": "action",
+        "description": "Select a category tab"
+      },
+      {
+        "type": "action",
+        "description": "Choose a live channel from the list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the selected stream is playing"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the active channel state is shown"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC002",
+    "title": "Unlock audio on the first interaction and keep watching",
+    "description": "This verifies that a first user interaction enables audio for the live player and playback continues afterward.",
+    "category": "Streaming Video Player",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the live player to load"
+      },
+      {
+        "type": "action",
+        "description": "Choose a live channel from the list"
+      },
+      {
+        "type": "action",
+        "description": "Interact with the player to unlock audio"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify audio is available for playback"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the live stream continues playing"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC003",
+    "title": "Recover playback after a stream load failure",
+    "description": "This verifies that when a stream fails to load, the error overlay appears and Retry restores playback.",
+    "category": "Streaming Video Player",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the live player to load"
+      },
+      {
+        "type": "action",
+        "description": "Choose a channel that fails to load"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a stream load failure overlay is visible"
+      },
+      {
+        "type": "action",
+        "description": "Retry playback"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify playback starts again"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC004",
+    "title": "Switch channels and categories without breaking playback on the homepage",
+    "description": "This verifies that a viewer can change category tabs and switch streams in the homepage player while the active channel updates correctly.",
+    "category": "Streaming Video Player",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the live player and channel list to load"
+      },
+      {
+        "type": "action",
+        "description": "Select one category tab"
+      },
+      {
+        "type": "action",
+        "description": "Choose a live channel from that category"
+      },
+      {
+        "type": "action",
+        "description": "Select a different category tab"
+      },
+      {
+        "type": "action",
+        "description": "Choose another live channel"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the active channel changes to the new stream"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify playback remains active"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC005",
+    "title": "Open a dedicated channel page and switch to another channel",
+    "description": "This verifies that a viewer can open /watch/:id, change category, and switch to a different live stream on the dedicated playback page.",
+    "category": "Streaming Video Player",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /watch"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the channel directory to load"
+      },
+      {
+        "type": "action",
+        "description": "Open a channel card to start playback"
+      },
+      {
+        "type": "action",
+        "description": "Select a different category tab"
+      },
+      {
+        "type": "action",
+        "description": "Choose another live channel"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new stream is playing on the dedicated page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the active channel state reflects the selected channel"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC006",
+    "title": "Browse the channel directory by category counts",
+    "description": "This verifies that a browser can open the directory, inspect category counts, filter by category, and see the channel list update accordingly.",
+    "category": "Channel Explorer Directory",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /watch"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the channel directory to load"
+      },
+      {
+        "type": "action",
+        "description": "View the category counts"
+      },
+      {
+        "type": "action",
+        "description": "Select a category filter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the channel list updates to match the selected category"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify channels remain visible in the filtered directory"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC007",
+    "title": "Search for a channel and open it from the directory",
+    "description": "This verifies that a browser can search by channel name or ID, see filtered results, and open a matching channel to start playback.",
+    "category": "Channel Explorer Directory",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /watch"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the channel directory to load"
+      },
+      {
+        "type": "action",
+        "description": "Type a valid channel search query into the search field"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the channel list is filtered to matching results"
+      },
+      {
+        "type": "action",
+        "description": "Open a matching channel card"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify playback starts for the selected channel"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC008",
+    "title": "Show an empty state when no channels match the search",
+    "description": "This verifies that entering a query with no matches shows an empty results state instead of a broken list.",
+    "category": "Channel Explorer Directory",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /watch"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the channel directory to load"
+      },
+      {
+        "type": "action",
+        "description": "Type a query that matches no channels into the search field"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an empty search results state is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no channel cards are shown"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC009",
+    "title": "Handle an invalid or missing channel page gracefully",
+    "description": "This verifies that opening an invalid channel page shows a clear not-found or invalid-channel state instead of playback.",
+    "category": "Streaming Video Player",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /watch"
+      },
+      {
+        "type": "action",
+        "description": "Open a channel page with an invalid channel identifier"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an invalid channel state is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify playback does not start"
+      }
+    ],
+    "priority": "Low"
+  }
+]

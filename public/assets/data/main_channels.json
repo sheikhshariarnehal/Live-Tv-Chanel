@@ -1,0 +1,217 @@
+{
+  "categories": {
+    "sports": {
+      "name": "Sports",
+      "channels": [
+        {
+          "id": "world-cup-2026",
+          "name": "World Cup 2026",
+          "url": "https://d1211whpimeups.cloudfront.net/smil:rtbgo/chunklist.m3u8",
+          "logo": "https://staytunedmag.com/wp-content/uploads/2026/06/FIFAWorldCup2026BB-678x381.jpg"
+        },
+        {
+          "id": "sports-beinsports-1",
+          "name": "BeINSports-1",
+          "url": "http://starhub.pro/live/farhat-3379/67897-913379/744517.ts",
+          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
+        },
+        {
+          "id": "sports-cazetv",
+          "name": "CazeTV",
+          "url": "https://dfr80qz435crc.cloudfront.net/MNOP/Amagi/Caze/Caze_TV_BR/1080p-vtt/index.m3u8",
+          "logo": "https://images.seeklogo.com/logo-png/61/1/cazetv-logo-png_seeklogo-619708.png"
+        },
+        {
+          "id": "sports-foxsports",
+          "name": "FoxSports",
+          "url": "http://84.17.50.102/fox/index.m3u8",
+          "logo": "https://variety.com/wp-content/uploads/2023/08/Fox-Sports.png?w=1000&h=563&crop=1"
+        },
+        {
+          "id": "sports-beinsports",
+          "name": "BeinSports",
+          "url": "https://bein-esp-xumo.amagi.tv/playlistR1080p.m3u8",
+          "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCXstZBALCMN8PSOTNgRTE_cVr2p1U7m5SLQ&s"
+        },
+        {
+          "id": "worldcup-hindi-002",
+          "name": "World Cup 2026 Hindi",
+          "url": "http://starhub.pro/live/farhat-3379/67897-913379/741567.ts",
+          "logo": "https://exchange4media.gumlet.io/news-photo/155155-Z1.jpg"
+        },
+        {
+          "id": "sports-channelone",
+          "name": "ChannelOne",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1702/output/1702-audio_113322_eng=113200-video=2202800.m3u8",
+          "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7HR0auERCGfI1w4fkZ-uIcWg97c32LpEd_0Hr7aRh7cKsAb1URzjCG2c&s=10"
+        },
+        {
+          "id": "sports-beinsports-xtra",
+          "name": "Beinsports-Xtra",
+          "url": "https://bein-esp-xumo.amagi.tv/playlistR1080p.m3u8",
+          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
+        },
+        {
+          "id": "sports-beinsports-2",
+          "name": "BeINSports-2",
+          "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78379.ts",
+          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
+        },
+        {
+          "id": "sports-beinsports-4",
+          "name": "BeINSports-4",
+          "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78381.ts",
+          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
+        },
+        {
+          "id": "sports-beinsports-5",
+          "name": "BeINSports-5",
+          "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78382.ts",
+          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
+        },
+        {
+          "id": "sports-dsports",
+          "name": "DSports",
+          "url": "http://147.135.114.221:8001/play/a00m/index.m3u8",
+          "logo": "https://imglink.cc/cdn/eYP_0o2cnt.jpg"
+        },
+        {
+          "id": "telemundo-aq",
+          "name": "TELEMUNDO-AQ",
+          "url": "https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s-v2/Live/channel(kvea)/master.mpd",
+          "logo": "https://duckduckgo.com/i/2e3815a5b7ddd3c9.png",
+          "drm": {
+            "kid": "ce7ab3022e753307997f58afe001bac4",
+            "key": "72d631a66e635c60829a0fe7705516c1"
+          }
+        },
+        {
+          "id": "sporza-dutch-aq",
+          "name": "Sporza DUTCH AQ",
+          "url": "https://live.vrtcdn.be/groupd/live/0761024f-37fe-4254-bc37-e95d7c62b2d1/live.isml/.mpd",
+          "logo": "https://cdn.uc.assets.prezly.com/870d12f1-d1f4-4668-8d25-0e8d79dd8e81/-/preview/-/format/auto/Untitled%20design%20(22).png",
+          "drm": {
+            "kid": "893bc63340876605f52886a42e0ccce5",
+            "key": "d6c46d2d691056fbd091bf1f01b21a91"
+          }
+        },
+        {
+          "id": "clkj29ujuws52g1vw",
+          "name": "FOX SPORTS AQ",
+          "url": "https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s-v2/Live/channel(kvea)/master.mpd",
+          "logo": "https://images.seeklogo.com/logo-png/28/1/fox-sports-logo-png_seeklogo-284763.png",
+          "drm": {
+            "kid": "ce7ab3022e753307997f58afe001bac4",
+            "key": "72d631a66e635c60829a0fe7705516c1"
+          }
+        }
+      ]
+    },
+    "movies": {
+      "name": "Movies",
+      "channels": [
+        {
+          "id": "movie-bangla-12438",
+          "name": "Movie Bangla",
+          "url": "http://str2.v3v3v.xyz:2082/live/rokhsi25_951396/POm6KqnW/277428.ts",
+          "logo": "https://imglink.cc/cdn/B1Dn0E5UKs.png"
+        },
+        {
+          "id": "goldmines-12381",
+          "name": "Goldmines",
+          "url": "https://cdn-2.pishow.tv/live/1459/master.m3u8",
+          "logo": "https://imglink.cc/cdn/E86bN6IAxl.jpg"
+        },
+        {
+          "id": "hindi-classic-24-12385",
+          "name": "Hindi Classic 24",
+          "url": "https://vods2.aynaott.com/hindimovies/index.m3u8",
+          "logo": "https://imglink.cc/cdn/cScI5tEUjV.png"
+        },
+        {
+          "id": "cmq7twb5500wkuh099s6sgvm2",
+          "name": "Action Hollywood Movies",
+          "url": "https://amg01076-lightningintern-actionhollywood-samsungnz-82rry.amagi.tv/playlist/amg01076-lightningintern-actionhollywood-samsungnz/playlist.m3u8",
+          "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgbgpw72MKf3E9wwUk9Srd4tQCL9-XewjnciT9uU03Jw1gGGE7DVniLi0vTwjnNZIRJPym7b8g9_u_qlO8Umncu3YgGBcQUICkc-ZkeqLDLwaeafP6nk2lK1h5OrQwVrQSPDYJXdOEMfPoIuBmonZYyzNFqGGehvHSed8_RN49jzxZ8QvnKTwneteBNVQ/s600/Nur_20251107_002149_0000.png"
+        },
+        {
+          "id": "cmq7twb5500whuh09uf9ieojs",
+          "name": "Ananda TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/anandatv.stream/tracks-v1a1/mono.m3u8",
+          "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi2RNLiL4qhYEVawGUat1HjjDb693C2K8hUpM7xLiuYciPmjwIQ5j7TIevtcnsHdjGBLIZZJbFTAc4nRoys3vyN-IeEiParo1SNH19m-1IbWG9RPRcW_VoPdSDNfNlFD4NWrKoONwxhgYJuLUzaTQ-LpDoQuqyOMx6meiH7QStygj_kx_Yrs17Dz62ccw/s600/Nur_20251216_221801_0000.png"
+        },
+        {
+          "id": "cmq7twb5500wmuh09ga686wp5",
+          "name": "B4U Kadak",
+          "url": "https://amg00877-b4unew-amg00877c4-xiaomi-in-5473.playouts.now.amagi.tv/playlist.m3u8",
+          "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjHljRYH5YMeCunedbeC2Zzcw7aT81fGdvFnpVmICN7XDkIq9BZnUf54TC_4_PiTvgzHIY5Ic5hUMbEO7UkcH0WDanBBSwlX6lslq0kbf5lCWbjJ5vVdMDui6xgo01qSgPuUIbWAphsN3DnZ9r3FsfVZgGUTnYYsgQbAVy_yhdGDm70O7ynQ9s1mE-MgA/s600/Nur_20251219_134934_0000.png"
+        },
+        {
+          "id": "cmq7twb5500wnuh09vorw3kx5",
+          "name": "B4U Movies",
+          "url": "https://amg00877-b4unew-amg00877c2-xiaomi-in-5489.playouts.now.amagi.tv/playlist.m3u8",
+          "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEigt0nGC7CikfRA7QSQp5MKBpDg-G8YSHL-xa1sXq9_8X25R7RRN1aJdN_VD8OW_uHzRDENU6pzGa3tCTOqkdGBEvmlQ8_ymva95CO_Z5xpv6geQBo9GO1amoXVjMfNEg_d5BYhQ0z3KI5gjfsYn-xnyOu71cs3vJfr6ratfarDSqw2i4lCL5MQmaCrUQ/s600/Nur_20251219_134839_0000.png"
+        },
+        {
+          "id": "cmq9bypt800ux12i4kow8hn63",
+          "name": "Hindi Classic 24",
+          "url": "https://vods2.aynaott.com/hindimovies/index.m3u8",
+          "logo": "https://imglink.cc/cdn/cScI5tEUjV.png"
+        },
+        {
+          "id": "cmq7twb5500wluh09x8hh7sdq",
+          "name": "Sony Movies",
+          "url": "https://a-cdn.klowdtv.com/live1/smc_720p/chunks.m3u8",
+          "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgNk47oTMuFgbjaG0yp7qPGD7w0Rf3rGRc7wURB_aUn-ArmAPsHo67HGOC8r-aiqd4AJhFhNQLu6LmGFhBj8pxHVL5ju7NCaI2ssa9QQm-rxmyv_zYwy9ehEIsdQVGxgLcGT8So2UCKIKIBz932Wi270pGc76elgFlp7aj3WXhrlOMvtUC2VxKni57FNg/s1080/1000060531.png"
+        },
+        {
+          "id": "cmq7twb5500wguh098zdygidj",
+          "name": "SRK TV",
+          "url": "https://srknowapp.ncare.live/srktvhlswodrm/srktv.stream/playlist.m3u8",
+          "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi-gOTZYUBCEpOwrtIYHCLViHpAU9Cz7V6zR14fu6XOlYahvBguPaxmbjH6ClmGp-PpLVDR8iFTOLRXo7xmxXBg5heY_umgJK0DRNwFb8pqCPP0rwdtZ9goIjgur2DeyqzIAZXgkObDCGIMVjXwhfvDH1Ol-kzFc9PlKFC8iWpWtYUskRxoint29agY/s600/Nur_20251107_222900_0000.png"
+        }
+      ]
+    },
+    "news": {
+      "name": "News",
+      "channels": [
+        {
+          "id": "channel-24-12421",
+          "name": "Channel 24",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1703/output/1703-audio_113332_eng=113200-video=2202800.m3u8",
+          "logo": "https://i.ibb.co.com/v65cfQ96/Channel-24.png"
+        },
+        {
+          "id": "dbc-news-12424",
+          "name": "DBC News",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1728/output/index.m3u8",
+          "logo": "https://i.ibb.co.com/TMKLMXs9/DBC-News.png"
+        },
+        {
+          "id": "ekattor-tv-hd-12428",
+          "name": "Ekattor TV HD",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1705/output/1705.m3u8",
+          "logo": "https://i.ibb.co.com/DPZrfqzr/Ekattor-TV-HD.png"
+        },
+        {
+          "id": "star-news-12443",
+          "name": "Star News",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1710/output/1710-audio_113402_eng=113200-video=1181200.m3u8",
+          "logo": "https://i.ibb.co.com/cXTjmmtP/Star-News.png"
+        },
+        {
+          "id": "jago-news-24-12433",
+          "name": "Jago News 24",
+          "url": "https://app.ncare.live/live-orgin/jagonews24.stream/live-orgin/jagonews24.stream/chunks.m3u8",
+          "logo": "https://i.ibb.co.com/KpRt3cT5/Jago-News-24.png"
+        },
+        {
+          "id": "news-24-12440",
+          "name": "News 24",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1708/output/index.m3u8",
+          "logo": "https://i.ibb.co.com/gLx9fX5N/News-24.png"
+        }
+      ]
+    }
+  }
+}

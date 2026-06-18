@@ -2,3 +2,5 @@ node_modules/
 .vercel/
 dist/
 .astro/
+
+testsprite_tests\tmp\config.json
