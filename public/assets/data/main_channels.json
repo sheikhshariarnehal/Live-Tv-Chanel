@@ -10,6 +10,13 @@
           "logo": "https://staytunedmag.com/wp-content/uploads/2026/06/FIFAWorldCup2026BB-678x381.jpg"
         },
         {
+          "id": "world-cup-2026-4",
+          "name": "World Cup 2026 Ch 4",
+          "url": "https://prod-cdn01-live.toffeelive.com/live/FIFA-2026-4/1/master_1800.m3u8",
+          "logo": "https://staytunedmag.com/wp-content/uploads/2026/06/FIFAWorldCup2026BB-678x381.jpg",
+          "proxy": true
+        },
+        {
           "id": "sports-beinsports-1",
           "name": "BeINSports-1",
           "url": "http://starhub.pro/live/farhat-3379/67897-913379/744517.ts",

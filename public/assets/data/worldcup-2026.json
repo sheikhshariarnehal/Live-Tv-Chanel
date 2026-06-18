@@ -1,0 +1,142 @@
+{
+  "tournament": "FIFA World Cup 2026™",
+  "hosts": ["Canada", "Mexico", "USA"],
+  "startDate": "2026-06-11",
+  "endDate": "2026-07-19",
+  "totalMatches": 104,
+  "notes": "All times stored as ISO 8601 UTC strings (YYYY-MM-DDTHH:mm:ssZ). Match status (finished/played/upcoming) is computed in the browser by comparing the match UTC time to the current time. Bangladesh Standard Time is UTC+6. Times below are based on the official FIFA match schedule; venues and pairings for knockout rounds are placeholders (TBD) until the group stage is decided.",
+  "matches": [
+    { "id": "md1",  "date": "2026-06-11T01:00:00Z", "group": "A", "home": "Mexico",        "away": "South Africa",            "venue": "Estadio Azteca, Mexico City",          "stage": "Group Stage" },
+    { "id": "md2",  "date": "2026-06-11T03:00:00Z", "group": "A", "home": "South Korea",   "away": "Czechia",                 "venue": "Estadio Akron, Zapopan",               "stage": "Group Stage" },
+
+    { "id": "md3",  "date": "2026-06-12T00:00:00Z", "group": "B", "home": "Canada",        "away": "Bosnia and Herzegovina",  "venue": "BMO Field, Toronto",                   "stage": "Group Stage" },
+    { "id": "md4",  "date": "2026-06-12T03:00:00Z", "group": "D", "home": "United States", "away": "Paraguay",                "venue": "SoFi Stadium, Inglewood",              "stage": "Group Stage" },
+
+    { "id": "md5",  "date": "2026-06-13T20:00:00Z", "group": "B", "home": "Qatar",         "away": "Switzerland",             "venue": "Levi's Stadium, Santa Clara",          "stage": "Group Stage" },
+    { "id": "md6",  "date": "2026-06-13T23:00:00Z", "group": "C", "home": "Brazil",        "away": "Morocco",                 "venue": "MetLife Stadium, East Rutherford",     "stage": "Group Stage" },
+    { "id": "md7",  "date": "2026-06-13T21:00:00Z", "group": "C", "home": "Haiti",         "away": "Scotland",                "venue": "Gillette Stadium, Foxborough",         "stage": "Group Stage" },
+    { "id": "md8",  "date": "2026-06-13T22:00:00Z", "group": "D", "home": "Australia",     "away": "Türkiye",                 "venue": "BC Place, Vancouver",                  "stage": "Group Stage" },
+
+    { "id": "md9",  "date": "2026-06-14T19:00:00Z", "group": "E", "home": "Germany",       "away": "Curaçao",                 "venue": "NRG Stadium, Houston",                 "stage": "Group Stage" },
+    { "id": "md10", "date": "2026-06-14T21:00:00Z", "group": "F", "home": "Netherlands",   "away": "Japan",                   "venue": "AT&T Stadium, Arlington",              "stage": "Group Stage" },
+    { "id": "md11", "date": "2026-06-14T23:00:00Z", "group": "E", "home": "Ivory Coast",   "away": "Ecuador",                 "venue": "Lincoln Financial Field, Philadelphia","stage": "Group Stage" },
+    { "id": "md12", "date": "2026-06-14T23:00:00Z", "group": "F", "home": "Sweden",        "away": "Tunisia",                 "venue": "Estadio Akron, Zapopan",               "stage": "Group Stage" },
+
+    { "id": "md13", "date": "2026-06-15T18:00:00Z", "group": "H", "home": "Spain",         "away": "Cape Verde",              "venue": "Mercedes-Benz Stadium, Atlanta",       "stage": "Group Stage" },
+    { "id": "md14", "date": "2026-06-15T21:00:00Z", "group": "G", "home": "Belgium",       "away": "Egypt",                   "venue": "Lumen Field, Seattle",                 "stage": "Group Stage" },
+    { "id": "md15", "date": "2026-06-15T23:00:00Z", "group": "H", "home": "Saudi Arabia",  "away": "Uruguay",                 "venue": "Hard Rock Stadium, Miami Gardens",     "stage": "Group Stage" },
+    { "id": "md16", "date": "2026-06-15T21:00:00Z", "group": "G", "home": "Iran",          "away": "New Zealand",             "venue": "SoFi Stadium, Inglewood",              "stage": "Group Stage" },
+
+    { "id": "md17", "date": "2026-06-16T23:00:00Z", "group": "I", "home": "France",        "away": "Senegal",                 "venue": "MetLife Stadium, East Rutherford",     "stage": "Group Stage" },
+    { "id": "md18", "date": "2026-06-16T21:00:00Z", "group": "I", "home": "Iraq",          "away": "Norway",                  "venue": "Gillette Stadium, Foxborough",         "stage": "Group Stage" },
+    { "id": "md19", "date": "2026-06-16T00:00:00Z", "group": "J", "home": "Argentina",     "away": "Algeria",                 "venue": "Arrowhead Stadium, Kansas City",       "stage": "Group Stage" },
+    { "id": "md20", "date": "2026-06-16T03:00:00Z", "group": "J", "home": "Austria",       "away": "Jordan",                  "venue": "Levi's Stadium, Santa Clara",          "stage": "Group Stage" },
+
+    { "id": "md21", "date": "2026-06-17T00:00:00Z", "group": "K", "home": "Portugal",      "away": "DR Congo",                "venue": "NRG Stadium, Houston",                 "stage": "Group Stage" },
+    { "id": "md22", "date": "2026-06-17T00:00:00Z", "group": "L", "home": "England",       "away": "Croatia",                 "venue": "AT&T Stadium, Arlington",              "stage": "Group Stage" },
+    { "id": "md23", "date": "2026-06-17T23:00:00Z", "group": "L", "home": "Ghana",         "away": "Panama",                  "venue": "BMO Field, Toronto",                   "stage": "Group Stage" },
+    { "id": "md24", "date": "2026-06-18T02:00:00Z", "group": "K", "home": "Uzbekistan",    "away": "Colombia",                "venue": "Estadio Azteca, Mexico City",          "stage": "Group Stage" },
+
+    { "id": "md25", "date": "2026-06-18T16:00:00Z", "group": "A", "home": "Czechia",       "away": "South Africa",            "venue": "Mercedes-Benz Stadium, Atlanta",       "stage": "Group Stage" },
+    { "id": "md26", "date": "2026-06-18T19:00:00Z", "group": "B", "home": "Switzerland",   "away": "Bosnia and Herzegovina",  "venue": "SoFi Stadium, Inglewood",              "stage": "Group Stage" },
+    { "id": "md27", "date": "2026-06-18T22:00:00Z", "group": "B", "home": "Canada",        "away": "Qatar",                   "venue": "BC Place, Vancouver",                  "stage": "Group Stage" },
+    { "id": "md28", "date": "2026-06-19T03:00:00Z", "group": "A", "home": "Mexico",        "away": "South Korea",             "venue": "Estadio Akron, Zapopan",               "stage": "Group Stage" },
+
+    { "id": "md29", "date": "2026-06-19T19:00:00Z", "group": "D", "home": "United States", "away": "Australia",               "venue": "Lumen Field, Seattle",                 "stage": "Group Stage" },
+    { "id": "md30", "date": "2026-06-19T22:00:00Z", "group": "C", "home": "Scotland",      "away": "Morocco",                 "venue": "Gillette Stadium, Foxborough",         "stage": "Group Stage" },
+    { "id": "md31", "date": "2026-06-20T01:00:00Z", "group": "C", "home": "Brazil",        "away": "Haiti",                   "venue": "Lincoln Financial Field, Philadelphia","stage": "Group Stage" },
+    { "id": "md32", "date": "2026-06-20T04:00:00Z", "group": "D", "home": "Türkiye",       "away": "Paraguay",                "venue": "Levi's Stadium, Santa Clara",          "stage": "Group Stage" },
+
+    { "id": "md33", "date": "2026-06-20T17:00:00Z", "group": "F", "home": "Netherlands",   "away": "Sweden",                  "venue": "NRG Stadium, Houston",                 "stage": "Group Stage" },
+    { "id": "md34", "date": "2026-06-20T20:00:00Z", "group": "E", "home": "Germany",       "away": "Ivory Coast",             "venue": "BMO Field, Toronto",                   "stage": "Group Stage" },
+    { "id": "md35", "date": "2026-06-21T00:00:00Z", "group": "E", "home": "Ecuador",       "away": "Curaçao",                 "venue": "Arrowhead Stadium, Kansas City",       "stage": "Group Stage" },
+    { "id": "md36", "date": "2026-06-21T04:00:00Z", "group": "F", "home": "Tunisia",       "away": "Japan",                   "venue": "Estadio Akron, Zapopan",               "stage": "Group Stage" },
+
+    { "id": "md37", "date": "2026-06-21T16:00:00Z", "group": "H", "home": "Spain",         "away": "Saudi Arabia",            "venue": "Mercedes-Benz Stadium, Atlanta",       "stage": "Group Stage" },
+    { "id": "md38", "date": "2026-06-21T19:00:00Z", "group": "G", "home": "Belgium",       "away": "Iran",                    "venue": "SoFi Stadium, Inglewood",              "stage": "Group Stage" },
+    { "id": "md39", "date": "2026-06-21T22:00:00Z", "group": "H", "home": "Uruguay",       "away": "Cape Verde",              "venue": "Hard Rock Stadium, Miami Gardens",     "stage": "Group Stage" },
+    { "id": "md40", "date": "2026-06-22T01:00:00Z", "group": "G", "home": "New Zealand",   "away": "Egypt",                   "venue": "BC Place, Vancouver",                  "stage": "Group Stage" },
+
+    { "id": "md41", "date": "2026-06-22T17:00:00Z", "group": "J", "home": "Argentina",     "away": "Austria",                 "venue": "AT&T Stadium, Arlington",              "stage": "Group Stage" },
+    { "id": "md42", "date": "2026-06-22T21:00:00Z", "group": "I", "home": "France",        "away": "Iraq",                    "venue": "Lincoln Financial Field, Philadelphia","stage": "Group Stage" },
+    { "id": "md43", "date": "2026-06-23T00:00:00Z", "group": "I", "home": "Norway",        "away": "Senegal",                 "venue": "MetLife Stadium, East Rutherford",     "stage": "Group Stage" },
+    { "id": "md44", "date": "2026-06-23T03:00:00Z", "group": "J", "home": "Jordan",        "away": "Algeria",                 "venue": "Levi's Stadium, Santa Clara",          "stage": "Group Stage" },
+
+    { "id": "md45", "date": "2026-06-23T17:00:00Z", "group": "K", "home": "Portugal",      "away": "Uzbekistan",              "venue": "NRG Stadium, Houston",                 "stage": "Group Stage" },
+    { "id": "md46", "date": "2026-06-23T20:00:00Z", "group": "L", "home": "England",       "away": "Ghana",                   "venue": "Gillette Stadium, Foxborough",         "stage": "Group Stage" },
+    { "id": "md47", "date": "2026-06-23T23:00:00Z", "group": "L", "home": "Panama",        "away": "Croatia",                 "venue": "BMO Field, Toronto",                   "stage": "Group Stage" },
+    { "id": "md48", "date": "2026-06-24T02:00:00Z", "group": "K", "home": "Colombia",      "away": "DR Congo",                "venue": "Estadio Akron, Zapopan",               "stage": "Group Stage" },
+
+    { "id": "md49", "date": "2026-06-24T19:00:00Z", "group": "B", "home": "Switzerland",   "away": "Canada",                  "venue": "BC Place, Vancouver",                  "stage": "Group Stage" },
+    { "id": "md50", "date": "2026-06-24T19:00:00Z", "group": "B", "home": "Bosnia and Herzegovina", "away": "Qatar",          "venue": "Lumen Field, Seattle",                 "stage": "Group Stage" },
+    { "id": "md51", "date": "2026-06-24T22:00:00Z", "group": "C", "home": "Scotland",      "away": "Brazil",                  "venue": "Hard Rock Stadium, Miami Gardens",     "stage": "Group Stage" },
+    { "id": "md52", "date": "2026-06-24T22:00:00Z", "group": "C", "home": "Morocco",       "away": "Haiti",                   "venue": "Mercedes-Benz Stadium, Atlanta",       "stage": "Group Stage" },
+    { "id": "md53", "date": "2026-06-25T01:00:00Z", "group": "A", "home": "Czechia",       "away": "Mexico",                  "venue": "Estadio Azteca, Mexico City",          "stage": "Group Stage" },
+    { "id": "md54", "date": "2026-06-25T01:00:00Z", "group": "A", "home": "South Africa",  "away": "South Korea",             "venue": "Estadio Akron, Zapopan",               "stage": "Group Stage" },
+
+    { "id": "md55", "date": "2026-06-25T20:00:00Z", "group": "E", "home": "Ecuador",       "away": "Germany",                 "venue": "MetLife Stadium, East Rutherford",     "stage": "Group Stage" },
+    { "id": "md56", "date": "2026-06-25T20:00:00Z", "group": "E", "home": "Curaçao",       "away": "Ivory Coast",             "venue": "Lincoln Financial Field, Philadelphia","stage": "Group Stage" },
+    { "id": "md57", "date": "2026-06-25T23:00:00Z", "group": "F", "home": "Japan",         "away": "Sweden",                  "venue": "AT&T Stadium, Arlington",              "stage": "Group Stage" },
+    { "id": "md58", "date": "2026-06-25T23:00:00Z", "group": "F", "home": "Tunisia",       "away": "Netherlands",             "venue": "Arrowhead Stadium, Kansas City",       "stage": "Group Stage" },
+    { "id": "md59", "date": "2026-06-26T02:00:00Z", "group": "D", "home": "Türkiye",       "away": "United States",           "venue": "SoFi Stadium, Inglewood",              "stage": "Group Stage" },
+    { "id": "md60", "date": "2026-06-26T02:00:00Z", "group": "D", "home": "Paraguay",      "away": "Australia",               "venue": "Levi's Stadium, Santa Clara",          "stage": "Group Stage" },
+
+    { "id": "md61", "date": "2026-06-26T19:00:00Z", "group": "I", "home": "Norway",        "away": "France",                  "venue": "Gillette Stadium, Foxborough",         "stage": "Group Stage" },
+    { "id": "md62", "date": "2026-06-26T19:00:00Z", "group": "I", "home": "Senegal",       "away": "Iraq",                    "venue": "BMO Field, Toronto",                   "stage": "Group Stage" },
+    { "id": "md63", "date": "2026-06-27T00:00:00Z", "group": "H", "home": "Cape Verde",    "away": "Saudi Arabia",            "venue": "NRG Stadium, Houston",                 "stage": "Group Stage" },
+    { "id": "md64", "date": "2026-06-27T00:00:00Z", "group": "H", "home": "Uruguay",       "away": "Spain",                   "venue": "Estadio Akron, Zapopan",               "stage": "Group Stage" },
+    { "id": "md65", "date": "2026-06-27T03:00:00Z", "group": "G", "home": "Egypt",         "away": "Iran",                    "venue": "Lumen Field, Seattle",                 "stage": "Group Stage" },
+    { "id": "md66", "date": "2026-06-27T03:00:00Z", "group": "G", "home": "New Zealand",   "away": "Belgium",                 "venue": "BC Place, Vancouver",                  "stage": "Group Stage" },
+
+    { "id": "md67", "date": "2026-06-27T21:00:00Z", "group": "L", "home": "Panama",        "away": "England",                 "venue": "MetLife Stadium, East Rutherford",     "stage": "Group Stage" },
+    { "id": "md68", "date": "2026-06-27T21:00:00Z", "group": "L", "home": "Croatia",       "away": "Ghana",                   "venue": "Lincoln Financial Field, Philadelphia","stage": "Group Stage" },
+    { "id": "md69", "date": "2026-06-27T23:30:00Z", "group": "K", "home": "Colombia",      "away": "Portugal",                "venue": "Hard Rock Stadium, Miami Gardens",     "stage": "Group Stage" },
+    { "id": "md70", "date": "2026-06-27T23:30:00Z", "group": "K", "home": "DR Congo",      "away": "Uzbekistan",              "venue": "Mercedes-Benz Stadium, Atlanta",       "stage": "Group Stage" },
+    { "id": "md71", "date": "2026-06-28T02:00:00Z", "group": "J", "home": "Algeria",       "away": "Austria",                 "venue": "Arrowhead Stadium, Kansas City",       "stage": "Group Stage" },
+    { "id": "md72", "date": "2026-06-28T02:00:00Z", "group": "J", "home": "Jordan",        "away": "Argentina",               "venue": "AT&T Stadium, Arlington",              "stage": "Group Stage" },
+
+    { "id": "md73", "date": "2026-06-28T19:00:00Z", "group": "KO", "home": "2A",  "away": "2B", "venue": "SoFi Stadium, Inglewood", "stage": "Round of 32" },
+    { "id": "md74", "date": "2026-06-29T17:00:00Z", "group": "KO", "home": "1C",  "away": "2F", "venue": "NRG Stadium, Houston", "stage": "Round of 32" },
+    { "id": "md75", "date": "2026-06-29T20:30:00Z", "group": "KO", "home": "1E",  "away": "3(A/B/C/D/F)", "venue": "Gillette Stadium, Foxborough", "stage": "Round of 32" },
+    { "id": "md76", "date": "2026-06-30T01:00:00Z", "group": "KO", "home": "1F",  "away": "2C", "venue": "Estadio Akron, Zapopan", "stage": "Round of 32" },
+
+    { "id": "md77", "date": "2026-06-30T17:00:00Z", "group": "KO", "home": "2E",  "away": "2I", "venue": "AT&T Stadium, Arlington", "stage": "Round of 32" },
+    { "id": "md78", "date": "2026-06-30T21:00:00Z", "group": "KO", "home": "1I",  "away": "3(C/D/F/G/H)", "venue": "MetLife Stadium, East Rutherford", "stage": "Round of 32" },
+    { "id": "md79", "date": "2026-07-01T01:00:00Z", "group": "KO", "home": "1A",  "away": "3(C/E/F/H/I)", "venue": "Estadio Azteca, Mexico City", "stage": "Round of 32" },
+
+    { "id": "md80", "date": "2026-07-01T16:00:00Z", "group": "KO", "home": "1L",  "away": "3(E/H/I/J/K)", "venue": "Mercedes-Benz Stadium, Atlanta", "stage": "Round of 32" },
+    { "id": "md81", "date": "2026-07-01T20:00:00Z", "group": "KO", "home": "1G",  "away": "3(A/E/H/I/J)", "venue": "Lumen Field, Seattle", "stage": "Round of 32" },
+    { "id": "md82", "date": "2026-07-02T00:00:00Z", "group": "KO", "home": "1D",  "away": "3(B/E/F/I/J)", "venue": "Levi's Stadium, Santa Clara", "stage": "Round of 32" },
+
+    { "id": "md83", "date": "2026-07-02T19:00:00Z", "group": "KO", "home": "1H",  "away": "2J", "venue": "SoFi Stadium, Inglewood", "stage": "Round of 32" },
+    { "id": "md84", "date": "2026-07-02T23:00:00Z", "group": "KO", "home": "2K",  "away": "2L", "venue": "BMO Field, Toronto", "stage": "Round of 32" },
+    { "id": "md85", "date": "2026-07-03T03:00:00Z", "group": "KO", "home": "1B",  "away": "3(E/F/G/I/J)", "venue": "BC Place, Vancouver", "stage": "Round of 32" },
+
+    { "id": "md86", "date": "2026-07-03T18:00:00Z", "group": "KO", "home": "2D",  "away": "2G", "venue": "AT&T Stadium, Arlington", "stage": "Round of 32" },
+    { "id": "md87", "date": "2026-07-03T22:00:00Z", "group": "KO", "home": "1J",  "away": "2H", "venue": "Hard Rock Stadium, Miami Gardens", "stage": "Round of 32" },
+    { "id": "md88", "date": "2026-07-04T01:30:00Z", "group": "KO", "home": "1K",  "away": "3(D/E/I/J/L)", "venue": "Arrowhead Stadium, Kansas City", "stage": "Round of 32" },
+
+    { "id": "md89", "date": "2026-07-04T17:00:00Z", "group": "KO", "home": "TBD", "away": "TBD", "venue": "NRG Stadium, Houston", "stage": "Round of 16" },
+    { "id": "md90", "date": "2026-07-04T21:00:00Z", "group": "KO", "home": "TBD", "away": "TBD", "venue": "Lincoln Financial Field, Philadelphia", "stage": "Round of 16" },
+
+    { "id": "md91", "date": "2026-07-05T20:00:00Z", "group": "KO", "home": "TBD", "away": "TBD", "venue": "MetLife Stadium, East Rutherford", "stage": "Round of 16" },
+    { "id": "md92", "date": "2026-07-06T00:00:00Z", "group": "KO", "home": "TBD", "away": "TBD", "venue": "Estadio Azteca, Mexico City", "stage": "Round of 16" },
+
+    { "id": "md93", "date": "2026-07-06T19:00:00Z", "group": "KO", "home": "TBD", "away": "TBD", "venue": "AT&T Stadium, Arlington", "stage": "Round of 16" },
+    { "id": "md94", "date": "2026-07-06T21:00:00Z", "group": "KO", "home": "TBD", "away": "TBD", "venue": "Lumen Field, Seattle", "stage": "Round of 16" },
+
+    { "id": "md95", "date": "2026-07-07T16:00:00Z", "group": "KO", "home": "TBD", "away": "TBD", "venue": "Mercedes-Benz Stadium, Atlanta", "stage": "Round of 16" },
+    { "id": "md96", "date": "2026-07-07T20:00:00Z", "group": "KO", "home": "TBD", "away": "TBD", "venue": "BC Place, Vancouver", "stage": "Round of 16" },
+
+    { "id": "md97", "date": "2026-07-09T20:00:00Z", "group": "KO", "home": "TBD", "away": "TBD", "venue": "Gillette Stadium, Foxborough", "stage": "Quarter-final" },
+    { "id": "md98", "date": "2026-07-10T19:00:00Z", "group": "KO", "home": "TBD", "away": "TBD", "venue": "SoFi Stadium, Inglewood", "stage": "Quarter-final" },
+    { "id": "md99", "date": "2026-07-11T21:00:00Z", "group": "KO", "home": "TBD", "away": "TBD", "venue": "Hard Rock Stadium, Miami Gardens", "stage": "Quarter-final" },
+    { "id": "md100", "date": "2026-07-12T01:00:00Z", "group": "KO", "home": "TBD", "away": "TBD", "venue": "Arrowhead Stadium, Kansas City", "stage": "Quarter-final" },
+
+    { "id": "md101", "date": "2026-07-14T19:00:00Z", "group": "KO", "home": "TBD", "away": "TBD", "venue": "AT&T Stadium, Arlington", "stage": "Semi-final" },
+    { "id": "md102", "date": "2026-07-15T19:00:00Z", "group": "KO", "home": "TBD", "away": "TBD", "venue": "Mercedes-Benz Stadium, Atlanta", "stage": "Semi-final" },
+
+    { "id": "md103", "date": "2026-07-18T21:00:00Z", "group": "KO", "home": "TBD", "away": "TBD", "venue": "Hard Rock Stadium, Miami Gardens", "stage": "Third-place play-off" },
+    { "id": "md104", "date": "2026-07-19T19:00:00Z", "group": "KO", "home": "TBD", "away": "TBD", "venue": "MetLife Stadium, East Rutherford", "stage": "Final" }
+  ]
+}
