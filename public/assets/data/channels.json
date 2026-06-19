@@ -10,22 +10,42 @@
           "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
         },
         {
+          "id": "go-fifa-live",
+          "name": "Go Fifa Live",
+          "url": "https://backup.alarafatofficial.workers.dev/?url=https%3A%2F%2Fd1211whpimeups.cloudfront.net%2Fsmil%3Artbgo%2Fchunklist_b4096000_slENG.m3u8&ua=Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Chrome%2F124.0.0.0%20Safari%2F537.36&ekey=SPORTIX_SECURE_KEY_2026",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
+        },
+        {
+          "id": "sports-foxsports",
+          "name": "FoxSports",
+          "url": "https://1nyaler.streamhostingcdn.top/stream/26/index.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/channels4_profile%20(1).jpg"
+        },
+        {
+          "id": "telemundo-fhd-2",
+          "name": "TELEMUNDO FHD 2",
+          "url": "https://nbculocallive.akamaized.net/hls/live/2037084/losangeles/stream6/master.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/telemundo-social-default.png",
+          "group": "Sports"
+        },
+        {
+          "id": "win-sports",
+          "name": "Win Sports",
+          "url": "https://1nyaler.streamhostingcdn.top/stream/32/index.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/channels4_profile.jpg",
+          "group": "Sports"
+        },
+        {
           "id": "sports-cazetv",
           "name": "CazeTV",
           "url": "https://dfr80qz435crc.cloudfront.net/MNOP/Amagi/Caze/Caze_TV_BR/1080p-vtt/index.m3u8",
           "logo": "https://images.seeklogo.com/logo-png/61/1/cazetv-logo-png_seeklogo-619708.png"
         },
         {
-          "id": "sports-foxsports",
-          "name": "FoxSports",
-          "url": "https://1nyaler.streamhostingcdn.top/stream/26/index.m3u8",
-          "logo": "https://variety.com/wp-content/uploads/2023/08/Fox-Sports.png?w=1000&h=563&crop=1"
-        },
-        {
           "id": "sports-beinsports",
           "name": "BeinSports",
           "url": "https://bein-esp-xumo.amagi.tv/playlistR1080p.m3u8",
-          "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCXstZBALCMN8PSOTNgRTE_cVr2p1U7m5SLQ&s"
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/bein%20sports%20logo.jpg.jpg"
         },
         {
           "id": "sports-channelone",
@@ -37,19 +57,19 @@
           "id": "sports-beinsports-2",
           "name": "BeINSports-2",
           "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78379.ts",
-          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/bein%20sports%20logo.jpg.jpg"
         },
         {
           "id": "sports-beinsports-4",
           "name": "BeINSports-4",
           "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78381.ts",
-          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/bein%20sports%20logo.jpg.jpg"
         },
         {
           "id": "sports-beinsports-5",
           "name": "BeINSports-5",
           "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78382.ts",
-          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/bein%20sports%20logo.jpg.jpg"
         },
         {
           "id": "sporza-dutch-aq",
