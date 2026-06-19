@@ -554,12 +554,16 @@ function playM3u8(video, url, artPlayer) {
     }
     const hls = new Hls({
       enableWorker: true,
-      lowLatencyMode: true,
-      backBufferLength: 90,
+      lowLatencyMode: false,
+      backBufferLength: 60,
       maxBufferLength: 30,
-      maxMaxBufferLength: 600,
+      maxMaxBufferLength: 90,
       maxBufferSize: 60 * 1000 * 1000,
-      maxBufferHole: 0.5
+      maxBufferHole: 0.5,
+      liveSyncDurationCount: 5,
+      liveSyncOnStallIncrease: 1,
+      liveMaxLatencyDurationCount: 15,
+      highBufferWatchdogPeriod: 2
     });
     hls.loadSource(url);
     hls.attachMedia(video);
