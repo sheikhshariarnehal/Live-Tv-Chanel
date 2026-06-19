@@ -990,7 +990,7 @@ if (btnReloadStream) {
 // ===== Mobile layout triggers =====
 if (mobileMenuBtn) {
   mobileMenuBtn.addEventListener('click', () => {
-    if (window.innerWidth > 640 && window.innerWidth <= 768 && sidebar) {
+    if (sidebar) {
       sidebar.classList.add('active');
     }
   });
@@ -1007,7 +1007,7 @@ if (closeSidebarBtn) {
 document.addEventListener('keydown', handleKeyboard);
 
 document.addEventListener('click', (e) => {
-  if (sidebar && mobileMenuBtn && window.innerWidth > 640 && window.innerWidth <= 768 && 
+  if (sidebar && mobileMenuBtn && 
       sidebar.classList.contains('active') &&
       !sidebar.contains(e.target) && 
       !mobileMenuBtn.contains(e.target)) {
@@ -1091,4 +1091,11 @@ if (playerContainer && categoryTabsContainer && channelGridContainer) {
 }
 executeOnLoadAndIdle(() => {
   loadNewsData();
+});
+
+// Trigger Artplayer resize on window resize to guarantee responsiveness across dynamic layout changes
+window.addEventListener('resize', () => {
+  if (art && typeof art.resize === 'function') {
+    art.resize();
+  }
 });
