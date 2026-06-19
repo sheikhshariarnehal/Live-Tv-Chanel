@@ -861,8 +861,15 @@ body.player-layout .container {
 
 /* Mobile Landscape */
 @media (max-width: 768px) {
-  body {
+  body.portal-layout {
     overflow-y: auto;
+  }
+
+  body.player-layout {
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
 
   .news-ticker-section {
@@ -870,9 +877,15 @@ body.player-layout .container {
     top: auto;
   }
 
-  .main-container,
-  body.player-layout .main-container {
+  body.portal-layout .main-container {
     overflow: visible;
+  }
+
+  body.player-layout .main-container {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+    overflow: hidden;
   }
 
   .header-content {
@@ -979,21 +992,35 @@ body.player-layout .container {
     display: none;
   }
   
-  .main-container,
-  body.player-layout .main-container {
+  body.portal-layout .main-container {
     margin-top: 0;
     height: auto;
     min-height: 0;
-    flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
   }
+
+  body.player-layout .main-container {
+    margin-top: 0;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
   
-  .container,
-  body.player-layout .container {
+  body.portal-layout .container {
     display: block;
     padding: 0;
     height: auto;
+  }
+
+  body.player-layout .container {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    height: 100%;
+    gap: 0;
   }
   
   .sidebar {
@@ -1005,9 +1032,11 @@ body.player-layout .container {
     border-radius: 0;
     border: none;
     border-top: 1px solid var(--border-color);
-    height: auto;
-    min-height: calc(100vh - var(--header-height) - 56vw);
-    overflow: visible;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
   
   .btn-close {
@@ -1023,9 +1052,7 @@ body.player-layout .container {
     border-radius: 0;
     flex-shrink: 0;
     flex: none;
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    position: static;
   }
   
   .channel-info {
@@ -1059,10 +1086,17 @@ body.player-layout .container {
     font-size: 0.8125rem;
   }
   
-  .channel-grid {
+  body.portal-layout .channel-grid {
     padding: 0.75rem;
     max-height: none;
     overflow-y: visible;
+  }
+
+  body.player-layout .channel-grid {
+    padding: 0.75rem;
+    max-height: none;
+    overflow-y: auto;
+    flex: 1;
   }
   
   .channel-category {
