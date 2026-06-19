@@ -7,13 +7,13 @@
           "id": "world-cup-2026",
           "name": "World Cup 2026",
           "url": "https://d1211whpimeups.cloudfront.net/smil:rtbgo/chunklist.m3u8",
-          "logo": "https://staytunedmag.com/wp-content/uploads/2026/06/FIFAWorldCup2026BB-678x381.jpg"
+          "logo": "https://upload.wikimedia.org/wikipedia/en/1/17/2026_FIFA_World_Cup_emblem.svg"
         },
         {
           "id": "world-cup-2026-4",
           "name": "World Cup 2026 Ch 4",
           "url": "https://prod-cdn01-live.toffeelive.com/live/FIFA-2026-4/1/master_1800.m3u8",
-          "logo": "https://staytunedmag.com/wp-content/uploads/2026/06/FIFAWorldCup2026BB-678x381.jpg",
+          "logo": "https://upload.wikimedia.org/wikipedia/en/1/17/2026_FIFA_World_Cup_emblem.svg",
           "proxy": true
         },
         {

@@ -87,6 +87,23 @@ function loadScript(url) {
   });
 }
 
+// Helper to defer non-critical execution until window load and browser idle
+function executeOnLoadAndIdle(callback) {
+  const run = () => {
+    if (window.requestIdleCallback) {
+      window.requestIdleCallback(() => callback(), { timeout: 2000 });
+    } else {
+      setTimeout(callback, 200);
+    }
+  };
+
+  if (document.readyState === 'complete') {
+    run();
+  } else {
+    window.addEventListener('load', run, { once: true });
+  }
+}
+
 function getLogoUrl(url) {
   if (!url) return '';
   const rawUrl = getRawUrl(url);
@@ -275,9 +292,9 @@ function initializeUI() {
     
     setupEventListeners();
     
-    setTimeout(() => {
+    executeOnLoadAndIdle(() => {
       playChannelById(match.channel.id);
-    }, 500);
+    });
   } else {
     const categoryKeys = Object.keys(channelsData.categories);
     if (categoryKeys.length > 0) {
@@ -291,7 +308,7 @@ function initializeUI() {
     
     setupEventListeners();
     
-    setTimeout(() => {
+    executeOnLoadAndIdle(() => {
       const firstChannelBtn = channelGridContainer.querySelector('.channel-btn[data-url]:not([data-url=""])');
       if (firstChannelBtn) {
         const channelId = firstChannelBtn.dataset.channelId;
@@ -302,7 +319,7 @@ function initializeUI() {
           history.replaceState({ channelId }, '', `/watch/${slug}`);
         }
       }
-    }, 500);
+    });
   }
 }
 
@@ -1068,4 +1085,6 @@ const playerContainer = document.getElementById('player');
 if (playerContainer && categoryTabsContainer && channelGridContainer) {
   loadChannelsData();
 }
-loadNewsData();
+executeOnLoadAndIdle(() => {
+  loadNewsData();
+});
