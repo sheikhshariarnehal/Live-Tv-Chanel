@@ -1,6 +1,7 @@
 ---
 import '../styles/css/style.css';
 import channelsData from '../../public/assets/data/channels.json';
+import MobileMenu from '../components/MobileMenu.astro';
 
 const categories = channelsData.categories;
 const categoryKeys = Object.keys(categories);
@@ -159,12 +160,24 @@ const {
 
       <div class="header-actions">
         {showPlayer && (
-          <button class="btn-icon mobile-menu-toggle" id="mobileMenuBtn" title="Menu">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 12h18M3 6h18M3 18h18"></path>
+          <button class="btn-icon mobile-menu-toggle" id="mobileMenuBtn" title="Channels List">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
             </svg>
           </button>
         )}
+        <button class="btn-icon nav-toggle-btn" id="navToggleBtn" title="Navigation Menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
       </div>
     </div>
   </header>
@@ -274,7 +287,7 @@ const {
         <slot />
       )}
     </div>
-  </div>
+  <MobileMenu />
 
   <script is:inline set:html={"window.initialChannelsData = " + JSON.stringify(channelsData).replace(/</g, '\\u003c') + ";"} />
   <script>

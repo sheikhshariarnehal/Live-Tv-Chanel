@@ -4,6 +4,9 @@ const channelGridContainer = document.getElementById('channelGrid');
 const sidebar = document.getElementById('sidebar');
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+const navToggleBtn = document.getElementById('navToggleBtn');
+const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+const closeNavBtn = document.getElementById('closeNavBtn');
 
 // New DOM Elements
 const errorOverlay = document.getElementById('errorOverlay');
@@ -934,8 +937,13 @@ function handleKeyboard(e) {
     art.toggle();
   }
   
-  if (e.code === 'Escape' && window.innerWidth > 640 && window.innerWidth <= 768 && sidebar) {
-    sidebar.classList.remove('active');
+  if (e.code === 'Escape') {
+    if (sidebar && window.innerWidth > 640 && window.innerWidth <= 768) {
+      sidebar.classList.remove('active');
+    }
+    if (mobileNavOverlay && mobileNavOverlay.classList.contains('active')) {
+      mobileNavOverlay.classList.remove('active');
+    }
   }
   
   if (e.code === 'KeyM' && window.innerWidth > 640 && window.innerWidth <= 768 && sidebar) {
@@ -1011,14 +1019,35 @@ if (closeSidebarBtn) {
   });
 }
 
+if (navToggleBtn && mobileNavOverlay) {
+  navToggleBtn.addEventListener('click', () => {
+    mobileNavOverlay.classList.add('active');
+  });
+}
+
+if (closeNavBtn && mobileNavOverlay) {
+  closeNavBtn.addEventListener('click', () => {
+    mobileNavOverlay.classList.remove('active');
+  });
+}
+
 document.addEventListener('keydown', handleKeyboard);
 
 document.addEventListener('click', (e) => {
+  // Click outside sidebar to close
   if (sidebar && mobileMenuBtn && 
       sidebar.classList.contains('active') &&
       !sidebar.contains(e.target) && 
       !mobileMenuBtn.contains(e.target)) {
     sidebar.classList.remove('active');
+  }
+  
+  // Click outside mobile nav drawer to close
+  if (mobileNavOverlay && navToggleBtn &&
+      mobileNavOverlay.classList.contains('active') &&
+      !mobileNavOverlay.querySelector('.mobile-nav-drawer').contains(e.target) &&
+      !navToggleBtn.contains(e.target)) {
+    mobileNavOverlay.classList.remove('active');
   }
 });
 
@@ -1102,6 +1131,9 @@ executeOnLoadAndIdle(() => {
 
 // Trigger Artplayer resize on window resize to guarantee responsiveness across dynamic layout changes
 window.addEventListener('resize', () => {
+  if (window.innerWidth > 1024 && mobileNavOverlay && mobileNavOverlay.classList.contains('active')) {
+    mobileNavOverlay.classList.remove('active');
+  }
   if (art && typeof art.resize === 'function') {
     art.resize();
   }
