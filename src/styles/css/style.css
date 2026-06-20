@@ -176,7 +176,6 @@ body.player-layout .container {
   line-height: 1;
   transition: color 0.3s ease;
   opacity: 0.85;
-  margin-left: 8px; /* Aligns the start of the subtitle with the bottom center tip of 'V' */
 }
 
 .logo:hover .logo-subtitle {
@@ -275,7 +274,8 @@ body.player-layout .container {
   overflow: hidden;
   display: flex;
   align-items: center;
-  padding-left: 20px; /* Space for the slanted label edge */
+  padding-left: 20px;
+  /* Space for the slanted label edge */
   /* Gradient masks on edges for premium fading effect */
   mask-image: linear-gradient(to right, transparent, black 30px, black calc(100% - 30px), transparent);
   -webkit-mask-image: linear-gradient(to right, transparent, black 30px, black calc(100% - 30px), transparent);
@@ -309,8 +309,15 @@ body.player-layout .container {
 }
 
 @keyframes pulse-placeholder {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
+
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
 
 .news-item {
@@ -342,13 +349,28 @@ body.player-layout .container {
 }
 
 @keyframes pulse-bullet {
-  0%, 100% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 12px #ef4444; }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: scale(1.3);
+    opacity: 1;
+    box-shadow: 0 0 12px #ef4444;
+  }
 }
 
 @keyframes marquee {
-  0% { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-50%, 0, 0); }
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
 }
 
 .header-actions {
@@ -412,6 +434,7 @@ body.player-layout .container {
   .wc-nav-text {
     display: none;
   }
+
   .wc-nav-link {
     padding: 0 0.65rem;
   }
@@ -502,7 +525,9 @@ body.player-layout .container {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-text {
@@ -715,9 +740,11 @@ body.player-layout .container {
   0% {
     box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6), 0 4px 15px rgba(0, 0, 0, 0.5);
   }
+
   70% {
     box-shadow: 0 0 0 8px rgba(255, 255, 255, 0), 0 4px 15px rgba(0, 0, 0, 0.5);
   }
+
   100% {
     box-shadow: 0 0 0 0 rgba(255, 255, 255, 0), 0 4px 15px rgba(0, 0, 0, 0.5);
   }
@@ -775,6 +802,7 @@ body.player-layout .container {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -785,6 +813,7 @@ body.player-layout .container {
   from {
     transform: translateX(100%);
   }
+
   to {
     transform: translateX(0);
   }
@@ -797,7 +826,7 @@ body.player-layout .container {
   :root {
     --sidebar-width: 380px;
   }
-  
+
   .channel-category {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   }
@@ -808,7 +837,7 @@ body.player-layout .container {
   :root {
     --sidebar-width: 350px;
   }
-  
+
   .header-content {
     padding: 0.875rem 1.25rem;
   }
@@ -825,12 +854,12 @@ body.player-layout .container {
     gap: 1rem;
     padding: 1rem;
   }
-  
+
   .channel-category {
     grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
     gap: 0.75rem;
   }
-  
+
   .channel-grid {
     padding: 1rem;
   }
@@ -842,37 +871,39 @@ body.player-layout .container {
     --header-height: 56px;
     --container-padding: 1.5rem;
   }
-  
+
   .nav-menu {
-    display: none; /* Hide navigation links on mobile/tablet viewports */
+    display: none;
+    /* Hide navigation links on mobile/tablet viewports */
   }
-  
+
   .main-container {
     margin-top: 0;
     height: calc(100vh - var(--header-height));
   }
-  
+
   .header-content {
     padding: 0.75rem 1rem;
   }
-  
+
   .logo {
     font-size: 1.125rem;
   }
-  
+
   .logo-icon {
     font-size: 1.5rem;
   }
-  
+
   .container {
     flex-direction: column;
     align-items: stretch;
     padding: 0.75rem;
     gap: 0.75rem;
   }
-  
+
   .video-section {
-    --available-height: calc(100vh - var(--header-height) - var(--ticker-height) - var(--container-padding) - 220px); /* reserve 220px for controls */
+    --available-height: calc(100vh - var(--header-height) - var(--ticker-height) - var(--container-padding) - 220px);
+    /* reserve 220px for controls */
     width: min(100%, calc(var(--available-height) * 16 / 9));
     aspect-ratio: 16 / 9;
     height: auto;
@@ -880,7 +911,7 @@ body.player-layout .container {
     align-self: center;
     flex: none;
   }
-  
+
   .sidebar {
     width: 100%;
     height: auto;
@@ -890,7 +921,7 @@ body.player-layout .container {
     overflow-y: auto;
     overflow-x: hidden;
   }
-  
+
   .channel-category {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   }
@@ -940,11 +971,11 @@ body.player-layout .container {
   .news-item {
     font-size: 0.75rem;
   }
-  
+
   .mobile-menu-toggle {
     display: flex;
   }
-  
+
   .sidebar {
     position: fixed;
     top: 64px;
@@ -956,20 +987,20 @@ body.player-layout .container {
     border-radius: 0;
     animation: slideIn 0.3s ease forwards;
   }
-  
+
   .sidebar.active {
     right: 0;
   }
-  
+
   .btn-close {
     display: flex;
   }
-  
+
   .container {
     padding: 0.5rem;
     gap: 0.5rem;
   }
-  
+
   .video-section {
     --available-height: calc(100vh - var(--header-height) - var(--ticker-height) - var(--container-padding));
     width: min(100%, calc(var(--available-height) * 16 / 9));
@@ -980,21 +1011,21 @@ body.player-layout .container {
     border-radius: 12px;
     flex: none;
   }
-  
+
   .category-tabs {
     padding: 0.75rem 1rem;
     gap: 0.5rem;
   }
-  
+
   .tab-btn {
     padding: 0.5rem 1rem;
     font-size: 0.8125rem;
   }
-  
+
   .channel-grid {
     padding: 1rem;
   }
-  
+
   .channel-category {
     grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
     gap: 0.75rem;
@@ -1018,24 +1049,24 @@ body.player-layout .container {
   .news-ticker-content {
     padding-left: 8px;
   }
-  
+
   .logo {
     font-size: 1rem;
   }
-  
+
   .logo-icon {
     font-size: 1.375rem;
   }
-  
+
   .btn-icon {
     width: 36px;
     height: 36px;
   }
-  
+
   .mobile-menu-toggle {
     display: none;
   }
-  
+
   body.portal-layout .main-container {
     margin-top: 0;
     height: auto;
@@ -1052,7 +1083,7 @@ body.player-layout .container {
     display: flex;
     flex-direction: column;
   }
-  
+
   body.portal-layout .container {
     display: block;
     padding: 0;
@@ -1066,7 +1097,7 @@ body.player-layout .container {
     height: 100%;
     gap: 0;
   }
-  
+
   .sidebar {
     position: relative;
     right: 0;
@@ -1082,11 +1113,11 @@ body.player-layout .container {
     flex-direction: column;
     overflow: hidden;
   }
-  
+
   .btn-close {
     display: none;
   }
-  
+
   .video-section {
     --available-height: calc(100vh - var(--header-height) - var(--ticker-height));
     width: min(100%, calc(var(--available-height) * 16 / 9));
@@ -1100,38 +1131,38 @@ body.player-layout .container {
     flex: none;
     position: static;
   }
-  
+
   .channel-info {
     padding: 0.5rem 0.75rem;
     top: 0.75rem;
     left: 0.75rem;
   }
-  
+
   .live-badge {
     font-size: 0.7rem;
     padding: 0.2rem 0.6rem;
   }
-  
+
   .channel-name-display {
     font-size: 0.8rem;
   }
-  
+
   .category-tabs {
     padding: 0.75rem 0.75rem;
     gap: 0.5rem;
     overflow-x: auto;
     scrollbar-width: none;
   }
-  
+
   .category-tabs::-webkit-scrollbar {
     display: none;
   }
-  
+
   .tab-btn {
     padding: 0.5rem 1rem;
     font-size: 0.8125rem;
   }
-  
+
   body.portal-layout .channel-grid {
     padding: 0.75rem;
     max-height: none;
@@ -1144,16 +1175,16 @@ body.player-layout .container {
     overflow-y: auto;
     flex: 1;
   }
-  
+
   .channel-category {
     grid-template-columns: repeat(3, 1fr);
     gap: 0.625rem;
   }
-  
+
   .channel-btn {
     border-radius: 8px;
   }
-  
+
   .channel-name {
     font-size: 0.7rem;
     padding: 0.375rem;
@@ -1169,21 +1200,21 @@ body.player-layout .container {
     height: auto;
     max-height: min(var(--available-height), 280px);
   }
-  
+
   .channel-category {
     grid-template-columns: repeat(3, 1fr);
     gap: 0.5rem;
   }
-  
+
   .channel-name {
     font-size: 0.65rem;
   }
-  
+
   .category-tabs {
     padding: 0.625rem 0.75rem;
     gap: 0.375rem;
   }
-  
+
   .tab-btn {
     padding: 0.5rem 0.875rem;
     font-size: 0.75rem;
@@ -1298,7 +1329,8 @@ body.player-layout .container {
 }
 
 /* ===== Landscape & Short Viewport Responsiveness ===== */
-@media (max-width: 1024px) and (orientation: landscape), (max-height: 520px) {
+@media (max-width: 1024px) and (orientation: landscape),
+(max-height: 520px) {
   :root {
     --container-padding: 1rem;
     --header-height: 56px;
@@ -1368,4 +1400,3 @@ body.player-layout .container {
     display: flex !important;
   }
 }
-
