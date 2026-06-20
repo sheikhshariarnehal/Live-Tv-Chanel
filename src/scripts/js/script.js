@@ -135,6 +135,10 @@ function getPlaybackStrategy(channel, forceProxy = false) {
     return 'proxy-stream';
   }
 
+  if (url.includes('cdn.livekhelatv.com')) {
+    return 'proxy';
+  }
+
   if (url.startsWith('http://')) {
     return 'proxy';
   }

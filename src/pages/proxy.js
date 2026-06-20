@@ -32,6 +32,8 @@ async function ensureKkx4Authorized(targetUrl) {
     key = 'foxeng';
   } else if (targetUrl.includes('otte-qw.live.pv-cdn.net')) {
     key = 'cazetv';
+  } else if (targetUrl.includes('cdn.livekhelatv.com')) {
+    key = 'tigosports';
   } else {
     return;
   }
