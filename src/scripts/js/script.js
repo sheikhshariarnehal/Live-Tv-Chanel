@@ -583,6 +583,45 @@ function playM3u8(video, url, artPlayer) {
     hls.attachMedia(video);
     artPlayer.hls = hls;
 
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      const levels = hls.levels;
+      if (levels && levels.length > 1) {
+        const options = levels.map((level, index) => {
+          const label = level.height ? `${level.height}p` : `${Math.round(level.bitrate / 1000)}kbps`;
+          return {
+            html: label,
+            level: index,
+          };
+        });
+
+        // Add Auto option at the beginning
+        options.unshift({
+          html: 'Auto',
+          level: -1,
+          default: true,
+        });
+
+        // Remove any existing quality setting if it exists
+        try {
+          artPlayer.setting.remove('quality');
+        } catch (e) {
+          // ignore
+        }
+
+        // Add quality selector to ArtPlayer settings
+        artPlayer.setting.add({
+          name: 'quality',
+          html: 'Quality',
+          width: 150,
+          selector: options,
+          onSelect: function (item) {
+            hls.currentLevel = item.level;
+            return item.html;
+          },
+        });
+      }
+    });
+
     let networkRetryCount = 0;
     hls.on(Hls.Events.ERROR, (event, data) => {
       console.error('HLS error inside ArtPlayer:', data);
@@ -754,6 +793,56 @@ function initializeShakaPlayer(video, url, artPlayer) {
     video.addEventListener('playing', () => {
       console.log('[DRM] Playback started');
     }, { once: true });
+
+    // Enable quality selection for Shaka Player
+    const tracks = player.getVariantTracks();
+    if (tracks && tracks.length > 1) {
+      tracks.sort((a, b) => (b.height || 0) - (a.height || 0));
+      const seenHeights = new Set();
+      const uniqueTracks = [];
+      tracks.forEach(track => {
+        const height = track.height;
+        if (height && !seenHeights.has(height)) {
+          seenHeights.add(height);
+          uniqueTracks.push(track);
+        }
+      });
+
+      if (uniqueTracks.length > 1) {
+        const options = uniqueTracks.map(track => {
+          return {
+            html: `${track.height}p`,
+            track: track,
+          };
+        });
+
+        options.unshift({
+          html: 'Auto',
+          track: null,
+          default: true,
+        });
+
+        try {
+          artPlayer.setting.remove('quality');
+        } catch (e) {}
+
+        artPlayer.setting.add({
+          name: 'quality',
+          html: 'Quality',
+          width: 150,
+          selector: options,
+          onSelect: function (item) {
+            if (item.track === null) {
+              player.configure({ abr: { enabled: true } });
+            } else {
+              player.configure({ abr: { enabled: false } });
+              player.selectVariantTrack(item.track, true);
+            }
+            return item.html;
+          }
+        });
+      }
+    }
   }).catch((error) => {
     console.error('[DRM] Manifest load failed', error);
     console.log('[DRM] Manifest load failed');
