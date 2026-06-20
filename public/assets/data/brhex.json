@@ -13,9 +13,13 @@
         {
           "id": "fox-sports-hd",
           "name": "Fox Sports HD",
-          "url": "https://1nyaler.streamhostingcdn.top/stream/26/index.m3u8",
+          "url": "https://a151aivottlinear-a.akamaihd.net/OTTB/sin-nitro/live/dash/enc/oboxe53wyo/out/v1/f7892a9d706d419a846d738fa22ea33e/cenc.mpd",
           "logo": "https://upload.wikimedia.org/wikipedia/commons/e/e5/Fox_Sports_Netherlands_Logo.png",
-          "group": "Sports"
+          "group": "Sports",
+          "drm": {
+            "kid": "2fbdaa3bea0d0323ae011b318d1db716",
+            "key": "8726ef7eaf5b9dce15fb6aa9f80bd53f"
+          }
         },
         {
           "id": "t-sports-hd",
@@ -298,7 +302,11 @@
           "name": "M6 FHD 2",
           "url": "https://origin-m6web.live.6cloud.fr/out/v1/6play/6play-m6/cmaf_cenc00/dash-short-hd.mpd",
           "logo": "https://cdn.mos.cms.futurecdn.net/kHeXzAT9cKJ8CiqmRsxEkk.jpg",
-          "group": "Sports"
+          "group": "Sports",
+          "drm": {
+            "kid": "433ffba670963e70857859a9dff4be04",
+            "key": "51ede3a821229fe81e71282c8eff80e3"
+          }
         },
         {
           "id": "somoy-tv-hd",
@@ -338,16 +346,24 @@
         {
           "id": "fox-live-fhd",
           "name": "Fox Live FHD",
-          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/ajfoeddkbz/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd",
+          "url": "https://otte-tim.live.pv-cdn.net/pdx-nitro/live/clients/dash/enc/ajfoeddkbz/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd",
           "logo": "https://cdn.mos.cms.futurecdn.net/kHeXzAT9cKJ8CiqmRsxEkk.jpg",
-          "group": "Sports"
+          "group": "Sports",
+          "drm": {
+            "kid": "f6564ec2aee819046328a0e153be574d",
+            "key": "ff46a8a1031eb27ef22576a077c98ab7"
+          }
         },
         {
           "id": "d-sports-fhd",
           "name": "D Sports FHD",
-          "url": "https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash/enc/ud6bnhthpj/out/v1/2639a2f4480f4269953de466d5f46463/cenc.mpd",
+          "url": "https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash/enc/ubehitlwzo/out/v1/8e09c381a51f4366a19e979418112e8f/cenc.mpd",
           "logo": "https://cdn.mos.cms.futurecdn.net/kHeXzAT9cKJ8CiqmRsxEkk.jpg",
-          "group": "Sports"
+          "group": "Sports",
+          "drm": {
+            "kid": "a7d11d37a1f7611ee88d4db880171f32",
+            "key": "68f96d618b0b956b008c445896a25a79"
+          }
         },
         {
           "id": "caracol-tv",
@@ -368,7 +384,11 @@
           "name": "CANAL SPORTS FHD",
           "url": "https://nog-live-ott.izzigo.tv/out/u/dash/CDMX1/CANAL-5-RDF-HD/default.mpd",
           "logo": "https://cdn.mos.cms.futurecdn.net/kHeXzAT9cKJ8CiqmRsxEkk.jpg",
-          "group": "Sports"
+          "group": "Sports",
+          "drm": {
+            "kid": "2a8c2d5088377f51f825d871e568be19",
+            "key": "eb5a8db64ca1992389672edb9447c711"
+          }
         },
         {
           "id": "dazn-spanish-hd",
@@ -380,9 +400,13 @@
         {
           "id": "nu9ve-fhd",
           "name": "NU9VE FHD",
-          "url": "https://live-pv-ta.amazon.fastly-edge.com/iad-nitro/live/clients/dash/enc/skz7pgjdyp/out/v1/8e7377f4d3154738b7f48baa996b35a5/cenc.mpd",
+          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/skz7pgjdyp/out/v1/8e7377f4d3154738b7f48baa996b35a5/cenc.mpd",
           "logo": "https://cdn.mos.cms.futurecdn.net/kHeXzAT9cKJ8CiqmRsxEkk.jpg",
-          "group": "Sports"
+          "group": "Sports",
+          "drm": {
+            "kid": "79737d20a3eaa862f8cb77c61cb3b58c",
+            "key": "41df11a0be44fd7272538728cec38bc6"
+          }
         },
         {
           "id": "orf-german-hd",
@@ -396,14 +420,22 @@
           "name": "VRT DUTCH FHD",
           "url": "https://live.vrtcdn.be/groupd/live/0761024f-37fe-4254-bc37-e95d7c62b2d1/live.isml/.mpd",
           "logo": "https://cdn.mos.cms.futurecdn.net/kHeXzAT9cKJ8CiqmRsxEkk.jpg",
-          "group": "Sports"
+          "group": "Sports",
+          "drm": {
+            "kid": "893bc63340876605f52886a42e0ccce5",
+            "key": "d6c46d2d691056fbd091bf1f01b21a91"
+          }
         },
         {
           "id": "zdf-german-hd",
           "name": "ZDF GERMAN HD",
           "url": "https://simplitv-live.mdn.ors.at/live/eds/zdf_hd/dash4h/zdf_hd.mpd",
           "logo": "https://cdn.mos.cms.futurecdn.net/kHeXzAT9cKJ8CiqmRsxEkk.jpg",
-          "group": "Sports"
+          "group": "Sports",
+          "drm": {
+            "kid": "c1a0ac1044a433d0856ccdc08f245084",
+            "key": "7f0e8800a6d63d7915ac181bb88ce813"
+          }
         },
         {
           "id": "joj-sports-fhd",
@@ -417,14 +449,22 @@
           "name": "TSN SPORTS FHD",
           "url": "https://otte-qw.live.pv-cdn.net/pdx-nitro/live/clients/dash/enc/w0rehjjrwe/out/v1/69a2a7041395406b970598f61680e7cf/cenc.mpd",
           "logo": "https://cdn.mos.cms.futurecdn.net/kHeXzAT9cKJ8CiqmRsxEkk.jpg",
-          "group": "Sports"
+          "group": "Sports",
+          "drm": {
+            "kid": "7b37e4614fcee2ec2ff6e5900c2f798f",
+            "key": "f349a9c28c55c20b9a2c50af99d1fc76"
+          }
         },
         {
           "id": "sporza-dutch-fhd",
           "name": "Sporza DUTCH FHD",
           "url": "https://live.vrtcdn.be/groupd/live/0761024f-37fe-4254-bc37-e95d7c62b2d1/live.isml/.mpd",
           "logo": "https://cdn.mos.cms.futurecdn.net/kHeXzAT9cKJ8CiqmRsxEkk.jpg",
-          "group": "Sports"
+          "group": "Sports",
+          "drm": {
+            "kid": "893bc63340876605f52886a42e0ccce5",
+            "key": "d6c46d2d691056fbd091bf1f01b21a91"
+          }
         },
         {
           "id": "tvp-polish-fhd",
@@ -445,14 +485,22 @@
           "name": "DIRECT TV FHD",
           "url": "https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash/enc/ubehitlwzo/out/v1/8e09c381a51f4366a19e979418112e8f/cenc.mpd",
           "logo": "https://cdn.mos.cms.futurecdn.net/kHeXzAT9cKJ8CiqmRsxEkk.jpg",
-          "group": "Sports"
+          "group": "Sports",
+          "drm": {
+            "kid": "a7d11d37a1f7611ee88d4db880171f32",
+            "key": "68f96d618b0b956b008c445896a25a79"
+          }
         },
         {
           "id": "fox-sports-fhd",
           "name": "FOX Sports FHD",
-          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/fsu3wl2rwb/out/v1/be61206c04e643349d53fb22301f3b50/cenc.mpd",
+          "url": "https://a151aivottlinear-a.akamaihd.net/OTTB/sin-nitro/live/dash/enc/oboxe53wyo/out/v1/f7892a9d706d419a846d738fa22ea33e/cenc.mpd",
           "logo": "https://cdn.mos.cms.futurecdn.net/kHeXzAT9cKJ8CiqmRsxEkk.jpg",
-          "group": "Sports"
+          "group": "Sports",
+          "drm": {
+            "kid": "2fbdaa3bea0d0323ae011b318d1db716",
+            "key": "8726ef7eaf5b9dce15fb6aa9f80bd53f"
+          }
         },
         {
           "id": "win-sports",
@@ -480,7 +528,11 @@
           "name": "CAZE TV FHD",
           "url": "https://otte-qw.live.pv-cdn.net/lhr-nitro/live/clients/dash/enc/iayg0kyrof/out/v1/91dc04907f56415b897faccfa9d252da/cenc.mpd",
           "logo": "https://cdn.mos.cms.futurecdn.net/kHeXzAT9cKJ8CiqmRsxEkk.jpg",
-          "group": "Sports"
+          "group": "Sports",
+          "drm": {
+            "kid": "1223d5105392cabf1bb9c2c1fdf6539a",
+            "key": "340b409f4b8f78a343e0363a7938df38"
+          }
         },
         {
           "id": "tnt-sports-premium",
@@ -513,9 +565,13 @@
         {
           "id": "telemundo",
           "name": "TELEMUNDO 🇲🇽",
-          "url": "https://nbculocallive.akamaized.net/hls/live/2037499/puertorico/stream1/master.m3u8",
+          "url": "https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s-v2/Live/channel(kvea)/master.mpd",
           "logo": "",
-          "group": "Sports"
+          "group": "Sports",
+          "drm": {
+            "kid": "ce7ab3022e753307997f58afe001bac4",
+            "key": "72d631a66e635c60829a0fe7705516c1"
+          }
         },
         {
           "id": "dazn-combat-1080p",

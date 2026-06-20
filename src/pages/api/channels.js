@@ -28,3 +28,5 @@ export async function GET({ request }) {
     }
   });
 }
+// cache-invalidate: TSN Sports final working URL restored
+

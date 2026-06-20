@@ -463,6 +463,13 @@ function handlePlaybackError(button, url, channelName, fallbackUrl) {
 
   if (isDrm) {
     console.error(`[DRM] Shaka error / playback failed for: ${channelName}`);
+    const wasProxied = url.startsWith('/proxy?url=');
+    if (!wasProxied && !isPrivateIP(channel.url)) {
+      console.log(`[PLAYBACK] DRM direct failed, falling back to proxy: ${channelName}`);
+      showError(`Retrying ${channelName} via proxy...`);
+      playChannel(button, url, channelName, fallbackUrl, true);
+      return;
+    }
     showPlayerError(channelName, url);
     return;
   }
@@ -801,7 +808,7 @@ async function playChannel(button, url, channelName, fallbackUrl = null, forcePr
   }
 
   const isTs = (strategy === 'proxy-stream');
-  const isMpd = (strategy === 'drm');
+  const isMpd = (strategy === 'drm') || url.endsWith('.mpd') || url.includes('.mpd?') || (channel && !!channel.drm);
 
   try {
     // Destroy previous player inside try block safely using destroy(false) to keep container

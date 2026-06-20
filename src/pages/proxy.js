@@ -24,6 +24,68 @@ export async function OPTIONS() {
   });
 }
 
+const lastAuthTimes = new Map();
+
+async function ensureKkx4Authorized(targetUrl) {
+  let key = '';
+  if (targetUrl.includes('otte.cache.aiv-cdn.net')) {
+    key = 'foxeng';
+  } else if (targetUrl.includes('otte-qw.live.pv-cdn.net')) {
+    key = 'cazetv';
+  } else {
+    return;
+  }
+
+  const lastAuth = lastAuthTimes.get(key);
+  if (lastAuth && (Date.now() - lastAuth) < 120000) {
+    return;
+  }
+
+  try {
+    const mainRes = await fetch('https://kkx4.livekhelatv.com/', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://kkx4.livekhelatv.com/'
+      }
+    });
+    const html = await mainRes.text();
+    
+    const regex = /const\s+CHANNELS\s*=\s*(\[[\s\S]*?\]);/g;
+    const match = regex.exec(html);
+    if (!match) throw new Error('CHANNELS not found');
+    
+    const channels = JSON.parse(match[1]);
+    const ch = channels.find(c => c.key === key);
+    if (!ch) throw new Error(`Key ${key} not found`);
+    
+    const body = new URLSearchParams();
+    body.set("key", key);
+    body.set("access", ch.play_token);
+    
+    const apiRes = await fetch(`https://kkx4.livekhelatv.com/v1/mks/channel?t=${Date.now()}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        'Referer': 'https://kkx4.livekhelatv.com/',
+        'Origin': 'https://kkx4.livekhelatv.com',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      },
+      body: body.toString()
+    });
+    
+    if (apiRes.ok) {
+      const json = await apiRes.json();
+      if (json.success) {
+        lastAuthTimes.set(key, Date.now());
+      }
+    }
+  } catch (e) {
+    console.error(`[Proxy] Failed to authorize IP for kkx4 channel ${key}:`, e.message);
+  }
+}
+
 export async function GET({ request }) {
   const url = new URL(request.url);
   const targetUrl = url.searchParams.get('url');
@@ -31,6 +93,9 @@ export async function GET({ request }) {
   if (!targetUrl) {
     return new Response('Target URL required', { status: 400 });
   }
+
+  // Authorize kkx4 CDN if needed
+  await ensureKkx4Authorized(targetUrl);
 
   // 1. Check in-memory cache first (only for m3u8 and mpd playlists)
   const cached = cache.get(targetUrl);
@@ -51,7 +116,7 @@ export async function GET({ request }) {
     const response = await fetch(targetUrl, {
       signal: controller.signal,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
         'Accept': '*/*',
         'Accept-Language': 'en-US,en;q=0.9',
         'Cache-Control': 'no-cache',
