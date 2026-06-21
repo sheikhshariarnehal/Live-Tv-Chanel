@@ -32,12 +32,16 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
   min-height: 100vh;
   overflow: hidden;
+  /* Prevent the browser's pull-to-refresh from misfiring on the root */
+  overscroll-behavior-y: none;
 }
 
 /* ===== Portal Page (Directory) Layout ===== */
 body.portal-layout {
   overflow-y: auto;
   overflow-x: hidden;
+  /* Re-enable pull-to-refresh on the scrollable portal/directory page */
+  overscroll-behavior-y: auto;
 }
 
 body.portal-layout .main-container {
@@ -64,6 +68,8 @@ body.player-layout {
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
+  /* Disable pull-to-refresh on the player page — scrollable areas handle their own overscroll */
+  overscroll-behavior-y: none;
 }
 
 body.player-layout .main-container {
@@ -647,6 +653,9 @@ body.player-layout .container {
   padding: 1.5rem;
   scrollbar-width: thin;
   scrollbar-color: var(--primary-color) var(--bg-tertiary);
+  /* Contain overscroll so pull-to-refresh triggers correctly inside this element on mobile */
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .channel-category {
@@ -950,6 +959,7 @@ body.player-layout .container {
     height: 100vh;
     display: flex;
     flex-direction: column;
+    overscroll-behavior-y: none;
   }
 
   .news-ticker-section {
@@ -1479,6 +1489,7 @@ body.player-layout .container {
   body.player-layout {
     overflow: hidden;
     height: 100vh;
+    overscroll-behavior-y: none;
   }
 
   body.player-layout .main-container {
