@@ -7,7 +7,39 @@
           "id": "world-cup-2026",
           "name": "World Cup 2026",
           "url": "https://d1211whpimeups.cloudfront.net/smil:rtbgo/chunklist.m3u8",
-          "logo": "https://digitalhub.fifa.com/transform/598a1d22-62b6-486b-849c-e8bf55894179/FIFA_FWC26_Tournament-Thumbnail-4-3"
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
+        },
+        {
+          "id": "go-fifa-live",
+          "name": "Go Fifa Live",
+          "url": "https://backup.alarafatofficial.workers.dev/?url=https%3A%2F%2Fd1211whpimeups.cloudfront.net%2Fsmil%3Artbgo%2Fchunklist_b4096000_slENG.m3u8&ua=Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Chrome%2F124.0.0.0%20Safari%2F537.36&ekey=SPORTIX_SECURE_KEY_2026",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
+        },
+        {
+          "id": "sports-foxsports",
+          "name": "FoxSports",
+          "url": "https://1nyaler.streamhostingcdn.top/stream/26/index.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/channels4_profile%20(1).jpg"
+        },
+        {
+          "id": "telemundo-fhd-2",
+          "name": "TELEMUNDO FHD 2",
+          "url": "https://nbculocallive.akamaized.net/hls/live/2037084/losangeles/stream6/master.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/telemundo-social-default.png",
+          "group": "Sports"
+        },
+        {
+          "id": "win-sports",
+          "name": "Win Sports",
+          "url": "https://1nyaler.streamhostingcdn.top/stream/32/index.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/channels4_profile.jpg",
+          "group": "Sports"
+        },
+        {
+          "id": "tigosports",
+          "name": "Tigo Sports HD",
+          "url": "https://cdn.livekhelatv.com/mks/lat-tigo-sports-hd/master.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Tigo%20Sports%20HD.webp"
         },
         {
           "id": "sports-cazetv",
@@ -16,40 +48,28 @@
           "logo": "https://images.seeklogo.com/logo-png/61/1/cazetv-logo-png_seeklogo-619708.png"
         },
         {
-          "id": "sports-foxsports",
-          "name": "FoxSports",
-          "url": "http://84.17.50.102/fox/index.m3u8",
-          "logo": "https://variety.com/wp-content/uploads/2023/08/Fox-Sports.png?w=1000&h=563&crop=1"
-        },
-        {
           "id": "sports-beinsports",
           "name": "BeinSports",
           "url": "https://bein-esp-xumo.amagi.tv/playlistR1080p.m3u8",
-          "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCXstZBALCMN8PSOTNgRTE_cVr2p1U7m5SLQ&s"
-        },
-        {
-          "id": "sports-channelone",
-          "name": "ChannelOne",
-          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1702/output/1702-audio_113322_eng=113200-video=2202800.m3u8",
-          "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7HR0auERCGfI1w4fkZ-uIcWg97c32LpEd_0Hr7aRh7cKsAb1URzjCG2c&s=10"
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/bein%20sports%20logo.jpg.jpg"
         },
         {
           "id": "sports-beinsports-2",
           "name": "BeINSports-2",
           "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78379.ts",
-          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/bein%20sports%20logo.jpg.jpg"
         },
         {
           "id": "sports-beinsports-4",
           "name": "BeINSports-4",
           "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78381.ts",
-          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/bein%20sports%20logo.jpg.jpg"
         },
         {
           "id": "sports-beinsports-5",
           "name": "BeINSports-5",
           "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78382.ts",
-          "logo": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg"
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/bein%20sports%20logo.jpg.jpg"
         },
         {
           "id": "sporza-dutch-aq",
@@ -59,6 +79,28 @@
           "drm": {
             "kid": "893bc63340876605f52886a42e0ccce5",
             "key": "d6c46d2d691056fbd091bf1f01b21a91"
+          }
+        },
+        {
+          "id": "fifa-2026-live-server-2",
+          "name": "FIFA 2026 Live (Server 2)",
+          "url": "https://1nyaler.streamhostingcdn.top/stream/89/index.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
+        },
+        {
+          "id": "ios3",
+          "name": "iOS - FIFA 2026 Server 3",
+          "url": "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8",
+          "logo": "https://i.guim.co.uk/img/media/993d3ff63f81efb3bd6d4a93be34a98a815a2453/0_0_5000_3297/master/5000.jpg?width=1900&dpr=2&s=none&crop=none"
+        },
+        {
+          "id": "foxeng",
+          "name": "FOX (ENG) 60Fps",
+          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/ajfoeddkbz/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Fox-One-Logo.webp",
+          "drm": {
+            "kid": "f6564ec2aee819046328a0e153be574d",
+            "key": "ff46a8a1031eb27ef22576a077c98ab7"
           }
         }
       ]
@@ -136,6 +178,12 @@
           "name": "Channel 24",
           "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1703/output/1703-audio_113332_eng=113200-video=2202800.m3u8",
           "logo": "https://i.ibb.co.com/v65cfQ96/Channel-24.png"
+        },
+        {
+          "id": "sports-channelone",
+          "name": "ChannelOne",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1702/output/1702-audio_113322_eng=113200-video=2202800.m3u8",
+          "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7HR0auERCGfI1w4fkZ-uIcWg97c32LpEd_0Hr7aRh7cKsAb1URzjCG2c&s=10"
         },
         {
           "id": "dbc-news-12424",
