@@ -1231,3 +1231,152 @@ window.addEventListener('resize', () => {
     art.resize();
   }
 });
+
+// ===== Custom Pull-to-Refresh =====
+// Native browser pull-to-refresh doesn't fire when body has overflow:hidden (player layout).
+// This custom implementation watches the channel grid scroll container and fires
+// a page reload when the user pulls down at the top — matching the native UX.
+(function initPullToRefresh() {
+  const PULL_THRESHOLD = 72;   // px to trigger reload
+  const MAX_VISUAL    = 110;   // max visual travel of the indicator (px)
+  const HIDE_Y        = -80;   // resting off-screen Y position (px)
+
+  // Build indicator DOM once
+  const indicator = document.createElement('div');
+  indicator.id = 'pullRefreshIndicator';
+  indicator.innerHTML = `
+    <div class="pull-refresh-pill">
+      <svg class="pull-refresh-icon" id="ptrIcon" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 4v6h6"/>
+        <path d="M3.51 15a9 9 0 1 0 .49-4"/>
+      </svg>
+      <span class="pull-refresh-text" id="ptrText">Pull to refresh</span>
+    </div>
+  `;
+  document.body.appendChild(indicator);
+
+  const ptrIcon = document.getElementById('ptrIcon');
+  const ptrText = document.getElementById('ptrText');
+
+  let touchStartY   = 0;
+  let currentPullY  = 0;
+  let isPulling     = false;
+  let isRefreshing  = false;
+  let rafId         = null;
+
+  // Returns the primary scrollable container (channel grid on player layout, else body)
+  function getScrollContainer() {
+    if (channelGridContainer && channelGridContainer.scrollHeight > channelGridContainer.clientHeight) {
+      return channelGridContainer;
+    }
+    return document.documentElement;
+  }
+
+  function getScrollTop() {
+    const sc = getScrollContainer();
+    return sc === document.documentElement
+      ? (document.documentElement.scrollTop || document.body.scrollTop)
+      : sc.scrollTop;
+  }
+
+  function applyIndicator(pullY) {
+    const progress   = Math.min(pullY / PULL_THRESHOLD, 1);
+    const visualY    = Math.min(pullY * 0.65, MAX_VISUAL) + HIDE_Y + 80; // slide in from top
+    const triggered  = pullY >= PULL_THRESHOLD;
+
+    // Move + fade indicator
+    indicator.style.transform = `translateX(-50%) translateY(${visualY}px)`;
+    indicator.style.opacity   = Math.min(progress * 1.4, 1).toString();
+
+    // Rotate icon proportional to pull (like native UX)
+    const rotation = triggered ? 180 : Math.round(progress * 160);
+    ptrIcon.style.transform = `rotate(${rotation}deg)`;
+
+    // State classes
+    indicator.classList.toggle('ptr-triggered', triggered);
+    ptrText.textContent = triggered ? 'Release to refresh' : 'Pull to refresh';
+  }
+
+  function resetIndicator() {
+    indicator.style.transform = `translateX(-50%) translateY(${HIDE_Y}px)`;
+    indicator.style.opacity   = '0';
+    indicator.classList.remove('ptr-triggered', 'ptr-refreshing');
+    ptrIcon.style.transform   = 'rotate(0deg)';
+    ptrText.textContent       = 'Pull to refresh';
+  }
+
+  function triggerRefresh() {
+    isRefreshing = true;
+    indicator.classList.add('ptr-refreshing');
+    indicator.classList.remove('ptr-triggered');
+    ptrIcon.classList.add('spinning');
+    ptrIcon.style.transform = 'rotate(0deg)';
+    ptrText.textContent     = 'Refreshing…';
+    // Keep indicator visible while loading
+    indicator.style.transform = `translateX(-50%) translateY(20px)`;
+    indicator.style.opacity   = '1';
+
+    setTimeout(() => { window.location.reload(); }, 450);
+  }
+
+  // ── Touch Handlers ──────────────────────────────────────────────────────────
+
+  document.addEventListener('touchstart', function(e) {
+    if (isRefreshing) return;
+    // Only begin pull detection when scrolled to the very top
+    if (getScrollTop() <= 1) {
+      touchStartY  = e.touches[0].clientY;
+      currentPullY = 0;
+      isPulling    = true;
+    } else {
+      isPulling = false;
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchmove', function(e) {
+    if (!isPulling || isRefreshing) return;
+
+    const dy = e.touches[0].clientY - touchStartY;
+    if (dy <= 0) {
+      // Scrolling up — hide indicator
+      if (currentPullY > 0) {
+        currentPullY = 0;
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(resetIndicator);
+      }
+      return;
+    }
+
+    currentPullY = dy;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(() => applyIndicator(currentPullY));
+  }, { passive: true });
+
+  document.addEventListener('touchend', function() {
+    if (!isPulling || isRefreshing) return;
+    isPulling = false;
+
+    if (rafId) cancelAnimationFrame(rafId);
+
+    if (currentPullY >= PULL_THRESHOLD) {
+      triggerRefresh();
+    } else {
+      // Snap back with a CSS transition for the release
+      indicator.style.transition = 'transform 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease';
+      resetIndicator();
+      setTimeout(() => { indicator.style.transition = ''; }, 320);
+    }
+
+    currentPullY = 0;
+  }, { passive: true });
+
+  document.addEventListener('touchcancel', function() {
+    if (!isPulling) return;
+    isPulling    = false;
+    currentPullY = 0;
+    if (rafId) cancelAnimationFrame(rafId);
+    resetIndicator();
+  }, { passive: true });
+})();
+

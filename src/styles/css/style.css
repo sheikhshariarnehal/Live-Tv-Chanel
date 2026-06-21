@@ -1546,3 +1546,78 @@ body.player-layout .container {
     display: flex !important;
   }
 }
+
+/* ===== Custom Pull-to-Refresh Indicator ===== */
+#pullRefreshIndicator {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(-80px);
+  z-index: 99999;
+  pointer-events: none;
+  will-change: transform, opacity;
+  /* No transition here — JS drives it for responsiveness */
+}
+
+.pull-refresh-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 15, 20, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  border-radius: 999px;
+  padding: 8px 18px 8px 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.04);
+  white-space: nowrap;
+}
+
+.pull-refresh-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--primary-color);
+  flex-shrink: 0;
+  will-change: transform;
+  transition: color 0.2s ease;
+}
+
+.pull-refresh-icon.spinning {
+  animation: ptr-spin 0.7s linear infinite;
+}
+
+@keyframes ptr-spin {
+  to { transform: rotate(360deg); }
+}
+
+.pull-refresh-text {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+  transition: color 0.2s ease;
+}
+
+#pullRefreshIndicator.ptr-triggered .pull-refresh-pill {
+  border-color: rgba(99, 102, 241, 0.7);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(99, 102, 241, 0.2);
+}
+
+#pullRefreshIndicator.ptr-triggered .pull-refresh-icon {
+  color: #a5b4fc;
+}
+
+#pullRefreshIndicator.ptr-triggered .pull-refresh-text {
+  color: #a5b4fc;
+}
+
+#pullRefreshIndicator.ptr-refreshing .pull-refresh-pill {
+  border-color: rgba(99, 102, 241, 0.7);
+}
+
+/* Only show pull-to-refresh UI on touch devices */
+@media (hover: hover) and (pointer: fine) {
+  #pullRefreshIndicator {
+    display: none !important;
+  }
+}
