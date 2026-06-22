@@ -1,6 +1,70 @@
 const cache = new Map();
 
-// Clean up expired cache entries periodically to prevent memory leaks
+// ---------------------------------------------------------------------------
+// Domains that REQUIRE full server-side proxying (CORS-blocked, auth-gated,
+// or Cloudflare-protected). Everything else gets a lightweight 302 redirect
+// so the browser fetches video segments directly — saving CPU & bandwidth.
+// ---------------------------------------------------------------------------
+const REQUIRES_FULL_PROXY = [
+  // Amazon IVS / Nitro CDNs — strict CORS + Widevine DRM MPD endpoints
+  'aiv-cdn.net',
+  'pv-cdn.net',
+  'fly.ww.aiv-cdn.net',
+  // Akamai IVS OTT linear — requires Referer / auth headers
+  'akamaihd.net',
+  // kkx4 / livekhelatv — requires server-IP authorization (tigosports, etc.)
+  'livekhelatv.com',
+  // foxbleu — raw .ts streams that block direct browser access
+  'foxbleu-cdn.com',
+  // thebosstv — CORS-blocked ncare-origin streams
+  'thebosstv.com',
+  'ncare.live',
+  // Cloudflare Worker proxy (already proxied upstream — keep stable)
+  'alarafatofficial.workers.dev',
+  // Cloudflare-protected zflixbd token streams
+  'zflixbd.com',
+  // SRK TV / ncare-based streams
+  'srknowapp.ncare.live',
+  // Heroku CORS proxy (already a proxy — keep stable)
+  'herokuapp.com',
+  // VRT live streams — geographic restriction + CORS
+  'vrtcdn.be',
+  // Antik DASH streams — CORS-blocked
+  'antik.sk',
+  // IndIHuy DASH — CORS-blocked
+  'indihuy.streamized.net',
+  // pishow.tv — requires token in headers
+  'pishow.tv',
+  // aynaott.com tvsen servers — CORS-blocked
+  'tvsen5.aynaott.com',
+  'tvsen6.aynaott.com',
+  'tvsen7.aynaott.com',
+  // klowdtv — CORS-blocked
+  'klowdtv.com',
+  // jagobd — token-based stream
+  'jagobd.com.bd',
+  // gpcdn - CORS-blocked Bangladesh news streams
+  'gpcdn.net',
+  // mxonlive — CORS-blocked
+  'mxonlive.xyz',
+  // v3v3v IPTV — requires auth in URL
+  'v3v3v.xyz',
+];
+
+/**
+ * Returns true if the target URL requires full server-side proxying.
+ * Returns false if the browser can fetch the resource directly (redirect is safe).
+ */
+function requiresFullProxy(url) {
+  try {
+    const { hostname } = new URL(url);
+    return REQUIRES_FULL_PROXY.some(domain => hostname === domain || hostname.endsWith('.' + domain));
+  } catch {
+    return true; // If URL is malformed, proxy to be safe
+  }
+}
+
+// Clean up expired cache entries every 60 seconds (was 10s — reduces CPU overhead)
 if (typeof globalThis.proxyCacheInterval === 'undefined') {
   globalThis.proxyCacheInterval = setInterval(() => {
     const now = Date.now();
@@ -9,7 +73,7 @@ if (typeof globalThis.proxyCacheInterval === 'undefined') {
         cache.delete(key);
       }
     }
-  }, 10000);
+  }, 60000);
 }
 
 export async function OPTIONS() {
@@ -96,8 +160,35 @@ export async function GET({ request }) {
     return new Response('Target URL required', { status: 400 });
   }
 
-  // Authorize kkx4 CDN if needed
+  // Authorize kkx4 CDN if needed (only runs for livekhelatv domains, rate-limited)
   await ensureKkx4Authorized(targetUrl);
+
+  // ---------------------------------------------------------------------------
+  // SMART REDIRECT: For binary media segments from open CDNs, send a 302 so
+  // the browser fetches the data directly. This avoids relaying video bytes
+  // through the server — the #1 cause of CPU saturation.
+  //
+  // Only redirect for segments (not playlists), and only for CDNs that don't
+  // require server-side CORS bypass or auth.
+  // ---------------------------------------------------------------------------
+  const isPlaylist = /\.m3u8(\?|$)/i.test(targetUrl) ||
+                     /\.mpd(\?|$)/i.test(targetUrl) ||
+                     targetUrl.includes('chunklist') ||
+                     targetUrl.includes('playlist');
+
+  if (!isPlaylist && !requiresFullProxy(targetUrl)) {
+    // Binary segment (TS, MP4, M4S, AAC, KEY, INIT, etc.) from an open CDN.
+    // Tell the browser to fetch it directly — zero CPU cost to us.
+    return new Response(null, {
+      status: 302,
+      headers: {
+        'Location': targetUrl,
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'no-store',
+        'X-Proxy-Mode': 'redirect'
+      }
+    });
+  }
 
   // 1. Check in-memory cache first (only for m3u8 and mpd playlists)
   const cached = cache.get(targetUrl);
