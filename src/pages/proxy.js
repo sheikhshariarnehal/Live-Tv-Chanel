@@ -222,7 +222,7 @@ export async function GET({ request }) {
     clearTimeout(timeoutId);
 
     const headers = new Headers();
-    const headersToCopy = ['content-type', 'cache-control'];
+    const headersToCopy = ['content-type', 'cache-control', 'content-length', 'accept-ranges'];
     headersToCopy.forEach(h => {
       const val = response.headers.get(h);
       if (val) headers.set(h, val);
@@ -299,7 +299,13 @@ export async function GET({ request }) {
           if (baseUrl.search && !absoluteUrl.includes('?')) {
             absoluteUrl += baseUrl.search;
           }
-          return '/proxy?url=' + encodeURIComponent(absoluteUrl);
+          // Optimization: Only proxy the segment URL if its domain requires full proxying.
+          // Otherwise, reference the direct URL to save proxy roundtrips (and avoid 302 redirects).
+          if (requiresFullProxy(absoluteUrl)) {
+            return '/proxy?url=' + encodeURIComponent(absoluteUrl);
+          } else {
+            return absoluteUrl;
+          }
         }
         if (line.startsWith('#EXT-X-KEY') || line.startsWith('#EXT-X-MAP')) {
           return line.replace(/URI="([^"]+)"/, (match, uri) => {
@@ -310,7 +316,11 @@ export async function GET({ request }) {
              if (baseUrl.search && !absoluteUrl.includes('?')) {
                absoluteUrl += baseUrl.search;
              }
-             return `URI="/proxy?url=${encodeURIComponent(absoluteUrl)}"`;
+             if (requiresFullProxy(absoluteUrl)) {
+               return `URI="/proxy?url=${encodeURIComponent(absoluteUrl)}"`;
+             } else {
+               return `URI="${absoluteUrl}"`;
+             }
           });
         }
         return line;

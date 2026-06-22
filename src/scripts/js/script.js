@@ -882,6 +882,12 @@ async function playChannel(button, url, channelName, fallbackUrl = null, forcePr
   const match = findChannelByIdOrSlug(channelId);
   const channel = match ? match.channel : { url, name: channelName };
 
+  // Update document title for better user experience/SEO on navigation
+  if (channel) {
+    const seoTitle = channel.seo?.title || `Watch ${channel.name} Live | Vibestream`;
+    document.title = seoTitle;
+  }
+
   // Classify strategy
   const strategy = getPlaybackStrategy(channel, forceProxy);
 
