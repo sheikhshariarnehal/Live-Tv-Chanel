@@ -884,7 +884,12 @@ async function playChannel(button, url, channelName, fallbackUrl = null, forcePr
 
   // Update document title for better user experience/SEO on navigation
   if (channel) {
-    const seoTitle = channel.seo?.title || `Watch ${channel.name} Live | Vibestream`;
+    const nameLower = channel.name.toLowerCase();
+    const hasLiveWord = nameLower.endsWith('live') || nameLower.includes(' live ') || nameLower.includes(' live(') || nameLower.includes(' live');
+    const defaultSeoTitle = hasLiveWord 
+      ? `Watch ${channel.name} | Vibestream` 
+      : `Watch ${channel.name} Live | Vibestream`;
+    const seoTitle = channel.seo?.title || defaultSeoTitle;
     document.title = seoTitle;
   }
 
