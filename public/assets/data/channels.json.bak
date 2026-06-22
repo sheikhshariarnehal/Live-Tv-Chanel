@@ -4,10 +4,11 @@
       "name": "Sports",
       "channels": [
         {
-          "id": "world-cup-2026",
-          "name": "World Cup 2026",
-          "url": "https://d1211whpimeups.cloudfront.net/smil:rtbgo/chunklist.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
+          "id": "toffee-fifa-2026-4",
+          "name": "Toffee FIFA 2026",
+          "url": "https://prod-cdn01-live.toffeelive.com/live/FIFA-2026-4/1/master_1800.m3u8?hdntl=Expires=1781860204~_GO=Generated~URLPrefix=aHR0cHM6Ly9wcm9kLWNkbjAxLWxpdmUudG9mZmVlbGl2ZS5jb20~Signature=AduQTZ9Sj9zvSufjg0JASf_vDycyqdS8TPBOu-JKexBNXNW9DscK2nxR0lg5t16ryjLACgEgXZ7OiLvl6k-jUTI_KmcD",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
+          "group": "Sports"
         },
         {
           "id": "go-fifa-live",
@@ -16,14 +17,10 @@
           "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
         },
         {
-          "id": "circleplay-fifa-world-cup-2026",
-          "name": "CirclePlay FIFA World Cup 2026",
-          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/72sjo8hygl/out/v1/3079be34d72a4985852d299a02406a0c/cenc.mpd",
-          "logo": "https://circleplay.top/assets/images/FIFA World Cup 20261781104112.png",
-          "drm": {
-            "kid": "d185684e2330de5bea436daa094a5e86",
-            "key": "014f0116154f5bf0050e03a6b0a23157"
-          }
+          "id": "world-cup-2026",
+          "name": "World Cup 2026",
+          "url": "https://d1211whpimeups.cloudfront.net/smil:rtbgo/chunklist.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
         },
         {
           "id": "foxeng",
@@ -55,6 +52,28 @@
           "logo": "https://images.seeklogo.com/logo-png/61/1/cazetv-logo-png_seeklogo-619708.png"
         },
         {
+          "id": "sporza-dutch-aq",
+          "name": "Sporza DUTCH AQ",
+          "url": "https://live.vrtcdn.be/groupd/live/0761024f-37fe-4254-bc37-e95d7c62b2d1/live.isml/.mpd",
+          "logo": "https://cdn.uc.assets.prezly.com/870d12f1-d1f4-4668-8d25-0e8d79dd8e81/-/preview/-/format/auto/Untitled%20design%20(22).png",
+          "drm": {
+            "kid": "893bc63340876605f52886a42e0ccce5",
+            "key": "d6c46d2d691056fbd091bf1f01b21a91"
+          }
+        },
+        {
+          "id": "fifa-2026-live-server-2",
+          "name": "FIFA 2026 Live (Server 2)",
+          "url": "https://1nyaler.streamhostingcdn.top/stream/89/index.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
+        },
+        {
+          "id": "ios3",
+          "name": "iOS - FIFA 2026 Server 3",
+          "url": "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8",
+          "logo": "https://i.guim.co.uk/img/media/993d3ff63f81efb3bd6d4a93be34a98a815a2453/0_0_5000_3297/master/5000.jpg?width=1900&dpr=2&s=none&crop=none"
+        },
+        {
           "id": "sports-beinsports",
           "name": "BeinSports",
           "url": "https://bein-esp-xumo.amagi.tv/playlistR1080p.m3u8",
@@ -77,18 +96,6 @@
           "name": "BeINSports-5",
           "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78382.ts",
           "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/bein%20sports%20logo.jpg.jpg"
-        },
-        {
-          "id": "fifa-2026-live-server-2",
-          "name": "FIFA 2026 Live (Server 2)",
-          "url": "https://1nyaler.streamhostingcdn.top/stream/89/index.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
-        },
-        {
-          "id": "ios3",
-          "name": "iOS - FIFA 2026 Server 3",
-          "url": "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8",
-          "logo": "https://i.guim.co.uk/img/media/993d3ff63f81efb3bd6d4a93be34a98a815a2453/0_0_5000_3297/master/5000.jpg?width=1900&dpr=2&s=none&crop=none"
         }
       ]
     },
