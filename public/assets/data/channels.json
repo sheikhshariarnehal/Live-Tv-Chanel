@@ -26,13 +26,6 @@
           }
         },
         {
-          "id": "telemundo-fhd-2",
-          "name": "TELEMUNDO FHD 2",
-          "url": "https://nbculocallive.akamaized.net/hls/live/2037084/losangeles/stream6/master.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/telemundo-social-default.png",
-          "group": "Sports"
-        },
-        {
           "id": "win-sports",
           "name": "Win Sports",
           "url": "https://1nyaler.streamhostingcdn.top/stream/32/index.m3u8",
@@ -50,6 +43,28 @@
           "name": "CazeTV",
           "url": "https://dfr80qz435crc.cloudfront.net/MNOP/Amagi/Caze/Caze_TV_BR/1080p-vtt/index.m3u8",
           "logo": "https://images.seeklogo.com/logo-png/61/1/cazetv-logo-png_seeklogo-619708.png"
+        },
+        {
+          "id": "sporza-dutch-aq",
+          "name": "Sporza DUTCH AQ",
+          "url": "https://live.vrtcdn.be/groupd/live/0761024f-37fe-4254-bc37-e95d7c62b2d1/live.isml/.mpd",
+          "logo": "https://cdn.uc.assets.prezly.com/870d12f1-d1f4-4668-8d25-0e8d79dd8e81/-/preview/-/format/auto/Untitled%20design%20(22).png",
+          "drm": {
+            "kid": "893bc63340876605f52886a42e0ccce5",
+            "key": "d6c46d2d691056fbd091bf1f01b21a91"
+          }
+        },
+        {
+          "id": "fifa-2026-live-server-2",
+          "name": "FIFA 2026 Live (Server 2)",
+          "url": "https://1nyaler.streamhostingcdn.top/stream/89/index.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
+        },
+        {
+          "id": "ios3",
+          "name": "iOS - FIFA 2026 Server 3",
+          "url": "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8",
+          "logo": "https://i.guim.co.uk/img/media/993d3ff63f81efb3bd6d4a93be34a98a815a2453/0_0_5000_3297/master/5000.jpg?width=1900&dpr=2&s=none&crop=none"
         },
         {
           "id": "sports-beinsports",
@@ -74,28 +89,6 @@
           "name": "BeINSports-5",
           "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78382.ts",
           "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/bein%20sports%20logo.jpg.jpg"
-        },
-        {
-          "id": "sporza-dutch-aq",
-          "name": "Sporza DUTCH AQ",
-          "url": "https://live.vrtcdn.be/groupd/live/0761024f-37fe-4254-bc37-e95d7c62b2d1/live.isml/.mpd",
-          "logo": "https://cdn.uc.assets.prezly.com/870d12f1-d1f4-4668-8d25-0e8d79dd8e81/-/preview/-/format/auto/Untitled%20design%20(22).png",
-          "drm": {
-            "kid": "893bc63340876605f52886a42e0ccce5",
-            "key": "d6c46d2d691056fbd091bf1f01b21a91"
-          }
-        },
-        {
-          "id": "fifa-2026-live-server-2",
-          "name": "FIFA 2026 Live (Server 2)",
-          "url": "https://1nyaler.streamhostingcdn.top/stream/89/index.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
-        },
-        {
-          "id": "ios3",
-          "name": "iOS - FIFA 2026 Server 3",
-          "url": "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8",
-          "logo": "https://i.guim.co.uk/img/media/993d3ff63f81efb3bd6d4a93be34a98a815a2453/0_0_5000_3297/master/5000.jpg?width=1900&dpr=2&s=none&crop=none"
         }
       ]
     },
