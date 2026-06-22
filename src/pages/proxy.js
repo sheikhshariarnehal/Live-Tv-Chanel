@@ -203,10 +203,10 @@ export async function GET({ request }) {
           if (!line.startsWith('http')) {
             absoluteUrl = line.startsWith('/') ? baseUrl.origin + line : basePath + line;
           }
-          if (absoluteUrl.includes('.m3u8')) {
-            return '/proxy?url=' + encodeURIComponent(absoluteUrl);
+          if (baseUrl.search && !absoluteUrl.includes('?')) {
+            absoluteUrl += baseUrl.search;
           }
-          return absoluteUrl;
+          return '/proxy?url=' + encodeURIComponent(absoluteUrl);
         }
         if (line.startsWith('#EXT-X-KEY') || line.startsWith('#EXT-X-MAP')) {
           return line.replace(/URI="([^"]+)"/, (match, uri) => {
@@ -214,10 +214,10 @@ export async function GET({ request }) {
              if (!uri.startsWith('http')) {
                absoluteUrl = uri.startsWith('/') ? baseUrl.origin + uri : basePath + uri;
              }
-             if (line.startsWith('#EXT-X-KEY') || absoluteUrl.includes('.m3u8')) {
-               return `URI="/proxy?url=${encodeURIComponent(absoluteUrl)}"`;
+             if (baseUrl.search && !absoluteUrl.includes('?')) {
+               absoluteUrl += baseUrl.search;
              }
-             return `URI="${absoluteUrl}"`;
+             return `URI="/proxy?url=${encodeURIComponent(absoluteUrl)}"`;
           });
         }
         return line;

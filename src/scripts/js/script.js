@@ -135,7 +135,7 @@ function getPlaybackStrategy(channel, forceProxy = false) {
     return 'proxy-stream';
   }
 
-  if (url.includes('cdn.livekhelatv.com')) {
+  if (url.includes('cdn.livekhelatv.com') || url.includes('toffeelive.com')) {
     return 'proxy';
   }
 
