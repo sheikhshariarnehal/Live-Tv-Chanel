@@ -49,6 +49,8 @@ const REQUIRES_FULL_PROXY = [
   'mxonlive.xyz',
   // v3v3v IPTV — requires auth in URL
   'v3v3v.xyz',
+  // Toffee Live CDN — strict CORS on TS media segments
+  'toffeelive.com',
 ];
 
 /**
