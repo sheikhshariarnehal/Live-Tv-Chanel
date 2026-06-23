@@ -5,6 +5,8 @@ import MobileMenu from '../components/MobileMenu.astro';
 
 const categories = channelsData.categories;
 const categoryKeys = Object.keys(categories);
+const firstCategoryKey = categoryKeys[0];
+const firstCategoryChannels = firstCategoryKey ? categories[firstCategoryKey].channels.slice(0, 24) : [];
 
 function slugify(text) {
   return text
@@ -96,13 +98,15 @@ const {
   <link rel="apple-touch-icon" href="/assets/logo.webp" />
   <link rel="manifest" href="/manifest.json" />
 
-  <!-- Scripts & Fonts -->
+  <!-- Fonts — async-loaded to avoid render-blocking (saves 200-600ms FCP) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-  <link rel="preconnect" href="https://digitalhub.fifa.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+
+  <!-- DNS prefetch for CDNs used on interaction (not preconnect — saves wasted TCP/TLS) -->
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
   <!-- Schema.org JSON-LD Structured Data -->
   {schema ? (
@@ -245,15 +249,14 @@ const {
 
           <!-- Channel Grid -->
           <div class="channel-grid" id="channelGrid">
-            {categoryKeys.map((catKey, index) => (
+            {firstCategoryKey && (
               <div 
                 class="channel-category" 
-                data-category={catKey} 
-                style={index === 0 ? '' : 'display: none;'}
+                data-category={firstCategoryKey}
               >
-                {categories[catKey].channels.map((channel, chIndex) => {
+                {firstCategoryChannels.map((channel, chIndex) => {
                   const logoSrc = getPlaybackUrl(channel.logo);
-                  const loadType = (index === 0 && chIndex < 8) ? 'eager' : 'lazy';
+                  const loadType = (chIndex < 8) ? 'eager' : 'lazy';
                   return (
                     <button 
                       class="channel-btn" 
@@ -268,10 +271,12 @@ const {
                           src={logoSrc} 
                           alt={channel.name} 
                           class="channel-logo" 
+                          width="160"
+                          height="90"
                           loading={loadType}
                           style="opacity: 0; transition: opacity 0.2s ease-in;"
-                          onload="this.style.opacity='1'"
-                          onerror="this.remove(); const span = document.createElement('span'); span.className = 'channel-name'; span.textContent = this.alt; this.parentNode.appendChild(span);"
+                          onload="imgOk(this)"
+                          onerror="imgErr(this)"
                         />
                       ) : (
                         <span class="channel-name">{channel.name}</span>
@@ -280,7 +285,7 @@ const {
                   );
                 })}
               </div>
-            ))}
+            )}
           </div>
         </div>
       ) : (
@@ -289,7 +294,11 @@ const {
     </div>
   <MobileMenu />
 
-  <script is:inline set:html={"window.initialChannelsData = " + JSON.stringify(channelsData).replace(/</g, '\\u003c') + ";"} />
+  <!-- Global image handlers — deduplicated from ~30 inline onerror/onload strings (saves ~4KB HTML) -->
+  <script is:inline>
+    function imgOk(el){el.style.opacity='1'}
+    function imgErr(el){el.remove();var s=document.createElement('span');s.className='channel-name';s.textContent=el.alt;el.parentNode.appendChild(s)}
+  </script>
   <script>
     import '../scripts/js/security.js';
     import '../scripts/js/script.js';

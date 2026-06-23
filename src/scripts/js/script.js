@@ -176,14 +176,14 @@ async function loadChannelsData() {
   channelGridContainer.innerHTML = '';
 
   try {
-    const response = await fetch('/api/channels');
+    const response = await fetch('/assets/data/channels.json');
     if (response.ok) {
       channelsData = await response.json();
       initializeUI();
       return;
     }
   } catch (error) {
-    console.error('Error loading channels from API:', error);
+    console.error('Error loading channels from static JSON:', error);
   }
 
   categoryTabsContainer.innerHTML = '<p class="loading-text" style="padding: 1rem; color: #ef4444;">Failed to load channels.</p>';
@@ -349,35 +349,65 @@ function createCategoryTabs() {
 
 // ===== Render channels only for the active category =====
 function renderChannelsForCategory(categoryKey) {
-  const hasPrerendered = channelGridContainer.querySelector('.channel-category') !== null;
-  if (hasPrerendered) {
-    toggleCategoryVisibility(categoryKey);
+  // Check if this category is already rendered in the DOM
+  let categoryDiv = channelGridContainer.querySelector(`.channel-category[data-category="${categoryKey}"]`);
+  
+  // Check if this category is fully rendered (i.e. not the initial partial rendering of 24 channels)
+  const isFullyRendered = categoryDiv && categoryDiv.dataset.fullyRendered === "true";
+  
+  if (categoryDiv && isFullyRendered) {
+    // Hide all other categories, show this one
+    const categoryDivs = channelGridContainer.querySelectorAll('.channel-category');
+    categoryDivs.forEach(div => {
+      if (div === categoryDiv) {
+        div.style.display = '';
+      } else {
+        div.style.display = 'none';
+      }
+    });
     return;
   }
 
-  channelGridContainer.innerHTML = '';
-  
+  if (!channelsData || !channelsData.categories) return;
   const category = channelsData.categories[categoryKey];
   if (!category || !category.channels) return;
   
+  if (!categoryDiv) {
+    categoryDiv = document.createElement('div');
+    categoryDiv.className = 'channel-category';
+    categoryDiv.dataset.category = categoryKey;
+  } else {
+    categoryDiv.innerHTML = ''; // Re-render the partial category fully
+  }
+  
+  categoryDiv.dataset.fullyRendered = "true";
+  
   const fragment = document.createDocumentFragment();
-  
-  const categoryDiv = document.createElement('div');
-  categoryDiv.className = 'channel-category';
-  categoryDiv.dataset.category = categoryKey;
-  
   category.channels.forEach(channel => {
     const channelBtn = createChannelButton(channel);
-    // Restore active playing state visually
-    if (channel.url === lastSelectedChannelUrl || (channel.fallbackUrl && channel.fallbackUrl === lastSelectedChannelUrl)) {
+    const isPlaybackMatch = channel.url === lastSelectedChannelUrl || (channel.fallbackUrl && channel.fallbackUrl === lastSelectedChannelUrl);
+    if (isPlaybackMatch) {
       channelBtn.classList.add('active');
       lastSelectedChannelBtn = channelBtn;
     }
-    categoryDiv.appendChild(channelBtn);
+    fragment.appendChild(channelBtn);
   });
   
-  fragment.appendChild(categoryDiv);
-  channelGridContainer.appendChild(fragment);
+  categoryDiv.appendChild(fragment);
+  
+  // Hide all others and show/append this one
+  const categoryDivs = channelGridContainer.querySelectorAll('.channel-category');
+  categoryDivs.forEach(div => {
+    if (div !== categoryDiv) {
+      div.style.display = 'none';
+    }
+  });
+  
+  if (!categoryDiv.parentNode) {
+    channelGridContainer.appendChild(categoryDiv);
+  } else {
+    categoryDiv.style.display = '';
+  }
 }
 
 // ===== Create individual channel button =====
@@ -964,7 +994,7 @@ async function playChannel(button, url, channelName, fallbackUrl = null, forcePr
       }
     } else {
       if (typeof Hls === 'undefined') {
-        enginePromises.push(loadScript('https://cdn.jsdelivr.net/npm/hls.js@latest'));
+        enginePromises.push(loadScript('https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js'));
       }
     }
 

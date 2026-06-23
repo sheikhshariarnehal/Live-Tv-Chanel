@@ -311,11 +311,12 @@
   }
 
   // 5. DevTools Detection Logic
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-  // A. Timing / Debugger based check
-  // This is highly robust. When DevTools is open, the debugger pauses execution.
-  // If the pause duration exceeds 100ms, it indicates DevTools is active.
+  // A. Timing / Debugger based check (desktop only)
+  // The `debugger` statement is ineffective on mobile and wastes CPU — skip entirely.
   const checkDebugger = () => {
+    if (isMobile) return;
     const startTime = performance.now();
     debugger;
     const endTime = performance.now();
@@ -324,29 +325,27 @@
     }
   };
 
-  // B. Window Size dock detection
-  // Detects if DevTools is docked on the side/bottom of the browser window.
-  // Excludes mobile user-agents to prevent false-positives from mobile browser toolbars.
+  // B. Window Size dock detection (desktop only)
   const checkSize = () => {
+    if (isMobile) return;
     const threshold = 160;
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    if (!isMobile) {
-      const widthDiff = window.outerWidth - window.innerWidth;
-      const heightDiff = window.outerHeight - window.innerHeight;
-      if (widthDiff > threshold || heightDiff > threshold) {
-        triggerAccessDenied();
-      }
+    const widthDiff = window.outerWidth - window.innerWidth;
+    const heightDiff = window.outerHeight - window.innerHeight;
+    if (widthDiff > threshold || heightDiff > threshold) {
+      triggerAccessDenied();
     }
   };
 
-  // Run initial checks
-  checkDebugger();
-  checkSize();
+  // Run initial checks (desktop only)
+  if (!isMobile) {
+    checkDebugger();
+    checkSize();
+  }
 
-  // Run checks repeatedly in background
+  // Run checks every 5s (was 1s — saves CPU and battery especially on mobile)
   const detectionInterval = setInterval(() => {
     checkDebugger();
     checkSize();
-  }, 1000);
+  }, 5000);
 
 })();
