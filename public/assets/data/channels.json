@@ -4,18 +4,18 @@
       "name": "Sports",
       "channels": [
         {
-          "id": "go-fifa-live",
-          "name": "Go Fifa Live",
-          "url": "https://backup.alarafatofficial.workers.dev/?url=https%3A%2F%2Fd1211whpimeups.cloudfront.net%2Fsmil%3Artbgo%2Fchunklist_b4096000_slENG.m3u8&ua=Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Chrome%2F124.0.0.0%20Safari%2F537.36&ekey=SPORTIX_SECURE_KEY_2026",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
-        },
-        {
           "id": "fifalive-fifa-2026-live-4k-server-6",
           "name": "FIFA 2026 Live 4K (Server 6)",
           "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
           "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
           "resolution": "4K",
           "proxy": false
+        },
+        {
+          "id": "go-fifa-live",
+          "name": "Go Fifa Live",
+          "url": "https://backup.alarafatofficial.workers.dev/?url=https%3A%2F%2Fd1211whpimeups.cloudfront.net%2Fsmil%3Artbgo%2Fchunklist_b4096000_slENG.m3u8&ua=Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Chrome%2F124.0.0.0%20Safari%2F537.36&ekey=SPORTIX_SECURE_KEY_2026",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
         },
         {
           "id": "toffee-fifa-2026-4",
