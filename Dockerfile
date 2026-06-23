@@ -1,30 +1,41 @@
-# Multi-stage build for Astro SSR Node.js
-FROM node:22-alpine AS base
-WORKDIR /app
+# Multi-stage build for Astro SSR Node.js (with cluster mode)
 
-# Step 1: Install dependencies
-FROM base AS deps
+# ── Stage 1: Install deps ────────────────────────────────────────────────────
+FROM node:22-alpine AS deps
+WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Step 2: Build the project and prune devDependencies
-FROM base AS builder
+# ── Stage 2: Build ───────────────────────────────────────────────────────────
+FROM node:22-alpine AS builder
+WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 RUN npm prune --production
 
-# Step 3: Production runtime
-FROM base AS runner
+# ── Stage 3: Production runtime ──────────────────────────────────────────────
+FROM node:22-alpine AS runner
 WORKDIR /app
+
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3000
 
-# Copy built server and production node_modules
+# curl is needed for the HEALTHCHECK
+RUN apk add --no-cache curl
+
+# Copy only what's needed to run
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/cluster.mjs ./cluster.mjs
 
 EXPOSE 3000
-CMD ["node", "./dist/server/entry.mjs"]
+
+# Health check: ping the server every 30s; restart if it fails 3 times in a row
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD curl -f http://localhost:3000/ || exit 1
+
+# Use cluster mode to utilise all CPU cores and auto-restart crashed workers
+CMD ["node", "cluster.mjs"]

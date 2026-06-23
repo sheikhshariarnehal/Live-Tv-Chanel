@@ -1,4 +1,105 @@
-const cache = new Map();
+// ---------------------------------------------------------------------------
+// Bounded LRU Cache — prevents unbounded memory growth under traffic spikes.
+// Max 150 entries; oldest evicted when full.
+// ---------------------------------------------------------------------------
+class LRUCache {
+  constructor(maxSize = 150) {
+    this.maxSize = maxSize;
+    this.map = new Map();
+  }
+
+  get(key) {
+    if (!this.map.has(key)) return undefined;
+    // Move to end (most recently used)
+    const value = this.map.get(key);
+    this.map.delete(key);
+    this.map.set(key, value);
+    return value;
+  }
+
+  set(key, value) {
+    if (this.map.has(key)) {
+      this.map.delete(key);
+    } else if (this.map.size >= this.maxSize) {
+      // Evict least recently used (first entry)
+      const firstKey = this.map.keys().next().value;
+      this.map.delete(firstKey);
+    }
+    this.map.set(key, value);
+  }
+
+  delete(key) {
+    this.map.delete(key);
+  }
+
+  entries() {
+    return this.map.entries();
+  }
+
+  get size() {
+    return this.map.size;
+  }
+}
+
+const cache = new LRUCache(150);
+
+// ---------------------------------------------------------------------------
+// Concurrency Semaphore — caps simultaneous outgoing fetch() calls to 50.
+// Excess requests immediately receive 503 rather than queuing and crashing.
+// ---------------------------------------------------------------------------
+class Semaphore {
+  constructor(max) {
+    this.max = max;
+    this.count = 0;
+  }
+
+  tryAcquire() {
+    if (this.count < this.max) {
+      this.count++;
+      return true;
+    }
+    return false;
+  }
+
+  release() {
+    if (this.count > 0) this.count--;
+  }
+}
+
+const fetchSemaphore = new Semaphore(50);
+
+// ---------------------------------------------------------------------------
+// Per-IP Rate Limiter — sliding window token bucket.
+// Playlist requests: max 60/min per IP
+// All other requests: max 120/min per IP
+// ---------------------------------------------------------------------------
+const rateLimitWindows = new Map();
+
+function isRateLimited(ip, isPlaylist) {
+  const limit = isPlaylist ? 60 : 120;
+  const windowMs = 60_000;
+  const now = Date.now();
+  const key = `${ip}:${isPlaylist ? 'pl' : 'seg'}`;
+
+  let record = rateLimitWindows.get(key);
+  if (!record) {
+    record = { count: 1, windowStart: now };
+    rateLimitWindows.set(key, record);
+    return false;
+  }
+
+  if (now - record.windowStart > windowMs) {
+    record.count = 1;
+    record.windowStart = now;
+    return false;
+  }
+
+  record.count++;
+  if (record.count > limit) {
+    return true;
+  }
+  return false;
+}
 
 // ---------------------------------------------------------------------------
 // Domains that REQUIRE full server-side proxying (CORS-blocked, auth-gated,
@@ -66,7 +167,10 @@ function requiresFullProxy(url) {
   }
 }
 
-// Clean up expired cache entries every 60 seconds (was 10s — reduces CPU overhead)
+// ---------------------------------------------------------------------------
+// Housekeeping: clean expired cache entries every 60s + purge stale rate
+// limit windows every 5 minutes to prevent memory accumulation over time.
+// ---------------------------------------------------------------------------
 if (typeof globalThis.proxyCacheInterval === 'undefined') {
   globalThis.proxyCacheInterval = setInterval(() => {
     const now = Date.now();
@@ -75,7 +179,18 @@ if (typeof globalThis.proxyCacheInterval === 'undefined') {
         cache.delete(key);
       }
     }
-  }, 60000);
+  }, 60_000);
+}
+
+if (typeof globalThis.proxyRateLimitInterval === 'undefined') {
+  globalThis.proxyRateLimitInterval = setInterval(() => {
+    const now = Date.now();
+    for (const [key, record] of rateLimitWindows.entries()) {
+      if (now - record.windowStart > 120_000) {
+        rateLimitWindows.delete(key);
+      }
+    }
+  }, 300_000);
 }
 
 export async function OPTIONS() {
@@ -106,6 +221,12 @@ async function ensureKkx4Authorized(targetUrl) {
 
   const lastAuth = lastAuthTimes.get(key);
   if (lastAuth && (Date.now() - lastAuth) < 120000) {
+    return;
+  }
+  // Back off 5 minutes after a failure — stops retrying on every request
+  // when the remote site has changed its HTML structure.
+  const lastFail = lastAuthTimes.get(key + ':failed');
+  if (lastFail && (Date.now() - lastFail) < 300000) {
     return;
   }
 
@@ -151,6 +272,8 @@ async function ensureKkx4Authorized(targetUrl) {
     }
   } catch (e) {
     console.error(`[Proxy] Failed to authorize IP for kkx4 channel ${key}:`, e.message);
+    // Record failure time so we back off for 5 minutes before retrying
+    lastAuthTimes.set(key + ':failed', Date.now());
   }
 }
 
@@ -160,6 +283,35 @@ export async function GET({ request }) {
 
   if (!targetUrl) {
     return new Response('Target URL required', { status: 400 });
+  }
+
+  // ---------------------------------------------------------------------------
+  // RATE LIMITING — protect against request floods from any single IP.
+  // ---------------------------------------------------------------------------
+  const isPlaylist = /\.m3u8(\?|$)/i.test(targetUrl) ||
+                     /\.mpd(\?|$)/i.test(targetUrl) ||
+                     targetUrl.includes('chunklist') ||
+                     targetUrl.includes('playlist');
+
+  const clientIp =
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('x-real-ip') ||
+    '0.0.0.0';
+
+  if (isRateLimited(clientIp, isPlaylist)) {
+    return new Response(
+      JSON.stringify({ error: 'Too Many Requests. Please slow down.' }),
+      {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Retry-After': '10',
+          'X-RateLimit-Limit': isPlaylist ? '60' : '120',
+          'X-RateLimit-Window': '60s'
+        }
+      }
+    );
   }
 
   // Authorize kkx4 CDN if needed (only runs for livekhelatv domains, rate-limited)
@@ -173,11 +325,6 @@ export async function GET({ request }) {
   // Only redirect for segments (not playlists), and only for CDNs that don't
   // require server-side CORS bypass or auth.
   // ---------------------------------------------------------------------------
-  const isPlaylist = /\.m3u8(\?|$)/i.test(targetUrl) ||
-                     /\.mpd(\?|$)/i.test(targetUrl) ||
-                     targetUrl.includes('chunklist') ||
-                     targetUrl.includes('playlist');
-
   if (!isPlaylist && !requiresFullProxy(targetUrl)) {
     // Binary segment (TS, MP4, M4S, AAC, KEY, INIT, etc.) from an open CDN.
     // Tell the browser to fetch it directly — zero CPU cost to us.
@@ -192,7 +339,7 @@ export async function GET({ request }) {
     });
   }
 
-  // 1. Check in-memory cache first (only for m3u8 and mpd playlists)
+  // 1. Check in-memory LRU cache first (only for m3u8 and mpd playlists)
   const cached = cache.get(targetUrl);
   if (cached && Date.now() < cached.expiresAt) {
     const headers = new Headers(cached.headers);
@@ -201,6 +348,24 @@ export async function GET({ request }) {
       status: cached.status,
       headers
     });
+  }
+
+  // ---------------------------------------------------------------------------
+  // CONCURRENCY LIMITER — cap simultaneous upstream fetches to 50.
+  // Return 503 immediately if at capacity rather than queuing and OOM-crashing.
+  // ---------------------------------------------------------------------------
+  if (!fetchSemaphore.tryAcquire()) {
+    return new Response(
+      JSON.stringify({ error: 'Server busy. Please try again in a moment.' }),
+      {
+        status: 503,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Retry-After': '1'
+        }
+      }
+    );
   }
 
   // Set a timeout of 5 seconds to prevent the function from hanging on unreachable IP addresses
@@ -271,7 +436,7 @@ export async function GET({ request }) {
           body: text,
           status: response.status,
           headers: responseHeaders,
-          expiresAt: Date.now() + 2000 // Cache playlists for 2 seconds
+          expiresAt: Date.now() + 15000 // Cache manifests 15s — cuts CDN fetches ~85% under concurrent load
         });
       }
 
@@ -339,7 +504,7 @@ export async function GET({ request }) {
           body: rewrittenText,
           status: response.status,
           headers: responseHeaders,
-          expiresAt: Date.now() + 2000 // Cache playlists for 2 seconds
+          expiresAt: Date.now() + 15000 // Cache manifests 15s — cuts CDN fetches ~85% under concurrent load
         });
       }
 
@@ -366,5 +531,8 @@ export async function GET({ request }) {
         'Access-Control-Allow-Origin': '*'
       }
     });
+  } finally {
+    // Always release the semaphore slot, even on error
+    fetchSemaphore.release();
   }
 }

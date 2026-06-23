@@ -4,18 +4,15 @@
       "name": "Sports",
       "channels": [
         {
-          "id": "go-fifa-live",
-          "name": "Go Fifa Live",
-          "url": "https://backup.alarafatofficial.workers.dev/?url=https%3A%2F%2Fd1211whpimeups.cloudfront.net%2Fsmil%3Artbgo%2Fchunklist_b4096000_slENG.m3u8&ua=Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Chrome%2F124.0.0.0%20Safari%2F537.36&ekey=SPORTIX_SECURE_KEY_2026",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
-          "seo": {
-            "title": "Watch Go FIFA Live Stream Free | Vibestream"
-          }
-        },
-        {
           "id": "world-cup-2026",
           "name": "World Cup 2026",
           "url": "https://d1211whpimeups.cloudfront.net/smil:rtbgo/chunklist.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
+        },
+        {
+          "id": "go-fifa-live",
+          "name": "Go Fifa Live",
+          "url": "https://backup.alarafatofficial.workers.dev/?url=https%3A%2F%2Fd1211whpimeups.cloudfront.net%2Fsmil%3Artbgo%2Fchunklist_b4096000_slENG.m3u8&ua=Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Chrome%2F124.0.0.0%20Safari%2F537.36&ekey=SPORTIX_SECURE_KEY_2026",
           "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
         },
         {
@@ -99,24 +96,6 @@
           "name": "iOS - FIFA 2026 Server 3",
           "url": "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8",
           "logo": "https://i.guim.co.uk/img/media/993d3ff63f81efb3bd6d4a93be34a98a815a2453/0_0_5000_3297/master/5000.jpg?width=1900&dpr=2&s=none&crop=none"
-        },
-        {
-          "id": "fifalive-fifa-2026-live-server-2",
-          "name": "FIFA 2026 Live (Server 2)",
-          "url": "https://vizio.kuvuslov.cymru/telemundo/tracks-v1a1/mono.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
-        },
-        {
-          "id": "fifalive-fifa-2026-live-server-3",
-          "name": "FIFA 2026 Live (Server 3)",
-          "url": "https://e3be9ac5.wurl.com/manifest/f36d25e7e52f1ba8d7e56eb859c636563214f541/TEctYnJfRklGQVBsdXNQb3J0dWd1ZXNlX0hMUw/9c1dd781-4ee3-4668-a957-fa1e6f81d613/3.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
-        },
-        {
-          "id": "fifalive-fifa-2026-live-server-4",
-          "name": "FIFA 2026 Live (Server 4)",
-          "url": "https://1nyaler.streamhostingcdn.top/stream/32/index.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
         }
       ]
     },
