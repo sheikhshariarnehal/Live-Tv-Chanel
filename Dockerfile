@@ -50,7 +50,7 @@ EXPOSE 3000
 
 # Health check: ping the server; fail if it doesn't respond
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD curl -f http://localhost:3000/ || exit 1
+  CMD curl -f http://127.0.0.1:3000/api/channels || exit 1
 
 # Start Next.js standalone server
 CMD ["node", "server.js"]
