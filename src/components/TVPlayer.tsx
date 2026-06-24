@@ -194,7 +194,7 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
     const isMpd = strategy === 'drm' || url.endsWith('.mpd') || url.includes('.mpd?') || !!channel.drm;
 
     const playbackUrl = (strategy === 'proxy' || strategy === 'proxy-stream')
-      ? `/proxy?url=${encodeURIComponent(url)}`
+      ? `${window.location.origin}/proxy?url=${encodeURIComponent(url)}`
       : url;
 
     const initPlayer = async () => {
@@ -492,7 +492,15 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
         });
 
         art.on('video:error', (err: any) => {
-          console.error('ArtPlayer internal video:error triggered:', err);
+          const videoError = art.video?.error;
+          const errMsg = `ArtPlayer internal video:error triggered:
+- Code: ${videoError?.code || 'N/A'}
+- Message: ${videoError?.message || 'N/A'}
+- Event/Type: ${err?.type || err?.name || 'N/A'}
+- Detail: ${err?.detail ? (typeof err.detail === 'object' ? JSON.stringify(err.detail) : err.detail) : 'N/A'}
+- Info: ${err?.info ? (typeof err.info === 'object' ? JSON.stringify(err.info) : err.info) : 'N/A'}`;
+          
+          console.error(errMsg, err);
           handleErrorFallback();
         });
 

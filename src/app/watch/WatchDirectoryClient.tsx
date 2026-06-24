@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChannelsData } from '@/types';
 import Header from '@/components/Header';
 import NewsTicker from '@/components/NewsTicker';
@@ -13,6 +13,14 @@ interface WatchDirectoryClientProps {
 export default function WatchDirectoryClient({ channelsData }: WatchDirectoryClientProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [failedLogos, setFailedLogos] = useState<Record<string, boolean>>({});
+
+  // Sync portal layout body class
+  useEffect(() => {
+    document.body.classList.add('portal-layout');
+    return () => {
+      document.body.classList.remove('portal-layout');
+    };
+  }, []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value.toLowerCase().trim());

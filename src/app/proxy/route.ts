@@ -320,6 +320,7 @@ export async function OPTIONS() {
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
+  const proxyOrigin = url.origin;
   const targetUrl = url.searchParams.get('url');
 
   if (!targetUrl) {
@@ -524,7 +525,7 @@ export async function GET(request: Request) {
             absoluteUrl += baseUrl.search;
           }
           if (requiresFullProxy(absoluteUrl, baseUrl.hostname)) {
-            return '/proxy?url=' + encodeURIComponent(absoluteUrl);
+            return proxyOrigin + '/proxy?url=' + encodeURIComponent(absoluteUrl);
           } else {
             return absoluteUrl;
           }
@@ -539,7 +540,7 @@ export async function GET(request: Request) {
                absoluteUrl += baseUrl.search;
              }
              if (requiresFullProxy(absoluteUrl, baseUrl.hostname)) {
-               return `URI="/proxy?url=${encodeURIComponent(absoluteUrl)}"`;
+               return `URI="${proxyOrigin}/proxy?url=${encodeURIComponent(absoluteUrl)}"`;
              } else {
                return `URI="${absoluteUrl}"`;
              }

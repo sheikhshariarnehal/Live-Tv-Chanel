@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import NewsTicker from '@/components/NewsTicker';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { ScheduleSkeleton } from '@/components/SkeletonLoader';
 
 interface Match {
   id: string;
@@ -138,22 +140,34 @@ function formatMini(diff: number) {
 }
 
 export default function UpcomingPageClient({ matches }: UpcomingPageClientProps) {
+  const router = useRouter();
   const [now, setNow] = useState<number | null>(null);
   const [activeFilter, setActiveFilter] = useState('upcoming');
+  const [isMounted, setIsMounted] = useState(false);
 
   // Spotlight match states
   const [spotlightMatch, setSpotlightMatch] = useState<Match | null>(null);
   const [isSpotlightLive, setIsSpotlightLive] = useState(false);
   const [countdown, setCountdown] = useState({ d: '00', h: '00', m: '00', s: '00' });
 
+  // Sync portal layout body class and mount status
+  useEffect(() => {
+    setIsMounted(true);
+    document.body.classList.add('portal-layout');
+    return () => {
+      document.body.classList.remove('portal-layout');
+    };
+  }, []);
+
   // Update clock every second
   useEffect(() => {
+    if (!isMounted) return;
     setNow(Date.now());
     const timer = setInterval(() => {
       setNow(Date.now());
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [isMounted]);
 
   // Tick calculation for Spotlight & schedule states
   useEffect(() => {
@@ -219,6 +233,33 @@ export default function UpcomingPageClient({ matches }: UpcomingPageClientProps)
     return m.stage === activeFilter;
   });
 
+  if (!isMounted) {
+    return (
+      <div className="portal-layout min-h-screen flex flex-col bg-[#0a0a0a] text-white">
+        <Header />
+        <NewsTicker />
+        <main className="main-container flex-1">
+          <div className="wc-wrapper">
+            <header className="wc-hero">
+              <div className="wc-hero-inner">
+                <div className="wc-hero-tag">⚽ 11 June – 19 July 2026 · Canada · Mexico · USA</div>
+                <h1 className="wc-hero-title">FIFA World Cup 2026™</h1>
+                <p className="wc-hero-subtitle">
+                  Complete match schedule with live countdown timers. All times shown in{' '}
+                  <strong>Bangladesh Time (BST, UTC+6)</strong>.
+                </p>
+              </div>
+            </header>
+            <div className="wc-filters">
+              <div className="h-10 w-full bg-neutral-900 border border-neutral-800 rounded-lg animate-pulse mb-6" style={{ maxWidth: '320px' }} />
+            </div>
+            <ScheduleSkeleton />
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="portal-layout min-h-screen flex flex-col bg-[#0a0a0a] text-white">
       <Header />
@@ -237,7 +278,15 @@ export default function UpcomingPageClient({ matches }: UpcomingPageClientProps)
               </p>
 
               {spotlightMatch && (
-                <div className={`wc-next ${isSpotlightLive ? 'is-live' : ''}`} id="nextMatchCard">
+                <div
+                  className={`wc-next ${isSpotlightLive ? 'is-live' : ''}`}
+                  id="nextMatchCard"
+                  onClick={() => {
+                    if (isSpotlightLive) {
+                      router.push('/watch/world-cup-2026');
+                    }
+                  }}
+                >
                   <div className="wc-next-label">
                     <span className="live-dot"></span>{' '}
                     <span>{isSpotlightLive ? 'Match is Live Now' : 'Next Match Kick-off In'}</span>
@@ -302,7 +351,11 @@ export default function UpcomingPageClient({ matches }: UpcomingPageClientProps)
                       </div>
                     </div>
                   ) : (
-                    <Link href="/watch/world-cup-2026" className="wc-hero-watch-btn">
+                    <Link
+                      href="/watch/world-cup-2026"
+                      className="wc-hero-watch-btn"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       Watch Live Stream →
                     </Link>
                   )}
@@ -371,6 +424,11 @@ export default function UpcomingPageClient({ matches }: UpcomingPageClientProps)
                   className={`wc-card is-${matchState}`}
                   data-stage={m.stage}
                   data-group={m.group}
+                  onClick={() => {
+                    if (matchState === 'live') {
+                      router.push('/watch/world-cup-2026');
+                    }
+                  }}
                 >
                   <div className="wc-card-body">
                     <div className="wc-teams-matchup">
@@ -416,7 +474,11 @@ export default function UpcomingPageClient({ matches }: UpcomingPageClientProps)
                           ⏱ {formatMini(diff)}
                         </span>
                       ) : matchState === 'live' ? (
-                        <Link href="/watch/world-cup-2026" className="wc-watch-link flex">
+                        <Link
+                          href="/watch/world-cup-2026"
+                          className="wc-watch-link flex"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           Watch Live →
                         </Link>
                       ) : (
