@@ -53,8 +53,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
         <script
           defer
-          src="https://umami.ntechbd.app/script.js"
-          data-website-id="33997810-5e40-4042-840a-f84fff1cc9ce"
+          src={process.env.NEXT_PUBLIC_UMAMI_URL || 'https://umami.ntechbd.app/script.js'}
+          data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID || '33997810-5e40-4042-840a-f84fff1cc9ce'}
         />
       </head>
       <body>

@@ -1,0 +1,31 @@
+services:
+  vinestream:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vinestream-app
+    restart: unless-stopped          # Auto-restart on crash or server reboot
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=3000
+      - NEXT_PUBLIC_UMAMI_URL=${NEXT_PUBLIC_UMAMI_URL:-https://umami.ntechbd.app/script.js}
+      - NEXT_PUBLIC_UMAMI_WEBSITE_ID=${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-33997810-5e40-4042-840a-f84fff1cc9ce}
+    deploy:
+      resources:
+        limits:
+          memory: 512m               # Hard cap — prevents OOM from killing the host
+          cpus: "2.0"                # Adjust to match your server's core count
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"              # Prevent log files from consuming all disk space
+        max-file: "3"
