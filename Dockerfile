@@ -21,12 +21,11 @@ FROM node:22-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV HOST=0.0.0.0
+ENV HOSTNAME="0.0.0.0"
 ENV PORT=3000
 # Disable telemetry during runtime
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN apk add --no-cache curl
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs
@@ -50,7 +49,7 @@ EXPOSE 3000
 
 # Health check: ping the server; fail if it doesn't respond
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD curl -f http://127.0.0.1:3000/api/channels || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/channels || exit 1
 
 # Start Next.js standalone server
 CMD ["node", "server.js"]

@@ -244,6 +244,15 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
               maxBufferSize: 30 * 1000 * 1000,
               maxBufferHole: 0.5,
               liveSyncDurationCount: 3,
+              manifestLoadingTimeOut: 10000,
+              manifestLoadingMaxRetry: 5,
+              manifestLoadingRetryDelay: 1000,
+              levelLoadingTimeOut: 10000,
+              levelLoadingMaxRetry: 5,
+              levelLoadingRetryDelay: 1000,
+              fragLoadingTimeOut: 20000,
+              fragLoadingMaxRetry: 6,
+              fragLoadingRetryDelay: 1000,
             });
             hls.loadSource(m3u8Url);
             hls.attachMedia(video);
@@ -308,6 +317,12 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
               type: 'mse',
               isLive: true,
               url: tsUrl,
+            }, {
+              enableWorker: true,
+              enableStashBuffer: false,
+              stashInitialSize: 128,
+              liveBufferLatencyChasing: true,
+              liveBufferLatencyChasingOnSeeking: true,
             });
             mpegtsPlayer.attachMediaElement(video);
             mpegtsPlayer.load();
@@ -336,6 +351,19 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
 
           const shakaPlayer = new window.shaka.Player(video);
           artPlayer.shaka = shakaPlayer;
+
+          shakaPlayer.configure({
+            streaming: {
+              bufferingGoal: 10,
+              rebufferingGoal: 2,
+              bufferBehind: 30,
+              retryParameters: {
+                maxAttempts: 5,
+                baseDelay: 1000,
+                backoffFactor: 2,
+              }
+            }
+          });
 
           shakaPlayer.addEventListener('error', (event: any) => {
             if (event.detail && event.detail.severity === window.shaka.util.Error.Severity.CRITICAL) {
@@ -403,7 +431,7 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
         };
 
         const art = new window.Artplayer({
-          container: '#player-container',
+          container: containerRef.current,
           url: playbackUrl,
           type: isTs ? 'ts' : (isMpd ? 'mpd' : 'm3u8'),
           isLive: true,
@@ -416,11 +444,42 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
           autoOrientation: true,
           theme: '#6366f1',
           setting: true,
+          playbackRate: true,
+          aspectRatio: true,
+          hotkey: true,
+          lock: true,
+          fastForward: true,
+          autoPlayback: true,
           customType: {
             m3u8: playM3u8,
             ts: playTs,
             mpd: playMpd,
           },
+          settings: [
+            {
+              html: 'Reload Stream',
+              tooltip: 'Reconnect',
+              icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>',
+              onSelect: function () {
+                art.url = playbackUrl;
+                return 'Reloading...';
+              }
+            },
+            {
+              html: 'Proxy Mode',
+              tooltip: (strategy === 'proxy' || strategy === 'proxy-stream') ? 'Enabled' : 'Disabled',
+              icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+              switch: strategy === 'proxy' || strategy === 'proxy-stream',
+              onSwitch: function (item: any) {
+                const nextSwitch = !item.switch;
+                setPlaybackState(prev => ({
+                  ...prev,
+                  strategy: nextSwitch ? 'proxy' : 'direct'
+                }));
+                return nextSwitch;
+              }
+            }
+          ]
         });
 
         artRef.current = art;

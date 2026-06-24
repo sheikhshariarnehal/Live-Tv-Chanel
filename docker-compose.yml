@@ -9,7 +9,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - HOST=0.0.0.0
+      - HOSTNAME=0.0.0.0
       - PORT=3000
       - NEXT_PUBLIC_UMAMI_URL=${NEXT_PUBLIC_UMAMI_URL:-https://umami.ntechbd.app/script.js}
       - NEXT_PUBLIC_UMAMI_WEBSITE_ID=${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-33997810-5e40-4042-840a-f84fff1cc9ce}
@@ -19,7 +19,7 @@ services:
           memory: 512m               # Hard cap — prevents OOM from killing the host
           cpus: "2.0"                # Adjust to match your server's core count
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1:3000/api/channels"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/api/channels"]
       interval: 30s
       timeout: 5s
       retries: 3
