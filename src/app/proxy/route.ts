@@ -1,5 +1,4 @@
 import dns from 'node:dns';
-import { ProxyAgent } from 'undici';
 
 export const dynamic = 'force-dynamic';
 
@@ -431,21 +430,11 @@ export async function GET(request: Request) {
       }
     } catch (_) {}
 
-    const fetchOptions: any = {
+    const response = await fetch(targetUrl, {
       signal: controller.signal,
       headers: upstreamHeaders,
       cache: 'no-store'
-    };
-
-    const needsProxy = targetHostname.includes('toffeelive.com') ||
-                       targetHostname.includes('fifalive.click') ||
-                       targetHostname.includes('inproviszon.st');
-
-    if (needsProxy && process.env.BD_PROXY_URL) {
-      fetchOptions.dispatcher = new ProxyAgent(process.env.BD_PROXY_URL);
-    }
-
-    const response = await fetch(targetUrl, fetchOptions);
+    });
 
     clearTimeout(timeoutId);
 
