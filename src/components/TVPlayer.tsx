@@ -78,8 +78,6 @@ function isPrivateIP(url: string): boolean {
 export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const artRef = useRef<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [loadingText, setLoadingText] = useState('Loading player engines...');
   const [errorInfo, setErrorInfo] = useState<{ title: string; desc: string } | null>(null);
   
   // Keep track of current playback state to support retrying with proxy or fallback url
@@ -126,7 +124,6 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
   // Reset playback state when channel changes
   useEffect(() => {
     setErrorInfo(null);
-    setLoading(true);
 
     let strategy: 'direct' | 'proxy' | 'proxy-stream' | 'drm' = 'direct';
     const url = channel.streamUrl;
@@ -200,8 +197,6 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
     const initPlayer = async () => {
       try {
         if (!active) return;
-        setLoading(true);
-        setLoadingText('Loading player engines...');
 
         const enginePromises: Promise<void>[] = [];
         if (typeof window.Artplayer === 'undefined') {
@@ -227,7 +222,6 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
         }
 
         if (!active) return;
-        setLoadingText('Connecting to stream...');
 
         // Custom playback functions
         const playM3u8 = (video: HTMLVideoElement, m3u8Url: string, artPlayer: any) => {
@@ -259,7 +253,6 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
             artPlayer.hls = hls;
 
             hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
-              setLoading(false);
               const levels = hls.levels;
               if (levels && levels.length > 1) {
                 const options = levels.map((level: any, index: number) => ({
@@ -301,7 +294,6 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
             });
           } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
             video.src = m3u8Url;
-            video.addEventListener('loadedmetadata', () => setLoading(false));
           } else {
             artPlayer.emit('video:error', new Error('HLS not supported'));
           }
@@ -327,7 +319,6 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
             mpegtsPlayer.attachMediaElement(video);
             mpegtsPlayer.load();
             artPlayer.mpegtsPlayer = mpegtsPlayer;
-            setLoading(false);
 
             mpegtsPlayer.on(window.mpegts.Events.ERROR, (type: any, detail: any, info: any) => {
               artPlayer.emit('video:error', { type, detail, info });
@@ -387,7 +378,6 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
           }
 
           shakaPlayer.load(mpdUrl).then(() => {
-            setLoading(false);
             const tracks = shakaPlayer.getVariantTracks();
             if (tracks && tracks.length > 1) {
               tracks.sort((a: any, b: any) => (b.height || 0) - (a.height || 0));
@@ -573,7 +563,6 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
     }
 
     // Both direct & fallback failed, trigger error overlay
-    setLoading(false);
     const isDrm = playbackState.url.endsWith('.mpd') || playbackState.url.includes('.mpd?') || !!channel.drm;
     const isPrivate = isPrivateIP(playbackState.url);
 
@@ -601,7 +590,6 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
 
   const handleRetry = () => {
     setErrorInfo(null);
-    setLoading(true);
     setPlaybackState({
       url: channel.streamUrl,
       strategy: channel.proxy === true ? 'proxy' : 'direct',
@@ -614,43 +602,6 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
     <div className="video-section">
       <div className="video-wrapper">
         <div id="player-container" ref={containerRef} style={{ width: '100%', height: '100%' }} />
-        
-        {loading && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: '#000',
-              color: '#fff',
-              zIndex: 5,
-            }}
-          >
-            <div
-              style={{
-                width: '40px',
-                height: '40px',
-                border: '3px solid rgba(255, 255, 255, 0.1)',
-                borderTopColor: '#6366f1',
-                borderRadius: '50%',
-                animation: 'spin-loader 1s linear infinite',
-                marginBottom: '12px',
-              }}
-            />
-            <div style={{ fontSize: '0.875rem', color: '#a1a1aa', fontWeight: 500 }}>{loadingText}</div>
-            <style>{`
-              @keyframes spin-loader {
-                to { transform: rotate(360deg); }
-              }
-            `}</style>
-          </div>
-        )}
 
         {errorInfo && (
           <div className="error-overlay active" id="errorOverlay" style={{ zIndex: 10 }}>
