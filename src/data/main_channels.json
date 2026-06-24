@@ -1,48 +1,5 @@
 {
   "categories": {
-    "FIFA": {
-      "name": "FIFA",
-      "channels": [
-        {
-          "id": "fifalive-fifa-2026-live-server-1",
-          "name": "FIFA 2026 Live (Server 1)",
-          "url": "https://prod-cdn01-live.toffeelive.com/live/FIFA-2026-4/0/master_2000.m3u8?hdntl=Expires=1782287049~_GO=Generated~URLPrefix=aHR0cHM6Ly9wcm9kLWNkbjAxLWxpdmUudG9mZmVlbGl2ZS5jb20~Signature=AVXEwveUIquATxp7U9qRWDundJ4tY6Wt81zwiUKg_M6cokQk8OcgXmtq_uOMonQKGDQFPN5DepdypBkfFM8grz63CDAP",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
-          "fallbackUrl": "https://inproviszon.st/fs14k-1.m3u8"
-        },
-        {
-          "id": "fifalive-fifa-2026-live-server-2",
-          "name": "FIFA 2026 Live (Server 2)",
-          "url": "https://cdn.fifalive.click/play.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
-          "fallbackUrl": "https://1nyaler.streamhostingcdn.top/stream/89/index.m3u8"
-        },
-        {
-          "id": "fifalive-fifa-2026-live-server-3",
-          "name": "FIFA 2026 Live (Server 3 - Fox)",
-          "url": "https://inproviszon.st/fox.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
-        },
-        {
-          "id": "fifalive-fifa-2026-live-server-4",
-          "name": "FIFA 2026 Live (Server 4)",
-          "url": "https://1nyaler.streamhostingcdn.top/stream/89/index.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
-        },
-        {
-          "id": "fifalive-fifa-2026-live-server-5",
-          "name": "FIFA 2026 Live (Server 5 - Bein)",
-          "url": "https://1nyaler.streamhostingcdn.top/stream/23/index.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
-        },
-        {
-          "id": "fifalive-fifa-2026-live-server-6",
-          "name": "FIFA 2026 Live (Server 6 - Fox)",
-          "url": "https://1nyaler.streamhostingcdn.top/stream/26/index.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
-        }
-      ]
-    },
     "sports": {
       "name": "Sports",
       "channels": [
@@ -152,42 +109,6 @@
             "kid": "f6564ec2aee819046328a0e153be574d",
             "key": "ff46a8a1031eb27ef22576a077c98ab7"
           }
-        },
-        {
-          "id": "fifalive-fifa-2026-live-server-1",
-          "name": "FIFA 2026 Live (Server 1)",
-          "url": "https://prod-cdn01-live.toffeelive.com/live/FIFA-2026-4/0/master_2000.m3u8?hdntl=Expires=1782287049~_GO=Generated~URLPrefix=aHR0cHM6Ly9wcm9kLWNkbjAxLWxpdmUudG9mZmVlbGl2ZS5jb20~Signature=AVXEwveUIquATxp7U9qRWDundJ4tY6Wt81zwiUKg_M6cokQk8OcgXmtq_uOMonQKGDQFPN5DepdypBkfFM8grz63CDAP",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
-        },
-        {
-          "id": "fifalive-fifa-2026-live-server-2",
-          "name": "FIFA 2026 Live (Server 2)",
-          "url": "https://cdn.fifalive.click/play*m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
-        },
-        {
-          "id": "fifalive-fifa-2026-live-server-3",
-          "name": "FIFA 2026 Live (Server 3)",
-          "url": "https://inproviszon.st/fox.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
-        },
-        {
-          "id": "fifalive-fifa-2026-live-server-4",
-          "name": "FIFA 2026 Live (Server 4)",
-          "url": "https://inproviszon.st/fifa-2.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
-        },
-        {
-          "id": "fifalive-fifa-2026-live-4k-server-5",
-          "name": "FIFA 2026 Live 4K (Server 5)",
-          "url": "https://inproviszon.st/fs14k-1.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
-        },
-        {
-          "id": "fifalive-fifa-2026-live-4k-server-6",
-          "name": "FIFA 2026 Live 4K (Server 6)",
-          "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
         }
       ]
     },

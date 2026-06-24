@@ -1,0 +1,46 @@
+{
+  "categories": {
+    "fifa-world-cup-2026": {
+      "name": "FIFA World Cup 2026™",
+      "channels": [
+        {
+          "id": "tigosports",
+          "name": "Tigo Sports HD",
+          "url": "https://cdn.livekhelatv.com/mks/lat-tigo-sports-hd/master.m3u8",
+          "logo": ""
+        }
+      ]
+    },
+    "sports": {
+      "name": "Sports",
+      "channels": [
+        {
+          "id": "ios3",
+          "name": "iOS - FIFA 2026 Server 3",
+          "url": "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8",
+          "logo": "https://i.guim.co.uk/img/media/993d3ff63f81efb3bd6d4a93be34a98a815a2453/0_0_5000_3297/master/5000.jpg?width=1900&dpr=2&s=none&crop=none"
+        },
+        {
+          "id": "foxeng",
+          "name": "FOX (ENG) 60Fps",
+          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/ajfoeddkbz/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd",
+          "logo": "https://cdn.broadbandtvnews.com/wp-content/uploads/2025/05/13115423/Fox-One-Logo.jpg",
+          "drm": {
+            "kid": "f6564ec2aee819046328a0e153be574d",
+            "key": "ff46a8a1031eb27ef22576a077c98ab7"
+          }
+        },
+        {
+          "id": "cazetv",
+          "name": "CazéTV 1080p 60Fps",
+          "url": "https://otte-qw.live.pv-cdn.net/lhr-nitro/live/clients/dash/enc/iayg0kyrof/out/v1/91dc04907f56415b897faccfa9d252da/cenc.mpd",
+          "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/6/64/Caz%C3%A9TV_logo.svg/1280px-Caz%C3%A9TV_logo.svg.png",
+          "drm": {
+            "kid": "1223d5105392cabf1bb9c2c1fdf6539a",
+            "key": "340b409f4b8f78a343e0363a7938df38"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,8 +1,49 @@
 {
   "categories": {
-    "sports": {
-      "name": "Sports",
+    "FIFA": {
+      "name": "FIFA",
       "channels": [
+        {
+          "id": "fifalive-fifa-2026-live-server-1",
+          "name": "FIFA 2026 Live (Server 1)",
+          "url": "https://prod-cdn01-live.toffeelive.com/live/FIFA-2026-4/0/master_2000.m3u8?hdntl=Expires=1782287049~_GO=Generated~URLPrefix=aHR0cHM6Ly9wcm9kLWNkbjAxLWxpdmUudG9mZmVlbGl2ZS5jb20~Signature=AVXEwveUIquATxp7U9qRWDundJ4tY6Wt81zwiUKg_M6cokQk8OcgXmtq_uOMonQKGDQFPN5DepdypBkfFM8grz63CDAP",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "fifalive-fifa-2026-live-server-2",
+          "name": "FIFA 2026 Live (Server 2)",
+          "url": "https://cdn.fifalive.click/play.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
+          "fallbackUrl": "https://1nyaler.streamhostingcdn.top/stream/89/index.m3u8",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "fifalive-fifa-2026-live-server-3",
+          "name": "FIFA 2026 Live (Server 3)",
+          "url": "https://inproviszon.st/fifa.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "fifalive-fifa-2026-live-server-4",
+          "name": "FIFA 2026 Live (Server 4)",
+          "url": "https://inproviszon.st/fifa-2.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "fifalive-fifa-2026-live-4k-server-5",
+          "name": "FIFA 2026 Live 4K (Server 5)",
+          "url": "https://inproviszon.st/fifa.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
+          "resolution": "4K",
+          "proxy": true
+        },
         {
           "id": "fifalive-fifa-2026-live-4k-server-6",
           "name": "FIFA 2026 Live 4K (Server 6)",
@@ -10,91 +51,110 @@
           "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
           "resolution": "4K",
           "proxy": false
-        },
-        {
-          "id": "foxeng",
-          "name": "FOX (ENG) 60Fps",
-          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/ajfoeddkbz/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Fox-One-Logo.webp",
-          "drm": {
-            "kid": "f6564ec2aee819046328a0e153be574d",
-            "key": "ff46a8a1031eb27ef22576a077c98ab7"
-          }
-        },
-        {
-          "id": "go-fifa-live",
-          "name": "Go Fifa Live",
-          "url": "https://backup.alarafatofficial.workers.dev/?url=https%3A%2F%2Fd1211whpimeups.cloudfront.net%2Fsmil%3Artbgo%2Fchunklist_b4096000_slENG.m3u8&ua=Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Chrome%2F124.0.0.0%20Safari%2F537.36&ekey=SPORTIX_SECURE_KEY_2026",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
-        },
+        }
+      ]
+    },
+    "sports": {
+      "name": "Sports",
+      "channels": [
         {
           "id": "toffee-fifa-2026-4",
           "name": "Toffee FIFA 2026",
           "url": "https://prod-cdn01-live.toffeelive.com/live/FIFA-2026-4/1/master_1800.m3u8?hdntl=Expires=1781860204~_GO=Generated~URLPrefix=aHR0cHM6Ly9wcm9kLWNkbjAxLWxpdmUudG9mZmVlbGl2ZS5jb20~Signature=AduQTZ9Sj9zvSufjg0JASf_vDycyqdS8TPBOu-JKexBNXNW9DscK2nxR0lg5t16ryjLACgEgXZ7OiLvl6k-jUTI_KmcD",
           "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
-          "group": "Sports"
+          "group": "Sports",
+          "resolution": "HD",
+          "proxy": true
         },
         {
           "id": "world-cup-2026",
           "name": "World Cup 2026",
           "url": "https://d1211whpimeups.cloudfront.net/smil:rtbgo/chunklist.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "go-fifa-live",
+          "name": "Go Fifa Live",
+          "url": "https://backup.alarafatofficial.workers.dev/?url=https%3A%2F%2Fd1211whpimeups.cloudfront.net%2Fsmil%3Artbgo%2Fchunklist_b4096000_slENG.m3u8&ua=Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Chrome%2F124.0.0.0%20Safari%2F537.36&ekey=SPORTIX_SECURE_KEY_2026",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
+          "resolution": "HD",
+          "proxy": false
         },
         {
           "id": "sports-foxsports",
           "name": "FoxSports",
           "url": "https://1nyaler.streamhostingcdn.top/stream/26/index.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/channels4_profile%20(1).jpg"
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/channels4_profile%20(1).jpg",
+          "resolution": "HD",
+          "proxy": true
         },
         {
           "id": "telemundo-fhd-2",
           "name": "TELEMUNDO FHD 2",
           "url": "https://nbculocallive.akamaized.net/hls/live/2037084/losangeles/stream6/master.m3u8",
           "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/telemundo-social-default.png",
-          "group": "Sports"
+          "group": "Sports",
+          "resolution": "HD",
+          "proxy": false
         },
         {
           "id": "win-sports",
           "name": "Win Sports",
           "url": "https://1nyaler.streamhostingcdn.top/stream/32/index.m3u8",
           "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/channels4_profile.jpg",
-          "group": "Sports"
+          "group": "Sports",
+          "resolution": "HD",
+          "proxy": true
         },
         {
           "id": "tigosports",
           "name": "Tigo Sports HD",
           "url": "https://cdn.livekhelatv.com/mks/lat-tigo-sports-hd/master.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Tigo%20Sports%20HD.webp"
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Tigo%20Sports%20HD.webp",
+          "resolution": "HD",
+          "proxy": true
         },
         {
           "id": "sports-cazetv",
           "name": "CazeTV",
           "url": "https://dfr80qz435crc.cloudfront.net/MNOP/Amagi/Caze/Caze_TV_BR/1080p-vtt/index.m3u8",
-          "logo": "https://images.seeklogo.com/logo-png/61/1/cazetv-logo-png_seeklogo-619708.png"
+          "logo": "https://images.seeklogo.com/logo-png/61/1/cazetv-logo-png_seeklogo-619708.png",
+          "resolution": "HD",
+          "proxy": false
         },
         {
           "id": "sports-beinsports",
           "name": "BeinSports",
           "url": "https://bein-esp-xumo.amagi.tv/playlistR1080p.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/bein%20sports%20logo.jpg.jpg"
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/bein%20sports%20logo.jpg.jpg",
+          "resolution": "HD",
+          "proxy": false
         },
         {
           "id": "sports-beinsports-2",
           "name": "BeINSports-2",
           "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78379.ts",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/bein%20sports%20logo.jpg.jpg"
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/bein%20sports%20logo.jpg.jpg",
+          "resolution": "HD",
+          "proxy": true
         },
         {
           "id": "sports-beinsports-4",
           "name": "BeINSports-4",
           "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78381.ts",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/bein%20sports%20logo.jpg.jpg"
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/bein%20sports%20logo.jpg.jpg",
+          "resolution": "HD",
+          "proxy": true
         },
         {
           "id": "sports-beinsports-5",
           "name": "BeINSports-5",
           "url": "http://foxbleu-cdn.com/live/e8:aa:cb:c4:bf:92/aMzpeeG/78382.ts",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/bein%20sports%20logo.jpg.jpg"
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/bein%20sports%20logo.jpg.jpg",
+          "resolution": "HD",
+          "proxy": true
         },
         {
           "id": "sporza-dutch-aq",
@@ -104,19 +164,85 @@
           "drm": {
             "kid": "893bc63340876605f52886a42e0ccce5",
             "key": "d6c46d2d691056fbd091bf1f01b21a91"
-          }
+          },
+          "resolution": "HD",
+          "proxy": false
         },
         {
           "id": "fifa-2026-live-server-2",
           "name": "FIFA 2026 Live (Server 2)",
           "url": "https://1nyaler.streamhostingcdn.top/stream/89/index.m3u8",
-          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
+          "resolution": "HD",
+          "proxy": true
         },
         {
           "id": "ios3",
           "name": "iOS - FIFA 2026 Server 3",
           "url": "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8",
-          "logo": "https://i.guim.co.uk/img/media/993d3ff63f81efb3bd6d4a93be34a98a815a2453/0_0_5000_3297/master/5000.jpg?width=1900&dpr=2&s=none&crop=none"
+          "logo": "https://i.guim.co.uk/img/media/993d3ff63f81efb3bd6d4a93be34a98a815a2453/0_0_5000_3297/master/5000.jpg?width=1900&dpr=2&s=none&crop=none",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "foxeng",
+          "name": "FOX (ENG) 60Fps",
+          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/ajfoeddkbz/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Fox-One-Logo.webp",
+          "drm": {
+            "kid": "f6564ec2aee819046328a0e153be574d",
+            "key": "ff46a8a1031eb27ef22576a077c98ab7"
+          },
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "fifalive-fifa-2026-live-server-1",
+          "name": "FIFA 2026 Live (Server 1)",
+          "url": "https://prod-cdn01-live.toffeelive.com/live/FIFA-2026-4/0/master_2000.m3u8?hdntl=Expires=1782287049~_GO=Generated~URLPrefix=aHR0cHM6Ly9wcm9kLWNkbjAxLWxpdmUudG9mZmVlbGl2ZS5jb20~Signature=AVXEwveUIquATxp7U9qRWDundJ4tY6Wt81zwiUKg_M6cokQk8OcgXmtq_uOMonQKGDQFPN5DepdypBkfFM8grz63CDAP",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "fifalive-fifa-2026-live-server-2",
+          "name": "FIFA 2026 Live (Server 2)",
+          "url": "https://cdn.fifalive.click/play.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "fifalive-fifa-2026-live-server-3",
+          "name": "FIFA 2026 Live (Server 3)",
+          "url": "https://inproviszon.st/fifa.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "fifalive-fifa-2026-live-server-4",
+          "name": "FIFA 2026 Live (Server 4)",
+          "url": "https://inproviszon.st/fifa-2.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "fifalive-fifa-2026-live-4k-server-5",
+          "name": "FIFA 2026 Live 4K (Server 5)",
+          "url": "https://inproviszon.st/fifa.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
+          "resolution": "4K",
+          "proxy": true
+        },
+        {
+          "id": "fifalive-fifa-2026-live-4k-server-6",
+          "name": "FIFA 2026 Live 4K (Server 6)",
+          "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+          "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp",
+          "resolution": "4K",
+          "proxy": false
         }
       ]
     },
@@ -127,61 +253,81 @@
           "id": "movie-bangla-12438",
           "name": "Movie Bangla",
           "url": "http://str2.v3v3v.xyz:2082/live/rokhsi25_951396/POm6KqnW/277428.ts",
-          "logo": "https://imglink.cc/cdn/B1Dn0E5UKs.png"
+          "logo": "https://imglink.cc/cdn/B1Dn0E5UKs.png",
+          "resolution": "HD",
+          "proxy": true
         },
         {
           "id": "goldmines-12381",
           "name": "Goldmines",
           "url": "https://cdn-2.pishow.tv/live/1459/master.m3u8",
-          "logo": "https://imglink.cc/cdn/E86bN6IAxl.jpg"
+          "logo": "https://imglink.cc/cdn/E86bN6IAxl.jpg",
+          "resolution": "HD",
+          "proxy": true
         },
         {
           "id": "hindi-classic-24-12385",
           "name": "Hindi Classic 24",
           "url": "https://vods2.aynaott.com/hindimovies/index.m3u8",
-          "logo": "https://imglink.cc/cdn/cScI5tEUjV.png"
+          "logo": "https://imglink.cc/cdn/cScI5tEUjV.png",
+          "resolution": "HD",
+          "proxy": false
         },
         {
           "id": "cmq7twb5500wkuh099s6sgvm2",
           "name": "Action Hollywood Movies",
           "url": "https://amg01076-lightningintern-actionhollywood-samsungnz-82rry.amagi.tv/playlist/amg01076-lightningintern-actionhollywood-samsungnz/playlist.m3u8",
-          "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgbgpw72MKf3E9wwUk9Srd4tQCL9-XewjnciT9uU03Jw1gGGE7DVniLi0vTwjnNZIRJPym7b8g9_u_qlO8Umncu3YgGBcQUICkc-ZkeqLDLwaeafP6nk2lK1h5OrQwVrQSPDYJXdOEMfPoIuBmonZYyzNFqGGehvHSed8_RN49jzxZ8QvnKTwneteBNVQ/s600/Nur_20251107_002149_0000.png"
+          "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgbgpw72MKf3E9wwUk9Srd4tQCL9-XewjnciT9uU03Jw1gGGE7DVniLi0vTwjnNZIRJPym7b8g9_u_qlO8Umncu3YgGBcQUICkc-ZkeqLDLwaeafP6nk2lK1h5OrQwVrQSPDYJXdOEMfPoIuBmonZYyzNFqGGehvHSed8_RN49jzxZ8QvnKTwneteBNVQ/s600/Nur_20251107_002149_0000.png",
+          "resolution": "HD",
+          "proxy": false
         },
         {
           "id": "cmq7twb5500whuh09uf9ieojs",
           "name": "Ananda TV",
           "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/anandatv.stream/tracks-v1a1/mono.m3u8",
-          "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi2RNLiL4qhYEVawGUat1HjjDb693C2K8hUpM7xLiuYciPmjwIQ5j7TIevtcnsHdjGBLIZZJbFTAc4nRoys3vyN-IeEiParo1SNH19m-1IbWG9RPRcW_VoPdSDNfNlFD4NWrKoONwxhgYJuLUzaTQ-LpDoQuqyOMx6meiH7QStygj_kx_Yrs17Dz62ccw/s600/Nur_20251216_221801_0000.png"
+          "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi2RNLiL4qhYEVawGUat1HjjDb693C2K8hUpM7xLiuYciPmjwIQ5j7TIevtcnsHdjGBLIZZJbFTAc4nRoys3vyN-IeEiParo1SNH19m-1IbWG9RPRcW_VoPdSDNfNlFD4NWrKoONwxhgYJuLUzaTQ-LpDoQuqyOMx6meiH7QStygj_kx_Yrs17Dz62ccw/s600/Nur_20251216_221801_0000.png",
+          "resolution": "HD",
+          "proxy": true
         },
         {
           "id": "cmq7twb5500wmuh09ga686wp5",
           "name": "B4U Kadak",
           "url": "https://amg00877-b4unew-amg00877c4-xiaomi-in-5473.playouts.now.amagi.tv/playlist.m3u8",
-          "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjHljRYH5YMeCunedbeC2Zzcw7aT81fGdvFnpVmICN7XDkIq9BZnUf54TC_4_PiTvgzHIY5Ic5hUMbEO7UkcH0WDanBBSwlX6lslq0kbf5lCWbjJ5vVdMDui6xgo01qSgPuUIbWAphsN3DnZ9r3FsfVZgGUTnYYsgQbAVy_yhdGDm70O7ynQ9s1mE-MgA/s600/Nur_20251219_134934_0000.png"
+          "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjHljRYH5YMeCunedbeC2Zzcw7aT81fGdvFnpVmICN7XDkIq9BZnUf54TC_4_PiTvgzHIY5Ic5hUMbEO7UkcH0WDanBBSwlX6lslq0kbf5lCWbjJ5vVdMDui6xgo01qSgPuUIbWAphsN3DnZ9r3FsfVZgGUTnYYsgQbAVy_yhdGDm70O7ynQ9s1mE-MgA/s600/Nur_20251219_134934_0000.png",
+          "resolution": "HD",
+          "proxy": false
         },
         {
           "id": "cmq7twb5500wnuh09vorw3kx5",
           "name": "B4U Movies",
           "url": "https://amg00877-b4unew-amg00877c2-xiaomi-in-5489.playouts.now.amagi.tv/playlist.m3u8",
-          "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEigt0nGC7CikfRA7QSQp5MKBpDg-G8YSHL-xa1sXq9_8X25R7RRN1aJdN_VD8OW_uHzRDENU6pzGa3tCTOqkdGBEvmlQ8_ymva95CO_Z5xpv6geQBo9GO1amoXVjMfNEg_d5BYhQ0z3KI5gjfsYn-xnyOu71cs3vJfr6ratfarDSqw2i4lCL5MQmaCrUQ/s600/Nur_20251219_134839_0000.png"
+          "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEigt0nGC7CikfRA7QSQp5MKBpDg-G8YSHL-xa1sXq9_8X25R7RRN1aJdN_VD8OW_uHzRDENU6pzGa3tCTOqkdGBEvmlQ8_ymva95CO_Z5xpv6geQBo9GO1amoXVjMfNEg_d5BYhQ0z3KI5gjfsYn-xnyOu71cs3vJfr6ratfarDSqw2i4lCL5MQmaCrUQ/s600/Nur_20251219_134839_0000.png",
+          "resolution": "HD",
+          "proxy": false
         },
         {
           "id": "cmq9bypt800ux12i4kow8hn63",
           "name": "Hindi Classic 24",
           "url": "https://vods2.aynaott.com/hindimovies/index.m3u8",
-          "logo": "https://imglink.cc/cdn/cScI5tEUjV.png"
+          "logo": "https://imglink.cc/cdn/cScI5tEUjV.png",
+          "resolution": "HD",
+          "proxy": false
         },
         {
           "id": "cmq7twb5500wluh09x8hh7sdq",
           "name": "Sony Movies",
           "url": "https://a-cdn.klowdtv.com/live1/smc_720p/chunks.m3u8",
-          "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgNk47oTMuFgbjaG0yp7qPGD7w0Rf3rGRc7wURB_aUn-ArmAPsHo67HGOC8r-aiqd4AJhFhNQLu6LmGFhBj8pxHVL5ju7NCaI2ssa9QQm-rxmyv_zYwy9ehEIsdQVGxgLcGT8So2UCKIKIBz932Wi270pGc76elgFlp7aj3WXhrlOMvtUC2VxKni57FNg/s1080/1000060531.png"
+          "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgNk47oTMuFgbjaG0yp7qPGD7w0Rf3rGRc7wURB_aUn-ArmAPsHo67HGOC8r-aiqd4AJhFhNQLu6LmGFhBj8pxHVL5ju7NCaI2ssa9QQm-rxmyv_zYwy9ehEIsdQVGxgLcGT8So2UCKIKIBz932Wi270pGc76elgFlp7aj3WXhrlOMvtUC2VxKni57FNg/s1080/1000060531.png",
+          "resolution": "HD",
+          "proxy": true
         },
         {
           "id": "cmq7twb5500wguh098zdygidj",
           "name": "SRK TV",
           "url": "https://srknowapp.ncare.live/srktvhlswodrm/srktv.stream/playlist.m3u8",
-          "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi-gOTZYUBCEpOwrtIYHCLViHpAU9Cz7V6zR14fu6XOlYahvBguPaxmbjH6ClmGp-PpLVDR8iFTOLRXo7xmxXBg5heY_umgJK0DRNwFb8pqCPP0rwdtZ9goIjgur2DeyqzIAZXgkObDCGIMVjXwhfvDH1Ol-kzFc9PlKFC8iWpWtYUskRxoint29agY/s600/Nur_20251107_222900_0000.png"
+          "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi-gOTZYUBCEpOwrtIYHCLViHpAU9Cz7V6zR14fu6XOlYahvBguPaxmbjH6ClmGp-PpLVDR8iFTOLRXo7xmxXBg5heY_umgJK0DRNwFb8pqCPP0rwdtZ9goIjgur2DeyqzIAZXgkObDCGIMVjXwhfvDH1Ol-kzFc9PlKFC8iWpWtYUskRxoint29agY/s600/Nur_20251107_222900_0000.png",
+          "resolution": "HD",
+          "proxy": true
         }
       ]
     },
@@ -192,43 +338,57 @@
           "id": "channel-24-12421",
           "name": "Channel 24",
           "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1703/output/1703-audio_113332_eng=113200-video=2202800.m3u8",
-          "logo": "https://i.ibb.co.com/v65cfQ96/Channel-24.png"
+          "logo": "https://i.ibb.co.com/v65cfQ96/Channel-24.png",
+          "resolution": "HD",
+          "proxy": true
         },
         {
           "id": "sports-channelone",
           "name": "ChannelOne",
           "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1702/output/1702-audio_113322_eng=113200-video=2202800.m3u8",
-          "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7HR0auERCGfI1w4fkZ-uIcWg97c32LpEd_0Hr7aRh7cKsAb1URzjCG2c&s=10"
+          "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7HR0auERCGfI1w4fkZ-uIcWg97c32LpEd_0Hr7aRh7cKsAb1URzjCG2c&s=10",
+          "resolution": "HD",
+          "proxy": true
         },
         {
           "id": "dbc-news-12424",
           "name": "DBC News",
           "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1728/output/index.m3u8",
-          "logo": "https://i.ibb.co.com/TMKLMXs9/DBC-News.png"
+          "logo": "https://i.ibb.co.com/TMKLMXs9/DBC-News.png",
+          "resolution": "HD",
+          "proxy": true
         },
         {
           "id": "ekattor-tv-hd-12428",
           "name": "Ekattor TV HD",
           "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1705/output/1705.m3u8",
-          "logo": "https://i.ibb.co.com/DPZrfqzr/Ekattor-TV-HD.png"
+          "logo": "https://i.ibb.co.com/DPZrfqzr/Ekattor-TV-HD.png",
+          "resolution": "HD",
+          "proxy": true
         },
         {
           "id": "star-news-12443",
           "name": "Star News",
           "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1710/output/1710-audio_113402_eng=113200-video=1181200.m3u8",
-          "logo": "https://i.ibb.co.com/cXTjmmtP/Star-News.png"
+          "logo": "https://i.ibb.co.com/cXTjmmtP/Star-News.png",
+          "resolution": "HD",
+          "proxy": true
         },
         {
           "id": "jago-news-24-12433",
           "name": "Jago News 24",
           "url": "https://app.ncare.live/live-orgin/jagonews24.stream/live-orgin/jagonews24.stream/chunks.m3u8",
-          "logo": "https://i.ibb.co.com/KpRt3cT5/Jago-News-24.png"
+          "logo": "https://i.ibb.co.com/KpRt3cT5/Jago-News-24.png",
+          "resolution": "HD",
+          "proxy": true
         },
         {
           "id": "news-24-12440",
           "name": "News 24",
           "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1708/output/index.m3u8",
-          "logo": "https://i.ibb.co.com/gLx9fX5N/News-24.png"
+          "logo": "https://i.ibb.co.com/gLx9fX5N/News-24.png",
+          "resolution": "HD",
+          "proxy": true
         }
       ]
     }
