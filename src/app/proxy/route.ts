@@ -174,6 +174,7 @@ const REQUIRES_FULL_PROXY = [
   'toffeelive.com',
   'cdn.fifalive.click',
   'inproviszon.st',
+  'starhub.pro',
 ];
 
 function getHostnameFast(url: string, defaultHostname = '') {
