@@ -6,6 +6,13 @@ export const dynamic = 'force-dynamic';
 // or misconfigured certificate chains (very common for IPTV and proxy endpoints).
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
+// Set public fast DNS servers to avoid slow/unreliable local router DNS lookups.
+try {
+  dns.setServers(['1.1.1.1', '8.8.8.8', '1.0.0.1', '8.8.4.4']);
+} catch (e) {
+  console.warn('[Proxy] Failed to set custom DNS servers:', e);
+}
+
 // ---------------------------------------------------------------------------
 // DNS Cache — overrides default dns.lookup to avoid blocking thread pool queries.
 // Caches IP resolutions for 30s.
@@ -392,7 +399,7 @@ export async function GET(request: Request) {
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 12000);
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
 
   try {
     let userAgent = request.headers.get('user-agent') || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36';
@@ -583,7 +590,15 @@ export async function GET(request: Request) {
     });
   } catch (error: any) {
     clearTimeout(timeoutId);
-    return new Response(JSON.stringify({ error: error.message || 'Fetch failed' }), { 
+    return new Response(JSON.stringify({ 
+      error: error.message || 'Fetch failed',
+      cause: error.cause ? {
+        message: error.cause.message,
+        code: error.cause.code,
+        stack: error.cause.stack
+      } : null,
+      stack: error.stack
+    }), { 
       status: 500,
       headers: { 
         'Content-Type': 'application/json',

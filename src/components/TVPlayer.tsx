@@ -483,12 +483,19 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
 
         art.on('video:error', (err: any) => {
           const videoError = art.video?.error;
+          
+          // Format shaka player error details if they exist
+          let shakaDetails = '';
+          if (err && typeof err === 'object' && ('category' in err || 'severity' in err || 'code' in err)) {
+            shakaDetails = `\n- Shaka Error Code: ${err.code} (Category: ${err.category}, Severity: ${err.severity})\n- Shaka Data: ${JSON.stringify(err.data)}`;
+          }
+
           const errMsg = `ArtPlayer internal video:error triggered:
 - Code: ${videoError?.code || 'N/A'}
 - Message: ${videoError?.message || 'N/A'}
 - Event/Type: ${err?.type || err?.name || 'N/A'}
 - Detail: ${err?.detail ? (typeof err.detail === 'object' ? JSON.stringify(err.detail) : err.detail) : 'N/A'}
-- Info: ${err?.info ? (typeof err.info === 'object' ? JSON.stringify(err.info) : err.info) : 'N/A'}`;
+- Info: ${err?.info ? (typeof err.info === 'object' ? JSON.stringify(err.info) : err.info) : 'N/A'}${shakaDetails}`;
           
           console.error(errMsg, err);
           handleErrorFallback();
