@@ -1,4 +1,5 @@
 import dns from 'node:dns';
+import { ProxyAgent, fetch as undiciFetch } from 'undici';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,31 +14,6 @@ try {
   console.warn('[Proxy] Failed to set custom DNS servers:', e);
 }
 
-// ---------------------------------------------------------------------------
-// DNS Cache — overrides default dns.lookup to avoid blocking thread pool queries.
-// Caches IP resolutions for 30s.
-// ---------------------------------------------------------------------------
-const dnsCache = new Map<string, { address: string; family: number; timestamp: number }>();
-const DNS_TTL = 30_000;
-const originalLookup = dns.lookup;
-
-dns.lookup = function (hostname: string, options: any, callback: any) {
-  if (typeof options === 'function') {
-    callback = options;
-    options = {};
-  }
-  const key = JSON.stringify({ hostname, options });
-  const cached = dnsCache.get(key);
-  if (cached && (Date.now() - cached.timestamp) < DNS_TTL) {
-    return callback(null, cached.address, cached.family);
-  }
-  originalLookup(hostname, options, (err, address, family) => {
-    if (!err && address) {
-      dnsCache.set(key, { address, family, timestamp: Date.now() });
-    }
-    callback(err, address, family);
-  });
-} as any;
 
 // ---------------------------------------------------------------------------
 // Bounded LRU Cache — prevents unbounded memory growth under traffic spikes.
@@ -231,49 +207,23 @@ if (typeof (globalThis as any).proxyRateLimitInterval === 'undefined') {
 }
 
 const lastAuthTimes: Map<string, number> = (globalThis as any).proxyLastAuthTimes || ((globalThis as any).proxyLastAuthTimes = new Map<string, number>());
+lastAuthTimes.clear();
 
 async function doKkx4Authorize(key: string) {
   try {
-    const mainRes = await fetch('https://kkx4.livekhelatv.com/', {
+    const mainRes = await undiciFetch('https://kkx4.livekhelatv.com/', {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Referer': 'https://kkx4.livekhelatv.com/'
       },
       cache: 'no-store'
     });
-    const html = await mainRes.text();
-    
-    const regex = /const\s+CHANNELS\s*=\s*(\[[\s\S]*?\]);/g;
-    const match = regex.exec(html);
-    if (!match) throw new Error('CHANNELS not found');
-    
-    const channels = JSON.parse(match[1]);
-    const ch = channels.find((c: any) => c.key === key);
-    if (!ch) throw new Error(`Key ${key} not found`);
-    
-    const body = new URLSearchParams();
-    body.set("key", key);
-    body.set("access", ch.play_token);
-    
-    const apiRes = await fetch(`https://kkx4.livekhelatv.com/v1/mks/channel?t=${Date.now()}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        'Referer': 'https://kkx4.livekhelatv.com/',
-        'Origin': 'https://kkx4.livekhelatv.com',
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
-      },
-      body: body.toString(),
-      cache: 'no-store'
-    });
-    
-    if (apiRes.ok) {
-      const json = await apiRes.json();
-      if (json.success) {
-        lastAuthTimes.set(key, Date.now());
-      }
+    if (mainRes.ok) {
+      lastAuthTimes.set(key, Date.now());
+      lastAuthTimes.delete(key + ':failed');
+      console.log(`[Proxy] Successfully authorized IP for kkx4 channel ${key}`);
+    } else {
+      throw new Error(`Auth page returned status ${mainRes.status}`);
     }
   } catch (e: any) {
     console.error(`[Proxy] Failed to authorize IP for kkx4 channel ${key}:`, e.message);
@@ -339,6 +289,8 @@ export async function GET(request: Request) {
                      targetUrl.includes('chunklist') ||
                      targetUrl.includes('playlist');
 
+  const forceFullProxy = url.searchParams.get('full') === 'true' || url.searchParams.get('proxy') === 'true';
+
   const clientIp =
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     request.headers.get('x-real-ip') ||
@@ -362,7 +314,7 @@ export async function GET(request: Request) {
 
   await ensureKkx4Authorized(targetUrl);
 
-  if (!isPlaylist && !requiresFullProxy(targetUrl)) {
+  if (!forceFullProxy && !isPlaylist && !requiresFullProxy(targetUrl)) {
     return new Response(null, {
       status: 302,
       headers: {
@@ -438,11 +390,40 @@ export async function GET(request: Request) {
       }
     } catch (_) {}
 
-    const response = await fetch(targetUrl, {
+    console.log('[Proxy] Fetching upstream:', targetUrl, 'Headers:', JSON.stringify(upstreamHeaders, null, 2));
+
+    let response;
+    let usedProxy = false;
+    const fetchOptions: any = {
       signal: controller.signal,
       headers: upstreamHeaders,
       cache: 'no-store'
-    });
+    };
+
+    const needsProxy = targetHostname.includes('toffeelive.com') ||
+                       targetHostname.includes('fifalive.click') ||
+                       targetHostname.includes('inproviszon.st');
+
+    if (needsProxy && process.env.BD_PROXY_URL) {
+      try {
+        fetchOptions.dispatcher = new ProxyAgent(process.env.BD_PROXY_URL);
+        usedProxy = true;
+      } catch (err) {
+        console.error('[Proxy] Failed to initialize ProxyAgent:', err);
+      }
+    }
+
+    try {
+      response = await undiciFetch(targetUrl, fetchOptions);
+    } catch (err) {
+      if (usedProxy) {
+        console.warn('[Proxy] Fetch with ProxyAgent failed, retrying directly without proxy:', err);
+        delete fetchOptions.dispatcher;
+        response = await undiciFetch(targetUrl, fetchOptions);
+      } else {
+        throw err;
+      }
+    }
 
     clearTimeout(timeoutId);
 
@@ -531,8 +512,8 @@ export async function GET(request: Request) {
           if (baseUrl.search && !absoluteUrl.includes('?')) {
             absoluteUrl += baseUrl.search;
           }
-          if (requiresFullProxy(absoluteUrl, baseUrl.hostname)) {
-            return proxyOrigin + '/proxy?url=' + encodeURIComponent(absoluteUrl);
+          if (requiresFullProxy(absoluteUrl, baseUrl.hostname) || forceFullProxy) {
+            return proxyOrigin + '/proxy?url=' + encodeURIComponent(absoluteUrl) + (forceFullProxy ? '&full=true' : '');
           } else {
             return absoluteUrl;
           }
@@ -546,8 +527,8 @@ export async function GET(request: Request) {
              if (baseUrl.search && !absoluteUrl.includes('?')) {
                absoluteUrl += baseUrl.search;
              }
-             if (requiresFullProxy(absoluteUrl, baseUrl.hostname)) {
-               return `URI="${proxyOrigin}/proxy?url=${encodeURIComponent(absoluteUrl)}"`;
+             if (requiresFullProxy(absoluteUrl, baseUrl.hostname) || forceFullProxy) {
+               return `URI="${proxyOrigin}/proxy?url=${encodeURIComponent(absoluteUrl)}${forceFullProxy ? '&full=true' : ''}"`;
              } else {
                return `URI="${absoluteUrl}"`;
              }
@@ -584,7 +565,30 @@ export async function GET(request: Request) {
       });
     }
 
-    return new Response(response.body, {
+    let bodyStream: any = null;
+    if (response.body) {
+      const reader = response.body.getReader();
+      bodyStream = new ReadableStream({
+        async start(controller) {
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) {
+                controller.close();
+                break;
+              }
+              controller.enqueue(value);
+            }
+          } catch (e) {
+            controller.error(e);
+          } finally {
+            reader.releaseLock();
+          }
+        }
+      });
+    }
+
+    return new Response(bodyStream, {
       status: response.status,
       headers
     });

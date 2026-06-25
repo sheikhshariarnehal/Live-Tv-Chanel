@@ -157,6 +157,70 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
     });
   }, [channel]);
 
+  const handleErrorFallback = () => {
+    if (!playbackState.retryWithProxy && playbackState.strategy === 'direct' && !isPrivateIP(channel.streamUrl)) {
+      // Direct stream failed. Retry using reverse proxy.
+      setPlaybackState((prev) => ({
+        ...prev,
+        strategy: (channel.streamUrl.endsWith('.ts') || channel.streamUrl.includes('.ts?')) ? 'proxy-stream' : 'proxy',
+        retryWithProxy: true,
+      }));
+      return;
+    }
+
+    if (!playbackState.isFallback && channel.fallbackUrl) {
+      // Proxy failed or direct private. Retry with fallbackUrl.
+      let strat: 'direct' | 'proxy' | 'proxy-stream' | 'drm' = 'direct';
+      if (channel.fallbackUrl.includes('.mpd') || channel.fallbackUrl.includes('.mpd?') || channel.drm) {
+        strat = 'drm';
+      } else if (channel.fallbackUrl.includes('.ts') || channel.fallbackUrl.includes('.ts?')) {
+        strat = 'proxy-stream';
+      } else if (
+        channel.fallbackUrl.includes('cdn.livekhelatv.com') ||
+        channel.fallbackUrl.includes('toffeelive.com') ||
+        channel.fallbackUrl.includes('cdn.fifalive.click') ||
+        channel.fallbackUrl.includes('inproviszon.st') ||
+        channel.fallbackUrl.includes('streamhostingcdn.top') ||
+        channel.fallbackUrl.startsWith('http://')
+      ) {
+        strat = 'proxy';
+      }
+
+      setPlaybackState({
+        url: channel.fallbackUrl,
+        strategy: strat,
+        isFallback: true,
+        retryWithProxy: false,
+      });
+      return;
+    }
+
+    // Both direct & fallback failed, trigger error overlay
+    const isDrm = playbackState.url.endsWith('.mpd') || playbackState.url.includes('.mpd?') || !!channel.drm;
+    const isPrivate = isPrivateIP(playbackState.url);
+
+    if (isDrm) {
+      setErrorInfo({
+        title: 'DRM Decryption Error',
+        desc: `Failed to decrypt stream for ${channel.name}. This feed requires DRM keys or your browser does not support DRM capabilities.`,
+      });
+    } else if (isPrivate) {
+      setErrorInfo({
+        title: 'BDIX Network Restriction',
+        desc: `${channel.name} is hosted on a private ISP BDIX server. It is unreachable unless you are on a compatible local network.`,
+      });
+    } else {
+      setErrorInfo({
+        title: 'Stream Load Failed',
+        desc: `This channel is currently offline or unreachable. Please try again later.`,
+      });
+    }
+
+    if (onPlaybackError) {
+      onPlaybackError(new Error('Playback failed'));
+    }
+  };
+
   // Player initialization effect
   useEffect(() => {
     let active = true;
@@ -190,9 +254,18 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
     const isTs = strategy === 'proxy-stream';
     const isMpd = strategy === 'drm' || url.endsWith('.mpd') || url.includes('.mpd?') || !!channel.drm;
 
+    const CLOUDFLARE_BLOCKED_DOMAINS = ['starhub.pro', 'aiv-cdn.net', 'pv-cdn.net', 'akamaihd.net', 'livekhelatv.com'];
+    const isCloudflareBlocked = CLOUDFLARE_BLOCKED_DOMAINS.some(domain => url.includes(domain));
+    const proxyBase = (isCloudflareBlocked || !process.env.NEXT_PUBLIC_PROXY_URL)
+      ? `${window.location.origin}/proxy`
+      : process.env.NEXT_PUBLIC_PROXY_URL;
+
+
     const playbackUrl = (strategy === 'proxy' || strategy === 'proxy-stream')
-      ? `${window.location.origin}/proxy?url=${encodeURIComponent(url)}`
+      ? `${proxyBase}${proxyBase.includes('?') ? '&' : '?'}url=${encodeURIComponent(url)}&full=true`
       : url;
+
+
 
     const initPlayer = async () => {
       try {
@@ -377,7 +450,7 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
             }
           }
 
-          shakaPlayer.load(mpdUrl).then(() => {
+          shakaPlayer.load(mpdUrl, null, 'application/dash+xml').then(() => {
             const tracks = shakaPlayer.getVariantTracks();
             if (tracks && tracks.length > 1) {
               tracks.sort((a: any, b: any) => (b.height || 0) - (a.height || 0));
@@ -530,70 +603,6 @@ export default function TVPlayer({ channel, onPlaybackError }: TVPlayerProps) {
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playbackState, hasInteracted]);
-
-  const handleErrorFallback = () => {
-    if (!playbackState.retryWithProxy && playbackState.strategy === 'direct' && !isPrivateIP(channel.streamUrl)) {
-      // Direct stream failed. Retry using reverse proxy.
-      setPlaybackState((prev) => ({
-        ...prev,
-        strategy: (channel.streamUrl.endsWith('.ts') || channel.streamUrl.includes('.ts?')) ? 'proxy-stream' : 'proxy',
-        retryWithProxy: true,
-      }));
-      return;
-    }
-
-    if (!playbackState.isFallback && channel.fallbackUrl) {
-      // Proxy failed or direct private. Retry with fallbackUrl.
-      let strat: 'direct' | 'proxy' | 'proxy-stream' | 'drm' = 'direct';
-      if (channel.fallbackUrl.includes('.mpd') || channel.fallbackUrl.includes('.mpd?') || channel.drm) {
-        strat = 'drm';
-      } else if (channel.fallbackUrl.includes('.ts') || channel.fallbackUrl.includes('.ts?')) {
-        strat = 'proxy-stream';
-      } else if (
-        channel.fallbackUrl.includes('cdn.livekhelatv.com') ||
-        channel.fallbackUrl.includes('toffeelive.com') ||
-        channel.fallbackUrl.includes('cdn.fifalive.click') ||
-        channel.fallbackUrl.includes('inproviszon.st') ||
-        channel.fallbackUrl.includes('streamhostingcdn.top') ||
-        channel.fallbackUrl.startsWith('http://')
-      ) {
-        strat = 'proxy';
-      }
-
-      setPlaybackState({
-        url: channel.fallbackUrl,
-        strategy: strat,
-        isFallback: true,
-        retryWithProxy: false,
-      });
-      return;
-    }
-
-    // Both direct & fallback failed, trigger error overlay
-    const isDrm = playbackState.url.endsWith('.mpd') || playbackState.url.includes('.mpd?') || !!channel.drm;
-    const isPrivate = isPrivateIP(playbackState.url);
-
-    if (isDrm) {
-      setErrorInfo({
-        title: 'DRM Decryption Error',
-        desc: `Failed to decrypt stream for ${channel.name}. This feed requires DRM keys or your browser does not support DRM capabilities.`,
-      });
-    } else if (isPrivate) {
-      setErrorInfo({
-        title: 'BDIX Network Restriction',
-        desc: `${channel.name} is hosted on a private ISP BDIX server. It is unreachable unless you are on a compatible local network.`,
-      });
-    } else {
-      setErrorInfo({
-        title: 'Stream Load Failed',
-        desc: `This channel is currently offline or unreachable. Please try again later.`,
-      });
-    }
-
-    if (onPlaybackError) {
-      onPlaybackError(new Error('Playback failed'));
-    }
-  };
 
   const handleRetry = () => {
     setErrorInfo(null);
