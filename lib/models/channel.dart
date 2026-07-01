@@ -41,7 +41,7 @@ class Channel {
       isLive: json['is_live'] as bool? ?? true,
       isTrending: json['is_trending'] as bool? ?? false,
       quality: json['quality'] as String? ?? 'HD',
-      streamUrl: json['stream_url'] as String,
+      streamUrl: json['stream_url'] as String? ?? '',
       headers: json['headers'] is Map
           ? Map<String, dynamic>.from(json['headers'] as Map)
           : {},

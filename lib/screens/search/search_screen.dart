@@ -161,15 +161,32 @@ class _SearchResults extends StatelessWidget {
                           color: GoPlayTheme.surfaceContainerHigh,
                           shape: BoxShape.circle,
                         ),
-                        child: Center(
-                          child: Text(
-                            ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
-                            style: TextStyle(
-                              color: GoPlayTheme.primary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
+                        child: ClipOval(
+                          child: ch.logo != null && ch.logo!.isNotEmpty
+                              ? Image.network(
+                                  ch.logo!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => Center(
+                                    child: Text(
+                                      ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
+                                      style: TextStyle(
+                                        color: GoPlayTheme.primary,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : Center(
+                                  child: Text(
+                                    ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
+                                    style: TextStyle(
+                                      color: GoPlayTheme.primary,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
                         ),
                       ),
                       title: Text(

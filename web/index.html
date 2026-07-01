@@ -22,7 +22,13 @@
   <!-- Google Fonts Preconnect & Preload -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <!-- Only Orbitron for splash title; loaded non-blocking to avoid render-block -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+
+  <!-- Preconnect to Supabase and CDN for faster first API/asset calls -->
+  <link rel="preconnect" href="https://hqmhuvsjlykrdusfkmeg.supabase.co">
+  <link rel="dns-prefetch" href="https://hqmhuvsjlykrdusfkmeg.supabase.co">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
 
   <style>
     body {

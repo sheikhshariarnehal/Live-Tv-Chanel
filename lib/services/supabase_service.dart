@@ -11,10 +11,15 @@ class SupabaseService {
   SupabaseService(this._client);
 
   // ─── Channels ───────────────────────────────────────────────
+
+  /// Columns needed for list/grid display (excludes heavy stream_url & headers)
+  static const String _listColumns =
+      'id, name, logo, category, country, language, is_live, is_trending, quality, sort_order, added_at, proxy';
+
   Future<List<Channel>> getChannels() async {
     final response = await _client
         .from('channels')
-        .select()
+        .select(_listColumns)
         .order('sort_order', ascending: true);
     return (response as List).map((e) => Channel.fromJson(e)).toList();
   }
@@ -22,7 +27,7 @@ class SupabaseService {
   Future<List<Channel>> getTrendingChannels() async {
     final response = await _client
         .from('channels')
-        .select()
+        .select(_listColumns)
         .eq('is_trending', true)
         .order('sort_order', ascending: true);
     return (response as List).map((e) => Channel.fromJson(e)).toList();
@@ -31,7 +36,7 @@ class SupabaseService {
   Future<List<Channel>> getChannelsByCategory(String categoryId) async {
     final response = await _client
         .from('channels')
-        .select()
+        .select(_listColumns)
         .eq('category', categoryId)
         .order('sort_order', ascending: true);
     return (response as List).map((e) => Channel.fromJson(e)).toList();

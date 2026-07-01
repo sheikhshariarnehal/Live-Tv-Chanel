@@ -570,15 +570,32 @@ class _TrendingChannels extends ConsumerWidget {
                             width: 2,
                           ),
                         ),
-                        child: Center(
-                          child: Text(
-                            ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
-                            style: TextStyle(
-                              color: GoPlayTheme.primary,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
+                        child: ClipOval(
+                          child: ch.logo != null && ch.logo!.isNotEmpty
+                              ? Image.network(
+                                  ch.logo!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => Center(
+                                    child: Text(
+                                      ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
+                                      style: TextStyle(
+                                        color: GoPlayTheme.primary,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : Center(
+                                  child: Text(
+                                    ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
+                                    style: TextStyle(
+                                      color: GoPlayTheme.primary,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
                         ),
                       ),
                       const SizedBox(height: 6),
