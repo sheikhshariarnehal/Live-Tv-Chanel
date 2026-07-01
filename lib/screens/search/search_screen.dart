@@ -5,6 +5,7 @@ import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
 import '../../models/channel.dart';
 import '../../models/event.dart';
+import '../../widgets/team_flag.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -162,7 +163,7 @@ class _SearchResults extends StatelessWidget {
                         ),
                         child: Center(
                           child: Text(
-                            ch.name.substring(0, 2).toUpperCase(),
+                            ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
                             style: TextStyle(
                               color: GoPlayTheme.primary,
                               fontSize: 12,
@@ -241,9 +242,9 @@ class _SearchResults extends StatelessWidget {
                   ),
                 ),
                 ...filtered.map((event) => ListTile(
-                      leading: Text(
-                        '${event.homeTeam.flag ?? ''}',
-                        style: const TextStyle(fontSize: 24),
+                      leading: TeamFlagWidget(
+                        flag: event.homeTeam.flag,
+                        size: 24,
                       ),
                       title: Text(
                         '${event.homeTeam.name} vs ${event.awayTeam.name}',

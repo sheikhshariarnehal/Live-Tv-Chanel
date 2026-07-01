@@ -180,7 +180,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                                   ),
                                   child: Center(
                                     child: Text(
-                                      channel.name.substring(0, 2).toUpperCase(),
+                                      channel.name.substring(0, channel.name.length >= 2 ? 2 : 1).toUpperCase(),
                                       style: TextStyle(
                                         color: GoPlayTheme.primary,
                                         fontWeight: FontWeight.w800,
@@ -302,7 +302,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                                         ),
                                         child: Center(
                                           child: Text(
-                                            ch.name.substring(0, 2).toUpperCase(),
+                                            ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
                                             style: TextStyle(
                                               color: GoPlayTheme.primary,
                                               fontSize: 11,
@@ -460,7 +460,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                                 ),
                                 child: Center(
                                   child: Text(
-                                    channel.name.substring(0, 2).toUpperCase(),
+                                    channel.name.substring(0, channel.name.length >= 2 ? 2 : 1).toUpperCase(),
                                     style: TextStyle(
                                       color: GoPlayTheme.primary,
                                       fontWeight: FontWeight.w800,
@@ -560,7 +560,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                                     ),
                                     child: Center(
                                       child: Text(
-                                        ch.name.substring(0, 2).toUpperCase(),
+                                        ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
                                         style: TextStyle(
                                           color: GoPlayTheme.primary,
                                           fontSize: 12,

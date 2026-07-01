@@ -7,8 +7,11 @@ import '../../providers/app_providers.dart';
 import '../../models/event.dart';
 
 import '../../widgets/cards/event_list_tile.dart';
+import '../../widgets/cards/match_card.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/live_badge.dart';
+import '../../widgets/team_flag.dart';
+import '../../widgets/channel_selector.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -100,157 +103,226 @@ class HomeScreen extends ConsumerWidget {
 }
 
 // ─── Hero Banner ──────────────────────────────────────────────
-class _HeroBanner extends ConsumerWidget {
+class _HeroBanner extends ConsumerStatefulWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_HeroBanner> createState() => _HeroBannerState();
+}
+
+class _HeroBannerState extends ConsumerState<_HeroBanner> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final featuredAsync = ref.watch(featuredEventsProvider);
 
     return featuredAsync.when(
       data: (events) {
         if (events.isEmpty) return const SizedBox.shrink();
-        final event = events.first;
-        return GestureDetector(
-          onTap: () {
-            if (event.channels.isNotEmpty) {
-              context.push('/player/${event.channels.first}');
-            }
-          },
-          child: Container(
-            height: 200,
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF1B3D2F),
-                  Color(0xFF0D1B14),
-                  Color(0xFF0D0D0D),
-                ],
-              ),
-              border: Border.all(
-                color: GoPlayTheme.primary.withAlpha(30),
-                width: 1,
-              ),
-            ),
-            child: Stack(
-              children: [
-                // Stadium overlay
-                Positioned.fill(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
+
+        return Column(
+          children: [
+            SizedBox(
+              height: 200,
+              child: PageView.builder(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  setState(() => _currentPage = index);
+                },
+                itemCount: events.length,
+                itemBuilder: (context, index) {
+                  final event = events[index];
+                  return GestureDetector(
+                    onTap: () {
+                      if (event.channels.isNotEmpty) {
+                        context.push('/player/${event.channels.first}');
+                      }
+                    },
                     child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
-                        gradient: RadialGradient(
-                          center: Alignment.topCenter,
-                          radius: 1.5,
+                        borderRadius: BorderRadius.circular(20),
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                           colors: [
-                            GoPlayTheme.primary.withAlpha(15),
-                            Colors.transparent,
+                            Color(0xFF1B3D2F),
+                            Color(0xFF0D1B14),
+                            Color(0xFF0D0D0D),
                           ],
                         ),
+                        image: event.banner != null && event.banner!.isNotEmpty
+                            ? DecorationImage(
+                                image: NetworkImage(event.banner!),
+                                fit: BoxFit.cover,
+                                colorFilter: ColorFilter.mode(
+                                  Colors.black.withOpacity(0.55),
+                                  BlendMode.darken,
+                                ),
+                              )
+                            : null,
+                        border: Border.all(
+                          color: GoPlayTheme.primary.withAlpha(30),
+                          width: 1,
+                        ),
                       ),
-                    ),
-                  ),
-                ),
-
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      // Status badge
-                      Row(
+                      child: Stack(
                         children: [
-                          if (event.isLive)
-                            const LiveBadge(fontSize: 11)
-                          else
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: GoPlayTheme.primary.withAlpha(30),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                '● UPCOMING',
-                                style: TextStyle(
-                                  color: GoPlayTheme.primary,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
+                          Positioned.fill(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: RadialGradient(
+                                    center: Alignment.topCenter,
+                                    radius: 1.5,
+                                    colors: [
+                                      GoPlayTheme.primary.withAlpha(15),
+                                      Colors.transparent,
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
+                          ),
+
+                          Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Row(
+                                  children: [
+                                    if (event.isLive)
+                                      const LiveBadge(fontSize: 11)
+                                    else
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: GoPlayTheme.primary.withAlpha(30),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          '● UPCOMING',
+                                          style: TextStyle(
+                                            color: GoPlayTheme.primary,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+
+                                Text(
+                                  event.league,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w800,
+                                    color: GoPlayTheme.onSurface,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+
+                                Row(
+                                  children: [
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        TeamFlagWidget(flag: event.homeTeam.flag, size: 16),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          event.homeTeam.name,
+                                          style: const TextStyle(
+                                            color: GoPlayTheme.onSurface,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const Text(
+                                      '  vs  ',
+                                      style: TextStyle(
+                                        color: GoPlayTheme.onSurfaceVariant,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          event.awayTeam.name,
+                                          style: const TextStyle(
+                                            color: GoPlayTheme.onSurface,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        TeamFlagWidget(flag: event.awayTeam.flag, size: 16),
+                                      ],
+                                    ),
+                                    const Spacer(),
+
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: GoPlayTheme.primary,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Text(
+                                        'WATCH',
+                                        style: GoogleFonts.inter(
+                                          color: const Color(0xFF003300),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 10),
-
-                      // Event title
-                      Text(
-                        event.league,
-                        style: GoogleFonts.inter(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: GoPlayTheme.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-
-                      // Teams
-                      Row(
-                        children: [
-                          Text(
-                            '${event.homeTeam.flag ?? ''} ${event.homeTeam.name}',
-                            style: const TextStyle(
-                              color: GoPlayTheme.onSurface,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const Text(
-                            '  vs  ',
-                            style: TextStyle(
-                              color: GoPlayTheme.onSurfaceVariant,
-                              fontSize: 13,
-                            ),
-                          ),
-                          Text(
-                            '${event.awayTeam.name} ${event.awayTeam.flag ?? ''}',
-                            style: const TextStyle(
-                              color: GoPlayTheme.onSurface,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const Spacer(),
-
-                          // Watch button
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: GoPlayTheme.primary,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              'WATCH',
-                              style: GoogleFonts.inter(
-                                color: const Color(0xFF003300),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                    ),
+                  );
+                },
+              ),
+            ),
+            if (events.length > 1) ...[
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  events.length,
+                  (index) => Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    width: _currentPage == index ? 16 : 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(3),
+                      color: _currentPage == index
+                          ? GoPlayTheme.primary
+                          : GoPlayTheme.primary.withAlpha(80),
+                    ),
                   ),
                 ),
-              ],
-            ),
-          ),
+              ),
+            ],
+          ],
         );
       },
       loading: () => Container(
@@ -382,19 +454,23 @@ class _MatchesSection extends ConsumerWidget {
           );
         }
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            children: events.map((event) {
-              return EventListTile(
+        return SizedBox(
+          height: 125,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: events.length,
+            itemBuilder: (context, index) {
+              final event = events[index];
+              return MatchCard(
                 event: event,
-                onTap: () {
-                  if (event.channels.isNotEmpty) {
-                    context.push('/player/${event.channels.first}');
-                  }
-                },
+                onTap: () => showChannelSelector(
+                  context: context,
+                  ref: ref,
+                  event: event,
+                ),
               );
-            }).toList(),
+            },
           ),
         );
       },
@@ -420,9 +496,10 @@ class _TodaySchedule extends ConsumerWidget {
       data: (events) {
         final now = DateTime.now();
         final todayEvents = events.where((e) {
-          return e.startTime.year == now.year &&
-              e.startTime.month == now.month &&
-              e.startTime.day == now.day;
+          final localStart = e.startTime.toLocal();
+          return localStart.year == now.year &&
+              localStart.month == now.month &&
+              localStart.day == now.day;
         }).toList();
 
         if (todayEvents.isEmpty) {
@@ -435,62 +512,23 @@ class _TodaySchedule extends ConsumerWidget {
           );
         }
 
-        // Group by sport
-        final Map<String, List<SportEvent>> grouped = {};
-        for (final e in todayEvents) {
-          grouped.putIfAbsent(e.sport, () => []).add(e);
-        }
-
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
-            children: grouped.entries.map((entry) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 6, top: 4),
-                    child: Text(
-                      '${_sportIcon(entry.key)} ${entry.key}',
-                      style: const TextStyle(
-                        color: GoPlayTheme.onSurfaceVariant,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+            children: todayEvents.map((event) => EventListTile(
+                  event: event,
+                  onTap: () => showChannelSelector(
+                    context: context,
+                    ref: ref,
+                    event: event,
                   ),
-                  ...entry.value.map((event) => EventListTile(
-                        event: event,
-                        onTap: () {
-                          if (event.channels.isNotEmpty) {
-                            context.push('/player/${event.channels.first}');
-                          }
-                        },
-                      )),
-                ],
-              );
-            }).toList(),
+                )).toList(),
           ),
         );
       },
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
     );
-  }
-
-  String _sportIcon(String sport) {
-    switch (sport.toLowerCase()) {
-      case 'football':
-        return '⚽';
-      case 'cricket':
-        return '🏏';
-      case 'basketball':
-        return '🏀';
-      case 'tennis':
-        return '🎾';
-      default:
-        return '🏆';
-    }
   }
 }
 
@@ -607,7 +645,7 @@ class _RecentlyWatched extends ConsumerWidget {
                         ),
                         child: Center(
                           child: Text(
-                            ch.name.substring(0, 2).toUpperCase(),
+                            ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
                             style: TextStyle(
                               color: GoPlayTheme.primary,
                               fontSize: 14,

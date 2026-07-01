@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme.dart';
 import '../../models/event.dart';
 import '../live_badge.dart';
+import '../team_flag.dart';
 
 /// Compact match card for horizontal scrolling lists
 class MatchCard extends StatelessWidget {
@@ -10,6 +11,12 @@ class MatchCard extends StatelessWidget {
 
   const MatchCard({super.key, required this.event, this.onTap});
 
+  String _formatTime(DateTime dateTime) {
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -17,7 +24,7 @@ class MatchCard extends StatelessWidget {
       child: Container(
         width: 280,
         margin: const EdgeInsets.only(right: 12),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           gradient: GoPlayTheme.cardGradient,
           borderRadius: BorderRadius.circular(16),
@@ -30,132 +37,140 @@ class MatchCard extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             // League + Status
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (event.isLive) ...[
-                  const LiveBadge(),
-                  const SizedBox(width: 8),
-                ] else ...[
-                  Icon(Icons.schedule, size: 12, color: GoPlayTheme.primary),
-                  const SizedBox(width: 4),
-                ],
                 Expanded(
                   child: Text(
                     event.league,
-                    style: TextStyle(
-                      color: event.isLive
-                          ? GoPlayTheme.liveBadge
-                          : GoPlayTheme.primary,
+                    style: const TextStyle(
+                      color: GoPlayTheme.onSurface,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Teams
-            Row(
-              children: [
-                // Home team
-                Expanded(
-                  child: Column(
-                    children: [
-                      Text(
-                        event.homeTeam.flag ?? '🏳️',
-                        style: const TextStyle(fontSize: 28),
+                const SizedBox(width: 8),
+                if (event.isLive)
+                  const LiveBadge()
+                else
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: GoPlayTheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: GoPlayTheme.onSurfaceVariant.withAlpha(40),
+                        width: 0.5,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        event.homeTeam.name,
-                        style: const TextStyle(
-                          color: GoPlayTheme.onSurface,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    ),
+                    child: const Text(
+                      'UPCOMING',
+                      style: TextStyle(
+                        color: GoPlayTheme.onSurfaceVariant,
+                        fontSize: 8,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
                       ),
-                    ],
-                  ),
-                ),
-
-                // VS / Score
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: GoPlayTheme.surfaceContainerHighest.withAlpha(120),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    event.isLive ? 'VS' : _formatTime(event.startTime),
-                    style: TextStyle(
-                      color: event.isLive ? GoPlayTheme.primary : GoPlayTheme.onSurfaceVariant,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
                     ),
                   ),
-                ),
-
-                // Away team
-                Expanded(
-                  child: Column(
-                    children: [
-                      Text(
-                        event.awayTeam.flag ?? '🏳️',
-                        style: const TextStyle(fontSize: 28),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        event.awayTeam.name,
-                        style: const TextStyle(
-                          color: GoPlayTheme.onSurface,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
             const SizedBox(height: 10),
 
-            // Sport tag
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: GoPlayTheme.primary.withAlpha(20),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                event.sport,
-                style: TextStyle(
-                  color: GoPlayTheme.primary,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                ),
+            // Teams & VS Info Row
+            Expanded(
+              child: Row(
+                children: [
+                  // Teams Names & Flags
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Home Team
+                        Row(
+                          children: [
+                            TeamFlagWidget(
+                              flag: event.homeTeam.flag,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                event.homeTeam.name,
+                                style: const TextStyle(
+                                  color: GoPlayTheme.onSurface,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        // Away Team
+                        Row(
+                          children: [
+                            TeamFlagWidget(
+                              flag: event.awayTeam.flag,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                event.awayTeam.name,
+                                style: const TextStyle(
+                                  color: GoPlayTheme.onSurface,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // Time / VS Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: event.isLive
+                          ? GoPlayTheme.liveBadge.withAlpha(20)
+                          : GoPlayTheme.surfaceContainerHighest.withAlpha(120),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: event.isLive
+                            ? GoPlayTheme.liveBadge.withAlpha(40)
+                            : Colors.transparent,
+                        width: 0.5,
+                      ),
+                    ),
+                    child: Text(
+                      event.isLive ? 'VS' : _formatTime(event.startTime),
+                      style: TextStyle(
+                        color: event.isLive ? GoPlayTheme.liveBadge : GoPlayTheme.onSurfaceVariant,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
     );
-  }
-
-  String _formatTime(DateTime time) {
-    final h = time.hour.toString().padLeft(2, '0');
-    final m = time.minute.toString().padLeft(2, '0');
-    return '$h:$m';
   }
 }
