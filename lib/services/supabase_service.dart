@@ -14,7 +14,7 @@ class SupabaseService {
 
   /// Columns needed for list/grid display (excludes heavy stream_url & headers)
   static const String _listColumns =
-      'id, name, logo, category, country, language, is_live, is_trending, quality, sort_order, added_at, proxy';
+      'id, name, logo, category, country, language, is_live, is_trending, quality, sort_order, added_at, proxy, drm';
 
   Future<List<Channel>> getChannels() async {
     final response = await _client
