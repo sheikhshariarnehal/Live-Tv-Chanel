@@ -188,6 +188,45 @@ class _ChannelCardState extends State<ChannelCard>
                     ),
                   ),
                 ),
+
+              // DRM badge — below quality badge (top left)
+              if (channel.hasDrm)
+                Positioned(
+                  bottom: 8,
+                  left: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 5, vertical: 1.5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF9800).withAlpha(20),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: const Color(0xFFFF9800).withAlpha(40),
+                        width: 0.5,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(
+                          Icons.lock,
+                          color: Color(0xFFFF9800),
+                          size: 7,
+                        ),
+                        SizedBox(width: 3),
+                        Text(
+                          'DRM',
+                          style: TextStyle(
+                            color: Color(0xFFFF9800),
+                            fontSize: 8,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

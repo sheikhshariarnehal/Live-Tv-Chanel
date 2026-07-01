@@ -192,6 +192,10 @@ Purpose: a forward-looking calendar of fixtures, separate from the Home screen's
 - Favorite toggle accessible from the player.
 - Picture-in-Picture (PiP) support.
 - Chromecast support is deferred to a future release (see Section 16).
+- **DRM playback support:**
+  - ClearKey DRM for DASH CENC-encrypted streams (kid/key embedded in channel metadata, no license server required).
+  - Widevine DRM for license-server-based streams (future — requires ExoPlayer native integration).
+  - Visual DRM indicator (lock badge) in player controls for DRM-protected channels.
 
 ### 6.5 Favorites
 
@@ -232,6 +236,34 @@ Global search covers:
   "headers": {
     "referer": "...",
     "user-agent": "..."
+  },
+  "proxy": false,
+  "drm": null
+}
+```
+
+**DRM Configuration (`drm` field):**
+
+- **No DRM:** `"drm": null`
+- **ClearKey (embedded keys — no license server):**
+```json
+{
+  "drm": {
+    "type": "clearkey",
+    "kid": "f6564ec2aee819046328a0e153be574d",
+    "key": "ff46a8a1031eb27ef22576a077c98ab7"
+  }
+}
+```
+- **Widevine (license server — future):**
+```json
+{
+  "drm": {
+    "type": "widevine",
+    "licenseUrl": "https://license.provider.com/widevine",
+    "headers": {
+      "Authorization": "Bearer ..."
+    }
   }
 }
 ```

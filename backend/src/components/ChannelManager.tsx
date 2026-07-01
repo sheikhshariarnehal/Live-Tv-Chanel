@@ -2,7 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { createAdminSupabaseClient } from '../utils/supabase';
-import { Plus, Edit2, Trash2, Save, X, Search, Tv, ToggleLeft, ToggleRight, Filter, ChevronLeft, ChevronRight, Check, AlertCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Search, Tv, ToggleLeft, ToggleRight, Filter, ChevronLeft, ChevronRight, Check, AlertCircle, Lock, Shield } from 'lucide-react';
+
+interface DrmConfig {
+  type: 'clearkey' | 'widevine' | 'playready';
+  kid?: string;
+  key?: string;
+  licenseUrl?: string;
+  headers?: Record<string, string>;
+}
 
 interface Channel {
   id: string;
@@ -15,6 +23,7 @@ interface Channel {
   is_live: boolean;
   is_trending: boolean;
   sort_order: number;
+  drm: DrmConfig | null;
 }
 
 interface Category {
@@ -56,7 +65,12 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
     proxy: false,
     is_live: true,
     is_trending: false,
-    sort_order: 0
+    sort_order: 0,
+    drm_enabled: false,
+    drm_type: 'clearkey' as 'clearkey' | 'widevine' | 'playready',
+    drm_kid: '',
+    drm_key: '',
+    drm_license_url: '',
   });
 
   const supabaseAdmin = createAdminSupabaseClient(adminToken);
@@ -116,7 +130,12 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
       proxy: channel.proxy,
       is_live: channel.is_live,
       is_trending: channel.is_trending,
-      sort_order: channel.sort_order
+      sort_order: channel.sort_order,
+      drm_enabled: !!channel.drm,
+      drm_type: channel.drm?.type || 'clearkey',
+      drm_kid: channel.drm?.kid || '',
+      drm_key: channel.drm?.key || '',
+      drm_license_url: channel.drm?.licenseUrl || '',
     });
     setShowAddForm(false);
   };
@@ -133,7 +152,12 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
       proxy: false,
       is_live: true,
       is_trending: false,
-      sort_order: 0
+      sort_order: 0,
+      drm_enabled: false,
+      drm_type: 'clearkey',
+      drm_kid: '',
+      drm_key: '',
+      drm_license_url: '',
     });
   };
 
@@ -148,6 +172,17 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
         return;
       }
 
+      // Build DRM config or null
+      const drmConfig = formData.drm_enabled ? {
+        type: formData.drm_type,
+        ...(formData.drm_type === 'clearkey' ? {
+          kid: formData.drm_kid.trim(),
+          key: formData.drm_key.trim(),
+        } : {
+          licenseUrl: formData.drm_license_url.trim(),
+        }),
+      } : null;
+
       const { error: updateErr } = await supabaseAdmin
         .from('channels')
         .update({
@@ -159,7 +194,8 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
           proxy: formData.proxy,
           is_live: formData.is_live,
           is_trending: formData.is_trending,
-          sort_order: Number(formData.sort_order)
+          sort_order: Number(formData.sort_order),
+          drm: drmConfig,
         })
         .eq('id', id);
 
@@ -199,6 +235,17 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
 
       const cleanId = formData.id.toLowerCase().replace(/[^a-z0-9-_]/g, '-').trim();
 
+      // Build DRM config or null
+      const drmConfig = formData.drm_enabled ? {
+        type: formData.drm_type,
+        ...(formData.drm_type === 'clearkey' ? {
+          kid: formData.drm_kid.trim(),
+          key: formData.drm_key.trim(),
+        } : {
+          licenseUrl: formData.drm_license_url.trim(),
+        }),
+      } : null;
+
       const { error: insertErr } = await supabaseAdmin
         .from('channels')
         .insert({
@@ -211,7 +258,8 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
           proxy: formData.proxy,
           is_live: formData.is_live,
           is_trending: formData.is_trending,
-          sort_order: Number(formData.sort_order) || channels.length + 1
+          sort_order: Number(formData.sort_order) || channels.length + 1,
+          drm: drmConfig,
         });
 
       if (insertErr) throw insertErr;
@@ -227,7 +275,12 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
         proxy: false,
         is_live: true,
         is_trending: false,
-        sort_order: 0
+        sort_order: 0,
+        drm_enabled: false,
+        drm_type: 'clearkey',
+        drm_kid: '',
+        drm_key: '',
+        drm_license_url: '',
       });
       setShowAddForm(false);
       fetchData();
@@ -289,7 +342,8 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
       (filterLive === 'live' && channel.is_live) || 
       (filterLive === 'offline' && !channel.is_live) ||
       (filterLive === 'trending' && channel.is_trending) ||
-      (filterLive === 'proxy' && channel.proxy);
+      (filterLive === 'proxy' && channel.proxy) ||
+      (filterLive === 'drm' && !!channel.drm);
 
     return matchesSearch && matchesCategory && matchesLive;
   });
@@ -456,6 +510,76 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
               </label>
             </div>
           </div>
+
+          {/* DRM Configuration Section */}
+          <div className="mt-4 p-4 rounded-xl bg-zinc-900/50 border border-zinc-800 space-y-3">
+            <label className="flex items-center gap-2 cursor-pointer text-sm text-zinc-300">
+              <input
+                type="checkbox"
+                checked={formData.drm_enabled}
+                onChange={e => setFormData({ ...formData, drm_enabled: e.target.checked })}
+                className="rounded border-zinc-700 bg-zinc-950 text-orange-500 focus:ring-orange-500"
+              />
+              <Shield className="w-4 h-4 text-orange-400" />
+              Enable DRM Protection
+            </label>
+
+            {formData.drm_enabled && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-zinc-400">DRM Type</label>
+                  <select
+                    value={formData.drm_type}
+                    onChange={e => setFormData({ ...formData, drm_type: e.target.value as any })}
+                    className="w-full p-2.5 rounded-xl glass-input text-sm"
+                  >
+                    <option value="clearkey">ClearKey (Embedded Keys)</option>
+                    <option value="widevine">Widevine (License Server)</option>
+                    <option value="playready">PlayReady (Future)</option>
+                  </select>
+                </div>
+
+                {formData.drm_type === 'clearkey' && (
+                  <>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-zinc-400">Key ID (KID) — Hex</label>
+                      <input
+                        type="text"
+                        placeholder="f6564ec2aee819046328a0e153be574d"
+                        value={formData.drm_kid}
+                        onChange={e => setFormData({ ...formData, drm_kid: e.target.value })}
+                        className="w-full p-2.5 rounded-xl glass-input text-sm font-mono"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-zinc-400">Content Key — Hex</label>
+                      <input
+                        type="text"
+                        placeholder="ff46a8a1031eb27ef22576a077c98ab7"
+                        value={formData.drm_key}
+                        onChange={e => setFormData({ ...formData, drm_key: e.target.value })}
+                        className="w-full p-2.5 rounded-xl glass-input text-sm font-mono"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {formData.drm_type === 'widevine' && (
+                  <div className="md:col-span-2 space-y-1">
+                    <label className="text-xs font-semibold text-zinc-400">License Server URL</label>
+                    <input
+                      type="text"
+                      placeholder="https://license.provider.com/widevine"
+                      value={formData.drm_license_url}
+                      onChange={e => setFormData({ ...formData, drm_license_url: e.target.value })}
+                      className="w-full p-2.5 rounded-xl glass-input text-sm font-mono"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           <button
             type="submit"
             className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-semibold transition-all duration-200"
@@ -509,6 +633,7 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
               <option value="offline">Only Offline</option>
               <option value="trending">Only Trending</option>
               <option value="proxy">Only Proxied</option>
+              <option value="drm">Only DRM</option>
             </select>
           </div>
         </div>
@@ -536,6 +661,7 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
                     <th className="py-3 px-3">Channel Info</th>
                     <th className="py-3 px-3">Category</th>
                     <th className="py-3 px-3">Stream URL</th>
+                    <th className="py-3 px-3 text-center">DRM</th>
                     <th className="py-3 px-3 text-center">Proxy</th>
                     <th className="py-3 px-3 text-center">Active</th>
                     <th className="py-3 px-3 text-center">Trending</th>
@@ -646,6 +772,18 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
                             />
                           ) : (
                             <span title={channel.stream_url}>{channel.stream_url}</span>
+                          )}
+                        </td>
+
+                        {/* DRM Badge */}
+                        <td className="py-3 px-3 text-center">
+                          {channel.drm ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-950/30 border border-orange-900/40 text-orange-400 text-[9px] font-bold">
+                              <Lock className="w-2.5 h-2.5" />
+                              {channel.drm.type.toUpperCase()}
+                            </span>
+                          ) : (
+                            <span className="text-zinc-600 text-[10px]">—</span>
                           )}
                         </td>
 
@@ -894,6 +1032,18 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
                         )}
                       </div>
 
+                      {/* DRM info (read mode) */}
+                      {!isEditing && channel.drm && (
+                        <div className="col-span-2">
+                          <span className="text-zinc-500 block mb-0.5">DRM</span>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-950/30 border border-orange-900/40 text-orange-400 text-[10px] font-bold">
+                            <Lock className="w-2.5 h-2.5" />
+                            {channel.drm.type.toUpperCase()}
+                            {channel.drm.kid && ` · KID: ${channel.drm.kid.substring(0, 8)}…`}
+                          </span>
+                        </div>
+                      )}
+
                       {isEditing && (
                         <div className="col-span-2">
                           <span className="text-zinc-500 block mb-1">Logo URL</span>
@@ -905,6 +1055,62 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
                           />
                         </div>
                       )}
+
+                      {/* DRM config (edit mode) */}
+                      {isEditing && (
+                        <div className="col-span-2 mt-1 p-2 rounded-lg bg-zinc-950/40 border border-zinc-850/60 space-y-2">
+                          <label className="flex items-center gap-2 cursor-pointer text-xs text-zinc-300">
+                            <input
+                              type="checkbox"
+                              checked={formData.drm_enabled}
+                              onChange={e => setFormData({ ...formData, drm_enabled: e.target.checked })}
+                              className="rounded border-zinc-700 bg-zinc-950"
+                            />
+                            <Lock className="w-3 h-3 text-orange-400" />
+                            DRM Protection
+                          </label>
+                          {formData.drm_enabled && (
+                            <div className="space-y-2">
+                              <select
+                                value={formData.drm_type}
+                                onChange={e => setFormData({ ...formData, drm_type: e.target.value as any })}
+                                className="w-full p-1 rounded bg-zinc-950 border border-zinc-800 text-xs text-white"
+                              >
+                                <option value="clearkey">ClearKey</option>
+                                <option value="widevine">Widevine</option>
+                              </select>
+                              {formData.drm_type === 'clearkey' && (
+                                <>
+                                  <input
+                                    type="text"
+                                    placeholder="KID (hex)"
+                                    value={formData.drm_kid}
+                                    onChange={e => setFormData({ ...formData, drm_kid: e.target.value })}
+                                    className="w-full p-1 rounded bg-zinc-950 border border-zinc-800 text-[10px] text-white font-mono"
+                                  />
+                                  <input
+                                    type="text"
+                                    placeholder="Key (hex)"
+                                    value={formData.drm_key}
+                                    onChange={e => setFormData({ ...formData, drm_key: e.target.value })}
+                                    className="w-full p-1 rounded bg-zinc-950 border border-zinc-800 text-[10px] text-white font-mono"
+                                  />
+                                </>
+                              )}
+                              {formData.drm_type === 'widevine' && (
+                                <input
+                                  type="text"
+                                  placeholder="License Server URL"
+                                  value={formData.drm_license_url}
+                                  onChange={e => setFormData({ ...formData, drm_license_url: e.target.value })}
+                                  className="w-full p-1 rounded bg-zinc-950 border border-zinc-800 text-[10px] text-white font-mono"
+                                />
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
 
                       <div className="col-span-2 flex justify-between items-center bg-zinc-950/20 p-2 rounded-lg border border-zinc-850/60 mt-1">
                         <div className="flex flex-col items-center gap-1">
