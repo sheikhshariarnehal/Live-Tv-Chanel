@@ -5,6 +5,7 @@ import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
 import '../../models/channel.dart';
 import '../../widgets/live_badge.dart';
+import '../../widgets/player/channel_video_player.dart';
 
 class PlayerScreen extends ConsumerStatefulWidget {
   final String channelId;
@@ -86,68 +87,61 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 // Left side: Video player
                 Expanded(
                   flex: 7,
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() => _controlsVisible = !_controlsVisible);
-                      if (_controlsVisible) _hideControlsAfterDelay();
-                    },
-                    child: Container(
-                      color: Colors.black,
-                      child: Stack(
-                        children: [
-                          Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(24),
-                                  decoration: BoxDecoration(
-                                    color: GoPlayTheme.surfaceContainerHigh,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.play_arrow_rounded,
-                                    size: 56,
-                                    color: GoPlayTheme.primary,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  channel.name,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  channel.streamUrl,
-                                  style: TextStyle(
-                                    color: Colors.white.withAlpha(120),
-                                    fontSize: 11,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
+                  child: Container(
+                    color: Colors.black,
+                    child: Stack(
+                      children: [
+                        // Web HLS Player integration
+                        ChannelVideoPlayer.create(channel: channel),
+
+                        // Back Button overlaid at top left
+                        Positioned(
+                          top: 12,
+                          left: 12,
+                          child: InkWell(
+                            onTap: () => Navigator.of(context).pop(),
+                            borderRadius: BorderRadius.circular(30),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withAlpha(120),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.arrow_back_rounded,
+                                color: Colors.white,
+                                size: 22,
+                              ),
                             ),
                           ),
-                          if (_controlsVisible)
-                            _PlayerControls(
-                              channel: channel,
-                              isFullscreen: false,
-                              isFavorite: _isFavorite,
-                              onBack: () => Navigator.of(context).pop(),
-                              onFullscreen: _toggleFullscreen,
-                              onFavoriteToggle: () {
-                                ref
-                                    .read(favoriteChannelIdsProvider.notifier)
-                                    .toggle(channel.id);
-                              },
+                        ),
+
+                        // Favorite Button overlaid at top right
+                        Positioned(
+                          top: 12,
+                          right: 12,
+                          child: InkWell(
+                            onTap: () {
+                              ref
+                                  .read(favoriteChannelIdsProvider.notifier)
+                                  .toggle(channel.id);
+                            },
+                            borderRadius: BorderRadius.circular(30),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withAlpha(120),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                _isFavorite ? Icons.favorite_rounded : Icons.favorite_outline,
+                                color: _isFavorite ? GoPlayTheme.liveBadge : Colors.white,
+                                size: 22,
+                              ),
                             ),
-                        ],
-                      ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -366,74 +360,71 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
               // Video Player Area
               Expanded(
                 flex: _isFullscreen ? 1 : 0,
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() => _controlsVisible = !_controlsVisible);
-                    if (_controlsVisible) _hideControlsAfterDelay();
-                  },
-                  child: Container(
-                    height: _isFullscreen ? double.infinity : 240,
-                    width: double.infinity,
-                    color: Colors.black,
-                    child: Stack(
-                      children: [
-                        // Placeholder for video (simulated)
-                        Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  color: GoPlayTheme.surfaceContainerHigh,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.play_arrow_rounded,
-                                  size: 48,
-                                  color: GoPlayTheme.primary,
-                                ),
+                child: Container(
+                  height: _isFullscreen ? double.infinity : 240,
+                  width: double.infinity,
+                  color: Colors.black,
+                  child: Stack(
+                    children: [
+                      // Web HLS Player integration
+                      ChannelVideoPlayer.create(channel: channel),
+
+                      // Overlaid Back Button
+                      Positioned(
+                        top: 12,
+                        left: 12,
+                        child: InkWell(
+                          onTap: () => Navigator.of(context).pop(),
+                          borderRadius: BorderRadius.circular(30),
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withAlpha(120),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withAlpha(30),
+                                width: 0.5,
                               ),
-                              const SizedBox(height: 12),
-                              Text(
-                                channel.name,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                channel.streamUrl,
-                                style: TextStyle(
-                                  color: Colors.white.withAlpha(100),
-                                  fontSize: 10,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back_rounded,
+                              color: Colors.white,
+                              size: 20,
+                            ),
                           ),
                         ),
+                      ),
 
-                        // Controls overlay
-                        if (_controlsVisible)
-                          _PlayerControls(
-                            channel: channel,
-                            isFullscreen: _isFullscreen,
-                            isFavorite: _isFavorite,
-                            onBack: () => Navigator.of(context).pop(),
-                            onFullscreen: _toggleFullscreen,
-                            onFavoriteToggle: () {
-                              ref
-                                  .read(favoriteChannelIdsProvider.notifier)
-                                  .toggle(channel.id);
-                            },
+                      // Overlaid Favorite Button
+                      Positioned(
+                        top: 12,
+                        right: 12,
+                        child: InkWell(
+                          onTap: () {
+                            ref
+                                .read(favoriteChannelIdsProvider.notifier)
+                                .toggle(channel.id);
+                          },
+                          borderRadius: BorderRadius.circular(30),
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withAlpha(120),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withAlpha(30),
+                                width: 0.5,
+                              ),
+                            ),
+                            child: Icon(
+                              _isFavorite ? Icons.favorite_rounded : Icons.favorite_outline,
+                              color: _isFavorite ? GoPlayTheme.liveBadge : Colors.white,
+                              size: 20,
+                            ),
                           ),
-                      ],
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
