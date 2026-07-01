@@ -5,10 +5,25 @@ import 'channel_video_player_stub.dart'
 
 abstract class ChannelVideoPlayer extends StatefulWidget {
   final Channel channel;
+  final VoidCallback? onFullscreenToggle;
+  final bool isFullscreen;
 
-  const ChannelVideoPlayer({super.key, required this.channel});
+  const ChannelVideoPlayer({
+    super.key,
+    required this.channel,
+    this.onFullscreenToggle,
+    this.isFullscreen = false,
+  });
 
-  static Widget create({required Channel channel}) {
-    return getChannelVideoPlayer(channel: channel);
+  static Widget create({
+    required Channel channel,
+    VoidCallback? onFullscreenToggle,
+    bool isFullscreen = false,
+  }) {
+    return getChannelVideoPlayer(
+      channel: channel,
+      onFullscreenToggle: onFullscreenToggle,
+      isFullscreen: isFullscreen,
+    );
   }
 }

@@ -64,8 +64,14 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     final channelsAsync = ref.watch(channelsProvider);
     final isDesktop = MediaQuery.of(context).size.width >= 800;
 
-    return Scaffold(
-      backgroundColor: Colors.black,
+    return PopScope(
+      canPop: !_isFullscreen,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        _toggleFullscreen();
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
       body: channelAsync.when(
         data: (channel) {
           if (channel == null) {
@@ -92,7 +98,11 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                     child: Stack(
                       children: [
                         // Web HLS Player integration
-                        ChannelVideoPlayer.create(channel: channel),
+                        ChannelVideoPlayer.create(
+                          channel: channel,
+                          isFullscreen: _isFullscreen,
+                          onFullscreenToggle: _toggleFullscreen,
+                        ),
 
                         // Back Button overlaid at top left
                         Positioned(
@@ -360,74 +370,86 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
               // Video Player Area
               Expanded(
                 flex: _isFullscreen ? 1 : 0,
-                child: Container(
-                  height: _isFullscreen ? double.infinity : 240,
-                  width: double.infinity,
-                  color: Colors.black,
-                  child: Stack(
+                child: SafeArea(
+                  top: !_isFullscreen,
+                  bottom: false,
+                  left: false,
+                  right: false,
+                  child: Container(
+                    height: _isFullscreen ? double.infinity : 240,
+                    width: double.infinity,
+                    color: Colors.black,
+                    child: Stack(
                     children: [
                       // Web HLS Player integration
-                      ChannelVideoPlayer.create(channel: channel),
+                      ChannelVideoPlayer.create(
+                        channel: channel,
+                        isFullscreen: _isFullscreen,
+                        onFullscreenToggle: _toggleFullscreen,
+                      ),
 
                       // Overlaid Back Button
-                      Positioned(
-                        top: 12,
-                        left: 12,
-                        child: InkWell(
-                          onTap: () => Navigator.of(context).pop(),
-                          borderRadius: BorderRadius.circular(30),
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withAlpha(120),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white.withAlpha(30),
-                                width: 0.5,
+                      if (!_isFullscreen)
+                        Positioned(
+                          top: 12,
+                          left: 12,
+                          child: InkWell(
+                            onTap: () => Navigator.of(context).pop(),
+                            borderRadius: BorderRadius.circular(30),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withAlpha(120),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white.withAlpha(30),
+                                  width: 0.5,
+                                ),
                               ),
-                            ),
-                            child: const Icon(
-                              Icons.arrow_back_rounded,
-                              color: Colors.white,
-                              size: 20,
+                              child: const Icon(
+                                Icons.arrow_back_rounded,
+                                color: Colors.white,
+                                size: 20,
+                              ),
                             ),
                           ),
                         ),
-                      ),
 
                       // Overlaid Favorite Button
-                      Positioned(
-                        top: 12,
-                        right: 12,
-                        child: InkWell(
-                          onTap: () {
-                            ref
-                                .read(favoriteChannelIdsProvider.notifier)
-                                .toggle(channel.id);
-                          },
-                          borderRadius: BorderRadius.circular(30),
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withAlpha(120),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white.withAlpha(30),
-                                width: 0.5,
+                      if (!_isFullscreen)
+                        Positioned(
+                          top: 12,
+                          right: 12,
+                          child: InkWell(
+                            onTap: () {
+                              ref
+                                  .read(favoriteChannelIdsProvider.notifier)
+                                  .toggle(channel.id);
+                            },
+                            borderRadius: BorderRadius.circular(30),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withAlpha(120),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white.withAlpha(30),
+                                  width: 0.5,
+                                ),
                               ),
-                            ),
-                            child: Icon(
-                              _isFavorite ? Icons.favorite_rounded : Icons.favorite_outline,
-                              color: _isFavorite ? GoPlayTheme.liveBadge : Colors.white,
-                              size: 20,
+                              child: Icon(
+                                _isFavorite ? Icons.favorite_rounded : Icons.favorite_outline,
+                                color: _isFavorite ? GoPlayTheme.liveBadge : Colors.white,
+                                size: 20,
+                              ),
                             ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),
               ),
+            ),
 
               // Channel info + related channels (portrait only)
               if (!_isFullscreen)
@@ -610,8 +632,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
           child: Text('Error: $e', style: const TextStyle(color: GoPlayTheme.error)),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 class _PlayerControls extends StatelessWidget {
