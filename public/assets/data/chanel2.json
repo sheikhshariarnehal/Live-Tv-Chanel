@@ -1,0 +1,204 @@
+[
+  {
+    "id": "clkj29ujuws52g1vw",
+    "name": "FOX SPORTS AQ",
+    "url": "https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s-v2/Live/channel(kvea)/master.mpd",
+    "logo": "https://images.seeklogo.com/logo-png/28/1/fox-sports-logo-png_seeklogo-284763.png",
+    "drm": {
+      "kid": "ce7ab3022e753307997f58afe001bac4",
+      "key": "72d631a66e635c60829a0fe7705516c1"
+    }
+  },
+  {
+    "id": "cauojjaa1kh2otnrb",
+    "name": "TELEMUNDO AQ",
+    "url": "https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s-v2/Live/channel(kvea)/master.mpd",
+    "logo": "https://duckduckgo.com/i/2e3815a5b7ddd3c9.png",
+    "drm": {
+      "kid": "ce7ab3022e753307997f58afe001bac4",
+      "key": "72d631a66e635c60829a0fe7705516c1"
+    }
+  },
+  {
+    "id": "coneg54a5mzcij4ba",
+    "name": "D Sports AQ",
+    "url": "https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash/enc/ubehitlwzo/out/v1/8e09c381a51f4366a19e979418112e8f/cenc.mpd",
+    "logo": "",
+    "drm": {
+      "kid": "a7d11d37a1f7611ee88d4db880171f32",
+      "key": "68f96d618b0b956b008c445896a25a79"
+    }
+  },
+  {
+    "id": "cseg7gim8230lqlr1",
+    "name": "Sporza DUTCH AQ",
+    "url": "https://live.vrtcdn.be/groupd/live/0761024f-37fe-4254-bc37-e95d7c62b2d1/live.isml/.mpd",
+    "logo": "",
+    "drm": {
+      "kid": "893bc63340876605f52886a42e0ccce5",
+      "key": "d6c46d2d691056fbd091bf1f01b21a91"
+    }
+  },
+  {
+    "id": "c2oc40n9ogqb1uigt",
+    "name": "CIGNAL ENGLISH",
+    "url": "https://qp-pldt-live-bpk-ucd-prod.akamaized.net/bpk-tv/ch299/default/index.mpd",
+    "logo": "https://cignal-web-assets-2.b-cdn.net/images/cignal-play/hero/cignal-play-logo.png",
+    "drm": {
+      "kid": "549ab7cd35a64bb6bb479ecead04d69d",
+      "key": "829799ed534d11fcadeb4b192467e050"
+    }
+  },
+  {
+    "id": "c81l2u0a5vwmq2wml",
+    "name": "ZEE5+ HINDI AQ",
+    "url": "https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Zeecinema/default/manifest.mpd",
+    "logo": "",
+    "drm": {
+      "kid": "43513b13f4b542e39c9265921dfc1726",
+      "key": "b0b2678bcd274c37b888a6c987d502ed"
+    }
+  },
+  {
+    "id": "cbjhys12a3hlxvtkr",
+    "name": "DAZN SPAIN",
+    "url": "https://1nyaler.streamhostingcdn.top/stream/94/index.m3u8",
+    "logo": ""
+  },
+  {
+    "id": "cpd19kk0c7uat3fsh",
+    "name": "ZDF AQ",
+    "url": "https://simplitv-live.mdn.ors.at/live/eds/zdf_hd/dash4h/zdf_hd.mpd",
+    "logo": "",
+    "drm": {
+      "kid": "c1a0ac1044a433d0856ccdc08f245084",
+      "key": "7f0e8800a6d63d7915ac181bb88ce813"
+    }
+  },
+  {
+    "id": "cuolhpmak72qlver4",
+    "name": "TVP AQ",
+    "url": "https://estreams.tv.nej.cz/dash/CH_TVP_SPORT_Portable.ism/playlist.mpd",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/TVP2_logo.svg/640px-TVP2_logo.svg.png"
+  },
+  {
+    "id": "cf0qwu6uqxgm0t4mx",
+    "name": "M6 AQ",
+    "url": "https://origin-m6web.live.6cloud.fr/out/v1/6play/6play-m6/cmaf_cenc00/dash-short-hd.mpd",
+    "logo": "",
+    "drm": {
+      "kid": "433ffba670963e70857859a9dff4be04",
+      "key": "51ede3a821229fe81e71282c8eff80e3"
+    }
+  },
+  {
+    "id": "cocjs9y6c92gizqli",
+    "name": "CANAL AQ",
+    "url": "https://nog-live-ott.izzigo.tv/out/u/dash/CDMX1/CANAL-5-RDF-HD/default.mpd",
+    "logo": "https://static.wikia.nocookie.net/logopedia/images/4/4e/CERTV_4_2015.png",
+    "drm": {
+      "kid": "2a8c2d5088377f51f825d871e568be19",
+      "key": "eb5a8db64ca1992389672edb9447c711"
+    }
+  },
+  {
+    "id": "cnvkthyuni322ftu6",
+    "name": "VIX Español AQ",
+    "url": "https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash/enc/8u9cregwlt/out/v1/687f6b2a559943549be271504a948ffd/cenc.mpd",
+    "logo": "",
+    "drm": {
+      "kid": "1710ac2bbfcd3032d0f6533850968f47",
+      "key": "d2548dacc8efcd1cd0af0373060c82dc"
+    }
+  },
+  {
+    "id": "cd6fozko0umns8cty",
+    "name": "Any device 1",
+    "url": "https://ww2.sporttsonline.click/channels/hd/hd1.php",
+    "logo": ""
+  },
+  {
+    "id": "c3aebz0j0rf5emiq4",
+    "name": "Any device 2",
+    "url": "https://ww2.sporttsonline.click/channels/hd/hd2.php",
+    "logo": ""
+  },
+  {
+    "id": "cb4w0miph8wlwb6sp",
+    "name": "Any device 3",
+    "url": "https://ww2.sporttsonline.click/channels/hd/hd5.php",
+    "logo": ""
+  },
+  {
+    "id": "c0q5nk9aab5ouzzky",
+    "name": "Any device 4",
+    "url": "https://ww2.sporttsonline.click/channels/hd/hd3.php",
+    "logo": ""
+  },
+  {
+    "id": "cburdpstyp0v0ml3i",
+    "name": "Any device 5",
+    "url": "https://ww2.sporttsonline.click/channels/hd/hd4.php",
+    "logo": ""
+  },
+  {
+    "id": "cronoglsofk3kd3np",
+    "name": "Any device 6",
+    "url": "https://ww2.sporttsonline.click/channels/hd/hd7.php",
+    "logo": ""
+  },
+  {
+    "id": "cmhce34cxfoxhd1u0",
+    "name": "Any device 7",
+    "url": "https://ww2.sporttsonline.click/channels/hd/hd8.php",
+    "logo": ""
+  },
+  {
+    "id": "chmyvxzoawrreo0lk",
+    "name": "Any device 8",
+    "url": "https://ww2.sporttsonline.click/channels/hd/hd10.php",
+    "logo": ""
+  },
+  {
+    "id": "cl9wlrjt6rvaacw6l",
+    "name": "Any device 9",
+    "url": "https://ww2.sporttsonline.click/channels/hd/hd11.php",
+    "logo": ""
+  },
+  {
+    "id": "sports-football-world-cup-2026-5z8t",
+    "name": "Football World Cup 2026",
+    "url": "http://114.130.57.224:8080/Somoy-TV-3Mb/tracks-v1a1/mono.m3u8?token=SkQuhAXZxgBan1",
+    "logo": "https://carboncredits.com/wp-content/uploads/2025/09/shutterstock_2306088965-e1757112807302.jpg"
+  },
+  {
+    "id": "sports-d-sports-n7ql",
+    "name": "D Sports",
+    "url": "https://1nyaler.streamhostingcdn.top/stream/106/index.m3u8",
+    "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg"
+  },
+  {
+    "id": "sports-btv-8b4d",
+    "name": "BTV",
+    "url": "http://114.130.57.224:8080/BTV/tracks-v1a1/mono.m3u8?token=SkQuhAXZxgBan1",
+    "logo": "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/BTV%20National.png"
+  },
+  {
+    "id": "sports-gazi-tv-8b4d",
+    "name": "Gazi TV",
+    "url": "http://114.130.57.224:8080/Gazi-TV/tracks-v1a1/mono.m3u8?token=SkQuhAXZxgBan1",
+    "logo": "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Gazi%20TV.jpg"
+  },
+  {
+    "id": "sports-t-sports-8b4d",
+    "name": "T Sports",
+    "url": "http://114.130.57.224:8080/T-Sports/tracks-v1a1/mono.m3u8?token=SkQuhAXZxgBan1",
+    "logo": "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/T%20Sports.png"
+  },
+  {
+    "id": "sports-star-sports-1-8b4d",
+    "name": "Star Sports 1",
+    "url": "http://114.130.57.224:8080/StarSports1/tracks-v1a1/mono.m3u8?token=SkQuhAXZxgBan1",
+    "logo": "https://abusaeeidx.github.io/Tv-Channel-Logo/CricHD/runded/16-by-xfireflix.png"
+  }
+]

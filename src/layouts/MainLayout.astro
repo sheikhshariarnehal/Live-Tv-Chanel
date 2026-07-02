@@ -1,0 +1,308 @@
+---
+import '../styles/css/style.css';
+import channelsData from '../../public/assets/data/channels.json';
+import MobileMenu from '../components/MobileMenu.astro';
+
+const categories = channelsData.categories;
+const categoryKeys = Object.keys(categories);
+const firstCategoryKey = categoryKeys[0];
+const firstCategoryChannels = firstCategoryKey ? categories[firstCategoryKey].channels.slice(0, 24) : [];
+
+function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '');
+}
+
+function getChannelSlug(channel) {
+  const nameSlug = slugify(channel.name);
+  const id = channel.id;
+  if (id.startsWith(nameSlug) || id.endsWith(nameSlug)) {
+    return id;
+  }
+  return `${nameSlug}-${id}`;
+}
+
+function getPlaybackUrl(url) {
+  if (!url) return '';
+  if (url.startsWith('http://')) {
+    return '/proxy?url=' + encodeURIComponent(url);
+  }
+  return url;
+}
+
+interface Props {
+  title?: string;
+  description?: string;
+  keywords?: string;
+  image?: string;
+  activeChannelId?: string;
+  showPlayer?: boolean;
+  schema?: Record<string, any>;
+}
+
+const { 
+  title = "Vibestream - Watch Live TV & IPTV Channels | HD Stream Player", 
+  description = "Stream your favorite live TV channels, sports, news, and entertainment in HD quality with Vibestream. A fast, modern, and professional web-based IPTV player.",
+  keywords = "Vibestream, vibestream tv, live tv, online tv, free iptv, iptv player, watch live tv, live stream tv, bdix tv, streaming player",
+  image = "https://vibestream.app/assets/image/og-image.png",
+  activeChannelId = "",
+  showPlayer = true,
+  schema
+} = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Primary Meta Tags -->
+  <title>{title}</title>
+  <meta name="title" content={title} />
+  <meta name="description" content={description} />
+  <meta name="keywords" content={keywords} />
+  <meta name="author" content="Vibestream" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#0a0a0a" />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={Astro.url.href} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content={image} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:site_name" content="Vibestream" />
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:domain" content={Astro.url.host} />
+  <meta property="twitter:url" content={Astro.url.href} />
+  <meta property="twitter:title" content={title} />
+  <meta property="twitter:description" content={description} />
+  <meta property="twitter:image" content={image} />
+
+  <!-- Canonical Link -->
+  <link rel="canonical" href={Astro.url.href} />
+
+  <!-- Favicons & Manifest -->
+  <link rel="icon" type="image/webp" href="/assets/logo.webp" />
+  <link rel="apple-touch-icon" href="/assets/logo.webp" />
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- Fonts — async-loaded to avoid render-blocking (saves 200-600ms FCP) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+
+  <!-- DNS prefetch for CDNs used on interaction (not preconnect — saves wasted TCP/TLS) -->
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+
+  <!-- Schema.org JSON-LD Structured Data -->
+  {schema ? (
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+  ) : (
+    <script type="application/ld+json" is:inline>
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Vibestream",
+        "url": "https://vibestream.app/",
+        "description": "Watch live TV channels in HD quality with Vibestream, the professional IPTV player.",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "All",
+        "browserRequirements": "Requires JavaScript. Requires HTML5.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0.00",
+          "priceCurrency": "USD"
+        }
+      }
+    </script>
+  )}
+</head>
+<body data-active-channel-id={activeChannelId} class={showPlayer ? "player-layout" : "portal-layout"}>
+  <script defer src="https://umami.ntechbd.app/script.js" data-website-id="33997810-5e40-4042-840a-f84fff1cc9ce"></script>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <a href="/" class="logo">
+        <img 
+          src="/assets/logo.webp" 
+          alt="Vibestream Logo" 
+          class="logo-img" 
+          width="32" 
+          height="32" 
+          loading="eager" 
+          decoding="async" 
+        />
+        <div class="logo-text-group">
+          <span class="logo-text">Vibestream</span>
+          <span class="logo-subtitle"> Live TV & IPTV</span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation Menu -->
+      <nav class="nav-menu">
+        <a href="/" class={`nav-link ${Astro.url.pathname === "/" || Astro.url.pathname.startsWith("/watch") ? "active" : ""}`}>
+          <span>Channels</span>
+        </a>
+        <a href="/upcoming" class={`nav-link ${Astro.url.pathname === "/upcoming" ? "active" : ""}`}>
+          <span>Schedule</span>
+        </a>
+      </nav>
+
+      <div class="header-actions">
+        {showPlayer && (
+          <button class="btn-icon mobile-menu-toggle" id="mobileMenuBtn" title="Channels List">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+          </button>
+        )}
+        <button class="btn-icon nav-toggle-btn" id="navToggleBtn" title="Navigation Menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sports News Ticker Section -->
+  <section class="news-ticker-section" id="newsTicker" style="display: none;">
+    <div class="news-ticker-container">
+      <div class="news-ticker-label">
+        <span class="news-ticker-label-text">NEWS</span>
+      </div>
+      <div class="news-ticker-content">
+        <div class="news-ticker-track" id="newsTickerTrack">
+          <div class="news-marquee-list" id="marqueeList1">
+            <span class="news-ticker-placeholder">সংবাদ লোড হচ্ছে...</span>
+          </div>
+          <div class="news-marquee-list" id="marqueeList2"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <div class="container">
+      {showPlayer ? (
+        <!-- Video Player Section -->
+        <div class="video-section">
+          <div class="video-wrapper">
+            <div id="player"></div>
+            <!-- Dynamic Error Overlay -->
+            <div class="error-overlay" id="errorOverlay">
+              <div class="error-card">
+                <div class="error-icon">⚠️</div>
+                <div class="error-title" id="errorTitle">Stream Load Failed</div>
+                <div class="error-desc" id="errorDesc">
+                  This stream could not be loaded. It might be offline or unreachable.
+                </div>
+                <div class="error-actions">
+                  <button class="btn-error-action secondary" id="btnReloadStream">Retry</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar Section -->
+        <div class="sidebar" id="sidebar">
+          <button class="btn-close" id="closeSidebarBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12"></path>
+            </svg>
+          </button>
+
+          <!-- Category Tabs -->
+          <div class="category-tabs" id="categoryTabs">
+            {categoryKeys.map((catKey, index) => (
+              <button 
+                class={`tab-btn ${index === 0 ? 'active' : ''}`} 
+                data-category={catKey}
+              >
+                {categories[catKey].name}
+              </button>
+            ))}
+          </div>
+
+          <!-- Channel Grid -->
+          <div class="channel-grid" id="channelGrid">
+            {firstCategoryKey && (
+              <div 
+                class="channel-category" 
+                data-category={firstCategoryKey}
+              >
+                {firstCategoryChannels.map((channel, chIndex) => {
+                  const logoSrc = getPlaybackUrl(channel.logo);
+                  const loadType = (chIndex < 8) ? 'eager' : 'lazy';
+                  return (
+                    <button 
+                      class="channel-btn" 
+                      data-url={channel.url} 
+                      data-fallback-url={channel.fallbackUrl || ''} 
+                      data-channel-id={channel.id} 
+                      data-channel-name={channel.name}
+                      title={channel.name}
+                    >
+                      {channel.logo ? (
+                        <img 
+                          src={logoSrc} 
+                          alt={channel.name} 
+                          class="channel-logo" 
+                          width="160"
+                          height="90"
+                          loading={loadType}
+                          style="opacity: 0; transition: opacity 0.2s ease-in;"
+                          onload="imgOk(this)"
+                          onerror="imgErr(this)"
+                        />
+                      ) : (
+                        <span class="channel-name">{channel.name}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <slot />
+      )}
+    </div>
+  <MobileMenu />
+
+  <!-- Global image handlers — deduplicated from ~30 inline onerror/onload strings (saves ~4KB HTML) -->
+  <script is:inline>
+    function imgOk(el){el.style.opacity='1'}
+    function imgErr(el){el.remove();var s=document.createElement('span');s.className='channel-name';s.textContent=el.alt;el.parentNode.appendChild(s)}
+  </script>
+  <script>
+    import '../scripts/js/security.js';
+    import '../scripts/js/script.js';
+  </script>
+</body>
+</html>
+<!-- cache-invalidate: TSN Sports final working URL restored -->
