@@ -41,47 +41,49 @@ class _LiveBadgeState extends State<LiveBadge>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return Container(
-          padding: widget.padding,
-          decoration: BoxDecoration(
-            color: GoPlayTheme.liveBadge.withAlpha((_animation.value * 255).toInt()),
-            borderRadius: BorderRadius.circular(6),
-            boxShadow: [
-              BoxShadow(
-                color: GoPlayTheme.liveBadge.withAlpha(80),
-                blurRadius: 8,
-                spreadRadius: 0,
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 6,
-                height: 6,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _animation,
+        builder: (context, child) {
+          return Container(
+            padding: widget.padding,
+            decoration: BoxDecoration(
+              color: GoPlayTheme.liveBadge.withAlpha((_animation.value * 255).toInt()),
+              borderRadius: BorderRadius.circular(6),
+              boxShadow: [
+                BoxShadow(
+                  color: GoPlayTheme.liveBadge.withAlpha(80),
+                  blurRadius: 8,
+                  spreadRadius: 0,
                 ),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                'LIVE',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: widget.fontSize,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1,
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        );
-      },
+                const SizedBox(width: 4),
+                Text(
+                  'LIVE',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: widget.fontSize,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
