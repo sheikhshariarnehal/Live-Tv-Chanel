@@ -55,7 +55,6 @@ class HomeScreen extends ConsumerWidget {
           SliverToBoxAdapter(
             child: SectionHeader(
               title: 'Matches',
-              icon: Icons.sports_soccer_rounded,
             ),
           ),
           SliverToBoxAdapter(child: _MatchTabs()),
@@ -67,7 +66,6 @@ class HomeScreen extends ConsumerWidget {
           SliverToBoxAdapter(
             child: SectionHeader(
               title: "Today's Schedule",
-              icon: Icons.calendar_today_rounded,
               actionLabel: 'See All',
               onAction: () => context.go('/upcoming'),
             ),
@@ -79,7 +77,6 @@ class HomeScreen extends ConsumerWidget {
           SliverToBoxAdapter(
             child: SectionHeader(
               title: 'Trending Channels',
-              icon: Icons.trending_up_rounded,
               actionLabel: 'All Channels',
               onAction: () => context.go('/channels'),
             ),
@@ -675,7 +672,6 @@ class _RecentlyWatched extends ConsumerWidget {
       children: [
         const SectionHeader(
           title: 'Recently Watched',
-          icon: Icons.history_rounded,
         ),
         SizedBox(
           height: 90,
@@ -747,7 +743,6 @@ class _AnnouncementsSection extends ConsumerWidget {
           children: [
             const SectionHeader(
               title: 'Announcements',
-              icon: Icons.campaign_rounded,
             ),
             ...announcements.map((a) => Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
