@@ -267,6 +267,8 @@ class _LogoAvatar extends StatelessWidget {
                 fit: BoxFit.cover,
                 width: 52,
                 height: 52,
+                cacheWidth: 104,
+                cacheHeight: 104,
                 errorBuilder: (context, error, stackTrace) =>
                     buildInitials(14),
               )
