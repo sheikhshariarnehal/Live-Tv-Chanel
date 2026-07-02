@@ -12,9 +12,12 @@ class MatchCard extends StatelessWidget {
   const MatchCard({super.key, required this.event, this.onTap});
 
   String _formatTime(DateTime dateTime) {
-    final hour = dateTime.hour.toString().padLeft(2, '0');
-    final minute = dateTime.minute.toString().padLeft(2, '0');
-    return '$hour:$minute';
+    final localTime = dateTime.toLocal();
+    final hour = localTime.hour;
+    final minute = localTime.minute.toString().padLeft(2, '0');
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour % 12 == 0 ? 12 : hour % 12;
+    return '$displayHour:$minute $period';
   }
 
   @override

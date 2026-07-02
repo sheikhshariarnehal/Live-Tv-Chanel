@@ -3,6 +3,7 @@ import '../../core/theme.dart';
 import '../../models/event.dart';
 import '../live_badge.dart';
 import '../team_flag.dart';
+import '../countdown_timer.dart';
 
 /// Full-width event list tile used in Upcoming and Today's Schedule
 class EventListTile extends StatelessWidget {
@@ -117,13 +118,31 @@ class EventListTile extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 2),
-                      Text(
-                        _formatTimeInfo(event),
-                        style: const TextStyle(
-                          color: GoPlayTheme.onSurfaceVariant,
-                          fontSize: 10,
-                        ),
-                      ),
+                      () {
+                        final now = DateTime.now();
+                        final localStart = event.startTime.toLocal();
+                        final isToday = localStart.year == now.year &&
+                            localStart.month == now.month &&
+                            localStart.day == now.day;
+
+                        if (event.isUpcoming && isToday) {
+                          return CountdownTimerWidget(
+                            startTime: event.startTime,
+                            style: const TextStyle(
+                              color: GoPlayTheme.primary,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          );
+                        }
+                        return Text(
+                          _formatTimeInfo(event),
+                          style: const TextStyle(
+                            color: GoPlayTheme.onSurfaceVariant,
+                            fontSize: 10,
+                          ),
+                        );
+                      }(),
                     ],
                   ),
                 ),
@@ -164,9 +183,12 @@ class EventListTile extends StatelessWidget {
   }
 
   String _formatTime(DateTime time) {
-    final h = time.toLocal().hour.toString().padLeft(2, '0');
-    final m = time.toLocal().minute.toString().padLeft(2, '0');
-    return '$h:$m';
+    final localTime = time.toLocal();
+    final hour = localTime.hour;
+    final minute = localTime.minute.toString().padLeft(2, '0');
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour % 12 == 0 ? 12 : hour % 12;
+    return '$displayHour:$minute $period';
   }
 
   String _formatTimeInfo(SportEvent event) {
