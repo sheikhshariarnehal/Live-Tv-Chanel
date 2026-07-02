@@ -1,0 +1,4494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DUDE TV Stream Tester</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- HLS.js for HLS streams -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  
+  <!-- Shaka Player for DASH / DRM streams -->
+  <script src="https://cdn.jsdelivr.net/npm/shaka-player@latest/dist/shaka-player.compiled.debug.js"></script>
+
+  <!-- mpegts.js for raw MPEG-TS streams -->
+  <script src="https://cdn.jsdelivr.net/npm/mpegts.js@latest/dist/mpegts.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #0b0c10;
+      --surface: rgba(22, 26, 35, 0.65);
+      --surface-border: rgba(255, 255, 255, 0.08);
+      --accent: #ff2a2a;
+      --accent-glow: rgba(255, 42, 42, 0.4);
+      --text: #f5f6f8;
+      --text-muted: rgba(245, 246, 248, 0.6);
+      --green: #00e676;
+      --blue: #00b0ff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+    }
+
+    /* Side Panel */
+    .sidebar {
+      width: 360px;
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--surface-border);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      z-index: 10;
+    }
+
+    .brand {
+      padding: 24px;
+      border-bottom: 1px solid var(--surface-border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand i {
+      color: var(--accent);
+      font-size: 24px;
+      text-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .brand h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      background: linear-gradient(90deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .settings-section {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--surface-border);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .proxy-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .select-wrap {
+      position: relative;
+    }
+
+    select, input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--surface-border);
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    select:focus, input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    .channel-list-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+    }
+
+    .channel-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .category-header {
+      padding: 14px 16px 6px 4px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      margin-top: 8px;
+    }
+    
+    .category-header:first-of-type {
+      border-top: none;
+      margin-top: 0;
+    }
+    
+    .badge-count {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .channel-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--surface-border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .channel-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateX(4px);
+    }
+
+    .channel-item.active {
+      background: rgba(255, 42, 42, 0.1);
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(255, 42, 42, 0.15);
+    }
+
+    .channel-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .channel-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .channel-name {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .channel-type {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: radial-gradient(circle at top right, rgba(255, 42, 42, 0.03), transparent 60%);
+    }
+
+    .player-section {
+      flex: 1;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .player-container {
+      width: 100%;
+      max-width: 960px;
+      aspect-ratio: 16/9;
+      background: #000;
+      border-radius: 16px;
+      border: 1px solid var(--surface-border);
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .player-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(11, 12, 16, 0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 5;
+      transition: opacity 0.3s ease;
+    }
+
+    .player-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .overlay-text {
+      font-size: 16px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Logs & Details Area */
+    .dashboard {
+      height: 280px;
+      background: rgba(15, 18, 25, 0.9);
+      border-top: 1px solid var(--surface-border);
+      display: flex;
+      z-index: 5;
+    }
+
+    .details-panel {
+      width: 320px;
+      border-right: 1px solid var(--surface-border);
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .detail-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .detail-value {
+      font-size: 13px;
+      font-weight: 500;
+      word-break: break-all;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-proxy {
+      background: rgba(0, 176, 255, 0.15);
+      color: var(--blue);
+      border: 1px solid rgba(0, 176, 255, 0.3);
+    }
+
+    .badge-direct {
+      background: rgba(0, 230, 118, 0.15);
+      color: var(--green);
+      border: 1px solid rgba(0, 230, 118, 0.3);
+    }
+
+    .console-panel {
+      flex: 1;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .console-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .console-logs {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      padding: 12px 16px;
+      overflow-y: auto;
+      color: #9cdcfe;
+    }
+
+    .log-entry {
+      margin-bottom: 6px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+
+    .log-info { color: #9cdcfe; }
+    .log-success { color: var(--green); }
+    .log-error { color: var(--accent); }
+    .log-warn { color: #ffeb3b; }
+
+    .btn-clear {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 12px;
+      transition: color 0.2s;
+    }
+
+    .btn-clear:hover {
+      color: var(--text);
+    }
+
+    .load-btn {
+      background: var(--accent);
+      border: none;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .load-btn:hover {
+      box-shadow: 0 0 15px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="brand">
+      <i class="fa-solid fa-circle-play"></i>
+      <h1>DUDE TV Link Tester</h1>
+    </div>
+
+    <!-- Proxy Config -->
+    <div class="settings-section">
+      <div class="detail-item">
+        <span class="section-title">Proxy Routing</span>
+        <div class="select-wrap">
+          <select id="proxySelect">
+            <option value="fifa" selected>Deployed Worker Proxy</option>
+            <option value="direct">Direct (No Proxy)</option>
+            <option value="custom">Custom Proxy...</option>
+          </select>
+        </div>
+      </div>
+      <div id="customProxyWrap" style="display: none;">
+        <input type="text" id="customProxyInput" placeholder="https://my-proxy.workers.dev/?url=">
+      </div>
+    </div>
+
+    <!-- Custom URL Input -->
+    <div class="settings-section">
+      <span class="section-title">Test Custom Link</span>
+      <div style="display: flex; gap: 8px;">
+        <input type="text" id="customUrl" placeholder="https://example.com/stream.m3u8">
+        <button class="load-btn" id="loadCustom">Load</button>
+      </div>
+    </div>
+
+    <!-- Channel List -->
+    <div class="channel-list-container">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px;">
+        <span class="section-title" id="sidebarTitle">Channels</span>
+        <input type="text" id="searchBox" placeholder="Search..." style="
+          background: rgba(0, 0, 0, 0.4);
+          border: 1px solid var(--surface-border);
+          border-radius: 6px;
+          padding: 6px 10px;
+          color: var(--text);
+          font-family: inherit;
+          font-size: 12px;
+          width: 140px;
+          outline: none;
+        ">
+      </div>
+      <div class="channel-list" id="channelList">
+        <!-- Rendered Dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="main-content">
+    
+    <!-- Player -->
+    <div class="player-section">
+      <div class="player-container">
+        <video id="videoPlayer" controls></video>
+        <div class="player-overlay" id="playerOverlay">
+          <div class="spinner" id="playerSpinner"></div>
+          <div class="overlay-text" id="overlayText">Select a channel to play</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard/Details -->
+    <div class="dashboard">
+      <div class="details-panel">
+        <div class="detail-item">
+          <span class="detail-label">Active Stream</span>
+          <span class="detail-value" id="activeName">-</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Proxy Mode</span>
+          <span id="activeProxyMode" class="badge badge-direct">Direct</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Resolved Stream URL</span>
+          <span class="detail-value" id="activeUrl" style="font-size: 11px; opacity: 0.8;">-</span>
+        </div>
+      </div>
+
+      <div class="console-panel">
+        <div class="console-header">
+          <span class="section-title">Console Output Logs</span>
+          <button class="btn-clear" id="clearConsole">Clear Logs</button>
+        </div>
+        <div class="console-logs" id="consoleLogs">
+          <!-- Log lines rendered here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Embedded channels.json Database
+    const CHANNELS = {
+  "categories": {
+    "fifa-world-cup-2026": {
+      "name": "FIFA™",
+      "channels": [
+        {
+          "id": "toffee-1",
+          "name": "Toffee 1",
+          "url": "http://sm-monirul.top/tof/live/toffee1/index.m3u8",
+          "logo": "https://i.imgur.com/53aSeDH.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "world-cup-a1",
+          "name": "World Cup A1 🇧🇩",
+          "url": "http://rgkkw.live/live/1Aoen7elp5/IgMJ60tmAa/130714.ts",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "world-cup-a2",
+          "name": "World Cup A2 🇧🇩",
+          "url": "http://198.195.239.50:8095/tsports/tracks-v1a1/mono.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "world-cup-s2",
+          "name": "World Cup S2",
+          "url": "https://andro.226503.xyz/checklist/androstreamlivebs1.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "fifa-live-bangla",
+          "name": "FIFA Live - Bangla 🇮🇳",
+          "url": "https://d1g8wgjurz8via.cloudfront.net/bpk-tv/ColorsHD/default/ColorsHD-video=2137600.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "fifa-live-bangla-a",
+          "name": "FIFA Live - Bangla A 🇮🇳",
+          "url": "https://d1g8wgjurz8via.cloudfront.net/bpk-tv/ColorsHD/default/ColorsHD.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "fox-sports-fifa-2026",
+          "name": "Fox Sports - FIFA 2026",
+          "url": "http://84.17.50.102/fox/index.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "fox-sports-1-fifa-2026",
+          "name": "Fox Sports 1 - FIFA 2026",
+          "url": "http://41.223.30.230/FOXSPORTS1/tracks-v1a1/mono.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "football-world-cup-2026-4k",
+          "name": "Football World Cup 2026 (4K)",
+          "url": "https://rgkkw.live/live/1Aoen7elp5/IgMJ60tmAa/688290.ts",
+          "logo": "https://carboncredits.com/wp-content/uploads/2025/09/shutterstock_2306088965-e1757112807302.jpg",
+          "resolution": "4K",
+          "proxy": false
+        },
+        {
+          "id": "somoy-tv-for-fifa-wards-cup",
+          "name": "Somoy TV for FIFA Wards Cup",
+          "url": "https://s1.itcnbd.live/1-somoy-tv/index.m3u8?nocache=1782578607115",
+          "logo": "https://i.postimg.cc/QjD6hcSc/FIFA-World-Cup-Logo-2022.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "bein-sports-1-max-arabia-for-fifa-world-cup",
+          "name": "beIN SPORTS 1 Max Arabia for FIFA World Cup",
+          "url": "https://cp11.adabmedia.com/hls2/sport.m3u8?nocache=1782057214460",
+          "logo": "https://i.postimg.cc/QjD6hcSc/FIFA-World-Cup-Logo-2022.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zee-bangla-sonar",
+          "name": "Zee Bangla Sonar",
+          "url": "https://stream.ottplus.live/live/zee_bangla_cinema_abr/live/zee_bangla_cinema_720/playlist.m3u8",
+          "logo": "https://i.postimg.cc/HnkzXwDf/channels4-profile.jpg",
+          "resolution": "HD",
+          "proxy": false
+        }
+      ]
+    },
+    "sports": {
+      "name": "Sports",
+      "channels": [
+        {
+          "id": "toffee-sports-vip",
+          "name": "TOFFEE Sports VIP",
+          "url": "https://sm-monirul.top/toffee/play/sports_highlights.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/19779/logo/240x240/mobile_logo_975410001725875598.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "euro-sport-hd",
+          "name": "Euro Sport HD",
+          "url": "https://sm-monirul.top/toffee/play/euro_sports_hd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/4388/logo/240x240/mobile_logo_422191001674119624.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "icc-test-championship-highlights",
+          "name": "ICC Test Championship Highlights",
+          "url": "https://sm-monirul.top/toffee/play/icc_wtc_final.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/f_webp group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "t-sports-hd-2",
+          "name": "T Sports HD 2",
+          "url": "http://198.195.239.50:8095/tsports/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "t-sports",
+          "name": "T Sports 🇧🇩",
+          "url": "http://114.130.57.233:8080/TsportHD/tracks-v1a1/mono.m3u8?token=SkQuhAXZxgBan1",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "unite-8-sports-1-hd-hindi",
+          "name": "Unite 8 Sports 1 HD 🇮🇳 Hindi",
+          "url": "http://starhub.pro/live/farhat-3379/67897-913379/741567.ts",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "616-sports-4k",
+          "name": "616 Sports 4K",
+          "url": "http://starhub.pro/live/farhat-3379/67897-913379/745270.ts",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "4K",
+          "proxy": true
+        },
+        {
+          "id": "go-live-sports",
+          "name": "Go Live Sports",
+          "url": "https://d1211whpimeups.cloudfront.net/smil:rtbgo/chunklist.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "go-live-sports-b",
+          "name": "Go Live Sports B",
+          "url": "https://d1211whpimeups.cloudfront.net/smil:rtbgo/chunklist_b4096000_slENG.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "s-football",
+          "name": "S Football",
+          "url": "http://rgkkw.live/live/1Aoen7elp5/IgMJ60tmAa/745149.ts",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "bein-sports-1-max-arabic",
+          "name": "Bein Sports 1 Max Arabic",
+          "url": "http://starhub.pro/live/farhat-3379/67897-913379/744517.ts",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "bein-sports",
+          "name": "Bein Sports",
+          "url": "https://1nyaler.streamhostingcdn.top/stream/23/index.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "ptv-sports-b",
+          "name": "PTV Sports B 🇵🇰",
+          "url": "http://stalker.hakunamata.workers.dev/play/1099/index.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "ptv-sports-c",
+          "name": "PTV Sports C 🇵🇰",
+          "url": "http://premiumtvs.space/live/jen12345/Jen54321/89.ts",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "m6-sports",
+          "name": "M6 Sports",
+          "url": "https://tv.beyondtaxconsultants.com/api/robi/lps/http://151.80.18.177:86/M6_HD/index.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "caze-tv-brazil",
+          "name": "Caze Tv 🇧🇷 Brazil",
+          "url": "https://dfr80qz435crc.cloudfront.net/MNOP/Amagi/Caze/Caze_TV_BR/1080p-vtt/index.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "win-sports",
+          "name": "Win Sports",
+          "url": "https://1nyaler.streamhostingcdn.top/stream/32/index.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "dazn-direct",
+          "name": "Dazn Direct",
+          "url": "https://1nyaler.streamhostingcdn.top/stream/94/index.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "tvp-sports",
+          "name": "TVP Sports",
+          "url": "https://1nyaler.streamhostingcdn.top/stream/89/index.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "d-sports",
+          "name": "D Sports",
+          "url": "https://1nyaler.streamhostingcdn.top/stream/106/index.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "tyc-sports",
+          "name": "TYC Sports",
+          "url": "https://1nyaler.streamhostingcdn.top/stream/84/index.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "tudn-sports",
+          "name": "Tudn Sports 🇲🇽",
+          "url": "https://1nyaler.streamhostingcdn.top/stream/52/index.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "t-sports-1",
+          "name": "T sports",
+          "url": "https://tv.emnetbd.com/flussonic/Tsports1/tracks-v1a1/mono.m3u8?nocache=1782578566351",
+          "logo": "https://www.jagobd.com/wp-content/uploads/2019/12/t-sports.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "euro-sport-hd-1",
+          "name": "Euro Sport HD",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=8yradhCZRM6o8LXpH6&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/4388/logo/240x240/mobile_logo_422191001674119624.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "star-sports-select-1",
+          "name": "Star Sports select  1",
+          "url": "https://cdn1.ctgiptv.com/star-select-1/tracks-v1a1/mono.ts.m3u8",
+          "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/200/-/Star_Sports_Select_HD_1.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "star-sports-select-2",
+          "name": "Star Sports select  2",
+          "url": "https://cdn1.ctgiptv.com/star-select-2/tracks-a1/mono.ts.m3u8",
+          "logo": "https://multireach.in/wp-content/uploads/2020/11/Star-Sports-Select-HD-2-1.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "star-sports-1",
+          "name": "Star Sports 1",
+          "url": "https://mxonlive.xyz/universal_restream/play/810/stream.m3u8",
+          "logo": "https://wclegends.uk/wp-content/uploads/2025/07/star-sports-hindi-hd-WCL-2025-Broadcaster.webp",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "star-sports-2",
+          "name": "Star Sports 2",
+          "url": "https://mxonlive.xyz/universal_restream/play/805/stream.m3u8",
+          "logo": "https://medianet.mv/media/channel/179x0-icon.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "ptv-sports",
+          "name": "PTV Sports",
+          "url": "https://tvsen5.aynaott.com/PtvSports/playlist.m3u8",
+          "logo": "https://upload.wikimedia.org/wikipedia/en/e/e4/PTV_Sports.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "gazi-tv-g-tv",
+          "name": "Gazi TV / G tv",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/gazibdz.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "sports-tennis",
+          "name": "Sports Tennis",
+          "url": "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/sportstak/SPORTSTAK_SCTE.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "trace-sports",
+          "name": "Trace Sports",
+          "url": "https://lightning-tracesport-samsungau.amagi.tv/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "cy-dubai",
+          "name": "CY Dubai",
+          "url": "https://dmitwlvvll.cdn.mangomolo.com/dubaisportshd/smil:dubaisportshd.smil/chunklist_b1300000.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "moto-racing",
+          "name": "Moto Racing",
+          "url": "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/motorracing/master.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "court-sports-network",
+          "name": "Court Sports Network",
+          "url": "https://d35j504z0x2vu2.cloudfront.net/v1/manifest/0bc8e8376bd8417a1b6761138aa41c26c7309312/court-sports-network/7c96e8a8-9be8-487f-9509-cb2fa31f35d4/1.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "kik-sports",
+          "name": "KIK Sports",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI2/kiksp.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        }
+      ]
+    },
+    "sky-sports": {
+      "name": "Sky Sports",
+      "channels": []
+    },
+    "sky-sport-nz": {
+      "name": "Sky Sport NZ",
+      "channels": []
+    },
+    "tnt-sports": {
+      "name": "TNT Sports",
+      "channels": []
+    },
+    "premier-sports": {
+      "name": "Premier Sports",
+      "channels": []
+    },
+    "willow": {
+      "name": "Willow Sports",
+      "channels": [
+        {
+          "id": "willow",
+          "name": "Willow",
+          "url": "https://tvsen5.aynaott.com/willowhd/index.m3u8",
+          "logo": "https://raw.githubusercontent.com/abusaeeidx/Tv-Channel-Logo/heads/main/CricHD/runded/38-by-xfireflix.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "willow-hd-2",
+          "name": "Willow HD 2",
+          "url": "https://mxonlive.xyz/universal_restream/play/808/stream.m3u8",
+          "logo": "https://raw.githubusercontent.com/abusaeeidx/Tv-Channel-Logo/heads/main/CricHD/runded/8-by-xfireflix.png",
+          "resolution": "HD",
+          "proxy": true
+        }
+      ]
+    },
+    "circleplay-a-sports": {
+      "name": "A Sports",
+      "channels": [
+        {
+          "id": "a-sports-hd",
+          "name": "A Sports HD",
+          "url": "https://tvsen6.aynaott.com/asports/tracks-v1a1/mono.ts.m3u8",
+          "logo": "https://play-lh.googleusercontent.com/Qhs1jcocO2FenxF7j5DBVn-3lQV3cPhnsJCfeo3fAvEPzdsUx1RCb8Ka956B_ZEhAA8",
+          "resolution": "HD",
+          "proxy": true
+        }
+      ]
+    },
+    "circleplay-ten-sports": {
+      "name": "Ten Sports",
+      "channels": [
+        {
+          "id": "sony-sports-ten-1-hd",
+          "name": "SONY SPORTS TEN 1 HD",
+          "url": "https://sm-monirul.top/toffee/play/sony_sports_1_hd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/603/logo/240x240/mobile_logo_237244001666780563.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-sports-ten-2-hd",
+          "name": "SONY SPORTS TEN 2 HD",
+          "url": "https://sm-monirul.top/toffee/play/sony_sports_2_hd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/604/logo/240x240/mobile_logo_093449001666780976.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-sports-ten-5-hd",
+          "name": "SONY SPORTS TEN 5 HD",
+          "url": "https://sm-monirul.top/toffee/play/sony_sports_5_hd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/606/logo/240x240/mobile_logo_689539001672145843.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-ten-cricket",
+          "name": "SONY TEN Cricket",
+          "url": "https://sm-monirul.top/toffee/play/ten_cricket.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/301891/logo/240x240/mobile_logo_578686001735197654.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-sports-ten-1-hd-1",
+          "name": "SONY SPORTS TEN 1 HD",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=TxyxtSzqVo04L96iQl&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/603/logo/240x240/mobile_logo_237244001666780563.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-sports-ten-2-hd-1",
+          "name": "SONY SPORTS TEN 2 HD",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=FNgoGmWFtMgqr3g3QL&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/604/logo/240x240/mobile_logo_093449001666780976.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-sports-ten-5-hd-1",
+          "name": "SONY SPORTS TEN 5 HD",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=LXBEesQtfLjYivA5fL&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/606/logo/240x240/mobile_logo_689539001672145843.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-ten-cricket-1",
+          "name": "SONY TEN Cricket",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=xEy212C3qN1T8GKaqM&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/301891/logo/240x240/mobile_logo_578686001735197654.png",
+          "resolution": "HD",
+          "proxy": false
+        }
+      ]
+    },
+    "movies": {
+      "name": "Movies",
+      "channels": [
+        {
+          "id": "toffee-movies-vip",
+          "name": "TOFFEE Movies VIP",
+          "url": "https://sm-monirul.top/toffee/play/toffee_movie.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/2708/logo/240x240/mobile_logo_724353001725875591.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "movie-bangla",
+          "name": "Movie Bangla",
+          "url": "https://sm-monirul.top/toffee/play/movie_bangla.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/w_480 group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-max-hd-vip",
+          "name": "SONY MAX HD VIP",
+          "url": "https://sm-monirul.top/toffee/play/sony_max_hd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/641/logo/240x240/mobile_logo_440775001666782769.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zee-bangla-cinema",
+          "name": "Zee Bangla Cinema",
+          "url": "https://sm-monirul.top/toffee/play/zee_bangla_cinema.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/w_256 group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zee-bollywood",
+          "name": "Zee Bollywood",
+          "url": "https://sm-monirul.top/toffee/play/zee_bollywood.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/f_png group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zee-action",
+          "name": "Zee Action",
+          "url": "https://sm-monirul.top/toffee/play/zee_action.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/f_webp group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-max-vip",
+          "name": "SONY MAX VIP",
+          "url": "https://sm-monirul.top/toffee/play/sony_max.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/352/logo/240x240/mobile_logo_612341001666782969.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-pix-hd-vip",
+          "name": "SONY PIX HD VIP",
+          "url": "https://sm-monirul.top/toffee/play/sonypix_hd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/2419/logo/240x240/mobile_logo_287412001666784602.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "b4u-movies-vip",
+          "name": "B4U Movies VIP",
+          "url": "https://sm-monirul.top/toffee/play/b4u_movies.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/366/logo/240x240/mobile_logo_702115001663003759.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-max-2-vip",
+          "name": "SONY MAX 2 VIP",
+          "url": "https://sm-monirul.top/toffee/play/sonymax_2.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/353/logo/240x240/mobile_logo_044841001666779831.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zee-cinema-hd",
+          "name": "Zee Cinema HD",
+          "url": "https://sm-monirul.top/toffee/play/zee_cinema_hd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/804/logo/240x240/mobile_logo_370803001655891689.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-max-hd",
+          "name": "SONY MAX HD",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=3CF8m1Bm7hqfFKYK96&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/641/logo/240x240/mobile_logo_440775001666782769.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-max",
+          "name": "SONY MAX",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=4uyddNeJhATsBrZXew&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/352/logo/240x240/mobile_logo_612341001666782969.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-pix-hd",
+          "name": "SONY PIX HD",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=FwWsyfnZJfUd3tmiAY&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/2419/logo/240x240/mobile_logo_287412001666784602.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-max-2",
+          "name": "SONY MAX 2",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=lx3vJyamuDGsefNng3&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/353/logo/240x240/mobile_logo_044841001666779831.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "b4u-movies",
+          "name": "B4U Movies",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=qZKbQThBRfj1XkWFOt&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/366/logo/240x240/mobile_logo_702115001663003759.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zee-bangla-cinema-1",
+          "name": "Zee Bangla Cinema",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=gS0juQdsYemH1P6bTY&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/403/logo/240x240/mobile_logo_368845001655891378.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zee-cinema-hd-1",
+          "name": "Zee Cinema HD",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=LtcUfN79dIOm4ZicCM&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/804/logo/240x240/mobile_logo_370803001655891689.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zee-bollywood-1",
+          "name": "Zee Bollywood",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=JhqC0ncpcwkRhWKbg5&e=.m3u8",
+          "logo": "https://www.bizasialive.com/wp-content/uploads/2018/08/zeebollywoodlogoNEW.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zee-action-1",
+          "name": "Zee Action",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=r34EfeJ1LwCwUkKcF1&e=.m3u8",
+          "logo": "https://upload.wikimedia.org/wikipedia/en/a/a4/Zee_Action_2023_logo.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "jalsha-movies",
+          "name": "Jalsha Movies",
+          "url": "https://live.dinesh29.com.np/stream/jiotvplus/jalshamovies/master.m3u8",
+          "logo": "https://static.wikia.nocookie.net/logopedia/images/6/61/Jalsha_Movies.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "jalsha-movies-hd",
+          "name": "Jalsha Movies HD",
+          "url": "https://live.dinesh29.com.np/stream/jiotvplus/jalshamovieshd/master.m3u8",
+          "logo": "https://live.dinesh29.com.np/logos/jiotvplus/jalshamovieshd.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "colors-bangla-cinema",
+          "name": "Colors Bangla Cinema",
+          "url": "https://live.dinesh29.com.np/stream/jiotv/colorsbanglacinema/master.m3u8",
+          "logo": "https://static.wikia.nocookie.net/etv-gspn-bangla/images/0/06/Colors_Bangla_Cinema_logo_%282023-2024%29.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "movie-bangla-1",
+          "name": "Movie Bangla",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/moviebanglalink2.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "movie-action",
+          "name": "Movie Action",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/movieaction.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "bollywood-movie",
+          "name": "Bollywood Movie",
+          "url": "https://amg00864-shemarooenterta-shemabollywood-ono-nlwbw.amagi.tv/playlist/amg00864-shemarooenterta-shemabollywood-ono/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "the-movie-club",
+          "name": "The Movie Club",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/bo2.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "movie-plus",
+          "name": "Movie Plus",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/movieplus.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        }
+      ]
+    },
+    "news": {
+      "name": "News",
+      "channels": [
+        {
+          "id": "cnn-vip",
+          "name": "CNN VIP",
+          "url": "https://sm-monirul.top/toffee/play/cnn.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/333/logo/240x240/mobile_logo_146607001735536058.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "somoy-tv",
+          "name": "Somoy TV",
+          "url": "https://sm-monirul.top/toffee/play/somoy_tv.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com//Xi_Ga5oBNnOkwJLWkhKP/posters/ef2899d5-1ae0-4fee-aee5-45f9b0b3ba80.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "jamuna-tv",
+          "name": "Jamuna TV",
+          "url": "https://sm-monirul.top/toffee/play/jamuna_tv.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/w_640 group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "atn-news",
+          "name": "ATN News",
+          "url": "https://sm-monirul.top/toffee/play/atn_news.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/w_640 group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "independent-tv",
+          "name": "Independent TV",
+          "url": "https://sm-monirul.top/toffee/play/independent_tv.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/w_480 group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "ekhon-tv",
+          "name": "Ekhon TV",
+          "url": "https://sm-monirul.top/toffee/play/ekhon_tv.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/w_640 group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "ekattor-tv",
+          "name": "Ekattor TV",
+          "url": "https://sm-monirul.top/toffee/play/ekattor_tv.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com//PS_La5oBNnOkwJLWLRN_/posters/e8c444fd-ee3b-4bf3-bb0a-f969bc295f82.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "jamuna-tv-1",
+          "name": "Jamuna TV",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1701/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "somoy-tv-1",
+          "name": "Somoy TV",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1702/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "channel-24",
+          "name": "Channel 24",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1703/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "independent-tv-1",
+          "name": "Independent TV",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1704/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "ekattor",
+          "name": "Ekattor",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1705/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "atn-news-1",
+          "name": "ATN NEWS",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1706/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "news24",
+          "name": "NEWS24",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1708/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "star-news",
+          "name": "Star News",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1710/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "dbc-news",
+          "name": "DBC NEWS",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1728/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "jago-news-24",
+          "name": "Jago News 24",
+          "url": "https://app.ncare.live/live-orgin/jagonews24.stream/live-orgin/jagonews24.stream/chunks.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "cnn-now",
+          "name": "CNN Now",
+          "url": "https://amg01448-samsungin-cnnnow-samsungin-4npqg.amagi.tv/playlist/amg01448-samsungin-cnnnow-samsungin/playlist.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "dw-english-hd",
+          "name": "DW English HD",
+          "url": "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "somoy-tv-2",
+          "name": "Somoy TV 🇧🇩",
+          "url": "http://114.130.57.233:8080/Somoy-TV-3Mb/tracks-v1a1/mono.m3u8?token=SkQuhAXZxgBan1",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "somoy-tv-b",
+          "name": "Somoy TV B 🇧🇩",
+          "url": "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "cnn",
+          "name": "CNN",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=cnwr34myd6aTncuezH&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/333/logo/240x240/mobile_logo_146607001735536058.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "nagorik-tv",
+          "name": "Nagorik TV",
+          "url": "https://tvsen6.aynaott.com/nagoriktv/index.m3u8",
+          "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/9/98/Logo_of_Nagorik_TV.svg/250px-Logo_of_Nagorik_TV.svg.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "jago-news-24-1",
+          "name": "Jago News 24",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/jagonews24.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "independent-tv-2",
+          "name": "Independent TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/independent-8-org.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "desh-tv-1",
+          "name": "Desh TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/deshtv.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "news-24",
+          "name": "News 24",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/news24local.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "makkah-live",
+          "name": "Makkah Live",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/makkah.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "btv-news",
+          "name": "BTV News",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/btvbd-office-sg.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "eakattor-tv",
+          "name": "Eakattor TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/ekattor.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "ekhon-tv-1",
+          "name": "Ekhon TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/globaltv.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "jamuna-tv-2",
+          "name": "Jamuna TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/jamuna-test-sample-ok.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "atn-news-2",
+          "name": "ATN News",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/atnws-sg.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "songsad-tv",
+          "name": "Songsad TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/songsodtv-world.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "btv-national",
+          "name": "BTV National",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/btvnational1.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "btv-chittagong",
+          "name": "BTV Chittagong",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/btvnational-ctg.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "dbc-news-1",
+          "name": "DBC News",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/dbcnews.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "channel-24-1",
+          "name": "Channel 24",
+          "url": "https://ch24play.ncare.io/live/channel24.926f3953.m3u8?t=b738cb0516564076a627a7beffadc188",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "somoy-tv-3",
+          "name": "Somoy TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/somoyt000011226615544544.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "atn-bangla-2",
+          "name": "ATN Bangla",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/atnbd-8-org.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "bangla-vision-1",
+          "name": "Bangla Vision",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/banglav000.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "my-tv",
+          "name": "MY TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/mytv-up-off.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "mohona-tv",
+          "name": "Mohona TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/mohonatv.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "channel-9-1",
+          "name": "Channel 9",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/channel9hd.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "rtv",
+          "name": "RTV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/rtv-sg.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "boishakhi-tv",
+          "name": "Boishakhi TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/boishakhitv-org.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "ananda-tv-1",
+          "name": "Ananda TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/anandatv.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "satv",
+          "name": "SATV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/satvoff5666.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "channel-s-bd",
+          "name": "Channel S BD",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/channels.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "bangla-tv-1",
+          "name": "Bangla TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/banglatvhd.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "bijoy-tv-1",
+          "name": "Bijoy TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/bijoy00.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "teen-prime",
+          "name": "Teen Prime",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/tenprime.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "asian-tv-1",
+          "name": "Asian TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/asian-test-sample-ok-d.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "channel-i-2",
+          "name": "Channel I",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/channeli-8-org.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "global-tv-bangladesh",
+          "name": "Global TV Bangladesh",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/Global-tv.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "ekusheys-tv",
+          "name": "Ekusheys TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/ekusheytv-8-org.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "cumilla-24",
+          "name": "Cumilla 24",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/cumilla24bd.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "pbn-tv",
+          "name": "PBN TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/pbntv.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "news-21-bd",
+          "name": "News 21 BD",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/news21bd.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "parboto-tv",
+          "name": "Parboto TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/parbototv.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "express-news",
+          "name": "Express News",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/expressnews.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "somoy-kolkata",
+          "name": "Somoy Kolkata",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/samaykolkata.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "high-news",
+          "name": "HIGH News",
+          "url": "https://highmedia.livebox.co.in/HIGHNEWShls/LIVE.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "cgtn-news",
+          "name": "CGTN News",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/cgtn.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "news-nation",
+          "name": "News Nation",
+          "url": "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/news-nation/nnnational.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "france-24",
+          "name": "France 24",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/fr24.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "voa-tv",
+          "name": "VOA TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/voa.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "al-jazeera",
+          "name": "AL Jazeera",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/aljazeera.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "dw-news",
+          "name": "DW News",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/dwnews.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "trt-world",
+          "name": "TRT World",
+          "url": "https://tv-trtworld.medya.trt.com.tr/master_480.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "rt",
+          "name": "RT",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/rtnews.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "duniya-news",
+          "name": "Duniya News",
+          "url": "https://intl.dunyanews.tv/livehd/ngrp:dunyalivehd_2_all/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "9-news",
+          "name": "9 News",
+          "url": "https://video.tegnaone.com/kusa/live/v1/master/f9c1bf9ffd6ac86b6173a7c169ff6e3f4efbd693/KUSA-Production/live/index.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "freedom",
+          "name": "Freedom",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/uatv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "nhk-world",
+          "name": "NHK World",
+          "url": "https://nhkworld-tv.akamaized.net/hls/live/2115640/nhkworld-tv/index_1M.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "euro-news",
+          "name": "Euro News",
+          "url": "https://a-cdn.klowdtv.com/live3/euronews_720p/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "press-tv",
+          "name": "Press TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/presstv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "africa-news",
+          "name": "Africa News",
+          "url": "https://rakuten-africanews-1-ie.samsung.wurl.tv/manifest/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "csb-news-usa",
+          "name": "CSB News USA",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/csbnewsbd.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        }
+      ]
+    },
+    "entertainment": {
+      "name": "Entertainment",
+      "channels": [
+        {
+          "id": "dailyflimonline",
+          "name": "DailyFlim.online",
+          "url": "http://dailyflim.online/ads/ads.mp4",
+          "logo": "https://dailyflim.online/genfavicon-512.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "toffee-dramas-vip",
+          "name": "TOFFEE Dramas VIP",
+          "url": "https://sm-monirul.top/toffee/play/toffee_drama.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/44878/logo/240x240/mobile_logo_764950001725875605.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "atn-bangla",
+          "name": "ATN Bangla",
+          "url": "https://sm-monirul.top/toffee/play/atn_bangla.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/w_640 group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "ananda-tv",
+          "name": "Ananda TV",
+          "url": "https://sm-monirul.top/toffee/play/anandatv.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com//wCM3l5sBEef-9-uVXFvD/posters/d80f7aee-5bd7-4edc-97eb-ead0e3ebbe09.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "bijoy-tv",
+          "name": "Bijoy TV",
+          "url": "https://sm-monirul.top/toffee/play/bijoytv.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com//bns4l5sBcqxnFHJBVZ32/posters/feaf9f3d-cc3b-4a3d-81a3-2cb703e561eb.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "ntv",
+          "name": "NTV",
+          "url": "https://sm-monirul.top/toffee/play/n_tv.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/w_480 group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "global-tv",
+          "name": "Global TV",
+          "url": "https://sm-monirul.top/toffee/play/global_tv.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/w_640 group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "channel-s",
+          "name": "Channel S",
+          "url": "https://sm-monirul.top/toffee/play/channel_s.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com//WyPuDJsBEef-9-uVUA_z/posters/ea20055c-a824-443c-8083-ce8e2da8b922.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "rajdhani-tv",
+          "name": "Rajdhani TV",
+          "url": "https://sm-monirul.top/toffee/play/rajdhani_tv.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/w_480 group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "bangla-tv",
+          "name": "Bangla TV",
+          "url": "https://sm-monirul.top/toffee/play/bangla_tv.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com//JiK-_poBEef-9-uVZv6L/posters/757a328e-70d6-45de-b093-0a843c69ade7.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "asian-tv",
+          "name": "Asian TV",
+          "url": "https://sm-monirul.top/toffee/play/asian_tv.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com//MyK__poBEef-9-uVmf5l/posters/1eadef5b-28e7-4dc2-b42f-c67a3357c9a0.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "channel-i",
+          "name": "Channel i",
+          "url": "https://sm-monirul.top/toffee/play/channel_i.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/w_640 group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "nexus-tv",
+          "name": "Nexus TV",
+          "url": "https://sm-monirul.top/toffee/play/nexus_tv.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/w_480 group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "desh-tv",
+          "name": "Desh TV",
+          "url": "https://sm-monirul.top/toffee/play/desh_tv.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/w_480 group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zee-anmol",
+          "name": "Zee Anmol",
+          "url": "https://sm-monirul.top/toffee/play/zee_anmol.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/f_webp group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zing",
+          "name": "Zing",
+          "url": "https://sm-monirul.top/toffee/play/zing_sd.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/f_webp group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "hum-tv",
+          "name": "Hum TV",
+          "url": "https://sm-monirul.top/toffee/play/hum_tv.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/303937/logo/240x240/mobile_logo_880134001738072763.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "hum-masala",
+          "name": "Hum Masala",
+          "url": "https://sm-monirul.top/toffee/play/hum_masala.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/303947/logo/240x240/mobile_logo_203789001738235600.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "hum-sitarey",
+          "name": "Hum Sitarey",
+          "url": "https://sm-monirul.top/toffee/play/hum_sitaray.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/303948/logo/240x240/mobile_logo_350939001738236112.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-aat-vip",
+          "name": "Sony Aat VIP",
+          "url": "https://sm-monirul.top/toffee/play/sonyaath.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/343/logo/240x240/mobile_logo_496322001666780228.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-entertainment-television-hd-vip",
+          "name": "SONY ENTERTAINMENT TELEVISION HD VIP",
+          "url": "https://sm-monirul.top/toffee/play/sonyentertainmnt_hd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/602/logo/240x240/mobile_logo_495351001666780441.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-entertainment-television",
+          "name": "SONY ENTERTAINMENT TELEVISION",
+          "url": "https://sm-monirul.top/toffee/play/sony_entertainment.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/57/logo/240x240/mobile_logo_149299001666780350.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-sab-hd-vip",
+          "name": "SONY SAB HD VIP",
+          "url": "https://sm-monirul.top/toffee/play/sonysab_hd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/2420/logo/240x240/mobile_logo_688156001666785674.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zee-tv-hd",
+          "name": "Zee TV HD",
+          "url": "https://sm-monirul.top/toffee/play/zee_tv_hd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/644/logo/240x240/mobile_logo_649814001655891557.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zee-cafe",
+          "name": "Zee Cafe",
+          "url": "https://sm-monirul.top/toffee/play/zee_cafe_hd.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/f_webp group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "tlc-hd",
+          "name": "TLC HD",
+          "url": "https://sm-monirul.top/toffee/play/tlc_hd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/608/logo/240x240/mobile_logo_648826001673178929.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "tlc",
+          "name": "TLC",
+          "url": "https://sm-monirul.top/toffee/play/tlc_sd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/358/logo/240x240/mobile_logo_048875001673178985.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "animal-planet",
+          "name": "Animal Planet",
+          "url": "https://sm-monirul.top/toffee/play/animal_planet_sd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/359/logo/240x240/mobile_logo_835681001673175607.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "animal-planet-hd",
+          "name": "Animal Planet HD",
+          "url": "https://sm-monirul.top/toffee/play/animal_planet_hd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/18096/logo/240x240/mobile_logo_032001001673194753.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-bbc-earth-hd-vip",
+          "name": "SONY BBC EARTH HD VIP",
+          "url": "https://sm-monirul.top/toffee/play/sonybbc_earth_hd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/670/logo/240x240/mobile_logo_892290001738663264.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "discovery-hd",
+          "name": "Discovery HD",
+          "url": "https://sm-monirul.top/toffee/play/discovery_hd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/18093/logo/240x240/mobile_logo_868363001673181438.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "discovery",
+          "name": "Discovery",
+          "url": "https://sm-monirul.top/toffee/play/discovery_sd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/18097/logo/240x240/mobile_logo_297723001673195119.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "discovery-science",
+          "name": "Discovery Science",
+          "url": "https://sm-monirul.top/toffee/play/discovery_science.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/378/logo/240x240/mobile_logo_604754001673177502.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "discovery-turbo",
+          "name": "Discovery Turbo",
+          "url": "https://sm-monirul.top/toffee/play/discovery_turbo.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/379/logo/240x240/mobile_logo_775127001673177876.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "investigation-discovery-hd",
+          "name": "Investigation Discovery HD",
+          "url": "https://sm-monirul.top/toffee/play/discovary_investigation_hd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/18094/logo/240x240/mobile_logo_154805001673178308.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "tv-hd",
+          "name": "&TV HD",
+          "url": "https://sm-monirul.top/toffee/play/and_tv_hd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/801/logo/240x240/mobile_logo_974516001655891652.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "pictures-hd",
+          "name": "& Pictures HD",
+          "url": "https://sm-monirul.top/toffee/play/andpicture_hd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/4570/logo/240x240/mobile_logo_000080001675856893.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "enter10-bangla",
+          "name": "Enter10 Bangla",
+          "url": "https://amg01448-samsungin-enterr10bangla-samsungin-ad-gg.amagi.tv/playlist/amg01448-samsungin-enterr10bangla-samsungin/playlist.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "btv",
+          "name": "BTV",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1707/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "btv-1",
+          "name": "BTV",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1709/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "deepto",
+          "name": "Deepto",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1711/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "bpk-tv",
+          "name": "BPK TV",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1713/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "bangla-vision",
+          "name": "Bangla Vision",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1715/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "n-tv",
+          "name": "N TV",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1716/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "sa-tv",
+          "name": "SA TV",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1720/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "atn-bangla-1",
+          "name": "ATN BANGLA",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1721/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "machranga",
+          "name": "Machranga",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1722/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "channel-i-1",
+          "name": "Channel I",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1723/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "channel-9",
+          "name": "Channel 9",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1729/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "deepto-tv",
+          "name": "Deepto TV",
+          "url": "https://byphdgllyk.gpcdn.net/hls/deeptotv/0_1/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "channel-s-tv",
+          "name": "Channel S TV",
+          "url": "https://app.ncare.live/live-orgin/channels.stream/live-orgin/channels.stream/chunks.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "global-tv-1",
+          "name": "Global TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/Global-tv.stream/tracks-v1a1/mono.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "ayna-tv",
+          "name": "Ayna TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/ayna.stream/tracks-v1a1/mono.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "btv-live",
+          "name": "BTV Live 🇧🇩",
+          "url": "http://103.14.151.101:11/manik-kuttar-baccha-telegram-batpar.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "btv-b",
+          "name": "BTV B 🇧🇩",
+          "url": "https://tv.beyondtaxconsultants.com/api/btv/btv.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "toffee-live",
+          "name": "Toffee Live",
+          "url": "https://prod-cdn01-live.toffeelive.com/live/FIFA-2026-4/0/master_2000.m3u8?hdntl=Expires=1781889962~_GO=Generated~URLPrefix=aHR0cHM6Ly9wcm9kLWNkbjAxLWxpdmUudG9mZmVlbGl2ZS5jb20~Signature=AduQTZ__yhQoYQ9quTfH5m5S8aVHfNHn65noStJ3WkyY-eBA7y2smXsQ1P_0pKKB1Jc2CsEoHWlzkjB9zSNYr6xh7NsG",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "tv-azteca",
+          "name": "Tv Azteca",
+          "url": "https://1nyaler.streamhostingcdn.top/stream/117/index.m3u8",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "fussball-tv-b",
+          "name": "Fussball Tv B",
+          "url": "http://starhub.pro/live/farhat-3379/67897-913379/745269.ts",
+          "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+          "resolution": "4K",
+          "proxy": true
+        },
+        {
+          "id": "max-hd",
+          "name": "MAX HD",
+          "url": "https://webott.viatv.com.np/v0t1/CineplexHD.stream/chunks.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-aath",
+          "name": "Sony Aath",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=Zffvji8FFa41ui0OG9&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/343/logo/240x240/mobile_logo_496322001666780228.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "discovery-1",
+          "name": "Discovery",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=UxwQw614OTg00S84mm&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/18097/logo/240x240/mobile_logo_297723001673195119.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "hum-tv-1",
+          "name": "Hum TV",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=KlbABGchXfQBZbNbMe&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/303937/logo/240x240/mobile_logo_880134001738072763.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "hum-masala-1",
+          "name": "Hum Masala",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=auhovOR2Odoc5I3Xhh&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/303947/logo/240x240/mobile_logo_203789001738235600.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "hum-sitarey-1",
+          "name": "Hum Sitarey",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=UixEp70j7DLyGwpAGn&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/303948/logo/240x240/mobile_logo_350939001738236112.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-entertainment-television-hd",
+          "name": "SONY ENTERTAINMENT TELEVISION HD",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=tnfkGXzmfcjEkZGJF9&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/602/logo/240x240/mobile_logo_495351001666780441.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-entertainment-television-1",
+          "name": "SONY ENTERTAINMENT TELEVISION",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=xkgzHA5enqqtqCoFEP&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/57/logo/240x240/mobile_logo_149299001666780350.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-sab-hd",
+          "name": "SONY SAB HD",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=geEoVFf9IzU92kuPQZ&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/2420/logo/240x240/mobile_logo_688156001666785674.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zee-tv-hd-1",
+          "name": "Zee TV HD",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=XedvVdnOBxBHw2rxV5&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/644/logo/240x240/mobile_logo_649814001655891557.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zee-anmol-1",
+          "name": "Zee Anmol",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=kX1tWpqPntgpHRS2VC&e=.m3u8",
+          "logo": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Zee_Anmol_logo.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zee-cafe-1",
+          "name": "Zee Cafe",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=exBHTW3krfRxVyUS87&e=.m3u8",
+          "logo": "https://i.postimg.cc/fTdwQnM3/3442d493-0c71-44b9-b12f-8e600d5eab91.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "tlc-1",
+          "name": "TLC",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=PTSHxIQ6FfHbKXB2EM&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/358/logo/240x240/mobile_logo_048875001673178985.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "tlc-hd-1",
+          "name": "TLC HD",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=xdvEIf8gId7bCDaJgw&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/608/logo/240x240/mobile_logo_648826001673178929.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "animal-planet-1",
+          "name": "Animal Planet",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=QAxiq7ovZTvtfKmCkm&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/359/logo/240x240/mobile_logo_835681001673175607.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "animal-planet-hd-1",
+          "name": "Animal Planet HD",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=EueA9Tw45u9bbZaWiT&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/18096/logo/240x240/mobile_logo_032001001673194753.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-bbc-earth-hd",
+          "name": "SONY BBC EARTH HD",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=yQ1Mp0ktb0tFanN2rb&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/670/logo/240x240/mobile_logo_892290001738663264.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "discovery-science-1",
+          "name": "Discovery Science",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=csTbFKmnQhLd2KQcd8&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/378/logo/240x240/mobile_logo_604754001673177502.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "discovery-turbo-1",
+          "name": "Discovery Turbo",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=2Z4u9liEjMfcXIMSRq&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/379/logo/240x240/mobile_logo_775127001673177876.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "investigation-discovery-hd-1",
+          "name": "Investigation Discovery HD",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=CutWPmSYKnudyZCvM5&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/18094/logo/240x240/mobile_logo_154805001673178308.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "tv-hd-1",
+          "name": "&TV HD",
+          "url": "https://mflixott.com/tv/plusbox/live/&TVHD/index.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/801/logo/240x240/mobile_logo_974516001655891652.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "pictures-hd-1",
+          "name": "& Pictures HD",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=GbY4Y5MktRkUIU2YkT&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/4570/logo/240x240/mobile_logo_000080001675856893.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zing-1",
+          "name": "Zing",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=MsDgPfAGTAsOAiVnSD&e=.m3u8",
+          "logo": "https://logowik.com/content/uploads/images/4104-zing-tv-new.webp",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "discovery-hd-1",
+          "name": "Discovery HD",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=PQVDEP2tGgm9iEtfz8&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/18093/logo/240x240/mobile_logo_868363001673181438.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "national-geographic",
+          "name": "National Geographic",
+          "url": "https://tvsen6.aynaott.com/natgeo/index.m3u8",
+          "logo": "https://account.nationalgeographic.com/media/national-geographic/media/National-Geographic-Logo.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "enterr10-bangla",
+          "name": "Enterr10 Bangla",
+          "url": "https://live-bangla.akamaized.net/liveabr/pub-iobanglakp3sff/live_360p/chunks.m3u8",
+          "logo": "https://static.wikia.nocookie.net/logopedia/images/0/01/Enterr10_Bangla.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "colors",
+          "name": "Colors",
+          "url": "https://live.dinesh29.com.np/stream/jiotv/colorssd/master.m3u8",
+          "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Colors_SD.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "colors-hd",
+          "name": "Colors HD",
+          "url": "https://live.dinesh29.com.np/stream/jiotv/colorshd/master.m3u8",
+          "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Colors_SD.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "nat-geo-wild",
+          "name": "Nat Geo Wild",
+          "url": "https://live.dinesh29.com.np/stream/jiotvplus/natgeowild/master.m3u8",
+          "logo": "https://images.seeklogo.com/logo-png/33/2/nat-geo-wild-logo-png_seeklogo-333045.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "flix-srk-tv",
+          "name": "Flix SRk TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/flixsrktv.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "times-24-tv",
+          "name": "Times 24 TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/times24tv.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "rajdhani-tv-1",
+          "name": "Rajdhani TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/rajdhanitv.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "varendra-tv",
+          "name": "Varendra TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/varendratv.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "jagoroni-tv",
+          "name": "Jagoroni TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/jagoronitv.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "nan-tv",
+          "name": "NAN TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/nantv.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "shadin-bd",
+          "name": "Shadin BD",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/shadinbd1.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "geo-tv",
+          "name": "Geo TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/geotv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "nobbano-tv",
+          "name": "Nobbano TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/cmtv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "express-tv",
+          "name": "Express TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/expresspk.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "hum-tv-2",
+          "name": "HUM TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/hum.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "global-fashion-channel",
+          "name": "Global Fashion Channel",
+          "url": "https://pubgfc.teleosmedia.com/linear/globalfashionchannel/globalfashionchannel/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "bangla-21-tv",
+          "name": "Bangla 21 TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/bangla21tv000889956-sg.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "hollywood-desi",
+          "name": "Hollywood Desi",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/bo1.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "lotus-macau",
+          "name": "Lotus Macau",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/lotusmacautv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "b24c",
+          "name": "B24C",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/b24c.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "masala-entertainment-plus",
+          "name": "Masala Entertainment Plus",
+          "url": "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/masala-entertainment-plus/master.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "channel-a1",
+          "name": "Channel A1",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/cha1.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "aur-life-hd",
+          "name": "Aur Life HD",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/aurtvpk.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "sananda-tv",
+          "name": "Sananda TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/sanandatv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "dim-tv",
+          "name": "Dim TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/dimtv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "tara-tv",
+          "name": "Tara TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/tara.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "matribhumi-tv",
+          "name": "Matribhumi TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/matribhumitv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "alpona-tv",
+          "name": "Alpona TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/alponatv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "ba-tv",
+          "name": "BA TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/batvuk.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "tv-one",
+          "name": "TV One",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/tvonepk.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "apna-ch",
+          "name": "Apna Ch",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/apnach.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "see-tv",
+          "name": "See TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/seetv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "urdu-1",
+          "name": "Urdu 1",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/urdu1.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "eye-tv-bangla",
+          "name": "Eye TV Bangla",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI2/eyetv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "tropoja-tv",
+          "name": "Tropoja TV",
+          "url": "https://live.prostream.al/al/smil:tropojatv.smil/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "cgtn-documentary",
+          "name": "CGTN Documentary",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/cgtndoc.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "discover-pakistan",
+          "name": "Discover Pakistan",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/discoverpakistan.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "nexus-tv-1",
+          "name": "Nexus TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/nexustv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "rt-tv",
+          "name": "RT TV",
+          "url": "https://rt-rtd.rttv.com/dvr/rtdoc/playlist_4500Kb.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "everyday-heros",
+          "name": "Everyday Heros",
+          "url": "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/everyday-heroes/master.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "wid-earth",
+          "name": "Wid Earth",
+          "url": "https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg01290-wildearth-oando/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "wid-earth-source-2",
+          "name": "Wid Earth [ Source 2 ]",
+          "url": "https://d2f9g9rfw2kx84.cloudfront.net/playlist/amg01290-wildearth-oando/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "open-tv",
+          "name": "Open TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/boulive.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "real-wlid",
+          "name": "Real Wlid",
+          "url": "https://cdn-apse1-prod.tsv2.amagi.tv/linear/amg00426-littledotstudio-realwildnz-samsungnz/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "real-wlid-source-2",
+          "name": "Real Wlid [ Source 2 ]",
+          "url": "https://amg00426-littledotstudio-realwildnz-samsungnz-wz0bm.amagi.tv/playlist/amg00426-littledotstudio-realwildnz-samsungnz/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "military-times",
+          "name": "Military Times",
+          "url": "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/sightline/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "voa-52-documentary",
+          "name": "VOA 52 Documentary",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/voadoc.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "esa-tv",
+          "name": "ESA TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/esatv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "untv",
+          "name": "UNTV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/untv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "wedding-tv-love-stories",
+          "name": "Wedding Tv ( Love Stories )",
+          "url": "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/wedding-tv-by-love-stories-tv/master.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "cook-bake",
+          "name": "Cook & Bake",
+          "url": "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/cook-and-bake/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "axs-tv-now-comedy",
+          "name": "AXS TV Now ( Comedy )",
+          "url": "https://dikcfc9915kp8.cloudfront.net/hls/main.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "gusto-tv",
+          "name": "Gusto TV",
+          "url": "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/gusto-tv/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "craftsy-tv",
+          "name": "Craftsy TV",
+          "url": "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/craftsytv/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "travel-xp",
+          "name": "Travel XP",
+          "url": "https://travelxp-travelxp-3-nl.samsung.wurl.tv/1200.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "lifeminute-tv",
+          "name": "Lifeminute Tv",
+          "url": "https://amg01468-lifeminutetv-lifeminute-klowdtv-r4hhz.amagi.tv/playlist/amg01468-lifeminutetv-lifeminute-klowdtv/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "always-funny-tv",
+          "name": "Always Funny TV",
+          "url": "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/always-funny/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "go-2-travel",
+          "name": "Go 2 Travel",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/go2travel.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "iqra-tv-bangla",
+          "name": "Iqra TV Bangla",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/iqrabanglatvoffice.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "atn-bangla-uk",
+          "name": "ATN Bangla UK",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/atnbanglauk-off.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "tv-one-1",
+          "name": "TV One",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/tvoneuksni.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "ch-s-tv",
+          "name": "CH S TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/chsukoff.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "ntv-uk",
+          "name": "NTV UK",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/ntvuk00332211.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "ion-tv",
+          "name": "ION TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/iontvuk.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "bangla-tv-uk",
+          "name": "Bangla TV UK",
+          "url": "https://cdn.ghuddi.live/tvpage/Bangla_TV_EU/Transcoded/Bangla_TV_EU_1080p/chunks.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "biswa-bangla-tv",
+          "name": "Biswa Bangla TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/biswabanglatv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "the-channel-tv",
+          "name": "The Channel TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/thechanneltv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "time-tv-usa",
+          "name": "Time TV USA",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/timetvusa.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "ib-tv-usa",
+          "name": "IB TV USA",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/ibtvus.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "jonmobhumi-tv",
+          "name": "Jonmobhumi Tv",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/jonmobhumitv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "ab-tv",
+          "name": "AB TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/abtvusa.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "deshi-tv",
+          "name": "Deshi TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/deshitv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "millennium-24-usa",
+          "name": "Millennium 24 USA",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/mnews24.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "millennium-tv-usa",
+          "name": "Millennium TV USA",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/millenniumtv-odr-up2.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "nrb-tv-canada",
+          "name": "NRB TV Canada",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/nrb-eu.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "cb-24-tv",
+          "name": "CB 24 TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/cb24.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "channel-52-usa",
+          "name": "Channel 52 USA",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/channel25usa.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        }
+      ]
+    },
+    "kids": {
+      "name": "Kids",
+      "channels": [
+        {
+          "id": "cartoon-network-hd",
+          "name": "Cartoon Network HD",
+          "url": "https://sm-monirul.top/toffee/play/cartoon_network_hd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/26942/logo/240x240/mobile_logo_443429001678950505.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "cartoon-network",
+          "name": "Cartoon Network",
+          "url": "https://sm-monirul.top/toffee/play/cartoon_network_sd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/27232/logo/240x240/mobile_logo_320294001679201065.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "pogo",
+          "name": "Pogo",
+          "url": "https://sm-monirul.top/toffee/play/pogo_sd.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/27159/logo/240x240/mobile_logo_740957001679201029.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "discovery-kids",
+          "name": "Discovery Kids",
+          "url": "https://sm-monirul.top/toffee/play/discovery_kids.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/611/logo/240x240/mobile_logo_430542001673177743.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-yay-vip",
+          "name": "SONY YAY VIP",
+          "url": "https://sm-monirul.top/toffee/play/sonyyay.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/612/logo/240x240/mobile_logo_091186001666784752.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "gopal-bhar-tv",
+          "name": "Gopal Bhar TV",
+          "url": "https://live20.bozztv.com/giatvplayout7/giatv-209611/tracks-v1a1/mono.ts.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "tom-jerry-tv",
+          "name": "Tom & Jerry TV",
+          "url": "https://live20.bozztv.com/giatvplayout7/giatv-208314/tracks-v1a1/mono.ts.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "doraemon-tv",
+          "name": "Doraemon TV",
+          "url": "https://live20.bozztv.com/giatvplayout7/giatv-209902/tracks-v1a1/mono.ts.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "mr-bean-animated",
+          "name": "Mr Bean Animated",
+          "url": "https://amg00627-amg00627c29-rakuten-it-3989.playouts.now.amagi.tv/playlist/amg00627-banijayfast-mrbeanitcc-rakutenit/playlist.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "cartoon-network-hd-1",
+          "name": "Cartoon Network HD",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=oBaEA0jRNouSrzVEqi&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/26942/logo/240x240/mobile_logo_443429001678950505.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "cartoon-network-1",
+          "name": "Cartoon Network",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=paTwyZsjWoaKvmDha1&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/27232/logo/240x240/mobile_logo_320294001679201065.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "pogo-1",
+          "name": "Pogo",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=wj07Wdqd8S6DgZwlNe&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/27159/logo/240x240/mobile_logo_740957001679201029.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "discovery-kids-1",
+          "name": "Discovery Kids",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=2Nq9nPGlXRaeXzLGKb&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/611/logo/240x240/mobile_logo_430542001673177743.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sony-yay",
+          "name": "SONY YAY",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=j080lfXdwHlaq45zm7&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/612/logo/240x240/mobile_logo_091186001666784752.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "nick",
+          "name": "Nick",
+          "url": "https://live.dinesh29.com.np/stream/jiotvplus/nickhindi/master.m3u8",
+          "logo": "https://play-lh.googleusercontent.com/hs9q_ggMJ-cUFiqqpSi-pC12G8-pdbjKo2c4Y5t1VQfB8t9_vEKOpVFGM3imFvxUbLg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "nick-hd",
+          "name": "Nick HD+",
+          "url": "https://live.dinesh29.com.np/stream/jiotvplus/nickhd/master.m3u8",
+          "logo": "https://images.seeklogo.com/logo-png/31/1/nick-hd-logo-png_seeklogo-314639.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sonic-bangla",
+          "name": "Sonic Bangla",
+          "url": "https://live.dinesh29.com.np/stream/jiotvplus/sonicbangla/master.m3u8",
+          "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSox9ZosTx_sp63YkOss8eFduCNV3jcyzbLVQ&s",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "hungama",
+          "name": "Hungama",
+          "url": "https://live.dinesh29.com.np/stream/jiotvplus/hungama/master.m3u8",
+          "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpMCoR3VuXQCF0y_pAqLnCcoVE6fOJKAiLpw&s",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "super-hungama",
+          "name": "Super Hungama",
+          "url": "https://live.dinesh29.com.np/stream/jiotvplus/superhungama/master.m3u8",
+          "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/channel/5771871bfbf60508ca13726f5a2146f6.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "duronto-tv",
+          "name": "Duronto TV",
+          "url": "https://tvsen6.aynaott.com/durontotv-live/index.m3u8",
+          "logo": "https://upload.wikimedia.org/wikipedia/en/d/d7/Duronto_TV_Logo.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "pop-up",
+          "name": "POP Up",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/popup.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "con-tv",
+          "name": "CON Tv",
+          "url": "https://kidoodletv-kdtv-1-us.samsung.wurl.tv/1200.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "kids-tv",
+          "name": "Kids TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/rongeentv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "kids-tv-india",
+          "name": "Kids TV India",
+          "url": "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/kids-tv-india-nursery-rhymes-and-baby-songs/master.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "toonz-kids",
+          "name": "Toonz Kids",
+          "url": "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/toonzkids/master.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zoo-moo",
+          "name": "Zoo Moo",
+          "url": "https://zoomoo-samsungau.amagi.tv/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "pbs-kids",
+          "name": "PBS Kids",
+          "url": "https://2-fss-2.streamhoster.com/pl_140/amlst%3a200914-1298290/chunklist_b2000000.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "kids-creation",
+          "name": "Kids Creation",
+          "url": "https://flc2.technohaat.com/kidscreation_test/index.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "tiny-pop",
+          "name": "Tiny Pop",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/tinypop/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "kids-max",
+          "name": "Kids Max",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/duronto.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "pop",
+          "name": "Pop",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/pop.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "baby-shark",
+          "name": "Baby Shark",
+          "url": "https://newidco-babysharktv-1-eu.rakuten.wurl.tv/1200.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        }
+      ]
+    },
+    "music": {
+      "name": "Music",
+      "channels": [
+        {
+          "id": "b4u-music-vip",
+          "name": "B4U Music VIP",
+          "url": "https://sm-monirul.top/toffee/play/b4u_music.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/367/logo/115x115/mobile_logo_886909001563629905.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "b4u-music",
+          "name": "B4U Music",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=0PRWzY4cMMFQKUybMd&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/367/logo/115x115/mobile_logo_886909001563629905.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sangeet-bangla",
+          "name": "Sangeet Bangla",
+          "url": "https://cdn-4.pishow.tv/live/1143/master.m3u8",
+          "logo": "https://pbs.twimg.com/media/GsKaFVeWsAAJbgi?format=jpg&name=large",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "9xm",
+          "name": "9XM",
+          "url": "https://d35j504z0x2vu2.cloudfront.net/v1/manifest/0bc8e8376bd8417a1b6761138aa41c26c7309312/9xm/a731c680-6a62-4174-bc98-186fe654724a/0.m3u8",
+          "logo": "https://static.wikia.nocookie.net/logopedia/images/8/81/9xm_red.svg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "birit-asia-tv",
+          "name": "Birit Asia TV",
+          "url": "https://d35j504z0x2vu2.cloudfront.net/v1/manifest/0bc8e8376bd8417a1b6761138aa41c26c7309312/britasiatv/ad785215-9b76-421c-b7c9-ec8c7670ceff/0.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "trace-urban",
+          "name": "Trace Urban",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/traceurban.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "v2-beat-tv",
+          "name": "V2 Beat TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/v2beattv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "joo-music",
+          "name": "Joo Music",
+          "url": "https://livecdn.live247stream.com/joomusic/tv/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "9xm-1",
+          "name": "9XM",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/9xmin.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "atn-music",
+          "name": "ATN Music",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/atnmusic.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "balle-balle",
+          "name": "Balle Balle",
+          "url": "https://mcncdndigital.com/balleballetv/tracks-v1a1/mono.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "masti",
+          "name": "Masti",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/mastiiiin.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "91nrg",
+          "name": "91NRG",
+          "url": "https://5c389faa13be3.streamlock.net/onweb/live/chunklist_w282239334.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "e24",
+          "name": "E24",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/e24in.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "9x-jalwa",
+          "name": "9x Jalwa",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/9xjalwain.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "zoom",
+          "name": "Zoom",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/zoomin.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "music-india",
+          "name": "Music India",
+          "url": "https://tvsen6.aynaott.com/MusicIndia/index.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "burno-tv",
+          "name": "Burno TV",
+          "url": "https://stream1.xdevel.com/video0s975758-1047/stream/chunks.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "colosal-tv",
+          "name": "Colosal TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/colosal.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "showbox",
+          "name": "ShowBox",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/showboxin.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "8xm",
+          "name": "8XM",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/8xmpk.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "music-bangla",
+          "name": "Music Bangla",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/musicbangla44.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "music-bangla-tv",
+          "name": "Music Bangla TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/musicbangla2025.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "channel-5",
+          "name": "Channel 5",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/musicbangla.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "sangeet-bangla-1",
+          "name": "Sangeet Bangla",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/sbin.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        }
+      ]
+    },
+    "religious": {
+      "name": "Religious",
+      "channels": [
+        {
+          "id": "islamic-tv",
+          "name": "Islamic TV",
+          "url": "https://sm-monirul.top/toffee/play/islamic_tv.m3u8",
+          "logo": "https://assets-prod.services.toffeelive.com/w_480 group-title=",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "islamic-tv-1",
+          "name": "Islamic TV",
+          "url": "https://owrcovcrpy.gpcdn.net/bpk-tv/1724/output/index.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "atn-islamic-tv",
+          "name": "ATN Islamic TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/atnislamictv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "makkah-tv",
+          "name": "Makkah TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/makkahtv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "deen-tv",
+          "name": "Deen TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/deentv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "madina-live",
+          "name": "Madina Live",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/madina.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "peace-tv-bangla",
+          "name": "Peace TV Bangla",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/peacetvban.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "salam-tv",
+          "name": "Salam TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/salamtvuk1.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "madani-ch-bangla",
+          "name": "Madani Ch Bangla",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/madanitvbangla.stream1/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "islam-channel",
+          "name": "Islam Channel",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/islamchannel.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "iqraa",
+          "name": "Iqraa",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/iqraa.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "islam-ch-bangla",
+          "name": "Islam Ch Bangla",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/islamchbangla.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "eman-channel",
+          "name": "Eman Channel",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/eman.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "islam-tv",
+          "name": "Islam Tv",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/islamtv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "iqra-tv-uk",
+          "name": "Iqra Tv UK",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/iqratvuk.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "i-tv-usa",
+          "name": "i Tv USA",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/itvusa.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "azan-tv-canada",
+          "name": "Azan Tv Canada",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/azantv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        }
+      ]
+    },
+    "kolkata": {
+      "name": "Kolkata TV",
+      "channels": [
+        {
+          "id": "zee-bangla-vip",
+          "name": "Zee Bangla VIP",
+          "url": "https://sm-monirul.top/toffee/play/zee_bangla.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/340/logo/240x240/mobile_logo_094417001655891123.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "star-jalsha-3",
+          "name": "Star Jalsha 3",
+          "url": "https://yupptvcatchupire.yuppcdn.net/preview/starjalsha/1800.m3u8",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zee-bangla-3",
+          "name": "Zee Bangla 3",
+          "url": "http://starshare.cx/PeH5kPWFfG/infamous7funny/23305",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "zee-bangla-2",
+          "name": "Zee Bangla 2",
+          "url": "http://starshare.cx/PeH5kPWFfG/infamous7funny/435",
+          "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "zee-bangla",
+          "name": "Zee Bangla",
+          "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=CowXUjfcmE0Jc30mRk&e=.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/340/logo/240x240/mobile_logo_094417001655891123.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "star-jalsha",
+          "name": "Star Jalsha",
+          "url": "https://tvsen3.aynaott.com/n64PH4YL/tracks-v1a1/mono.ts.m3u8",
+          "logo": "https://upload.wikimedia.org/wikipedia/commons/e/ef/Star_Jalsha_logo_2023.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "star-plus",
+          "name": "Star Plus",
+          "url": "https://tvsen7.aynaott.com/sphdbd/index.m3u8",
+          "logo": "https://upload.wikimedia.org/wikipedia/en/d/d7/StarPlus_Logo.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "star-bharat",
+          "name": "Star Bharat",
+          "url": "https://live.dinesh29.com.np/stream/jiotvplus/starbharat/master.m3u8",
+          "logo": "https://live.dinesh29.com.np/logos/jiotvplus/starbharat.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "star-bharat-hd",
+          "name": "Star Bharat HD",
+          "url": "https://live.dinesh29.com.np/stream/jiotvplus/starbharathd/master.m3u8",
+          "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/channel/a8c5acbf13de9aaff9a579b4380611a5.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "colors-bangla",
+          "name": "Colors Bangla",
+          "url": "https://padmaonline.duckdns.org:8088/ColorsBanglaHD/tracks-v1a1/mono.m3u8",
+          "logo": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Colors_Bangla.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zee-bangla-hd",
+          "name": "Zee Bangla HD",
+          "url": "https://mflixott.com/tv/plusbox/live/ZeeBanglaHD/index.m3u8",
+          "logo": "https://images.toffeelive.com/images/program/340/logo/240x240/mobile_logo_094417001655891123.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "sun-bangla",
+          "name": "Sun Bangla",
+          "url": "https://live.dinesh29.com.np/stream/jiotv/sunbangla/master.m3u8",
+          "logo": "https://upload.wikimedia.org/wikipedia/en/b/b3/Sun_Bangla.png",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "ruposhi-bangla",
+          "name": "Ruposhi Bangla",
+          "url": "https://cdn-4.pishow.tv/live/1039/master.m3u8",
+          "logo": "https://i.postimg.cc/pLs2ZYhz/20250529-111853.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "ruposhi-bangla-1",
+          "name": "Ruposhi bangla",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/ruposhibangla.stream/playlist.m3u8",
+          "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "amar-bangla-tv",
+          "name": "Amar Bangla TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/amarbanglatv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "mon-tv",
+          "name": "Mon TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/montv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "amar-digital",
+          "name": "Amar Digital",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/amardigital.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "network-10",
+          "name": "Network 10",
+          "url": "https://network10.livebox.co.in/network10hls/live.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "zodiak-tv",
+          "name": "Zodiak TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/zodiaktv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "bangla-hd",
+          "name": "Bangla + HD",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/banglaplushd.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "zillar-barta",
+          "name": "Zillar Barta",
+          "url": "https://live-stream.utkalbongo.com/utkalbongo/stream18/hls/zillarbartalive.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "ctv-n-akd-plus",
+          "name": "CTV N AKD Plus",
+          "url": "https://akdnetwork.co.in/live/ctvn/index.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "onkar-bangla",
+          "name": "Onkar Bangla",
+          "url": "https://5dd3981940faa.streamlock.net/onkarentertainment/onkarentertainment/chunklist_w1855751334.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": false
+        },
+        {
+          "id": "ananda-barta",
+          "name": "Ananda Barta",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/anandabarta.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "home-tv",
+          "name": "Home TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/hometv.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "tara-tv-1",
+          "name": "Tara TV",
+          "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/taratvinn.stream/playlist.m3u8",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        }
+      ]
+    }
+  }
+};
+
+    const PROXIES = {
+      hls: 'https://live-stream-proxy.sheikhshariarnehal.workers.dev/?url=',
+      fifa: 'https://live-stream-proxy.sheikhshariarnehal.workers.dev/?url=',
+      direct: ''
+    };
+
+    // DOM Elements
+    const video = document.getElementById('videoPlayer');
+    const proxySelect = document.getElementById('proxySelect');
+    const customProxyWrap = document.getElementById('customProxyWrap');
+    const customProxyInput = document.getElementById('customProxyInput');
+    const customUrl = document.getElementById('customUrl');
+    const loadCustom = document.getElementById('loadCustom');
+    const channelList = document.getElementById('channelList');
+    const playerOverlay = document.getElementById('playerOverlay');
+    const playerSpinner = document.getElementById('playerSpinner');
+    const overlayText = document.getElementById('overlayText');
+    const activeName = document.getElementById('activeName');
+    const activeProxyMode = document.getElementById('activeProxyMode');
+    const activeUrl = document.getElementById('activeUrl');
+    const consoleLogs = document.getElementById('consoleLogs');
+    const clearConsole = document.getElementById('clearConsole');
+
+    let shakaPlayerInstance = null;
+    let hlsInstance = null;
+    let mpegtsPlayerInstance = null;
+    let selectedChannel = null;
+
+    // Logging helpers
+    function log(msg, type = 'info') {
+      const entry = document.createElement('div');
+      entry.className = `log-entry log-${type}`;
+      const time = new Date().toLocaleTimeString();
+      entry.textContent = `[${time}] ${msg}`;
+      consoleLogs.appendChild(entry);
+      consoleLogs.scrollTop = consoleLogs.scrollHeight;
+      console.log(`[${type.toUpperCase()}] ${msg}`);
+    }
+
+    clearConsole.addEventListener('click', () => {
+      consoleLogs.innerHTML = '';
+      log("Logs cleared", "info");
+    });
+
+    // Handle Proxy Selector changes
+    proxySelect.addEventListener('change', () => {
+      if (proxySelect.value === 'custom') {
+        customProxyWrap.style.display = 'block';
+      } else {
+        customProxyWrap.style.display = 'none';
+      }
+      log(`Proxy mode switched to: ${proxySelect.value.toUpperCase()}`);
+      if (selectedChannel) {
+        loadStream(selectedChannel);
+      }
+    });
+
+    customProxyInput.addEventListener('input', () => {
+      if (selectedChannel) {
+        loadStream(selectedChannel);
+      }
+    });
+
+    // Search filter event listener
+    const searchBox = document.getElementById('searchBox');
+    searchBox.addEventListener('input', () => {
+      const q = searchBox.value.toLowerCase().trim();
+      const items = channelList.querySelectorAll('.channel-item');
+      
+      items.forEach(item => {
+        const name = item.querySelector('.channel-name').textContent.toLowerCase();
+        if (name.includes(q)) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+      
+      // Toggle category headers based on visibility of items under it
+      let currentHeader = null;
+      let hasVisibleItem = false;
+      const children = Array.from(channelList.children);
+      children.forEach(child => {
+        if (child.classList.contains('category-header')) {
+          if (currentHeader && !hasVisibleItem) {
+            currentHeader.style.display = 'none';
+          }
+          currentHeader = child;
+          child.style.display = 'flex';
+          hasVisibleItem = false;
+        } else if (child.classList.contains('channel-item')) {
+          if (child.style.display === 'flex') {
+            hasVisibleItem = true;
+          }
+        }
+      });
+      if (currentHeader && !hasVisibleItem) {
+        currentHeader.style.display = 'none';
+      }
+    });
+
+    // Populate Channel List
+    function init() {
+      // Try loading channels.json database first
+      fetch('channels.json')
+        .then(res => res.json())
+        .then(data => {
+          if (data.categories) {
+            log("Dynamically loaded database from channels.json", "success");
+            renderCategorizedChannels(data.categories);
+          } else {
+            log("Loaded channels.json but format is flat. Rendering flat...", "info");
+            renderChannels(data.channels || data);
+          }
+        })
+        .catch(() => {
+          log("Could not load channels.json directly. Trying scrabe_1.json...", "info");
+          fetch('scrabe_1.json')
+            .then(res => res.json())
+            .then(data => {
+              log("Dynamically loaded channels from scrabe_1.json", "success");
+              renderChannels(data.channels || data);
+            })
+            .catch(() => {
+              log("No external database accessible. Using fallback channel list.", "warn");
+              if (CHANNELS.categories) { renderCategorizedChannels(CHANNELS.categories); } else { renderChannels(CHANNELS); }
+            });
+        });
+
+      // Install Shaka polyfills
+      shaka.polyfill.installAll();
+      if (!shaka.Player.isBrowserSupported()) {
+        log("DASH/DRM Playback is NOT supported in this browser!", "error");
+      }
+    }
+
+    function renderCategorizedChannels(categories) {
+      channelList.innerHTML = '';
+      let total = 0;
+      
+      for (const catKey in categories) {
+        const cat = categories[catKey];
+        if (!cat.channels || cat.channels.length === 0) continue;
+        
+        const header = document.createElement('div');
+        header.className = 'category-header';
+        header.innerHTML = `<span>${cat.name}</span> <span class="badge-count">${cat.channels.length}</span>`;
+        channelList.appendChild(header);
+        
+        cat.channels.forEach(ch => {
+          total++;
+          const item = document.createElement('div');
+          item.className = 'channel-item';
+          item.dataset.id = ch.id;
+          
+          const isFifa = ch.name.toLowerCase().includes('fifa') || cat.name.toLowerCase().includes('fifa');
+          const iconClass = isFifa ? 'fa-solid fa-trophy' : (catKey.includes('movie') ? 'fa-solid fa-film' : 'fa-solid fa-tv');
+          const streamType = ch.url.includes('.mpd') ? 'DASH (DRM)' : 'HLS';
+          
+          item.innerHTML = `
+            <div class="channel-icon">
+              <i class="${iconClass}"></i>
+            </div>
+            <div class="channel-info">
+              <div class="channel-name">${ch.name}</div>
+              <div class="channel-type">${streamType}</div>
+            </div>
+          `;
+          
+          item.addEventListener('click', () => {
+            document.querySelectorAll('.channel-item').forEach(el => el.classList.remove('active'));
+            item.classList.add('active');
+            
+            // Auto toggle proxy based on database config for this channel
+            proxySelect.value = ch.proxy ? 'fifa' : 'direct';
+            customProxyWrap.style.display = 'none';
+            
+            selectedChannel = ch;
+            loadStream(ch);
+          });
+          
+          channelList.appendChild(item);
+        });
+      }
+      log(`Rendered ${total} categorized channels in sidebar`, "success");
+    }
+
+    function renderChannels(list) {
+      channelList.innerHTML = '';
+      list.forEach(ch => {
+        const item = document.createElement('div');
+        item.className = 'channel-item';
+        item.dataset.id = ch.id;
+
+        const isFifa = ch.name.toLowerCase().includes('fifa');
+        const iconClass = isFifa ? 'fa-solid fa-trophy' : 'fa-solid fa-tv';
+        const streamType = ch.url.includes('.mpd') ? 'DASH (DRM)' : 'HLS';
+
+        item.innerHTML = `
+          <div class="channel-icon">
+            <i class="${iconClass}"></i>
+          </div>
+          <div class="channel-info">
+            <div class="channel-name">${ch.name}</div>
+            <div class="channel-type">${streamType}</div>
+          </div>
+        `;
+
+        item.addEventListener('click', () => {
+          document.querySelectorAll('.channel-item').forEach(el => el.classList.remove('active'));
+          item.classList.add('active');
+          
+          proxySelect.value = ch.proxy ? 'fifa' : 'direct';
+          customProxyWrap.style.display = 'none';
+          
+          selectedChannel = ch;
+          loadStream(ch);
+        });
+
+        channelList.appendChild(item);
+      });
+      log(`Rendered ${list.length} channels in sidebar`, "success");
+    }
+
+    // Load Stream Helper
+    async function loadStream(ch) {
+      // Reset players
+      destroyPlayers();
+      showOverlay("Loading stream...", true);
+
+      activeName.textContent = ch.name;
+      
+      // Determine Proxy URL
+      let proxyPrefix = '';
+      const mode = proxySelect.value;
+      if (mode === 'custom') {
+        proxyPrefix = customProxyInput.value;
+      } else {
+        proxyPrefix = PROXIES[mode];
+      }
+
+      const resolvedUrl = proxyPrefix ? proxyPrefix + encodeURIComponent(ch.url) : ch.url;
+      activeUrl.textContent = resolvedUrl;
+      
+      activeProxyMode.textContent = proxyPrefix ? 'PROXIED' : 'DIRECT';
+      activeProxyMode.className = `badge ${proxyPrefix ? 'badge-proxy' : 'badge-direct'}`;
+
+      log(`Preparing to load: ${ch.name}`);
+      log(`Stream URL: ${ch.url}`);
+      if (proxyPrefix) log(`Proxied URL: ${resolvedUrl}`);
+
+      const isMpd = ch.url.includes('.mpd');
+      const isTs = ch.url.includes('.ts') || ch.url.includes('/ts/') || ch.url.includes('/ts');
+      if (isMpd) {
+        await playMpd(resolvedUrl, ch.drm);
+      } else if (isTs) {
+        playMpegTs(resolvedUrl);
+      } else {
+        playHls(resolvedUrl);
+      }
+    }
+
+    // HLS.js playback
+    function playHls(url) {
+      log("Initializing HLS.js player...", "info");
+      
+      if (Hls.isSupported()) {
+        hlsInstance = new Hls({
+          enableWorker: true,
+          lowLatencyMode: true
+        });
+
+        hlsInstance.loadSource(url);
+        hlsInstance.attachMedia(video);
+
+        hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+          log("HLS manifest parsed successfully! Starting playback...", "success");
+          hideOverlay();
+          video.play().catch(err => {
+            log(`Autoplay blocked: ${err.message}. Click play manually.`, "warn");
+          });
+        });
+
+        hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+          if (data.fatal) {
+            log(`Fatal HLS error encountered: ${data.type} - ${data.details}`, "error");
+            showOverlay(`Playback failed: ${data.details}`, false);
+            switch (data.type) {
+              case Hls.ErrorTypes.NETWORK_ERROR:
+                log("Network error. Attempting recovery...", "warn");
+                hlsInstance.startLoad();
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                log("Media error. Attempting recovery...", "warn");
+                hlsInstance.recoverMediaError();
+                break;
+              default:
+                destroyPlayers();
+                break;
+            }
+          }
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        log("Browser supports native HLS playback (Safari).", "info");
+        video.src = url;
+        video.addEventListener('loadedmetadata', () => {
+          hideOverlay();
+          video.play();
+        });
+        video.addEventListener('error', () => {
+          log("Native HLS playback failed", "error");
+          showOverlay("Native playback error", false);
+        });
+      } else {
+        log("HLS is not supported in this browser.", "error");
+        showOverlay("HLS unsupported on this browser", false);
+      }
+    }
+
+    // Shaka DASH DRM playback
+    async function playMpd(url, drm) {
+      log("Initializing Shaka Player for DASH/DRM stream...", "info");
+      
+      try {
+        shakaPlayerInstance = new shaka.Player(video);
+        
+        // Listen to error events
+        shakaPlayerInstance.addEventListener('error', (event) => {
+          log(`Shaka Player Error: ${event.detail.code} - ${event.detail.message}`, "error");
+          showOverlay(`DASH Error: code ${event.detail.code}`, false);
+        });
+
+        // Configure DRM ClearKey if present
+        if (drm && drm.kid && drm.key) {
+          log(`Configuring ClearKey DRM for DASH stream...`, "info");
+          log(`KeyID: ${drm.kid} | Key: ${drm.key}`, "info");
+          shakaPlayerInstance.configure({
+            drm: {
+              clearKeys: {
+                [drm.kid]: drm.key
+              }
+            }
+          });
+        }
+
+        // Load stream
+        await shakaPlayerInstance.load(url);
+        log("DASH manifest loaded successfully! Starting playback...", "success");
+        hideOverlay();
+        video.play().catch(err => {
+          log(`Autoplay blocked: ${err.message}`, "warn");
+        });
+      } catch (error) {
+        log(`Shaka loading failed: ${error.message}`, "error");
+        showOverlay("DASH playback failed", false);
+        destroyPlayers();
+      }
+    }
+
+    function playMpegTs(url) {
+      log("Initializing mpegts.js player for raw MPEG-TS stream...", "info");
+      
+      try {
+        if (mpegts.getFeatureList().mseLivePlayback) {
+          mpegtsPlayerInstance = mpegts.createPlayer({
+            type: 'mpegts',
+            isLive: true,
+            url: url
+          }, {
+            enableWorker: true,
+            enableStashBuffer: false
+          });
+          
+          mpegtsPlayerInstance.attachMediaElement(video);
+          mpegtsPlayerInstance.load();
+          
+          mpegtsPlayerInstance.on(mpegts.Events.ERROR, (type, detail, info) => {
+            log(`MPEG-TS Player Error: ${type} - ${detail}`, "error");
+            showOverlay(`TS Error: ${detail}`, false);
+          });
+          
+          hideOverlay();
+          mpegtsPlayerInstance.play().catch(err => {
+            log(`Autoplay blocked: ${err.message}`, "warn");
+          });
+          log("MPEG-TS player started successfully!", "success");
+        } else {
+          log("MSE live playback not supported on this browser.", "error");
+          showOverlay("MSE playback unsupported", false);
+        }
+      } catch (error) {
+        log(`MPEG-TS loading failed: ${error.message}`, "error");
+        showOverlay("TS playback failed", false);
+        destroyPlayers();
+      }
+    }
+
+    function destroyPlayers() {
+      if (hlsInstance) {
+        hlsInstance.destroy();
+        hlsInstance = null;
+        log("HLS instance destroyed", "info");
+      }
+      if (shakaPlayerInstance) {
+        shakaPlayerInstance.destroy();
+        shakaPlayerInstance = null;
+        log("Shaka player instance destroyed", "info");
+      }
+      if (mpegtsPlayerInstance) {
+        mpegtsPlayerInstance.destroy();
+        mpegtsPlayerInstance = null;
+        log("MPEG-TS instance destroyed", "info");
+      }
+      video.removeAttribute('src');
+      video.load();
+    }
+
+    function showOverlay(text, spin = true) {
+      playerOverlay.classList.remove('hidden');
+      overlayText.textContent = text;
+      playerSpinner.style.display = spin ? 'block' : 'none';
+    }
+
+    function hideOverlay() {
+      playerOverlay.classList.add('hidden');
+    }
+
+    // Load Custom URL manually
+    loadCustom.addEventListener('click', () => {
+      const url = customUrl.value.trim();
+      if (!url) {
+        log("Please enter a valid URL", "error");
+        return;
+      }
+      selectedChannel = {
+        name: "Custom Test Link",
+        url: url
+      };
+      
+      // Auto toggle proxy based on type
+      if (url.toLowerCase().includes('fifa')) {
+        proxySelect.value = 'fifa';
+      } else {
+        proxySelect.value = 'hls';
+      }
+      customProxyWrap.style.display = 'none';
+
+      document.querySelectorAll('.channel-item').forEach(el => el.classList.remove('active'));
+      loadStream(selectedChannel);
+    });
+
+    // Start
+    init();
+  </script>
+</body>
+</html>

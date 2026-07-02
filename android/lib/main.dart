@@ -10,10 +10,16 @@ import 'core/router.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'utils/web_helper.dart';
+import 'services/local_proxy.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
+
+  // Start local proxy server for proxy-enabled channels
+  if (!kIsWeb) {
+    await LocalProxy.start();
+  }
 
   // System UI styling
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(

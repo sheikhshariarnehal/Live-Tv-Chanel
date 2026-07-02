@@ -1,6 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/cards/channel_card.dart';
@@ -17,17 +18,20 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
   bool _isSearching = false;
   String _localSearchQuery = '';
   final _scrollController = ScrollController();
+  Timer? _debounceTimer;
 
   @override
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 
   void _toggleSearch() {
     setState(() {
       _isSearching = !_isSearching;
+      _debounceTimer?.cancel();
       if (!_isSearching) {
         _searchController.clear();
         _localSearchQuery = '';
@@ -38,106 +42,120 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
   @override
   Widget build(BuildContext context) {
     final selectedCategory = ref.watch(selectedCategoryProvider);
-    final categoriesAsync = ref.watch(categoriesProvider);
     final channelsAsync = ref.watch(channelsByCategoryProvider(selectedCategory));
     final favorites = ref.watch(favoriteChannelIdsProvider);
-    final allChannelsAsync = ref.watch(channelsProvider);
 
     return Scaffold(
       body: CustomScrollView(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
+        cacheExtent: 150.0,
         slivers: [
           // Dynamic App Bar supporting search and categories
           SliverAppBar(
             floating: true,
             pinned: true,
-            expandedHeight: 110,
+            toolbarHeight: _isSearching ? kToolbarHeight : 0,
+            expandedHeight: _isSearching ? 104 : 100,
             leading: const SizedBox.shrink(),
             leadingWidth: 0,
-            title: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: _isSearching
-                  ? TextField(
-                      controller: _searchController,
-                      autofocus: true,
-                      onChanged: (val) {
+            title: _isSearching
+                ? TextField(
+                    controller: _searchController,
+                    autofocus: true,
+                    onChanged: (val) {
+                      if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+                      _debounceTimer = Timer(const Duration(milliseconds: 180), () {
                         setState(() => _localSearchQuery = val);
-                      },
-                      style: const TextStyle(
-                        color: GoPlayTheme.onSurface,
-                        fontSize: 16,
+                      });
+                    },
+                    style: const TextStyle(
+                      color: GoPlayTheme.onSurface,
+                      fontSize: 16,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Search channels by name, country...',
+                      hintStyle: TextStyle(
+                        color: GoPlayTheme.onSurfaceVariant.withAlpha(120),
                       ),
-                      decoration: InputDecoration(
-                        hintText: 'Search channels by name, country...',
-                        hintStyle: TextStyle(
-                          color: GoPlayTheme.onSurfaceVariant.withAlpha(120),
-                        ),
-                        border: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        prefixIcon: const Icon(
-                          Icons.search_rounded,
-                          color: GoPlayTheme.primary,
-                        ),
-                        suffixIcon: IconButton(
-                          icon: const Icon(
-                            Icons.close_rounded,
-                            color: GoPlayTheme.onSurfaceVariant,
-                          ),
-                          onPressed: () {
-                            if (_searchController.text.isEmpty) {
-                              _toggleSearch();
-                            } else {
-                              _searchController.clear();
-                              setState(() => _localSearchQuery = '');
-                            }
-                          },
-                        ),
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      prefixIcon: const Icon(
+                        Icons.search_rounded,
+                        color: GoPlayTheme.primary,
                       ),
-                    )
-                  : Row(
-                      children: [
-                        const Text('Channels'),
-                        const SizedBox(width: 8),
-                        // Channel count badge
-                        allChannelsAsync.when(
-                          data: (channels) => Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: GoPlayTheme.primary.withAlpha(20),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              '${channels.length}',
-                              style: TextStyle(
-                                color: GoPlayTheme.primary,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
+                      suffixIcon: IconButton(
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          color: GoPlayTheme.onSurfaceVariant,
+                        ),
+                        onPressed: () {
+                          if (_searchController.text.isEmpty) {
+                            _toggleSearch();
+                          } else {
+                            _searchController.clear();
+                            _debounceTimer?.cancel();
+                            setState(() => _localSearchQuery = '');
+                          }
+                        },
+                      ),
+                    ),
+                  )
+                : null,
+            flexibleSpace: _isSearching
+                ? null
+                : LayoutBuilder(
+                    builder: (context, constraints) {
+                      final top = constraints.biggest.height;
+                      final isCollapsed = top <=
+                          (48 + MediaQuery.of(context).padding.top + 10);
+                      return AnimatedOpacity(
+                        duration: const Duration(milliseconds: 150),
+                        opacity: isCollapsed ? 0.0 : 1.0,
+                        child: SafeArea(
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: SizedBox(
+                              height: 52,
+                              child: Stack(
+                                children: [
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 16.0),
+                                      child: Text(
+                                        'CHANNELS',
+                                        style: GoogleFonts.orbitron(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.w900,
+                                          color: GoPlayTheme.primary,
+                                          letterSpacing: 3,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(right: 8.0),
+                                      child: IconButton(
+                                        icon: const Icon(Icons.search_rounded),
+                                        onPressed: _toggleSearch,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                          loading: () => const SizedBox.shrink(),
-                          error: (_, __) => const SizedBox.shrink(),
                         ),
-                      ],
-                    ),
-            ),
-            actions: [
-              if (!_isSearching)
-                IconButton(
-                  icon: const Icon(Icons.search_rounded),
-                  onPressed: _toggleSearch,
-                ),
-            ],
+                      );
+                    },
+                  ),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(48),
               child: _CategoryFilterBar(
-                categoriesAsync: categoriesAsync,
-                allChannelsAsync: allChannelsAsync,
-                selectedCategory: selectedCategory,
-                ref: ref,
                 onCategorySelected: () {
                   // Scroll to top when changing category
                   if (_scrollController.hasClients) {
@@ -156,19 +174,20 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
           channelsAsync.when(
             data: (channels) {
               // Apply search filter locally for instant performance
-              final filtered = _localSearchQuery.isEmpty
+              final query = _localSearchQuery.trim().toLowerCase();
+              final filtered = query.isEmpty
                   ? channels
                   : channels.where((ch) {
                       final nameMatch = ch.name
                           .toLowerCase()
-                          .contains(_localSearchQuery.toLowerCase());
+                          .contains(query);
                       final countryMatch = ch.country
                               ?.toLowerCase()
-                              .contains(_localSearchQuery.toLowerCase()) ??
+                              .contains(query) ??
                           false;
                       final languageMatch = ch.language
                               ?.toLowerCase()
-                              .contains(_localSearchQuery.toLowerCase()) ??
+                              .contains(query) ??
                           false;
                       return nameMatch || countryMatch || languageMatch;
                     }).toList();
@@ -314,75 +333,76 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
 }
 
 // ─── Category Filter Bar ──────────────────────────────────────
-class _CategoryFilterBar extends StatelessWidget {
-  final AsyncValue categoriesAsync;
-  final AsyncValue allChannelsAsync;
-  final String selectedCategory;
-  final WidgetRef ref;
+class _CategoryFilterBar extends ConsumerWidget {
   final VoidCallback onCategorySelected;
 
   const _CategoryFilterBar({
-    required this.categoriesAsync,
-    required this.allChannelsAsync,
-    required this.selectedCategory,
-    required this.ref,
     required this.onCategorySelected,
   });
 
   @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 42,
-      child: categoriesAsync.when(
-        data: (categories) {
-          final allChannels = allChannelsAsync.when(
-            data: (data) => data as List,
-            loading: () => [],
-            error: (_, __) => [],
-          );
-          final catCounts = <String, int>{};
-          for (final ch in allChannels) {
-            final cat = ch.category ?? 'uncategorized';
-            catCounts[cat] = (catCounts[cat] ?? 0) + 1;
-          }
+  Widget build(BuildContext context, WidgetRef ref) {
+    final categoriesAsync = ref.watch(categoriesProvider);
+    final allChannelsAsync = ref.watch(channelsProvider);
+    final selectedCategory = ref.watch(selectedCategoryProvider);
 
-          // Filter out categories with 0 channels to avoid empty screens
-          final activeCategories =
-              categories.where((cat) => (catCounts[cat.id] ?? 0) > 0).toList();
+    return Container(
+      height: 48,
+      color: GoPlayTheme.surface,
+      alignment: Alignment.center,
+      child: SizedBox(
+        height: 42,
+        child: categoriesAsync.when(
+          data: (categories) {
+            final allChannels = allChannelsAsync.when(
+              data: (data) => data as List,
+              loading: () => [],
+              error: (_, __) => [],
+            );
+            final catCounts = <String, int>{};
+            for (final ch in allChannels) {
+              final cat = ch.category ?? 'uncategorized';
+              catCounts[cat] = (catCounts[cat] ?? 0) + 1;
+            }
 
-          return ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            children: [
-              _CategoryChip(
-                label: 'All',
-                icon: '📺',
-                count: allChannels.length,
-                isSelected: selectedCategory == 'all',
-                onTap: () {
-                  ref
-                      .read(selectedCategoryProvider.notifier)
-                      .select('all');
-                  onCategorySelected();
-                },
-              ),
-              ...activeCategories.map((cat) => _CategoryChip(
-                    label: cat.name,
-                    icon: cat.icon ?? '📁',
-                    count: catCounts[cat.id] ?? 0,
-                    isSelected: selectedCategory == cat.id,
-                    onTap: () {
-                      ref
-                          .read(selectedCategoryProvider.notifier)
-                          .select(cat.id);
-                      onCategorySelected();
-                    },
-                  )),
-            ],
-          );
-        },
-        loading: () => const SizedBox(height: 42),
-        error: (_, __) => const SizedBox(height: 42),
+            // Filter out categories with 0 channels to avoid empty screens
+            final activeCategories =
+                categories.where((cat) => (catCounts[cat.id] ?? 0) > 0).toList();
+
+            return ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              children: [
+                _CategoryChip(
+                  label: 'All',
+                  icon: '📺',
+                  count: allChannels.length,
+                  isSelected: selectedCategory == 'all',
+                  onTap: () {
+                    ref
+                        .read(selectedCategoryProvider.notifier)
+                        .select('all');
+                    onCategorySelected();
+                  },
+                ),
+                ...activeCategories.map((cat) => _CategoryChip(
+                      label: cat.name,
+                      icon: cat.icon ?? '📁',
+                      count: catCounts[cat.id] ?? 0,
+                      isSelected: selectedCategory == cat.id,
+                      onTap: () {
+                        ref
+                            .read(selectedCategoryProvider.notifier)
+                            .select(cat.id);
+                        onCategorySelected();
+                      },
+                    )),
+              ],
+            );
+          },
+          loading: () => const SizedBox(height: 42),
+          error: (_, __) => const SizedBox(height: 42),
+        ),
       ),
     );
   }
@@ -551,3 +571,5 @@ class _ShimmerCard extends StatelessWidget {
     );
   }
 }
+
+

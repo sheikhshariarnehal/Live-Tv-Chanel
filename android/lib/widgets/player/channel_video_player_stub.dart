@@ -6,6 +6,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import '../../models/channel.dart';
 import '../../models/drm_config.dart';
 import '../../services/drm_service.dart';
+import '../../services/local_proxy.dart';
 import 'channel_video_player.dart';
 
 Widget getChannelVideoPlayer({
@@ -49,6 +50,12 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
   void initState() {
     super.initState();
     _player = Player();
+    
+    // Subscribe to internal media_kit / mpv logs for debugging playback & decryption
+    _player.stream.log.listen((event) {
+      debugPrint('media_kit: [${event.level}] ${event.prefix}: ${event.text}');
+    });
+
     _controller = VideoController(_player);
     _initPlayer();
   }
@@ -65,9 +72,13 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
 
   /// Standard non-DRM playback
   Future<void> _initDirectPlayer() async {
+    final streamUrl = widget.channel.proxy
+        ? LocalProxy.getUrl(widget.channel.streamUrl, widget.channel.headers)
+        : widget.channel.streamUrl;
+
     await _player.open(
       Media(
-        widget.channel.streamUrl,
+        streamUrl,
         httpHeaders: widget.channel.headers.map(
           (key, value) => MapEntry(key, value.toString()),
         ),
@@ -123,9 +134,22 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
       final kidB64 = DrmService.hexToBase64Url(drm.kid!);
       final keyB64 = DrmService.hexToBase64Url(drm.key!);
 
+      final streamUrl = widget.channel.proxy
+          ? LocalProxy.getUrl(widget.channel.streamUrl, widget.channel.headers)
+          : widget.channel.streamUrl;
+
+      // Configure mpv for ClearKey DASH decryption BEFORE loading the media
+      // mpv supports ClearKey via --demuxer-lavf-o=decryption_key=<key>
+      if (_player.platform is NativePlayer) {
+        await (_player.platform as NativePlayer).setProperty(
+          'demuxer-lavf-o',
+          'decryption_key=${drm.key}',
+        );
+      }
+
       await _player.open(
         Media(
-          widget.channel.streamUrl,
+          streamUrl,
           httpHeaders: widget.channel.headers.map(
             (key, value) => MapEntry(key, value.toString()),
           ),
@@ -137,15 +161,6 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
           },
         ),
       );
-
-      // Configure mpv for ClearKey DASH decryption
-      // mpv supports ClearKey via --demuxer-lavf-o=decryption_key=<key>
-      if (_player.platform is NativePlayer) {
-        await (_player.platform as NativePlayer).setProperty(
-          'demuxer-lavf-o',
-          'decryption_key=${drm.key}',
-        );
-      }
     } catch (e) {
       setState(() {
         _drmError = true;
@@ -165,12 +180,16 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
         return;
       }
 
+      final streamUrl = widget.channel.proxy
+          ? LocalProxy.getUrl(widget.channel.streamUrl, widget.channel.headers)
+          : widget.channel.streamUrl;
+
       // For Widevine, media_kit/mpv does not natively support it.
       // We need to use the native ExoPlayer through a platform channel.
       // For now, attempt playback and report if DRM blocks it.
       await _player.open(
         Media(
-          widget.channel.streamUrl,
+          streamUrl,
           httpHeaders: {
             ...widget.channel.headers.map(
               (key, value) => MapEntry(key, value.toString()),
