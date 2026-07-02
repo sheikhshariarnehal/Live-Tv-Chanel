@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
+import '../../models/event.dart';
 
 import '../../widgets/cards/event_list_tile.dart';
 import '../../widgets/cards/match_card.dart';
@@ -12,6 +14,99 @@ import '../../widgets/live_badge.dart';
 import '../../widgets/team_flag.dart';
 import '../../widgets/channel_selector.dart';
 import '../../widgets/countdown_timer.dart';
+
+// ─── Cached Text Styles ──────────────────────────────────────
+// Avoids recreating GoogleFonts TextStyle objects on every frame.
+final TextStyle _orbitronTitle = GoogleFonts.orbitron(
+  fontSize: 22,
+  fontWeight: FontWeight.w900,
+  color: GoPlayTheme.primary,
+  letterSpacing: 3,
+);
+
+final TextStyle _interLeagueBold = GoogleFonts.inter(
+  color: Colors.white,
+  fontSize: 14,
+  fontWeight: FontWeight.bold,
+);
+
+final TextStyle _interUpcomingBadge = GoogleFonts.inter(
+  color: GoPlayTheme.primary,
+  fontSize: 9,
+  fontWeight: FontWeight.w800,
+  letterSpacing: 0.5,
+);
+
+final TextStyle _orbitronVS = GoogleFonts.orbitron(
+  color: Colors.white,
+  fontSize: 20,
+  fontWeight: FontWeight.w900,
+  letterSpacing: 1,
+  shadows: [
+    Shadow(
+      color: Colors.black.withAlpha(160),
+      blurRadius: 4,
+      offset: const Offset(0, 1),
+    ),
+  ],
+);
+
+final TextStyle _interStartsIn = GoogleFonts.inter(
+  color: Colors.white.withAlpha(160),
+  fontSize: 7.5,
+  fontWeight: FontWeight.w800,
+  letterSpacing: 0.5,
+  shadows: [
+    Shadow(
+      color: Colors.black.withAlpha(160),
+      blurRadius: 2,
+    ),
+  ],
+);
+
+final TextStyle _interLiveNow = GoogleFonts.inter(
+  color: Colors.white,
+  fontSize: 10,
+  fontWeight: FontWeight.w800,
+  shadows: [
+    Shadow(
+      color: Colors.black.withAlpha(160),
+      blurRadius: 2,
+    ),
+  ],
+);
+
+final TextStyle _interCountdown = GoogleFonts.inter(
+  color: Colors.white,
+  fontSize: 10,
+  fontWeight: FontWeight.w800,
+  shadows: [
+    Shadow(
+      color: Colors.black.withAlpha(160),
+      blurRadius: 2,
+    ),
+  ],
+);
+
+final TextStyle _interButtonLabel = GoogleFonts.inter(
+  color: const Color(0xFF003300),
+  fontSize: 11,
+  fontWeight: FontWeight.w900,
+  letterSpacing: 0.5,
+);
+
+final TextStyle _interTeamName = GoogleFonts.inter(
+  color: Colors.white,
+  fontSize: 11,
+  fontWeight: FontWeight.w700,
+  shadows: [
+    Shadow(
+      color: Colors.black.withAlpha(180),
+      blurRadius: 4,
+      offset: const Offset(0, 1),
+    ),
+  ],
+);
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -29,15 +124,7 @@ class HomeScreen extends ConsumerWidget {
               icon: const Icon(Icons.menu_rounded),
               onPressed: () {},
             ),
-            title: Text(
-              'GOPLAY',
-              style: GoogleFonts.orbitron(
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                color: GoPlayTheme.primary,
-                letterSpacing: 3,
-              ),
-            ),
+            title: Text('GOPLAY', style: _orbitronTitle),
             centerTitle: true,
             actions: [
               IconButton(
@@ -48,7 +135,7 @@ class HomeScreen extends ConsumerWidget {
           ),
 
           // Hero Banner
-          SliverToBoxAdapter(child: _HeroBanner()),
+          const SliverToBoxAdapter(child: RepaintBoundary(child: _HeroBanner())),
 
           // Live/Ongoing Matches
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
@@ -57,9 +144,9 @@ class HomeScreen extends ConsumerWidget {
               title: 'Matches',
             ),
           ),
-          SliverToBoxAdapter(child: _MatchTabs()),
+          const SliverToBoxAdapter(child: RepaintBoundary(child: _MatchTabs())),
           const SliverToBoxAdapter(child: SizedBox(height: 8)),
-          SliverToBoxAdapter(child: _MatchesSection()),
+          const SliverToBoxAdapter(child: RepaintBoundary(child: _MatchesSection())),
 
           // Today's Schedule
           const SliverToBoxAdapter(child: SizedBox(height: 20)),
@@ -70,7 +157,7 @@ class HomeScreen extends ConsumerWidget {
               onAction: () => context.go('/upcoming'),
             ),
           ),
-          SliverToBoxAdapter(child: _TodaySchedule()),
+          const SliverToBoxAdapter(child: RepaintBoundary(child: _TodaySchedule())),
 
           // Trending Channels
           const SliverToBoxAdapter(child: SizedBox(height: 20)),
@@ -81,15 +168,15 @@ class HomeScreen extends ConsumerWidget {
               onAction: () => context.go('/channels'),
             ),
           ),
-          SliverToBoxAdapter(child: _TrendingChannels()),
+          const SliverToBoxAdapter(child: RepaintBoundary(child: _TrendingChannels())),
 
           // Recently Watched
           const SliverToBoxAdapter(child: SizedBox(height: 20)),
-          SliverToBoxAdapter(child: _RecentlyWatched()),
+          const SliverToBoxAdapter(child: RepaintBoundary(child: _RecentlyWatched())),
 
           // Announcements
           const SliverToBoxAdapter(child: SizedBox(height: 20)),
-          SliverToBoxAdapter(child: _AnnouncementsSection()),
+          const SliverToBoxAdapter(child: RepaintBoundary(child: _AnnouncementsSection())),
 
           // Bottom padding
           const SliverToBoxAdapter(child: SizedBox(height: 100)),
@@ -101,17 +188,20 @@ class HomeScreen extends ConsumerWidget {
 
 // ─── Hero Banner ──────────────────────────────────────────────
 class _HeroBanner extends ConsumerStatefulWidget {
+  const _HeroBanner();
+
   @override
   ConsumerState<_HeroBanner> createState() => _HeroBannerState();
 }
 
 class _HeroBannerState extends ConsumerState<_HeroBanner> {
   final PageController _pageController = PageController();
-  int _currentPage = 0;
+  final ValueNotifier<int> _currentPage = ValueNotifier<int>(0);
 
   @override
   void dispose() {
     _pageController.dispose();
+    _currentPage.dispose();
     super.dispose();
   }
 
@@ -130,232 +220,38 @@ class _HeroBannerState extends ConsumerState<_HeroBanner> {
               child: PageView.builder(
                 controller: _pageController,
                 onPageChanged: (index) {
-                  setState(() => _currentPage = index);
+                  _currentPage.value = index;
                 },
                 itemCount: events.length,
                 itemBuilder: (context, index) {
                   final event = events[index];
-                  return GestureDetector(
-                    onTap: () {
-                      if (event.channels.isNotEmpty) {
-                        context.push('/player/${event.channels.first}');
-                      }
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                        image: event.banner != null && event.banner!.isNotEmpty
-                            ? DecorationImage(
-                                image: NetworkImage(event.banner!),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
-                        border: Border.all(
-                          color: Colors.white.withAlpha(20),
-                          width: 1.0,
-                        ),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(24),
-                        child: Stack(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                              child: Column(
-                                children: [
-                                  // Top Row: League and Status Badge
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        event.league,
-                                        style: GoogleFonts.inter(
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      if (event.isLive)
-                                        const LiveBadge(fontSize: 11)
-                                      else
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 8, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: GoPlayTheme.primary.withAlpha(30),
-                                            borderRadius: BorderRadius.circular(12),
-                                            border: Border.all(
-                                              color: GoPlayTheme.primary.withAlpha(80),
-                                              width: 0.5,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Container(
-                                                width: 5,
-                                                height: 5,
-                                                decoration: const BoxDecoration(
-                                                  color: GoPlayTheme.primary,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 5),
-                                              Text(
-                                                'UPCOMING',
-                                                style: GoogleFonts.inter(
-                                                  color: GoPlayTheme.primary,
-                                                  fontSize: 9,
-                                                  fontWeight: FontWeight.w800,
-                                                  letterSpacing: 0.5,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  const Spacer(),
-
-                                  // Middle Row: Matchup details
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      _TeamCard(teamName: event.homeTeam.name, flag: event.homeTeam.flag),
-                                      Expanded(
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              'VS',
-                                              style: GoogleFonts.orbitron(
-                                                color: Colors.white,
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.w900,
-                                                letterSpacing: 1,
-                                                shadows: [
-                                                  Shadow(
-                                                    color: Colors.black.withAlpha(160),
-                                                    blurRadius: 4,
-                                                    offset: const Offset(0, 1),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              'STARTS IN',
-                                              style: GoogleFonts.inter(
-                                                color: Colors.white.withAlpha(160),
-                                                fontSize: 7.5,
-                                                fontWeight: FontWeight.w800,
-                                                letterSpacing: 0.5,
-                                                shadows: [
-                                                  Shadow(
-                                                    color: Colors.black.withAlpha(160),
-                                                    blurRadius: 2,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            if (event.isLive)
-                                              Text(
-                                                'LIVE NOW',
-                                                style: GoogleFonts.inter(
-                                                  color: Colors.white,
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.w800,
-                                                  shadows: [
-                                                    Shadow(
-                                                      color: Colors.black.withAlpha(160),
-                                                      blurRadius: 2,
-                                                    ),
-                                                  ],
-                                                ),
-                                              )
-                                            else
-                                              CountdownTimerWidget(
-                                                startTime: event.startTime,
-                                                style: GoogleFonts.inter(
-                                                  color: Colors.white,
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.w800,
-                                                  shadows: [
-                                                    Shadow(
-                                                      color: Colors.black.withAlpha(160),
-                                                      blurRadius: 2,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                      _TeamCard(teamName: event.awayTeam.name, flag: event.awayTeam.flag),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  const Spacer(),
-
-                                  // Bottom Row: Watch/Hub Button
-                                  Center(
-                                    child: Container(
-                                      width: 150,
-                                      height: 32,
-                                      decoration: BoxDecoration(
-                                        color: GoPlayTheme.primary,
-                                        borderRadius: BorderRadius.circular(16),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: GoPlayTheme.primary.withAlpha(40),
-                                            blurRadius: 6,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
-                                      ),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        event.isLive ? 'WATCH LIVE' : 'MATCH HUB',
-                                        style: GoogleFonts.inter(
-                                          color: const Color(0xFF003300),
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w900,
-                                          letterSpacing: 0.5,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
+                  return _HeroBannerCard(event: event);
                 },
               ),
             ),
             if (events.length > 1) ...[
               const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  events.length,
-                  (index) => Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: _currentPage == index ? 16 : 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(3),
-                      color: _currentPage == index
-                          ? GoPlayTheme.primary
-                          : GoPlayTheme.primary.withAlpha(80),
+              ValueListenableBuilder<int>(
+                valueListenable: _currentPage,
+                builder: (context, currentPage, _) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      events.length,
+                      (index) => Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        width: currentPage == index ? 16 : 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(3),
+                          color: currentPage == index
+                              ? GoPlayTheme.primary
+                              : GoPlayTheme.primary.withAlpha(80),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
             ],
           ],
@@ -377,6 +273,153 @@ class _HeroBannerState extends ConsumerState<_HeroBanner> {
   }
 }
 
+/// Individual hero banner card — extracted to its own widget to avoid
+/// rebuilding all cards when the page indicator changes.
+class _HeroBannerCard extends StatelessWidget {
+  final SportEvent event;
+  const _HeroBannerCard({required this.event});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        if (event.channels.isNotEmpty) {
+          context.push('/player/${event.channels.first}');
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: Colors.white.withAlpha(20),
+            width: 1.0,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Cached banner image
+              if (event.banner != null && event.banner!.isNotEmpty)
+                CachedNetworkImage(
+                  imageUrl: event.banner!,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    color: GoPlayTheme.surfaceContainerHigh,
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: GoPlayTheme.surfaceContainerHigh,
+                  ),
+                ),
+              // Content overlay
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Column(
+                  children: [
+                    // Top Row: League and Status Badge
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(event.league, style: _interLeagueBold),
+                        if (event.isLive)
+                          const LiveBadge(fontSize: 11)
+                        else
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: GoPlayTheme.primary.withAlpha(30),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: GoPlayTheme.primary.withAlpha(80),
+                                width: 0.5,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 5,
+                                  height: 5,
+                                  decoration: const BoxDecoration(
+                                    color: GoPlayTheme.primary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 5),
+                                Text('UPCOMING', style: _interUpcomingBadge),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    const Spacer(),
+
+                    // Middle Row: Matchup details
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _TeamCard(teamName: event.homeTeam.name, flag: event.homeTeam.flag),
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('VS', style: _orbitronVS),
+                              const SizedBox(height: 6),
+                              Text('STARTS IN', style: _interStartsIn),
+                              if (event.isLive)
+                                Text('LIVE NOW', style: _interLiveNow)
+                              else
+                                CountdownTimerWidget(
+                                  startTime: event.startTime,
+                                  style: _interCountdown,
+                                ),
+                            ],
+                          ),
+                        ),
+                        _TeamCard(teamName: event.awayTeam.name, flag: event.awayTeam.flag),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    const Spacer(),
+
+                    // Bottom Row: Watch/Hub Button
+                    Center(
+                      child: Container(
+                        width: 150,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: GoPlayTheme.primary,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: GoPlayTheme.primary.withAlpha(40),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          event.isLive ? 'WATCH LIVE' : 'MATCH HUB',
+                          style: _interButtonLabel,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // ─── Match Tabs ────────────────────────────────────────────────
 final _matchTabProvider = NotifierProvider<_MatchTabNotifier, int>(
   _MatchTabNotifier.new,
@@ -390,6 +433,8 @@ class _MatchTabNotifier extends Notifier<int> {
 }
 
 class _MatchTabs extends ConsumerWidget {
+  const _MatchTabs();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tab = ref.watch(_matchTabProvider);
@@ -457,6 +502,8 @@ class _TabButton extends StatelessWidget {
 
 // ─── Matches Section ──────────────────────────────────────────
 class _MatchesSection extends ConsumerWidget {
+  const _MatchesSection();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tab = ref.watch(_matchTabProvider);
@@ -482,7 +529,7 @@ class _MatchesSection extends ConsumerWidget {
                   const SizedBox(height: 8),
                   Text(
                     tab == 0 ? 'No live matches right now' : 'No upcoming matches',
-                    style: TextStyle(color: GoPlayTheme.onSurfaceVariant),
+                    style: const TextStyle(color: GoPlayTheme.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -524,6 +571,8 @@ class _MatchesSection extends ConsumerWidget {
 
 // ─── Today's Schedule ─────────────────────────────────────────
 class _TodaySchedule extends ConsumerWidget {
+  const _TodaySchedule();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final eventsAsync = ref.watch(eventsProvider);
@@ -570,6 +619,8 @@ class _TodaySchedule extends ConsumerWidget {
 
 // ─── Trending Channels ────────────────────────────────────────
 class _TrendingChannels extends ConsumerWidget {
+  const _TrendingChannels();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final trendingAsync = ref.watch(trendingChannelsProvider);
@@ -608,13 +659,23 @@ class _TrendingChannels extends ConsumerWidget {
                         ),
                         child: ClipOval(
                           child: ch.logo != null && ch.logo!.isNotEmpty
-                              ? Image.network(
-                                  ch.logo!,
+                              ? CachedNetworkImage(
+                                  imageUrl: ch.logo!,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => Center(
+                                  placeholder: (context, url) => Center(
                                     child: Text(
                                       ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
-                                      style: TextStyle(
+                                      style: const TextStyle(
+                                        color: GoPlayTheme.primary,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) => Center(
+                                    child: Text(
+                                      ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
+                                      style: const TextStyle(
                                         color: GoPlayTheme.primary,
                                         fontSize: 14,
                                         fontWeight: FontWeight.w800,
@@ -625,7 +686,7 @@ class _TrendingChannels extends ConsumerWidget {
                               : Center(
                                   child: Text(
                                     ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: GoPlayTheme.primary,
                                       fontSize: 14,
                                       fontWeight: FontWeight.w800,
@@ -662,6 +723,8 @@ class _TrendingChannels extends ConsumerWidget {
 
 // ─── Recently Watched ─────────────────────────────────────────
 class _RecentlyWatched extends ConsumerWidget {
+  const _RecentlyWatched();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final history = ref.watch(watchHistoryProvider);
@@ -691,14 +754,14 @@ class _RecentlyWatched extends ConsumerWidget {
                       Container(
                         width: 52,
                         height: 52,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: GoPlayTheme.surfaceContainerHigh,
                           shape: BoxShape.circle,
                         ),
                         child: Center(
                           child: Text(
                             ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: GoPlayTheme.primary,
                               fontSize: 14,
                               fontWeight: FontWeight.w800,
@@ -731,6 +794,8 @@ class _RecentlyWatched extends ConsumerWidget {
 
 // ─── Announcements ────────────────────────────────────────────
 class _AnnouncementsSection extends ConsumerWidget {
+  const _AnnouncementsSection();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final announcementsAsync = ref.watch(announcementsProvider);
@@ -846,18 +911,7 @@ class _TeamCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             teamName,
-            style: GoogleFonts.inter(
-              color: Colors.white,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              shadows: [
-                Shadow(
-                  color: Colors.black.withAlpha(180),
-                  blurRadius: 4,
-                  offset: const Offset(0, 1),
-                ),
-              ],
-            ),
+            style: _interTeamName,
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -867,5 +921,3 @@ class _TeamCard extends StatelessWidget {
     );
   }
 }
-
-
