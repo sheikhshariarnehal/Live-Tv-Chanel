@@ -181,9 +181,14 @@ export default {
     }
 
     // 4. Request Headers Customization (Referer/Origin Spoofing)
-    let userAgent = request.headers.get('user-agent') || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36';
+    const customUserAgent = request.headers.get('x-user-agent') || urlObj.searchParams.get('user-agent');
+    const customReferer = request.headers.get('x-referer') || urlObj.searchParams.get('referer');
+
+    let userAgent = customUserAgent || request.headers.get('user-agent') || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36';
     if (userAgent.includes('Headless') || userAgent.includes('headless') || userAgent.includes('Electron') || userAgent.includes('crawler') || userAgent.includes('bot')) {
-      userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36';
+      if (!customUserAgent) {
+        userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36';
+      }
     }
 
     const targetUrlObj = new URL(targetUrl);
@@ -205,7 +210,15 @@ export default {
     }
 
     // Spoof Referer and Origin for specific servers
-    if (targetHostname === 'cdn.fifalive.click' || targetHostname.endsWith('.fifalive.click') || targetHostname.endsWith('.workers.dev') || targetHostname === 'fifalive.click') {
+    if (customReferer) {
+      upstreamHeaders['Referer'] = customReferer;
+      try {
+        const refUrl = new URL(customReferer);
+        upstreamHeaders['Origin'] = refUrl.origin;
+      } catch {
+        upstreamHeaders['Origin'] = customReferer;
+      }
+    } else if (targetHostname === 'cdn.fifalive.click' || targetHostname.endsWith('.fifalive.click') || targetHostname.endsWith('.workers.dev') || targetHostname === 'fifalive.click') {
       upstreamHeaders['Referer'] = 'https://fifalive.click/';
       upstreamHeaders['Origin'] = 'https://fifalive.click';
     } else if (targetHostname.includes('toffeelive.com')) {
@@ -244,6 +257,15 @@ export default {
       const isMpd = targetUrl.includes('.mpd') || contentType.includes('application/dash+xml') || contentType.includes('video/vnd.mpeg.dash.mpd');
       const isM3u8 = contentType.includes('application/vnd.apple.mpegurl') || contentType.includes('application/x-mpegurl') || targetUrl.includes('.m3u8');
 
+      // Propagate custom referer and user-agent to segment and sub-playlist requests
+      let extraParams = '';
+      if (customReferer) {
+        extraParams += `&referer=${encodeURIComponent(customReferer)}`;
+      }
+      if (customUserAgent) {
+        extraParams += `&user-agent=${encodeURIComponent(customUserAgent)}`;
+      }
+
       const proxyPrefix = `${urlObj.origin}${urlObj.pathname}?url=`;
 
       // 6. DASH Playlist Manifest Rewriting
@@ -254,21 +276,28 @@ export default {
         const baseUrl = new URL(targetUrl);
         const basePath = baseUrl.origin + baseUrl.pathname.substring(0, baseUrl.pathname.lastIndexOf('/') + 1);
         
-        if (text.includes('<BaseURL>') || text.includes('<BaseURL/>')) {
-          text = text.replace(/<BaseURL>([^<]*)<\/BaseURL>/gi, (match, urlValue) => {
-            urlValue = urlValue.trim();
-            if (urlValue.startsWith('http://') || urlValue.startsWith('https://')) {
-              return match;
-            }
-            if (urlValue.startsWith('/')) {
-              return `<BaseURL>${baseUrl.origin}${urlValue}</BaseURL>`;
-            }
-            return `<BaseURL>${basePath}${urlValue}</BaseURL>`;
-          });
-        } else {
-          text = text.replace(/<MPD([^>]*)>/i, (match, attrs) => {
-            return `<MPD${attrs}>\n  <BaseURL>${basePath}</BaseURL>`;
-          });
+        // Only modify or inject BaseURL if there isn't already an absolute BaseURL in the manifest.
+        // If the manifest already contains an absolute BaseURL (e.g. <BaseURL>http...), Shaka Player
+        // will resolve relative tracks relative to it, and our request filter will proxy them.
+        const hasAbsoluteBaseUrl = /<BaseURL>\s*https?:\/\//i.test(text);
+
+        if (!hasAbsoluteBaseUrl) {
+          if (text.includes('<BaseURL>') || text.includes('<BaseURL/>')) {
+            text = text.replace(/<BaseURL>([^<]*)<\/BaseURL>/gi, (match, urlValue) => {
+              urlValue = urlValue.trim();
+              if (urlValue.startsWith('http://') || urlValue.startsWith('https://')) {
+                return match;
+              }
+              if (urlValue.startsWith('/')) {
+                return `<BaseURL>${baseUrl.origin}${urlValue}</BaseURL>`;
+              }
+              return `<BaseURL>${basePath}${urlValue}</BaseURL>`;
+            });
+          } else {
+            text = text.replace(/<MPD([^>]*)>/i, (match, attrs) => {
+              return `<MPD${attrs}>\n  <BaseURL>${basePath}</BaseURL>`;
+            });
+          }
         }
 
         const rewrittenResponse = new Response(text, {
@@ -303,7 +332,7 @@ export default {
               absoluteUrl += baseUrl.search;
             }
             if (requiresFullProxy(absoluteUrl, baseUrl.hostname) || forceFullProxy) {
-              return proxyPrefix + encodeURIComponent(absoluteUrl) + (forceFullProxy ? '&full=true' : '');
+              return proxyPrefix + encodeURIComponent(absoluteUrl) + extraParams + (forceFullProxy ? '&full=true' : '');
             } else {
               return absoluteUrl;
             }
@@ -318,7 +347,7 @@ export default {
                  absoluteUrl += baseUrl.search;
                }
                if (requiresFullProxy(absoluteUrl, baseUrl.hostname) || forceFullProxy) {
-                 return `URI="${proxyPrefix}${encodeURIComponent(absoluteUrl)}${forceFullProxy ? '&full=true' : ''}"`;
+                 return `URI="${proxyPrefix}${encodeURIComponent(absoluteUrl)}${extraParams}${forceFullProxy ? '&full=true' : ''}"`;
                } else {
                  return `URI="${absoluteUrl}"`;
                }

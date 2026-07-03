@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme.dart';
 import '../../models/event.dart';
+import '../../providers/app_providers.dart';
 import '../live_badge.dart';
 import '../team_flag.dart';
 import '../countdown_timer.dart';
 
 /// Full-width event list tile used in Upcoming and Today's Schedule
-class EventListTile extends StatelessWidget {
+class EventListTile extends ConsumerWidget {
   final SportEvent event;
   final VoidCallback? onTap;
 
   const EventListTile({super.key, required this.event, this.onTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -128,6 +130,9 @@ class EventListTile extends StatelessWidget {
                         if (event.isUpcoming && isToday) {
                           return CountdownTimerWidget(
                             startTime: event.startTime,
+                            onTimerFinished: () {
+                              ref.invalidate(eventsProvider);
+                            },
                             style: const TextStyle(
                               color: GoPlayTheme.primary,
                               fontSize: 10,

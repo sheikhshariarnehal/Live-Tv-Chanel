@@ -275,12 +275,12 @@ class _HeroBannerState extends ConsumerState<_HeroBanner> {
 
 /// Individual hero banner card — extracted to its own widget to avoid
 /// rebuilding all cards when the page indicator changes.
-class _HeroBannerCard extends StatelessWidget {
+class _HeroBannerCard extends ConsumerWidget {
   final SportEvent event;
   const _HeroBannerCard({required this.event});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
       onTap: () {
         if (event.channels.isNotEmpty) {
@@ -375,6 +375,9 @@ class _HeroBannerCard extends StatelessWidget {
                               else
                                 CountdownTimerWidget(
                                   startTime: event.startTime,
+                                  onTimerFinished: () {
+                                    ref.invalidate(eventsProvider);
+                                  },
                                   style: _interCountdown,
                                 ),
                             ],
