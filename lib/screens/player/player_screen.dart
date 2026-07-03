@@ -82,7 +82,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final channelAsync = ref.watch(channelProvider(_currentChannelId));
+    final channelsAsync = ref.watch(channelsProvider);
     final mq = MediaQuery.of(context);
     final isDesktop = mq.size.width >= 800;
     final isFullscreen = mq.orientation == Orientation.landscape;
@@ -95,8 +95,13 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       },
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: channelAsync.when(
-          data: (channel) {
+        body: channelsAsync.when(
+          data: (channels) {
+            final channel = channels.cast<Channel?>().firstWhere(
+                  (c) => c?.id == _currentChannelId,
+                  orElse: () => null,
+                );
+
             if (channel == null) {
               return const Center(
                 child: Text('Channel not found', style: TextStyle(color: Colors.white)),
