@@ -43,7 +43,20 @@ final appRouter = GoRouter(
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) {
         final channelId = state.pathParameters['channelId']!;
-        return PlayerScreen(channelId: channelId);
+        List<String>? eventChannels;
+        bool forceFullscreen = false;
+
+        if (state.extra is Map<String, dynamic>) {
+          final extra = state.extra as Map<String, dynamic>;
+          eventChannels = extra['eventChannels'] as List<String>?;
+          forceFullscreen = extra['forceFullscreen'] as bool? ?? false;
+        }
+
+        return PlayerScreen(
+          channelId: channelId,
+          eventChannels: eventChannels,
+          forceFullscreen: forceFullscreen,
+        );
       },
     ),
     GoRoute(

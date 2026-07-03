@@ -295,7 +295,20 @@ class _SearchResults extends StatelessWidget {
                       contentPadding: EdgeInsets.zero,
                       onTap: () {
                         if (event.channels.isNotEmpty) {
-                          context.push('/player/${event.channels.first}');
+                          context.push(
+                            '/player/${event.channels.first}',
+                            extra: {
+                              'eventChannels': event.channels,
+                              'forceFullscreen': true,
+                            },
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('No channels available for this event.'),
+                              backgroundColor: GoPlayTheme.error,
+                            ),
+                          );
                         }
                       },
                     )),
