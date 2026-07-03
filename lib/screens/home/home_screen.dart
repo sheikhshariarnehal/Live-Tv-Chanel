@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+
 import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
 import '../../models/event.dart';
@@ -12,7 +13,7 @@ import '../../widgets/cards/match_card.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/live_badge.dart';
 import '../../widgets/team_flag.dart';
-import '../../widgets/channel_selector.dart';
+import '../../widgets/channel_avatar.dart';
 import '../../widgets/countdown_timer.dart';
 
 // ─── Cached Text Styles ──────────────────────────────────────
@@ -279,6 +280,29 @@ class _HeroBannerCard extends ConsumerWidget {
   final SportEvent event;
   const _HeroBannerCard({required this.event});
 
+  // Cache static decoration objects
+  static final _cardRadius = BorderRadius.circular(24);
+  static final _cardDecoration = BoxDecoration(
+    borderRadius: _cardRadius,
+    border: Border.all(color: Colors.white.withAlpha(20), width: 1.0),
+  );
+  static final _upcomingBadgeDecoration = BoxDecoration(
+    color: GoPlayTheme.primary.withAlpha(30),
+    borderRadius: BorderRadius.circular(12),
+    border: Border.all(color: GoPlayTheme.primary.withAlpha(80), width: 0.5),
+  );
+  static final _watchButtonDecoration = BoxDecoration(
+    color: GoPlayTheme.primary,
+    borderRadius: BorderRadius.circular(16),
+    boxShadow: [
+      BoxShadow(
+        color: GoPlayTheme.primary.withAlpha(40),
+        blurRadius: 6,
+        offset: const Offset(0, 2),
+      ),
+    ],
+  );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
@@ -300,32 +324,29 @@ class _HeroBannerCard extends ConsumerWidget {
           );
         }
       },
-      child: Container(
-        margin: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: Colors.white.withAlpha(20),
-            width: 1.0,
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Cached banner image
-              if (event.banner != null && event.banner!.isNotEmpty)
-                CachedNetworkImage(
-                  imageUrl: event.banner!,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    color: GoPlayTheme.surfaceContainerHigh,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 8),
+        child: DecoratedBox(
+          decoration: _cardDecoration,
+          child: ClipRRect(
+            borderRadius: _cardRadius,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Cached banner image
+                if (event.banner != null && event.banner!.isNotEmpty)
+                  CachedNetworkImage(
+                    imageUrl: event.banner!,
+                    fit: BoxFit.cover,
+                    memCacheWidth: 800,
+                    fadeInDuration: const Duration(milliseconds: 200),
+                    placeholder: (_, __) => const ColoredBox(
+                      color: GoPlayTheme.surfaceContainerHigh,
+                    ),
+                    errorWidget: (_, __, ___) => const ColoredBox(
+                      color: GoPlayTheme.surfaceContainerHigh,
+                    ),
                   ),
-                  errorWidget: (context, url, error) => Container(
-                    color: GoPlayTheme.surfaceContainerHigh,
-                  ),
-                ),
               // Content overlay
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -339,31 +360,28 @@ class _HeroBannerCard extends ConsumerWidget {
                         if (event.isLive)
                           const LiveBadge(fontSize: 11)
                         else
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: GoPlayTheme.primary.withAlpha(30),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: GoPlayTheme.primary.withAlpha(80),
-                                width: 0.5,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 5,
-                                  height: 5,
-                                  decoration: const BoxDecoration(
-                                    color: GoPlayTheme.primary,
-                                    shape: BoxShape.circle,
+                          DecoratedBox(
+                            decoration: _upcomingBadgeDecoration,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const SizedBox(
+                                    width: 5,
+                                    height: 5,
+                                    child: DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        color: GoPlayTheme.primary,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 5),
-                                Text('UPCOMING', style: _interUpcomingBadge),
-                              ],
+                                  const SizedBox(width: 5),
+                                  Text('UPCOMING', style: _interUpcomingBadge),
+                                ],
+                              ),
                             ),
                           ),
                       ],
@@ -404,24 +422,17 @@ class _HeroBannerCard extends ConsumerWidget {
 
                     // Bottom Row: Watch/Hub Button
                     Center(
-                      child: Container(
-                        width: 150,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: GoPlayTheme.primary,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: GoPlayTheme.primary.withAlpha(40),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
+                      child: DecoratedBox(
+                        decoration: _watchButtonDecoration,
+                        child: SizedBox(
+                          width: 150,
+                          height: 32,
+                          child: Center(
+                            child: Text(
+                              event.isLive ? 'WATCH LIVE' : 'MATCH HUB',
+                              style: _interButtonLabel,
                             ),
-                          ],
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          event.isLive ? 'WATCH LIVE' : 'MATCH HUB',
-                          style: _interButtonLabel,
+                          ),
                         ),
                       ),
                     ),
@@ -431,6 +442,7 @@ class _HeroBannerCard extends ConsumerWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }
@@ -487,6 +499,29 @@ class _TabButton extends StatelessWidget {
     required this.onTap,
   });
 
+  static final _selectedDecoration = BoxDecoration(
+    color: GoPlayTheme.primary.withAlpha(25),
+    borderRadius: BorderRadius.circular(10),
+    border: Border.all(color: GoPlayTheme.primary, width: 1),
+  );
+  static final _unselectedDecoration = BoxDecoration(
+    color: Colors.transparent,
+    borderRadius: BorderRadius.circular(10),
+    border: Border.all(color: GoPlayTheme.cardBorder, width: 1),
+  );
+  static const _selectedTextStyle = TextStyle(
+    color: GoPlayTheme.primary,
+    fontSize: 12,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0.5,
+  );
+  static const _unselectedTextStyle = TextStyle(
+    color: GoPlayTheme.onSurfaceVariant,
+    fontSize: 12,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0.5,
+  );
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -494,22 +529,10 @@ class _TabButton extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? GoPlayTheme.primary.withAlpha(25) : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isSelected ? GoPlayTheme.primary : GoPlayTheme.cardBorder,
-            width: 1,
-          ),
-        ),
+        decoration: isSelected ? _selectedDecoration : _unselectedDecoration,
         child: Text(
           label,
-          style: TextStyle(
-            color: isSelected ? GoPlayTheme.primary : GoPlayTheme.onSurfaceVariant,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.5,
-          ),
+          style: isSelected ? _selectedTextStyle : _unselectedTextStyle,
         ),
       ),
     );
@@ -559,6 +582,7 @@ class _MatchesSection extends ConsumerWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: events.length,
+            addAutomaticKeepAlives: false,
             itemBuilder: (context, index) {
               final event = events[index];
               return MatchCard(
@@ -626,31 +650,38 @@ class _TodaySchedule extends ConsumerWidget {
           );
         }
 
-        return Padding(
+        // Use ListView.builder for lazy rendering instead of Column + .map()
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            children: todayEvents.map((event) => EventListTile(
-                  event: event,
-                  onTap: () {
-                    if (event.channels.isNotEmpty) {
-                      context.push(
-                        '/player/${event.channels.first}',
-                        extra: {
-                          'eventChannels': event.channels,
-                          'forceFullscreen': true,
-                        },
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('No channels available for this event.'),
-                          backgroundColor: GoPlayTheme.error,
-                        ),
-                      );
-                    }
-                  },
-                )).toList(),
-          ),
+          itemCount: todayEvents.length,
+          addAutomaticKeepAlives: false,
+          addRepaintBoundaries: false,
+          itemBuilder: (context, index) {
+            final event = todayEvents[index];
+            return EventListTile(
+              event: event,
+              onTap: () {
+                if (event.channels.isNotEmpty) {
+                  context.push(
+                    '/player/${event.channels.first}',
+                    extra: {
+                      'eventChannels': event.channels,
+                      'forceFullscreen': true,
+                    },
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('No channels available for this event.'),
+                      backgroundColor: GoPlayTheme.error,
+                    ),
+                  );
+                }
+              },
+            );
+          },
         );
       },
       loading: () => const SizedBox.shrink(),
@@ -662,6 +693,12 @@ class _TodaySchedule extends ConsumerWidget {
 // ─── Trending Channels ────────────────────────────────────────
 class _TrendingChannels extends ConsumerWidget {
   const _TrendingChannels();
+
+  static const _nameStyle = TextStyle(
+    color: GoPlayTheme.onSurface,
+    fontSize: 10,
+    fontWeight: FontWeight.w500,
+  );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -677,79 +714,28 @@ class _TrendingChannels extends ConsumerWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: channels.length,
+            addAutomaticKeepAlives: false,
             itemBuilder: (context, index) {
               final ch = channels[index];
               return GestureDetector(
                 onTap: () => context.push('/player/${ch.id}'),
-                child: Container(
-                  width: 75,
-                  margin: const EdgeInsets.only(right: 12),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          color: GoPlayTheme.surfaceContainerHigh,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: ch.isLive
-                                ? GoPlayTheme.primary.withAlpha(80)
-                                : GoPlayTheme.cardBorder,
-                            width: 2,
-                          ),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: SizedBox(
+                    width: 75,
+                    child: Column(
+                      children: [
+                        ChannelAvatar(channel: ch),
+                        const SizedBox(height: 6),
+                        Text(
+                          ch.name,
+                          style: _nameStyle,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        child: ClipOval(
-                          child: ch.logo != null && ch.logo!.isNotEmpty
-                              ? CachedNetworkImage(
-                                  imageUrl: ch.logo!,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) => Center(
-                                    child: Text(
-                                      ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
-                                      style: const TextStyle(
-                                        color: GoPlayTheme.primary,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                  ),
-                                  errorWidget: (context, url, error) => Center(
-                                    child: Text(
-                                      ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
-                                      style: const TextStyle(
-                                        color: GoPlayTheme.primary,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              : Center(
-                                  child: Text(
-                                    ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
-                                    style: const TextStyle(
-                                      color: GoPlayTheme.primary,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        ch.name,
-                        style: const TextStyle(
-                          color: GoPlayTheme.onSurface,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -784,45 +770,31 @@ class _RecentlyWatched extends ConsumerWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: history.length,
+            addAutomaticKeepAlives: false,
             itemBuilder: (context, index) {
               final ch = history[index];
               return GestureDetector(
                 onTap: () => context.push('/player/${ch.id}'),
-                child: Container(
-                  width: 75,
-                  margin: const EdgeInsets.only(right: 12),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: const BoxDecoration(
-                          color: GoPlayTheme.surfaceContainerHigh,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
-                            style: const TextStyle(
-                              color: GoPlayTheme.primary,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                            ),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: SizedBox(
+                    width: 75,
+                    child: Column(
+                      children: [
+                        ChannelAvatar(channel: ch, showBorder: false),
+                        const SizedBox(height: 6),
+                        Text(
+                          ch.name,
+                          style: const TextStyle(
+                            color: GoPlayTheme.onSurface,
+                            fontSize: 10,
                           ),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        ch.name,
-                        style: const TextStyle(
-                          color: GoPlayTheme.onSurface,
-                          fontSize: 10,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -838,6 +810,18 @@ class _RecentlyWatched extends ConsumerWidget {
 class _AnnouncementsSection extends ConsumerWidget {
   const _AnnouncementsSection();
 
+  static final _warningDecoration = BoxDecoration(
+    color: const Color(0xFF3D3300).withAlpha(60),
+    borderRadius: BorderRadius.circular(12),
+    border: Border.all(color: Colors.amber.withAlpha(40), width: 0.5),
+  );
+
+  static final _infoDecoration = BoxDecoration(
+    color: GoPlayTheme.surfaceContainer,
+    borderRadius: BorderRadius.circular(12),
+    border: Border.all(color: GoPlayTheme.cardBorder, width: 0.5),
+  );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final announcementsAsync = ref.watch(announcementsProvider);
@@ -848,62 +832,63 @@ class _AnnouncementsSection extends ConsumerWidget {
 
         return Column(
           children: [
-            const SectionHeader(
-              title: 'Announcements',
-            ),
-            ...announcements.map((a) => Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: a.type == 'warning'
-                        ? const Color(0xFF3D3300).withAlpha(60)
-                        : GoPlayTheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: a.type == 'warning'
-                          ? Colors.amber.withAlpha(40)
-                          : GoPlayTheme.cardBorder,
-                      width: 0.5,
+            const SectionHeader(title: 'Announcements'),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
+              itemCount: announcements.length,
+              addAutomaticKeepAlives: false,
+              addRepaintBoundaries: false,
+              itemBuilder: (context, index) {
+                final a = announcements[index];
+                final isWarning = a.type == 'warning';
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: DecoratedBox(
+                    decoration: isWarning ? _warningDecoration : _infoDecoration,
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Row(
+                        children: [
+                          Icon(
+                            isWarning
+                                ? Icons.warning_amber_rounded
+                                : Icons.info_outline_rounded,
+                            color: isWarning ? Colors.amber : GoPlayTheme.primary,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  a.title,
+                                  style: const TextStyle(
+                                    color: GoPlayTheme.onSurface,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  a.body,
+                                  style: const TextStyle(
+                                    color: GoPlayTheme.onSurfaceVariant,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        a.type == 'warning'
-                            ? Icons.warning_amber_rounded
-                            : Icons.info_outline_rounded,
-                        color: a.type == 'warning'
-                            ? Colors.amber
-                            : GoPlayTheme.primary,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              a.title,
-                              style: const TextStyle(
-                                color: GoPlayTheme.onSurface,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              a.body,
-                              style: const TextStyle(
-                                color: GoPlayTheme.onSurfaceVariant,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                )),
+                );
+              },
+            ),
           ],
         );
       },
@@ -922,6 +907,19 @@ class _TeamCard extends StatelessWidget {
     required this.flag,
   });
 
+  // Cache decoration to avoid recreating Border + BoxShadow objects per frame
+  static final _avatarDecoration = BoxDecoration(
+    shape: BoxShape.circle,
+    border: Border.all(color: Colors.white, width: 1.5),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withAlpha(60),
+        blurRadius: 6,
+        offset: const Offset(0, 2),
+      ),
+    ],
+  );
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -929,25 +927,14 @@ class _TeamCard extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.white,
-                width: 1.5,
+          DecoratedBox(
+            decoration: _avatarDecoration,
+            child: SizedBox(
+              width: 48,
+              height: 48,
+              child: ClipOval(
+                child: TeamFlagWidget(flag: flag, size: 40),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(60),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: ClipOval(
-              child: TeamFlagWidget(flag: flag, size: 40),
             ),
           ),
           const SizedBox(height: 8),
@@ -963,3 +950,4 @@ class _TeamCard extends StatelessWidget {
     );
   }
 }
+

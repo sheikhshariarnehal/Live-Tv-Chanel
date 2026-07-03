@@ -16,6 +16,19 @@ class SectionHeader extends StatelessWidget {
     this.icon,
   });
 
+  static const _titleStyle = TextStyle(
+    color: GoPlayTheme.onSurface,
+    fontSize: 16,
+    fontWeight: FontWeight.w800,
+    letterSpacing: 1.5,
+  );
+
+  static const _actionStyle = TextStyle(
+    color: GoPlayTheme.primary,
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
+  );
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -26,27 +39,12 @@ class SectionHeader extends StatelessWidget {
             Icon(icon, color: GoPlayTheme.primary, size: 20),
             const SizedBox(width: 8),
           ],
-          Text(
-            title.toUpperCase(),
-            style: TextStyle(
-              color: GoPlayTheme.onSurface,
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.5,
-            ),
-          ),
+          Text(title.toUpperCase(), style: _titleStyle),
           const Spacer(),
           if (actionLabel != null)
             GestureDetector(
               onTap: onAction,
-              child: Text(
-                actionLabel!,
-                style: TextStyle(
-                  color: GoPlayTheme.primary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              child: Text(actionLabel!, style: _actionStyle),
             ),
         ],
       ),
