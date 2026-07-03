@@ -114,6 +114,8 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Kick off background sync now that Supabase is guaranteed ready.
+    ref.watch(appSyncProvider);
     return Scaffold(
       body: CustomScrollView(
         slivers: [
