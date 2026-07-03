@@ -284,7 +284,20 @@ class _HeroBannerCard extends ConsumerWidget {
     return GestureDetector(
       onTap: () {
         if (event.channels.isNotEmpty) {
-          context.push('/player/${event.channels.first}');
+          context.push(
+            '/player/${event.channels.first}',
+            extra: {
+              'eventChannels': event.channels,
+              'forceFullscreen': true,
+            },
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No channels available for this event.'),
+              backgroundColor: GoPlayTheme.error,
+            ),
+          );
         }
       },
       child: Container(
@@ -550,11 +563,24 @@ class _MatchesSection extends ConsumerWidget {
               final event = events[index];
               return MatchCard(
                 event: event,
-                onTap: () => showChannelSelector(
-                  context: context,
-                  ref: ref,
-                  event: event,
-                ),
+                onTap: () {
+                  if (event.channels.isNotEmpty) {
+                    context.push(
+                      '/player/${event.channels.first}',
+                      extra: {
+                        'eventChannels': event.channels,
+                        'forceFullscreen': true,
+                      },
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('No channels available for this event.'),
+                        backgroundColor: GoPlayTheme.error,
+                      ),
+                    );
+                  }
+                },
               );
             },
           ),
@@ -605,11 +631,24 @@ class _TodaySchedule extends ConsumerWidget {
           child: Column(
             children: todayEvents.map((event) => EventListTile(
                   event: event,
-                  onTap: () => showChannelSelector(
-                    context: context,
-                    ref: ref,
-                    event: event,
-                  ),
+                  onTap: () {
+                    if (event.channels.isNotEmpty) {
+                      context.push(
+                        '/player/${event.channels.first}',
+                        extra: {
+                          'eventChannels': event.channels,
+                          'forceFullscreen': true,
+                        },
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('No channels available for this event.'),
+                          backgroundColor: GoPlayTheme.error,
+                        ),
+                      );
+                    }
+                  },
                 )).toList(),
           ),
         );

@@ -84,11 +84,24 @@ class UpcomingScreen extends ConsumerWidget {
                           // Events for this date
                           ...entry.value.map((event) => EventListTile(
                                 event: event,
-                                onTap: () => showChannelSelector(
-                                  context: context,
-                                  ref: ref,
-                                  event: event,
-                                ),
+                                onTap: () {
+                                  if (event.channels.isNotEmpty) {
+                                    context.push(
+                                      '/player/${event.channels.first}',
+                                      extra: {
+                                        'eventChannels': event.channels,
+                                        'forceFullscreen': true,
+                                      },
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('No channels available for this event.'),
+                                        backgroundColor: GoPlayTheme.error,
+                                      ),
+                                    );
+                                  }
+                                },
                               )),
                         ],
                       ),

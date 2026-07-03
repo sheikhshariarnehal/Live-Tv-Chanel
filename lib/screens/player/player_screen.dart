@@ -11,7 +11,15 @@ import '../../widgets/player/channel_video_player.dart';
 
 class PlayerScreen extends ConsumerStatefulWidget {
   final String channelId;
-  const PlayerScreen({super.key, required this.channelId});
+  final List<String>? eventChannels;
+  final bool forceFullscreen;
+
+  const PlayerScreen({
+    super.key,
+    required this.channelId,
+    this.eventChannels,
+    this.forceFullscreen = false,
+  });
 
   @override
   ConsumerState<PlayerScreen> createState() => _PlayerScreenState();
@@ -28,6 +36,14 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     super.initState();
     _currentChannelId = widget.channelId;
     _startControlsTimer();
+
+    if (widget.forceFullscreen) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    }
   }
 
   void _startControlsTimer() {
@@ -88,10 +104,14 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     final isFullscreen = mq.orientation == Orientation.landscape;
 
     return PopScope(
-      canPop: !isFullscreen,
+      canPop: !isFullscreen || widget.forceFullscreen,
       onPopInvoked: (didPop) {
         if (didPop) return;
-        _toggleFullscreen();
+        if (widget.forceFullscreen) {
+          Navigator.of(context).pop();
+        } else {
+          _toggleFullscreen();
+        }
       },
       child: Scaffold(
         backgroundColor: Colors.black,
@@ -143,6 +163,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                                 currentChannelId: channel.id,
                                 isScrollable: true,
                                 onChannelSelected: (id) => setState(() => _currentChannelId = id),
+                                eventChannels: widget.eventChannels,
                               ),
                             ),
                           ],
@@ -175,11 +196,14 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                           ? _FullscreenTopBar(
                               category: channel.category ?? '',
                               currentChannelId: channel.id,
-                              onBackPressed: _toggleFullscreen,
+                              onBackPressed: widget.forceFullscreen
+                                  ? () => Navigator.of(context).pop()
+                                  : _toggleFullscreen,
                               onChannelSelected: (id) {
                                 setState(() => _currentChannelId = id);
                                 _startControlsTimer();
                               },
+                              eventChannels: widget.eventChannels,
                             )
                           : null,
                     ),
@@ -189,19 +213,25 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                   Expanded(
                     child: ColoredBox(
                       color: GoPlayTheme.surface,
-                      child: ListView(
-                        padding: EdgeInsets.zero,
-                        children: [
-                          _ChannelInfoBar(channel: channel),
-                          const Divider(color: GoPlayTheme.cardBorder, height: 1),
-                          const _SectionLabel(text: 'SWITCH CHANNEL'),
-                          _RelatedChannelsList(
-                            category: channel.category ?? '',
-                            currentChannelId: channel.id,
-                            isScrollable: false,
-                            onChannelSelected: (id) => setState(() => _currentChannelId = id),
-                          ),
-                        ],
+                      child: SafeArea(
+                        top: false,
+                        bottom: true,
+                        child: ListView(
+                          padding: EdgeInsets.zero,
+                          children: [
+                            _ChannelInfoBar(channel: channel),
+                            const Divider(color: GoPlayTheme.cardBorder, height: 1),
+                            const _SectionLabel(text: 'SWITCH CHANNEL'),
+                            _RelatedChannelsList(
+                              category: channel.category ?? '',
+                              currentChannelId: channel.id,
+                              isScrollable: false,
+                              onChannelSelected: (id) => setState(() => _currentChannelId = id),
+                              eventChannels: widget.eventChannels,
+                            ),
+                            const SizedBox(height: 24),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -487,12 +517,14 @@ class _RelatedChannelsList extends ConsumerWidget {
   final String currentChannelId;
   final bool isScrollable;
   final Function(String) onChannelSelected;
+  final List<String>? eventChannels;
 
   const _RelatedChannelsList({
     required this.category,
     required this.currentChannelId,
     required this.isScrollable,
     required this.onChannelSelected,
+    this.eventChannels,
   });
 
   @override
@@ -501,7 +533,12 @@ class _RelatedChannelsList extends ConsumerWidget {
 
     return channelsAsync.when(
       data: (channels) {
-        final related = channels.where((c) => c.category == category).toList();
+        final List<Channel> related;
+        if (eventChannels != null) {
+          related = channels.where((c) => eventChannels!.contains(c.id)).toList();
+        } else {
+          related = channels.where((c) => c.category == category).toList();
+        }
 
         if (related.isEmpty) {
           return const Padding(
@@ -731,12 +768,14 @@ class _FullscreenTopBar extends ConsumerWidget {
   final String currentChannelId;
   final VoidCallback onBackPressed;
   final Function(String) onChannelSelected;
+  final List<String>? eventChannels;
 
   const _FullscreenTopBar({
     required this.category,
     required this.currentChannelId,
     required this.onBackPressed,
     required this.onChannelSelected,
+    this.eventChannels,
   });
 
   @override
@@ -774,7 +813,12 @@ class _FullscreenTopBar extends ConsumerWidget {
                 Expanded(
                   child: channelsAsync.when(
                     data: (channels) {
-                      final related = channels.where((c) => c.category == category).toList();
+                      final List<Channel> related;
+                      if (eventChannels != null) {
+                        related = channels.where((c) => eventChannels!.contains(c.id)).toList();
+                      } else {
+                        related = channels.where((c) => c.category == category).toList();
+                      }
                       if (related.isEmpty) return const SizedBox.shrink();
                       return ListView.builder(
                         scrollDirection: Axis.horizontal,
