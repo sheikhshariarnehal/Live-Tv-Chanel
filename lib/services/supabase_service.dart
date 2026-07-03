@@ -10,6 +10,20 @@ class SupabaseService {
 
   SupabaseService(this._client);
 
+  /// Fetch version tracking info from database
+  Future<Map<String, dynamic>?> getSyncVersions() async {
+    try {
+      final response = await _client
+          .from('app_settings')
+          .select('channels_version, events_version')
+          .eq('id', 1)
+          .maybeSingle();
+      return response;
+    } catch (e) {
+      return null;
+    }
+  }
+
   // ─── Channels ───────────────────────────────────────────────
 
   /// Columns needed for list/grid display (excludes heavy stream_url & headers)
@@ -19,7 +33,7 @@ class SupabaseService {
   Future<List<Channel>> getChannels() async {
     final response = await _client
         .from('channels')
-        .select(_listColumns)
+        .select()
         .order('sort_order', ascending: true);
     return (response as List).map((e) => Channel.fromJson(e)).toList();
   }

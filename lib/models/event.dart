@@ -41,8 +41,11 @@ class SportEvent {
     this.isFeatured = false,
   });
 
-  bool get isLive => status == 'live';
-  bool get isUpcoming => status == 'upcoming';
+  bool get isLive =>
+      status == 'live' ||
+      (status == 'upcoming' && DateTime.now().isAfter(startTime));
+  bool get isUpcoming =>
+      status == 'upcoming' && DateTime.now().isBefore(startTime);
   bool get isFinished => status == 'finished';
 
   Duration get timeUntilStart => startTime.difference(DateTime.now());

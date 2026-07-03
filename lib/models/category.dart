@@ -20,4 +20,11 @@ class Category {
       sortOrder: json['sort_order'] as int? ?? 0,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'icon': icon,
+        'sort_order': sortOrder,
+      };
 }

@@ -7,6 +7,7 @@ import 'package:media_kit/media_kit.dart';
 import 'core/constants.dart';
 import 'core/theme.dart';
 import 'core/router.dart';
+import 'providers/app_providers.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'utils/web_helper.dart';
@@ -29,8 +30,14 @@ void main() async {
     systemNavigationBarIconBrightness: Brightness.light,
   ));
 
-  // Initialize Hive
+  // Initialize Hive and pre-open cache boxes
   await Hive.initFlutter();
+  await Future.wait([
+    Hive.openBox(AppConstants.settingsBox),
+    Hive.openBox(AppConstants.channelsBox),
+    Hive.openBox(AppConstants.eventsBox),
+    Hive.openBox(AppConstants.categoriesBox),
+  ]);
 
   // Initialize Supabase
   await Supabase.initialize(
@@ -41,11 +48,14 @@ void main() async {
   runApp(const ProviderScope(child: GoPlayApp()));
 }
 
-class GoPlayApp extends StatelessWidget {
+class GoPlayApp extends ConsumerWidget {
   const GoPlayApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Kick off version-based synchronization in the background
+    ref.watch(appSyncProvider);
+
     if (kIsWeb) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         removeLoadingSplash();

@@ -1,54 +1,91 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/supabase_service.dart';
+import '../services/cache_service.dart';
+import '../services/sync_service.dart';
 import '../models/channel.dart';
 import '../models/event.dart';
 import '../models/category.dart';
 import '../models/announcement.dart';
 
-// ─── Core Service Provider ────────────────────────────────────
+// ─── Core Service Providers ───────────────────────────────────
 final supabaseServiceProvider = Provider<SupabaseService>((ref) {
   return SupabaseService(Supabase.instance.client);
 });
 
+final cacheServiceProvider = Provider<CacheService>((ref) {
+  return CacheService();
+});
+
+final syncServiceProvider = Provider<SyncService>((ref) {
+  return SyncService(ref);
+});
+
+/// Startup provider to trigger the background synchronization process
+final appSyncProvider = FutureProvider<void>((ref) async {
+  final syncService = ref.watch(syncServiceProvider);
+  await syncService.sync();
+});
+
 // ─── Channels ─────────────────────────────────────────────────
 final channelsProvider = FutureProvider<List<Channel>>((ref) async {
-  final service = ref.read(supabaseServiceProvider);
-  return service.getChannels();
+  final cache = ref.watch(cacheServiceProvider);
+  final localChannels = cache.getLocalChannels();
+  
+  if (localChannels.isEmpty) {
+    // If the local cache is empty (first install), fetch from remote immediately
+    final remoteService = ref.watch(supabaseServiceProvider);
+    final remoteChannels = await remoteService.getChannels();
+    await cache.saveLocalChannels(remoteChannels);
+    return remoteChannels;
+  }
+  return localChannels;
 });
 
 final trendingChannelsProvider = FutureProvider<List<Channel>>((ref) async {
-  final service = ref.read(supabaseServiceProvider);
-  return service.getTrendingChannels();
+  final channels = await ref.watch(channelsProvider.future);
+  return channels.where((ch) => ch.isTrending).toList();
 });
 
 final channelsByCategoryProvider =
     FutureProvider.family<List<Channel>, String>((ref, categoryId) async {
-  final service = ref.read(supabaseServiceProvider);
-  if (categoryId == 'all') return service.getChannels();
-  return service.getChannelsByCategory(categoryId);
+  final channels = await ref.watch(channelsProvider.future);
+  if (categoryId == 'all') return channels;
+  return channels.where((ch) => ch.category == categoryId).toList();
 });
 
 final channelProvider =
     FutureProvider.family<Channel?, String>((ref, id) async {
-  final service = ref.read(supabaseServiceProvider);
-  return service.getChannel(id);
+  final channels = await ref.watch(channelsProvider.future);
+  try {
+    return channels.firstWhere((ch) => ch.id == id);
+  } catch (_) {
+    return null;
+  }
 });
 
 // ─── Events ───────────────────────────────────────────────────
 final eventsProvider = FutureProvider<List<SportEvent>>((ref) async {
-  final service = ref.read(supabaseServiceProvider);
-  return service.getEvents();
+  final cache = ref.watch(cacheServiceProvider);
+  final localEvents = cache.getLocalEvents();
+
+  if (localEvents.isEmpty) {
+    final remoteService = ref.watch(supabaseServiceProvider);
+    final remoteEvents = await remoteService.getEvents();
+    await cache.saveLocalEvents(remoteEvents);
+    return remoteEvents;
+  }
+  return localEvents;
 });
 
 final liveEventsProvider = FutureProvider<List<SportEvent>>((ref) async {
-  final service = ref.read(supabaseServiceProvider);
-  return service.getLiveEvents();
+  final events = await ref.watch(eventsProvider.future);
+  return events.where((e) => e.isLive).toList();
 });
 
 final upcomingEventsProvider = FutureProvider<List<SportEvent>>((ref) async {
-  final service = ref.read(supabaseServiceProvider);
-  return service.getUpcomingEvents();
+  final events = await ref.watch(eventsProvider.future);
+  return events.where((e) => e.isUpcoming).toList();
 });
 
 final featuredEventsProvider = Provider<AsyncValue<List<SportEvent>>>((ref) {
@@ -60,8 +97,16 @@ final featuredEventsProvider = Provider<AsyncValue<List<SportEvent>>>((ref) {
 
 // ─── Categories ───────────────────────────────────────────────
 final categoriesProvider = FutureProvider<List<Category>>((ref) async {
-  final service = ref.read(supabaseServiceProvider);
-  return service.getCategories();
+  final cache = ref.watch(cacheServiceProvider);
+  final localCategories = cache.getLocalCategories();
+
+  if (localCategories.isEmpty) {
+    final remoteService = ref.watch(supabaseServiceProvider);
+    final remoteCategories = await remoteService.getCategories();
+    await cache.saveLocalCategories(remoteCategories);
+    return remoteCategories;
+  }
+  return localCategories;
 });
 
 // ─── Announcements ────────────────────────────────────────────
