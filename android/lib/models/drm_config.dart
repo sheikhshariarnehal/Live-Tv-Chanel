@@ -12,6 +12,7 @@ class DrmConfig {
   // ── ClearKey fields ──
   final String? kid;
   final String? key;
+  final Map<String, String>? clearKeys;
 
   // ── Widevine / PlayReady fields ──
   final String? licenseUrl;
@@ -21,6 +22,7 @@ class DrmConfig {
     required this.type,
     this.kid,
     this.key,
+    this.clearKeys,
     this.licenseUrl,
     this.licenseHeaders,
   });
@@ -37,10 +39,42 @@ class DrmConfig {
       orElse: () => DrmType.clearkey,
     );
 
+    // Parse clearKeys if present
+    Map<String, String>? clearKeys;
+    final clearKeysJson = map['clearKeys'] ?? map['clearkeys'];
+    if (clearKeysJson is Map) {
+      clearKeys = Map<String, String>.from(
+        clearKeysJson.map((k, v) => MapEntry(k.toString(), v.toString())),
+      );
+    } else if (map['keys'] is List) {
+      clearKeys = {};
+      for (final item in map['keys']) {
+        if (item is Map) {
+          final k = item['kid']?.toString();
+          final v = item['key']?.toString();
+          if (k != null && v != null) {
+            clearKeys[k] = v;
+          }
+        }
+      }
+    }
+
+    final kid = map['kid'] as String?;
+    final key = map['key'] as String?;
+
+    // Backwards compatibility fallback: if kid/key are in the root but not in clearKeys
+    if (kid != null && key != null) {
+      clearKeys ??= {};
+      if (!clearKeys.containsKey(kid)) {
+        clearKeys[kid] = key;
+      }
+    }
+
     return DrmConfig(
       type: type,
-      kid: map['kid'] as String?,
-      key: map['key'] as String?,
+      kid: kid,
+      key: key,
+      clearKeys: clearKeys,
       licenseUrl: map['licenseUrl'] as String?,
       licenseHeaders: map['headers'] != null
           ? Map<String, String>.from(map['headers'] as Map)
@@ -52,6 +86,7 @@ class DrmConfig {
     final map = <String, dynamic>{'type': type.name};
     if (kid != null) map['kid'] = kid;
     if (key != null) map['key'] = key;
+    if (clearKeys != null) map['clearKeys'] = clearKeys;
     if (licenseUrl != null) map['licenseUrl'] = licenseUrl;
     if (licenseHeaders != null) map['headers'] = licenseHeaders;
     return map;
@@ -64,5 +99,5 @@ class DrmConfig {
   bool get isWidevine => type == DrmType.widevine;
 
   @override
-  String toString() => 'DrmConfig(type: $type, kid: $kid)';
+  String toString() => 'DrmConfig(type: $type, kid: $kid, keysCount: ${clearKeys?.length ?? 0})';
 }

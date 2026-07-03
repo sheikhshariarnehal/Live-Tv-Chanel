@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:media_kit/media_kit.dart';
+
 import 'core/constants.dart';
 import 'core/theme.dart';
 import 'core/router.dart';
@@ -15,7 +15,7 @@ import 'services/local_proxy.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  MediaKit.ensureInitialized();
+
 
   // Start local proxy server for proxy-enabled channels
   if (!kIsWeb) {
