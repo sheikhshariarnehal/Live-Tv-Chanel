@@ -18,7 +18,7 @@
         {
           "id": "fifa-2026-live-server-3",
           "name": "FIFA 2026 Live (Server 3)",
-          "url": "http://84.17.50.102/fox/index.m3u8",
+          "url": "https://nbculocallive.akamaized.net/hls/live/2037084/losangeles/stream6/master.m3u8",
           "logo": "https://carboncredits.com/wp-content/uploads/2025/09/shutterstock_2306088965-e1757112807302-1068x749.jpg"
         },
         {
@@ -34,8 +34,26 @@
           "logo": "https://carboncredits.com/wp-content/uploads/2025/09/shutterstock_2306088965-e1757112807302-1068x749.jpg"
         },
         {
-          "id": "fifa-2026-live-server-6 4K",
-          "name": "FIFA 2026 Live (Server 6) 4K",
+          "id": "fifa-2026-live-server-6",
+          "name": "FIFA 2026 Live (Server 6)",
+          "url": "http://114.130.57.233:8080/TsportHD/tracks-v1a1/mono.m3u8?token=SkQuhAXZxgBan1",
+          "logo": "https://carboncredits.com/wp-content/uploads/2025/09/shutterstock_2306088965-e1757112807302-1068x749.jpg"
+        },
+        {
+          "id": "fifa-2026-live-server-7",
+          "name": "FIFA 2026 Live (Server 7)",
+          "url": "https://live-stream-proxy.sheikhshariarnehal.workers.dev/?url=http%3A%2F%2Frgkkw.live%2Flive%2F1Aoen7elp5%2FIgMJ60tmAa%2F745149.ts",
+          "logo": "https://carboncredits.com/wp-content/uploads/2025/09/shutterstock_2306088965-e1757112807302-1068x749.jpg"
+        },
+        {
+          "id": "fifa-2026-live-server-8",
+          "name": "FIFA 2026 Live (Server 8)",
+          "url": "https://live-stream-proxy.sheikhshariarnehal.workers.dev/?url=https%3A%2F%2F1nyaler.streamhostingcdn.top%2Fstream%2F23%2Findex.m3u8",
+          "logo": "https://carboncredits.com/wp-content/uploads/2025/09/shutterstock_2306088965-e1757112807302-1068x749.jpg"
+        },
+        {
+          "id": "fifa-2026-live-server-4K",
+          "name": "FIFA 2026 Live Server 4K",
           "url": "https://live-stream-proxy.sheikhshariarnehal.workers.dev/?url=https%3A%2F%2Finproviszon.st%2Ffussballtv1uhd-de.m3u8%3F&referer=https%3A%2F%2Fvileembeds.pages.dev%2F",
           "logo": "https://carboncredits.com/wp-content/uploads/2025/09/shutterstock_2306088965-e1757112807302-1068x749.jpg"
         }
