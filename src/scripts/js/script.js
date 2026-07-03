@@ -119,28 +119,13 @@ function getLogoUrl(url) {
 function getPlaybackStrategy(channel, forceProxy = false) {
   if (!channel || !channel.url) return 'direct';
   const url = channel.url;
-  
-  if (forceProxy) {
-    if (url.endsWith('.ts') || url.includes('.ts?')) {
-      return 'proxy-stream';
-    }
-    return 'proxy';
-  }
 
   if (url.endsWith('.mpd') || url.includes('.mpd?') || channel.drm) {
     return 'drm';
   }
 
   if (url.endsWith('.ts') || url.includes('.ts?')) {
-    return 'proxy-stream';
-  }
-
-  if (url.includes('cdn.livekhelatv.com') || url.includes('toffeelive.com')) {
-    return 'proxy';
-  }
-
-  if (url.startsWith('http://')) {
-    return 'proxy';
+    return 'ts';
   }
 
   return 'direct';
@@ -500,31 +485,21 @@ function handlePlaybackError(button, url, channelName, fallbackUrl) {
 
   if (isDrm) {
     console.error(`[DRM] Shaka error / playback failed for: ${channelName}`);
-    const wasProxied = url.startsWith('/proxy?url=');
-    if (!wasProxied && !isPrivateIP(channel.url)) {
-      console.log(`[PLAYBACK] DRM direct failed, falling back to proxy: ${channelName}`);
-      showError(`Retrying ${channelName} via proxy...`);
-      playChannel(button, url, channelName, fallbackUrl, true);
-      return;
+    if (fallbackUrl && fallbackUrl !== '' && fallbackUrl !== 'null' && fallbackUrl !== 'undefined') {
+      console.log(`[PLAYBACK] DRM direct failed. Trying fallback URL: ${fallbackUrl}`);
+      showError(`Switching to fallback stream for ${channelName}...`);
+      playChannel(button, fallbackUrl, channelName, null);
+    } else {
+      showPlayerError(channelName, url);
     }
-    showPlayerError(channelName, url);
     return;
   }
 
-  // If direct playback (direct or drm played directly) failed, retry via proxy
-  const wasProxied = url.startsWith('/proxy?url=');
-  if (!wasProxied && !isPrivateIP(url)) {
-    console.log(`[PLAYBACK] Direct failed, falling back to proxy: ${channelName}`);
-    showError(`Retrying ${channelName} via proxy...`);
-    playChannel(button, url, channelName, fallbackUrl, true);
-    return;
-  }
-
-  // If already proxied or direct failed and cannot be proxied, try the fallback URL
+  // If direct playback failed, try the fallback URL directly
   if (fallbackUrl && fallbackUrl !== '' && fallbackUrl !== 'null' && fallbackUrl !== 'undefined') {
-    console.log(`[PLAYBACK] Proxy failed for ${channelName}. Trying fallback URL: ${fallbackUrl}`);
+    console.log(`[PLAYBACK] Direct failed for ${channelName}. Trying fallback URL: ${fallbackUrl}`);
     showError(`Switching to fallback stream for ${channelName}...`);
-    playChannel(button, fallbackUrl, channelName, null, false);
+    playChannel(button, fallbackUrl, channelName, null);
   } else {
     showPlayerError(channelName, url);
   }
@@ -930,21 +905,16 @@ async function playChannel(button, url, channelName, fallbackUrl = null, forcePr
   const logPrefix = '[PLAYBACK]';
   if (strategy === 'direct') {
     console.log(`${logPrefix} Direct: ${channel.name}`);
-  } else if (strategy === 'proxy') {
-    console.log(`${logPrefix} Proxy: ${channel.name}`);
-  } else if (strategy === 'proxy-stream') {
-    console.log(`${logPrefix} Proxy Stream: ${channel.name}`);
+  } else if (strategy === 'ts') {
+    console.log(`${logPrefix} TS: ${channel.name}`);
   } else if (strategy === 'drm') {
     console.log(`${logPrefix} DRM: ${channel.name}`);
   }
 
   // Determine actual playback URL
   let playbackUrl = url;
-  if (strategy === 'proxy' || strategy === 'proxy-stream') {
-    playbackUrl = '/proxy?url=' + encodeURIComponent(url);
-  }
 
-  const isTs = (strategy === 'proxy-stream');
+  const isTs = (strategy === 'ts');
   const isMpd = (strategy === 'drm') || url.endsWith('.mpd') || url.includes('.mpd?') || (channel && !!channel.drm);
 
   try {
