@@ -7,6 +7,8 @@ import '../screens/upcoming/upcoming_screen.dart';
 import '../screens/player/player_screen.dart';
 import '../screens/search/search_screen.dart';
 
+import '../screens/splash/splash_screen.dart';
+
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -14,14 +16,23 @@ final appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/',
   routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const SplashScreen(),
+    ),
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
       builder: (context, state, child) => ShellScreen(child: child),
       routes: [
         GoRoute(
-          path: '/',
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: HomeScreen(),
+          path: '/home',
+          pageBuilder: (context, state) => CustomTransitionPage<void>(
+            key: state.pageKey,
+            child: const HomeScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+            transitionDuration: const Duration(milliseconds: 400),
           ),
         ),
         GoRoute(
