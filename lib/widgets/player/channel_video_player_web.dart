@@ -7,11 +7,15 @@ Widget getChannelVideoPlayer({
   required Channel channel,
   VoidCallback? onFullscreenToggle,
   bool isFullscreen = false,
+  bool showControls = true,
+  VoidCallback? onTap,
 }) {
   return ChannelVideoPlayerWeb(
     channel: channel,
     onFullscreenToggle: onFullscreenToggle,
     isFullscreen: isFullscreen,
+    showControls: showControls,
+    onTap: onTap,
   );
 }
 
@@ -26,12 +30,18 @@ class ChannelVideoPlayerWeb extends StatefulWidget implements ChannelVideoPlayer
   final VoidCallback? onFullscreenToggle;
   @override
   final bool isFullscreen;
+  @override
+  final bool showControls;
+  @override
+  final VoidCallback? onTap;
 
   const ChannelVideoPlayerWeb({
     super.key,
     required this.channel,
     this.onFullscreenToggle,
     this.isFullscreen = false,
+    this.showControls = true,
+    this.onTap,
   });
 
   @override
@@ -122,58 +132,74 @@ $streamUrl
             ),
           ),
 
+          // Transparent tap-to-toggle overlay on top of video, but behind controls
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: widget.onTap,
+              child: const SizedBox.shrink(),
+            ),
+          ),
+
           // Bottom controls overlay
           Positioned(
             left: 0,
             right: 0,
             bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [
-                    Colors.black.withAlpha(180),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-              child: Row(
-                children: [
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(Icons.circle, color: Colors.white, size: 6),
-                        SizedBox(width: 4),
-                        Text(
-                          'LIVE',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+            child: IgnorePointer(
+              ignoring: !widget.showControls,
+              child: AnimatedOpacity(
+                opacity: widget.showControls ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 250),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [
+                        Colors.black.withAlpha(180),
+                        Colors.transparent,
                       ],
                     ),
                   ),
-                  const Spacer(),
-                  if (widget.onFullscreenToggle != null)
-                    IconButton(
-                      onPressed: widget.onFullscreenToggle,
-                      icon: Icon(
-                        widget.isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
-                        color: Colors.white,
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(Icons.circle, color: Colors.white, size: 6),
+                            SizedBox(width: 4),
+                            Text(
+                              'LIVE',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                ],
+                      const Spacer(),
+                      if (widget.onFullscreenToggle != null)
+                        IconButton(
+                          onPressed: widget.onFullscreenToggle,
+                          icon: Icon(
+                            widget.isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
+                            color: Colors.white,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
