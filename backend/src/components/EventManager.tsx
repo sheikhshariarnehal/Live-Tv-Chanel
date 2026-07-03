@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createAdminSupabaseClient } from '../utils/supabase';
-import { Plus, Edit2, Trash2, Save, X, Calendar, Search, Trophy, Check, AlertCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Calendar, Search, Trophy, Check, AlertCircle, Star, Play, CheckCircle } from 'lucide-react';
 import 'flag-icons/css/flag-icons.min.css';
 
 interface Event {
@@ -299,6 +299,46 @@ export default function EventManager({ adminToken, onRefreshStats }: EventManage
     }
   };
 
+  const handleToggleFeatured = async (id: string, currentFeatured: boolean) => {
+    try {
+      const { error: updateErr } = await supabaseAdmin
+        .from('events')
+        .update({ is_featured: !currentFeatured })
+        .eq('id', id);
+
+      if (updateErr) throw updateErr;
+
+      showNotification('success', !currentFeatured ? 'Event marked as Featured' : 'Event removed from Featured');
+      
+      // Update local state directly for responsive feel
+      setEvents(prev => prev.map(ev => ev.id === id ? { ...ev, is_featured: !currentFeatured } : ev));
+      onRefreshStats();
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      showNotification('error', errMsg || 'Failed to update spotlight status');
+    }
+  };
+
+  const handleUpdateStatus = async (id: string, newStatus: string) => {
+    try {
+      const { error: updateErr } = await supabaseAdmin
+        .from('events')
+        .update({ status: newStatus })
+        .eq('id', id);
+
+      if (updateErr) throw updateErr;
+
+      showNotification('success', `Event status updated to ${newStatus}`);
+      
+      // Update local state directly for responsive feel
+      setEvents(prev => prev.map(ev => ev.id === id ? { ...ev, status: newStatus } : ev));
+      onRefreshStats();
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      showNotification('error', errMsg || 'Failed to update event status');
+    }
+  };
+
   // Filter events
   const filteredEvents = events.filter(event => {
     const nameStr = `${event.home_team?.name} vs ${event.away_team?.name} ${event.league} ${event.sport}`;
@@ -548,10 +588,25 @@ export default function EventManager({ adminToken, onRefreshStats }: EventManage
                       : 'bg-zinc-900/40 border-zinc-800 hover:border-zinc-700'
                   }`}
                 >
-                  <div className="flex justify-between items-start mb-3">
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400">
-                      {event.sport}
-                    </span>
+                  <div className="flex justify-between items-center mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400">
+                        {event.sport}
+                      </span>
+                      {!isEditing && (
+                        <button
+                          onClick={() => handleToggleFeatured(event.id, event.is_featured)}
+                          title={event.is_featured ? "Remove from Spotlight" : "Feature in Spotlight"}
+                          className={`p-1 rounded-lg transition-all ${
+                            event.is_featured 
+                              ? 'text-amber-400 hover:text-amber-300 bg-amber-500/10' 
+                              : 'text-zinc-500 hover:text-zinc-400 hover:bg-zinc-800'
+                          }`}
+                        >
+                          <Star className={`w-3.5 h-3.5 ${event.is_featured ? 'fill-amber-400' : ''}`} />
+                        </button>
+                      )}
+                    </div>
                     <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
                       event.status === 'live' 
                         ? 'bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse' 
@@ -668,15 +723,37 @@ export default function EventManager({ adminToken, onRefreshStats }: EventManage
                         </>
                       ) : (
                         <>
+                          {event.status !== 'live' && event.status !== 'completed' && (
+                            <button
+                              onClick={() => handleUpdateStatus(event.id, 'live')}
+                              title="Switch to Live"
+                              className="p-1.5 bg-zinc-950 hover:bg-red-950/40 border border-zinc-800 text-red-500 hover:text-red-400 hover:border-red-500/30 rounded-lg transition-all flex items-center gap-1"
+                            >
+                              <Play className="w-3.5 h-3.5 fill-red-500" />
+                              <span className="hidden lg:inline text-[10px] font-semibold">Go Live</span>
+                            </button>
+                          )}
+                          {event.status !== 'completed' && (
+                            <button
+                              onClick={() => handleUpdateStatus(event.id, 'completed')}
+                              title="Mark as Completed"
+                              className="p-1.5 bg-zinc-950 hover:bg-emerald-950/40 border border-zinc-800 text-emerald-500 hover:text-emerald-450 hover:border-emerald-500/30 rounded-lg transition-all flex items-center gap-1"
+                            >
+                              <CheckCircle className="w-3.5 h-3.5" />
+                              <span className="hidden lg:inline text-[10px] font-semibold">Complete</span>
+                            </button>
+                          )}
                           <button
                             onClick={() => handleEdit(event)}
                             className="p-1.5 bg-zinc-950 hover:bg-zinc-850 border border-zinc-805 text-purple-400 hover:text-white rounded-lg transition-all"
+                            title="Edit Event"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => handleDelete(event.id)}
                             className="p-1.5 bg-zinc-950 hover:bg-red-950/20 border border-zinc-805 text-red-400 hover:text-red-300 rounded-lg transition-all"
+                            title="Delete Event"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
