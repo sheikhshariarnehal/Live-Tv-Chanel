@@ -137,8 +137,19 @@ class HomeScreen extends ConsumerWidget {
           // Hero Banner
           const SliverToBoxAdapter(child: RepaintBoundary(child: _HeroBanner())),
 
-          // Live/Ongoing Matches
+          // Trending Channels
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          SliverToBoxAdapter(
+            child: SectionHeader(
+              title: 'Trending Channels',
+              actionLabel: 'All Channels',
+              onAction: () => context.go('/channels'),
+            ),
+          ),
+          const SliverToBoxAdapter(child: RepaintBoundary(child: _TrendingChannels())),
+
+          // Live/Ongoing Matches
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
           SliverToBoxAdapter(
             child: SectionHeader(
               title: 'Matches',
@@ -158,17 +169,6 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
           const SliverToBoxAdapter(child: RepaintBoundary(child: _TodaySchedule())),
-
-          // Trending Channels
-          const SliverToBoxAdapter(child: SizedBox(height: 20)),
-          SliverToBoxAdapter(
-            child: SectionHeader(
-              title: 'Trending Channels',
-              actionLabel: 'All Channels',
-              onAction: () => context.go('/channels'),
-            ),
-          ),
-          const SliverToBoxAdapter(child: RepaintBoundary(child: _TrendingChannels())),
 
           // Recently Watched
           const SliverToBoxAdapter(child: SizedBox(height: 20)),
