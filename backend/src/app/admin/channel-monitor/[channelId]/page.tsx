@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation';
 import { useAuth } from '../../../../providers/auth-provider';
 import {
   ArrowLeft, RefreshCw, CheckCircle2, XCircle, Clock,
-  Calendar, Check, X, Minus
+  Calendar, Check, X, Minus, ShieldAlert, Activity
 } from 'lucide-react';
 
 interface LogData {

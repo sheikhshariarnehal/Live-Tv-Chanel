@@ -6,13 +6,14 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '../../providers/auth-provider';
 import {
   Layers, Tv, Calendar, Bell, Shield, LogOut,
-  ChevronRight, Activity, Menu, X, Search, Sparkles,
+  ChevronRight, Activity, Menu, X, Search, Sparkles, List,
 } from 'lucide-react';
 
 const navItems = [
   { label: 'Overview', href: '/dashboard/overview', icon: Activity },
   { label: 'Categories', href: '/dashboard/categories', icon: Layers },
   { label: 'Channels', href: '/dashboard/channels', icon: Tv },
+  { label: 'Playlists', href: '/dashboard/playlists', icon: List },
   { label: 'Sports Matches', href: '/dashboard/events', icon: Calendar },
   { label: 'Announcements', href: '/dashboard/announcements', icon: Bell },
   { label: 'Channel Monitor', href: '/admin/channel-monitor', icon: Shield },

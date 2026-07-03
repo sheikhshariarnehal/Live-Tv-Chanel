@@ -63,6 +63,12 @@ interface Channel {
   name: string;
 }
 
+interface Playlist {
+  id: string;
+  name: string;
+  channels: string[];
+}
+
 interface EventManagerProps {
   adminToken: string;
   onRefreshStats: () => void;
@@ -71,6 +77,7 @@ interface EventManagerProps {
 export default function EventManager({ adminToken, onRefreshStats }: EventManagerProps) {
   const [events, setEvents] = useState<Event[]>([]);
   const [channels, setChannels] = useState<Channel[]>([]);
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -121,15 +128,26 @@ export default function EventManager({ adminToken, onRefreshStats }: EventManage
 
       if (chErr) throw chErr;
       setChannels(chData || []);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch events data');
+
+      // Fetch Playlists
+      const { data: plData, error: plErr } = await supabaseAdmin
+        .from('playlists')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (plErr) throw plErr;
+      setPlaylists(plData || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch events data');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adminToken]);
 
   const showNotification = (type: 'success' | 'error', msg: string) => {
@@ -221,8 +239,9 @@ export default function EventManager({ adminToken, onRefreshStats }: EventManage
       handleCancel();
       fetchData();
       onRefreshStats();
-    } catch (err: any) {
-      showNotification('error', err.message || 'Failed to update event');
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      showNotification('error', errMsg || 'Failed to update event');
     }
   };
 
@@ -273,8 +292,9 @@ export default function EventManager({ adminToken, onRefreshStats }: EventManage
       handleCancel();
       fetchData();
       onRefreshStats();
-    } catch (err: any) {
-      showNotification('error', err.message || 'Failed to schedule event');
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      showNotification('error', errMsg || 'Failed to schedule event');
     }
   };
 
@@ -294,8 +314,9 @@ export default function EventManager({ adminToken, onRefreshStats }: EventManage
       showNotification('success', 'Event deleted successfully');
       fetchData();
       onRefreshStats();
-    } catch (err: any) {
-      showNotification('error', err.message || 'Failed to delete event');
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      showNotification('error', errMsg || 'Failed to delete event');
     }
   };
 
@@ -512,9 +533,51 @@ export default function EventManager({ adminToken, onRefreshStats }: EventManage
               </label>
             </div>
 
+            {/* Playlist Quick Select */}
+            <div className="md:col-span-3 space-y-2">
+              <div className="flex justify-between items-center">
+                <label className="text-xs font-semibold text-zinc-400 block">Apply Playlist Selection (Quick Setup)</label>
+                <div className="flex gap-2 text-[10px] text-zinc-500">
+                  <span>Selected: {formData.channels.length} channels</span>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <select
+                  onChange={e => {
+                    const selectedPlId = e.target.value;
+                    if (selectedPlId) {
+                      const selectedPl = playlists.find(p => p.id === selectedPlId);
+                      if (selectedPl) {
+                        setFormData(prev => ({
+                          ...prev,
+                          channels: selectedPl.channels || []
+                        }));
+                      }
+                    }
+                  }}
+                  className="flex-1 p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-white"
+                  defaultValue=""
+                >
+                  <option value="" disabled>-- Choose a Playlist --</option>
+                  {playlists.map(pl => (
+                    <option key={pl.id} value={pl.id}>
+                      {pl.name} ({pl.channels?.length || 0} channels)
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, channels: [] }))}
+                  className="px-3 py-2 bg-zinc-950 hover:bg-zinc-850 border border-zinc-800 hover:border-zinc-700 rounded-xl text-xs text-zinc-400 hover:text-white transition"
+                >
+                  Clear Selection
+                </button>
+              </div>
+            </div>
+
             {/* Broadcast Channels Selection */}
             <div className="md:col-span-3 space-y-2">
-              <label className="text-xs font-semibold text-zinc-400 block">Select Broadcasting Live Channels (Multiselect)</label>
+              <label className="text-xs font-semibold text-zinc-400 block">Select Broadcasting Live Channels (Manual Fine-Tuning)</label>
               <div className="p-4 rounded-xl bg-zinc-950/80 border border-zinc-800 max-h-40 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                 {channels.map(ch => {
                   const isSelected = formData.channels.includes(ch.id);
