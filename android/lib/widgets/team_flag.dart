@@ -16,7 +16,7 @@ class TeamFlagWidget extends StatelessWidget {
 
   String? _emojiToCountryCode(String emoji) {
     final trimmed = emoji.trim();
-    if (trimmed.length == 2 && RegExp(r'^[a-zA-Z]{2}$').hasMatch(trimmed)) {
+    if (RegExp(r'^[a-zA-Z]{2}(-[a-zA-Z]{3})?$').hasMatch(trimmed)) {
       return trimmed.toLowerCase();
     }
     final runes = trimmed.runes.toList();

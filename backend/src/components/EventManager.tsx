@@ -21,7 +21,7 @@ interface Event {
 const emojiToCountryCode = (emoji: string): string | null => {
   if (!emoji) return null;
   const trimmed = emoji.trim();
-  if (/^[a-zA-Z]{2}$/.test(trimmed)) {
+  if (/^[a-zA-Z]{2}(-[a-zA-Z]{3})?$/.test(trimmed)) {
     return trimmed.toLowerCase();
   }
   const codePoints = Array.from(trimmed).map(char => char.codePointAt(0) || 0);
@@ -48,7 +48,7 @@ const renderTeamFlag = (flag?: string | null) => {
   if (trimmed.startsWith('http') || trimmed.startsWith('/') || trimmed.startsWith('data:')) {
     return <img src={trimmed} alt="" className="w-full h-full object-contain" />;
   }
-  if (/^[a-zA-Z]{2}$/.test(trimmed)) {
+  if (/^[a-zA-Z]{2}(-[a-zA-Z]{3})?$/.test(trimmed)) {
     return <span className={`fi fi-${trimmed.toLowerCase()} fis w-full h-full shadow-sm`} />;
   }
   const countryCode = emojiToCountryCode(trimmed);
