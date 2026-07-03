@@ -52,7 +52,19 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
   bool _hasError = false;
   String? _errorMessage;
 
-  /// Build the creation parameters to pass to the native ExoPlayer view.
+  // Cache creation params to avoid re-building on every frame
+  Map<String, dynamic>? _cachedParams;
+  String? _cachedChannelId;
+
+  Map<String, dynamic> _getCreationParams() {
+    if (_cachedParams != null && _cachedChannelId == widget.channel.id) {
+      return _cachedParams!;
+    }
+    _cachedChannelId = widget.channel.id;
+    _cachedParams = _buildCreationParams();
+    return _cachedParams!;
+  }
+
   Map<String, dynamic> _buildCreationParams() {
     final headers = widget.channel.headers.map(
       (key, value) => MapEntry(key, value.toString()),
@@ -98,24 +110,23 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
     }
   }
 
-  /// Handle callbacks from the native ExoPlayer.
   Future<dynamic> _handleMethodCall(MethodCall call) async {
+    if (!mounted) return;
+
     switch (call.method) {
       case 'onStateChanged':
         final args = Map<String, dynamic>.from(call.arguments as Map);
         final state = args['state'] as String;
         final isPlaying = args['isPlaying'] as bool? ?? false;
 
-        if (mounted) {
-          setState(() {
-            _isPlaying = isPlaying;
-            _isBuffering = state == 'buffering';
-            if (state == 'ready' || state == 'playing') {
-              _hasError = false;
-              _errorMessage = null;
-            }
-          });
-        }
+        setState(() {
+          _isPlaying = isPlaying;
+          _isBuffering = state == 'buffering';
+          if (state == 'ready' || state == 'playing') {
+            _hasError = false;
+            _errorMessage = null;
+          }
+        });
         break;
 
       case 'onError':
@@ -123,26 +134,23 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
         final message = args['message'] as String? ?? 'Unknown playback error';
         debugPrint('NativePlayer error: $message');
 
-        if (mounted) {
-          setState(() {
-            _hasError = true;
-            _errorMessage = message;
-            _isBuffering = false;
-          });
-        }
+        setState(() {
+          _hasError = true;
+          _errorMessage = message;
+          _isBuffering = false;
+        });
         break;
     }
   }
 
   void _retryPlayback() {
+    _cachedParams = null; // Invalidate cache on retry
     setState(() {
       _hasError = false;
       _errorMessage = null;
       _isBuffering = true;
     });
-
-    // Re-send play command with the same config
-    _methodChannel?.invokeMethod('play', _buildCreationParams());
+    _methodChannel?.invokeMethod('play', _getCreationParams());
   }
 
   @override
@@ -159,14 +167,15 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
         LocalProxy.startKkx4Auth();
       }
 
+      _cachedParams = null; // Invalidate on channel switch
+
       setState(() {
         _hasError = false;
         _errorMessage = null;
         _isBuffering = true;
       });
 
-      // Send new play command to the existing native view
-      _methodChannel?.invokeMethod('play', _buildCreationParams());
+      _methodChannel?.invokeMethod('play', _getCreationParams());
     }
   }
 
@@ -181,211 +190,254 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
 
   @override
   Widget build(BuildContext context) {
-    // Show error state
-    if (_hasError) {
-      return _buildErrorWidget();
-    }
+    if (_hasError) return _buildErrorWidget();
 
-    return Container(
+    return ColoredBox(
       color: Colors.black,
-      width: double.infinity,
-      height: double.infinity,
-      child: Stack(
-        children: [
-          // Native ExoPlayer view
-          AndroidView(
-            viewType: 'com.goplay/native_player',
-            creationParams: _buildCreationParams(),
-            creationParamsCodec: const StandardMessageCodec(),
-            onPlatformViewCreated: _onPlatformViewCreated,
-          ),
-
-          // Buffering indicator
-          if (_isBuffering)
-            const Center(
-              child: CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 2.5,
-              ),
+      child: SizedBox.expand(
+        child: Stack(
+          children: [
+            // Native ExoPlayer view
+            AndroidView(
+              viewType: 'com.goplay/native_player',
+              creationParams: _getCreationParams(),
+              creationParamsCodec: const StandardMessageCodec(),
+              onPlatformViewCreated: _onPlatformViewCreated,
             ),
 
-          // Transparent tap-to-toggle overlay on top of video, but behind controls
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: widget.onTap,
-              child: const SizedBox.shrink(),
-            ),
-          ),
-
-          // Bottom controls overlay
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: IgnorePointer(
-              ignoring: !widget.showControls,
-              child: AnimatedOpacity(
-                opacity: widget.showControls ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 250),
-                child: _buildControls(),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildControls() {
-    final bottomPadding = widget.isFullscreen ? 14.0 : 4.0;
-    final horizontalPadding = widget.isFullscreen ? 16.0 : 8.0;
-
-    return Container(
-      padding: EdgeInsets.only(
-        left: horizontalPadding,
-        right: horizontalPadding,
-        top: 6,
-        bottom: bottomPadding,
-      ),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.bottomCenter,
-          end: Alignment.topCenter,
-          colors: [
-            Colors.black.withAlpha(180),
-            Colors.transparent,
-          ],
-        ),
-      ),
-      child: Row(
-        children: [
-          // Play / Pause
-          IconButton(
-            onPressed: () {
-              if (_isPlaying) {
-                _methodChannel?.invokeMethod('pause');
-              } else {
-                _methodChannel?.invokeMethod('resume');
-              }
-            },
-            icon: Icon(
-              _isPlaying ? Icons.pause : Icons.play_arrow,
-              color: Colors.white,
-            ),
-            iconSize: 28,
-          ),
-
-          const SizedBox(width: 4),
-
-          // LIVE badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: Colors.red,
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.circle, color: Colors.white, size: 6),
-                SizedBox(width: 4),
-                Text(
-                  'LIVE',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // DRM indicator
-          if (widget.channel.hasDrm) ...[
-            const SizedBox(width: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.orange.withAlpha(180),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: const [
-                  Icon(Icons.lock, color: Colors.white, size: 8),
-                  SizedBox(width: 3),
-                  Text(
-                    'DRM',
-                    style: TextStyle(
+            // Buffering indicator (isolated)
+            if (_isBuffering)
+              const Center(
+                child: RepaintBoundary(
+                  child: SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: CircularProgressIndicator(
                       color: Colors.white,
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
+                      strokeWidth: 2,
                     ),
                   ),
-                ],
+                ),
+              ),
+
+            // Tap overlay
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: widget.onTap,
+                child: const SizedBox.shrink(),
+              ),
+            ),
+
+            // Controls
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: IgnorePointer(
+                ignoring: !widget.showControls,
+                child: AnimatedOpacity(
+                  opacity: widget.showControls ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: _PlayerControls(
+                    isPlaying: _isPlaying,
+                    isFullscreen: widget.isFullscreen,
+                    hasDrm: widget.channel.hasDrm,
+                    onPlayPause: () {
+                      if (_isPlaying) {
+                        _methodChannel?.invokeMethod('pause');
+                      } else {
+                        _methodChannel?.invokeMethod('resume');
+                      }
+                    },
+                    onFullscreenToggle: widget.onFullscreenToggle,
+                  ),
+                ),
               ),
             ),
           ],
-
-          const Spacer(),
-
-          // Fullscreen toggle
-          if (widget.onFullscreenToggle != null)
-            IconButton(
-              onPressed: widget.onFullscreenToggle,
-              icon: Icon(
-                widget.isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
-                color: Colors.white,
-              ),
-            ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildErrorWidget() {
-    return Container(
+    final isDrm = widget.channel.hasDrm;
+    return ColoredBox(
       color: Colors.black,
-      width: double.infinity,
-      height: double.infinity,
-      child: Center(
-        child: Column(
+      child: SizedBox.expand(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isDrm ? Icons.lock_outline : Icons.error_outline,
+                color: isDrm ? Colors.orange : Colors.redAccent,
+                size: 44,
+              ),
+              const SizedBox(height: 14),
+              Text(
+                isDrm ? 'DRM Protected Content' : 'Playback Error',
+                style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 6),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  _errorMessage ?? 'Unable to play this stream',
+                  style: const TextStyle(color: Colors.white60, fontSize: 12),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 14),
+              TextButton.icon(
+                onPressed: _retryPlayback,
+                icon: const Icon(Icons.refresh, size: 16),
+                label: const Text('Retry'),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.orange.shade800,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Extracted controls bar — avoids rebuilding when only play/pause state changes.
+class _PlayerControls extends StatelessWidget {
+  final bool isPlaying;
+  final bool isFullscreen;
+  final bool hasDrm;
+  final VoidCallback onPlayPause;
+  final VoidCallback? onFullscreenToggle;
+
+  const _PlayerControls({
+    required this.isPlaying,
+    required this.isFullscreen,
+    required this.hasDrm,
+    required this.onPlayPause,
+    this.onFullscreenToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          colors: [Color(0xB4000000), Colors.transparent],
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: isFullscreen ? 14.0 : 6.0,
+          right: isFullscreen ? 14.0 : 6.0,
+          top: 4,
+          bottom: isFullscreen ? 12.0 : 4.0,
+        ),
+        child: Row(
+          children: [
+            // Play / Pause
+            IconButton(
+              onPressed: onPlayPause,
+              icon: Icon(
+                isPlaying ? Icons.pause : Icons.play_arrow,
+                color: Colors.white,
+              ),
+              iconSize: 26,
+              padding: const EdgeInsets.all(6),
+              constraints: const BoxConstraints(),
+            ),
+            const SizedBox(width: 4),
+
+            // LIVE badge
+            const _LiveIndicator(),
+
+            // DRM indicator
+            if (hasDrm) ...[
+              const SizedBox(width: 5),
+              const _DrmIndicator(),
+            ],
+
+            const Spacer(),
+
+            // Fullscreen toggle
+            if (onFullscreenToggle != null)
+              IconButton(
+                onPressed: onFullscreenToggle,
+                icon: Icon(
+                  isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
+                  color: Colors.white,
+                ),
+                iconSize: 24,
+                padding: const EdgeInsets.all(6),
+                constraints: const BoxConstraints(),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LiveIndicator extends StatelessWidget {
+  const _LiveIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.red,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              widget.channel.hasDrm ? Icons.lock_outline : Icons.error_outline,
-              color: widget.channel.hasDrm ? Colors.orange : Colors.redAccent,
-              size: 48,
+            SizedBox(
+              width: 6, height: 6,
+              child: DecoratedBox(decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
             ),
-            const SizedBox(height: 16),
+            SizedBox(width: 4),
             Text(
-              widget.channel.hasDrm ? 'DRM Protected Content' : 'Playback Error',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              'LIVE',
+              style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Text(
-                _errorMessage ?? 'Unable to play this stream',
-                style: const TextStyle(color: Colors.white60, fontSize: 12),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: _retryPlayback,
-              icon: const Icon(Icons.refresh, size: 16),
-              label: const Text('Retry'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange.shade800,
-                foregroundColor: Colors.white,
-              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DrmIndicator extends StatelessWidget {
+  const _DrmIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xB4FF9800),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.lock, color: Colors.white, size: 8),
+            SizedBox(width: 3),
+            Text(
+              'DRM',
+              style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
             ),
           ],
         ),
