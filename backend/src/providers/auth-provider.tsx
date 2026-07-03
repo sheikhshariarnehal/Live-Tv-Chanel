@@ -78,9 +78,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Route guard: redirect to /login if not authenticated on dashboard routes
+  // Route guard: redirect to /login if not authenticated on dashboard and admin routes
   useEffect(() => {
-    if (!isLoading && !isAuthenticated && pathname.startsWith('/dashboard')) {
+    if (!isLoading && !isAuthenticated && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin'))) {
       router.replace('/login');
     }
   }, [isLoading, isAuthenticated, pathname, router]);

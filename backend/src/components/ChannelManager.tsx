@@ -97,15 +97,17 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
 
       if (chErr) throw chErr;
       setChannels(chData || []);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch channels data');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch channels data');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adminToken]);
 
   const showNotification = (type: 'success' | 'error', msg: string) => {
@@ -205,8 +207,8 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
       setEditingId(null);
       fetchData();
       onRefreshStats();
-    } catch (err: any) {
-      showNotification('error', err.message || 'Failed to update channel');
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Failed to update channel');
     }
   };
 
@@ -285,8 +287,8 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
       setShowAddForm(false);
       fetchData();
       onRefreshStats();
-    } catch (err: any) {
-      showNotification('error', err.message || 'Failed to add channel');
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Failed to add channel');
     }
   };
 
@@ -306,8 +308,8 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
       showNotification('success', 'Channel deleted successfully');
       fetchData();
       onRefreshStats();
-    } catch (err: any) {
-      showNotification('error', err.message || 'Failed to delete channel');
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Failed to delete channel');
     }
   };
 
@@ -323,8 +325,8 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
       // Update state locally to avoid full fetch
       setChannels(prev => prev.map(ch => ch.id === id ? { ...ch, [column]: !currentValue } : ch));
       onRefreshStats();
-    } catch (err: any) {
-      showNotification('error', err.message || `Failed to toggle ${column}`);
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : `Failed to toggle ${column}`);
     }
   };
 
@@ -355,10 +357,52 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const paginatedChannels = filteredChannels.slice(startIndex, endIndex);
 
-  // Reset page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, selectedCategory, filterLive]);
+  const [selectedChannelIds, setSelectedChannelIds] = useState<string[]>([]);
+
+  const handleSelectRow = (id: string) => {
+    setSelectedChannelIds(prev => 
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = () => {
+    const pageIds = paginatedChannels.map(ch => ch.id);
+    const allPageSelected = pageIds.length > 0 && pageIds.every(id => selectedChannelIds.includes(id));
+
+    if (allPageSelected) {
+      setSelectedChannelIds(prev => prev.filter(id => !pageIds.includes(id)));
+    } else {
+      setSelectedChannelIds(prev => {
+        const otherSelected = prev.filter(id => !pageIds.includes(id));
+        return [...otherSelected, ...pageIds];
+      });
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Are you sure you want to delete the ${selectedChannelIds.length} selected channels?`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const { error: deleteErr } = await supabaseAdmin
+        .from('channels')
+        .delete()
+        .in('id', selectedChannelIds);
+
+      if (deleteErr) throw deleteErr;
+
+      showNotification('success', `${selectedChannelIds.length} channels deleted successfully`);
+      setSelectedChannelIds([]);
+      fetchData();
+      onRefreshStats();
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Failed to delete selected channels');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -530,7 +574,7 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
                   <label className="text-xs font-semibold text-zinc-400">DRM Type</label>
                   <select
                     value={formData.drm_type}
-                    onChange={e => setFormData({ ...formData, drm_type: e.target.value as any })}
+                    onChange={e => setFormData({ ...formData, drm_type: e.target.value as 'clearkey' | 'widevine' | 'playready' })}
                     className="w-full p-2.5 rounded-xl glass-input text-sm"
                   >
                     <option value="clearkey">ClearKey (Embedded Keys)</option>
@@ -600,7 +644,11 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
               type="text"
               placeholder="Search by name, ID, slug, or stream URL..."
               value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
+              onChange={e => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+                setSelectedChannelIds([]);
+              }}
               className="w-full pl-9 pr-4 py-2.5 rounded-xl glass-input text-sm"
             />
           </div>
@@ -610,7 +658,11 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
             <Filter className="absolute left-3 top-3 w-4 h-4 text-zinc-500" />
             <select
               value={selectedCategory}
-              onChange={e => setSelectedCategory(e.target.value)}
+              onChange={e => {
+                setSelectedCategory(e.target.value);
+                setCurrentPage(1);
+                setSelectedChannelIds([]);
+              }}
               className="w-full pl-9 pr-4 py-2.5 rounded-xl glass-input text-sm appearance-none"
             >
               <option value="all">All Categories</option>
@@ -625,7 +677,11 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
             <Filter className="absolute left-3 top-3 w-4 h-4 text-zinc-500" />
             <select
               value={filterLive}
-              onChange={e => setFilterLive(e.target.value)}
+              onChange={e => {
+                setFilterLive(e.target.value);
+                setCurrentPage(1);
+                setSelectedChannelIds([]);
+              }}
               className="w-full pl-9 pr-4 py-2.5 rounded-xl glass-input text-sm appearance-none"
             >
               <option value="all">All Channels</option>
@@ -652,11 +708,36 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
           <div className="text-center py-12 text-zinc-500">No channels match selected filters.</div>
         ) : (
           <div className="space-y-4">
+            {/* Bulk Action Bar */}
+            {selectedChannelIds.length > 0 && (
+              <div className="flex items-center justify-between p-3.5 bg-red-950/20 border border-red-900/40 rounded-xl animate-fadeIn">
+                <div className="flex items-center gap-2 text-red-400 text-xs font-semibold">
+                  <AlertCircle className="w-4 h-4 text-red-400 animate-pulse" />
+                  <span>{selectedChannelIds.length} channels selected</span>
+                </div>
+                <button
+                  onClick={handleBulkDelete}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-red-650 hover:bg-red-700 text-white rounded-lg text-xs font-semibold transition cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Delete Selected
+                </button>
+              </div>
+            )}
+
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full border-collapse text-left text-sm text-zinc-400">
                 <thead>
                   <tr className="border-b border-zinc-800 text-zinc-500 text-xs">
+                    <th className="py-3 px-3 w-8">
+                      <input
+                        type="checkbox"
+                        checked={paginatedChannels.length > 0 && paginatedChannels.every(ch => selectedChannelIds.includes(ch.id))}
+                        onChange={handleSelectAll}
+                        className="rounded border-zinc-700 bg-zinc-950 text-purple-600 focus:ring-purple-500 cursor-pointer"
+                      />
+                    </th>
                     <th className="py-3 px-3">Order</th>
                     <th className="py-3 px-3">Channel Info</th>
                     <th className="py-3 px-3">Category</th>
@@ -673,6 +754,15 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
                     const isEditing = editingId === channel.id;
                     return (
                       <tr key={channel.id} className="hover:bg-zinc-900/30 transition-colors">
+                        <td className="py-3 px-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedChannelIds.includes(channel.id)}
+                            onChange={() => handleSelectRow(channel.id)}
+                            className="rounded border-zinc-700 bg-zinc-950 text-purple-600 focus:ring-purple-500 cursor-pointer"
+                            disabled={isEditing}
+                          />
+                        </td>
                         {/* Sort Order */}
                         <td className="py-3 px-3">
                           {isEditing ? (
@@ -902,6 +992,13 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
                   <div key={channel.id} className="p-4 rounded-xl bg-zinc-900/40 border border-zinc-805 space-y-3">
                     <div className="flex justify-between items-start border-b border-zinc-800/60 pb-2.5">
                       <div className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={selectedChannelIds.includes(channel.id)}
+                          onChange={() => handleSelectRow(channel.id)}
+                          className="rounded border-zinc-700 bg-zinc-950 text-purple-600 focus:ring-purple-500 cursor-pointer"
+                          disabled={isEditing}
+                        />
                         <div className="w-10 h-10 rounded-lg bg-zinc-950 border border-zinc-800 overflow-hidden flex items-center justify-center flex-shrink-0">
                           {channel.logo ? (
                             <img src={channel.logo} alt="" className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} />
@@ -1073,7 +1170,7 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
                             <div className="space-y-2">
                               <select
                                 value={formData.drm_type}
-                                onChange={e => setFormData({ ...formData, drm_type: e.target.value as any })}
+                                onChange={e => setFormData({ ...formData, drm_type: e.target.value as 'clearkey' | 'widevine' | 'playready' })}
                                 className="w-full p-1 rounded bg-zinc-950 border border-zinc-800 text-xs text-white"
                               >
                                 <option value="clearkey">ClearKey</option>

@@ -20,10 +20,10 @@ const navItems = [
 
 function getTabLabel(pathname: string): string {
   const item = navItems.find((n) => pathname.startsWith(n.href));
-  return item?.label ?? 'Dashboard';
+  return item?.label ?? 'Channel Monitor';
 }
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+export default function AdminLayout({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading, logout } = useAuth();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
