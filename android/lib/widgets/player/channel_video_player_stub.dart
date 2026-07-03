@@ -8,11 +8,15 @@ Widget getChannelVideoPlayer({
   required Channel channel,
   VoidCallback? onFullscreenToggle,
   bool isFullscreen = false,
+  bool showControls = true,
+  VoidCallback? onTap,
 }) {
   return ChannelVideoPlayerNative(
     channel: channel,
     onFullscreenToggle: onFullscreenToggle,
     isFullscreen: isFullscreen,
+    showControls: showControls,
+    onTap: onTap,
   );
 }
 
@@ -23,12 +27,18 @@ class ChannelVideoPlayerNative extends StatefulWidget implements ChannelVideoPla
   final VoidCallback? onFullscreenToggle;
   @override
   final bool isFullscreen;
+  @override
+  final bool showControls;
+  @override
+  final VoidCallback? onTap;
 
   const ChannelVideoPlayerNative({
     super.key,
     required this.channel,
     this.onFullscreenToggle,
     this.isFullscreen = false,
+    this.showControls = true,
+    this.onTap,
   });
 
   @override
@@ -199,12 +209,28 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
               ),
             ),
 
+          // Transparent tap-to-toggle overlay on top of video, but behind controls
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: widget.onTap,
+              child: const SizedBox.shrink(),
+            ),
+          ),
+
           // Bottom controls overlay
           Positioned(
             left: 0,
             right: 0,
             bottom: 0,
-            child: _buildControls(),
+            child: IgnorePointer(
+              ignoring: !widget.showControls,
+              child: AnimatedOpacity(
+                opacity: widget.showControls ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 250),
+                child: _buildControls(),
+              ),
+            ),
           ),
         ],
       ),
@@ -212,8 +238,16 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
   }
 
   Widget _buildControls() {
+    final bottomPadding = widget.isFullscreen ? 14.0 : 4.0;
+    final horizontalPadding = widget.isFullscreen ? 16.0 : 8.0;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.only(
+        left: horizontalPadding,
+        right: horizontalPadding,
+        top: 6,
+        bottom: bottomPadding,
+      ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.bottomCenter,
