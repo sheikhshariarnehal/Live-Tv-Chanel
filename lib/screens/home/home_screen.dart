@@ -581,18 +581,10 @@ class _TodaySchedule extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final eventsAsync = ref.watch(eventsProvider);
+    final eventsAsync = ref.watch(todayEventsProvider);
 
     return eventsAsync.when(
-      data: (events) {
-        final now = DateTime.now();
-        final todayEvents = events.where((e) {
-          final localStart = e.startTime.toLocal();
-          return localStart.year == now.year &&
-              localStart.month == now.month &&
-              localStart.day == now.day;
-        }).toList();
-
+      data: (todayEvents) {
         if (todayEvents.isEmpty) {
           return const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),

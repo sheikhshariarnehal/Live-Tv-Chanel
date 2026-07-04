@@ -8,12 +8,17 @@ import '../../providers/app_providers.dart';
 import '../../models/event.dart';
 import '../../widgets/cards/event_list_tile.dart';
 
+final groupedUpcomingEventsProvider = Provider.autoDispose<AsyncValue<Map<String, List<SportEvent>>>>((ref) {
+  final eventsAsync = ref.watch(upcomingEventsProvider);
+  return eventsAsync.whenData(UpcomingScreen._groupByDate);
+});
+
 class UpcomingScreen extends ConsumerWidget {
   const UpcomingScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final eventsAsync = ref.watch(upcomingEventsProvider);
+    final groupedAsync = ref.watch(groupedUpcomingEventsProvider);
 
     return Scaffold(
       body: Stack(
@@ -111,16 +116,15 @@ class UpcomingScreen extends ConsumerWidget {
                 ),
               ),
 
-              eventsAsync.when(
-                data: (events) {
-                  if (events.isEmpty) {
+              groupedAsync.when(
+                data: (grouped) {
+                  if (grouped.isEmpty) {
                     return const SliverFillRemaining(
                       hasScrollBody: false,
                       child: _EmptyState(),
                     );
                   }
 
-                  final grouped = _groupByDate(events);
                   final keys = grouped.keys.toList(growable: false);
 
                   return SliverList(
