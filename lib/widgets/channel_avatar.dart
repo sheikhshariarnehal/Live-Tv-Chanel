@@ -36,8 +36,8 @@ class ChannelAvatar extends StatelessWidget {
         border: showBorder
             ? Border.all(
                 color: channel.isLive
-                    ? GoPlayTheme.primary.withAlpha(80)
-                    : GoPlayTheme.cardBorder,
+                    ? const Color(0x5000E676) // GoPlayTheme.primary @ 31%
+                    : const Color(0xFF2A2A2A),
                 width: 2,
               )
             : null,
@@ -53,9 +53,9 @@ class ChannelAvatar extends StatelessWidget {
                   memCacheWidth: (size * 2).toInt(),
                   memCacheHeight: (size * 2).toInt(),
                   fadeInDuration: const Duration(milliseconds: 150),
-                  placeholder: (_, __) =>
+                  placeholder: (context, url) =>
                       Center(child: Text(initials, style: _initialsStyle)),
-                  errorWidget: (_, __, ___) =>
+                  errorWidget: (context, url, error) =>
                       Center(child: Text(initials, style: _initialsStyle)),
                 )
               : Center(child: Text(initials, style: _initialsStyle)),

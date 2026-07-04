@@ -4,6 +4,46 @@ import '../../models/event.dart';
 import '../live_badge.dart';
 import '../team_flag.dart';
 
+const _kLiveCardDecoration = BoxDecoration(
+  color: Color(0x0AFF1744), // liveBadge @ 4%
+  borderRadius: BorderRadius.all(Radius.circular(12)),
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x3DFF1744), width: 1.0), // liveBadge @ 24%
+  ),
+);
+
+const _kUpcomingCardDecoration = BoxDecoration(
+  color: Color(0x05FFFFFF), // white @ 2%
+  borderRadius: BorderRadius.all(Radius.circular(12)),
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x0FFFFFFF), width: 0.8), // white @ 6%
+  ),
+);
+
+const _kUpcomingBadgeDecoration = BoxDecoration(
+  color: Color(0x0AFFFFFF), // white @ 4%
+  borderRadius: BorderRadius.all(Radius.circular(4)),
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x14FFFFFF), width: 0.5),
+  ),
+);
+
+const _kLiveTimeBadgeDecoration = BoxDecoration(
+  color: Color(0x1FFF1744), // liveBadge @ 12%
+  borderRadius: BorderRadius.all(Radius.circular(8)),
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x3DFF1744), width: 0.5),
+  ),
+);
+
+const _kUpcomingTimeBadgeDecoration = BoxDecoration(
+  color: Color(0x0FFFFFFF), // white @ 6%
+  borderRadius: BorderRadius.all(Radius.circular(8)),
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x14FFFFFF), width: 0.5),
+  ),
+);
+
 /// Compact match card for horizontal scrolling lists
 class MatchCard extends StatelessWidget {
   final SportEvent event;
@@ -22,22 +62,15 @@ class MatchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLive = event.isLive;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 280,
         margin: const EdgeInsets.only(right: 12),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          gradient: GoPlayTheme.cardGradient,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: event.isLive
-                ? GoPlayTheme.liveBadge.withAlpha(60)
-                : GoPlayTheme.cardBorder,
-            width: event.isLive ? 1 : 0.5,
-          ),
-        ),
+        decoration: isLive ? _kLiveCardDecoration : _kUpcomingCardDecoration,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -58,19 +91,15 @@ class MatchCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                if (event.isLive)
+                if (isLive)
                   const LiveBadge()
                 else
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: GoPlayTheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: GoPlayTheme.onSurfaceVariant.withAlpha(40),
-                        width: 0.5,
-                      ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
                     ),
+                    decoration: _kUpcomingBadgeDecoration,
                     child: const Text(
                       'UPCOMING',
                       style: TextStyle(
@@ -98,10 +127,7 @@ class MatchCard extends StatelessWidget {
                         // Home Team
                         Row(
                           children: [
-                            TeamFlagWidget(
-                              flag: event.homeTeam.flag,
-                              size: 20,
-                            ),
+                            TeamFlagWidget(flag: event.homeTeam.flag, size: 20),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
@@ -121,10 +147,7 @@ class MatchCard extends StatelessWidget {
                         // Away Team
                         Row(
                           children: [
-                            TeamFlagWidget(
-                              flag: event.awayTeam.flag,
-                              size: 20,
-                            ),
+                            TeamFlagWidget(flag: event.awayTeam.flag, size: 20),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
@@ -146,23 +169,19 @@ class MatchCard extends StatelessWidget {
                   const SizedBox(width: 16),
                   // Time / VS Badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: event.isLive
-                          ? GoPlayTheme.liveBadge.withAlpha(20)
-                          : GoPlayTheme.surfaceContainerHighest.withAlpha(120),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: event.isLive
-                            ? GoPlayTheme.liveBadge.withAlpha(40)
-                            : Colors.transparent,
-                        width: 0.5,
-                      ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
                     ),
+                    decoration: isLive
+                        ? _kLiveTimeBadgeDecoration
+                        : _kUpcomingTimeBadgeDecoration,
                     child: Text(
-                      event.isLive ? 'VS' : _formatTime(event.startTime),
+                      isLive ? 'VS' : _formatTime(event.startTime),
                       style: TextStyle(
-                        color: event.isLive ? GoPlayTheme.liveBadge : GoPlayTheme.onSurfaceVariant,
+                        color: isLive
+                            ? GoPlayTheme.liveBadge
+                            : GoPlayTheme.onSurfaceVariant,
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
                       ),
