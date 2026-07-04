@@ -413,7 +413,7 @@ export const prerender = true;
   .mockup-container {
     position: relative;
     width: 100%;
-    max-width: 480px;
+    max-width: 550px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -582,9 +582,9 @@ export const prerender = true;
 
   .phone-stack-container {
     position: relative;
-    height: 540px;
+    height: 620px;
     width: 100%;
-    max-width: 480px;
+    max-width: 550px;
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -593,7 +593,7 @@ export const prerender = true;
 
   .phone-stack-item {
     position: absolute;
-    width: 250px;
+    width: 290px;
     aspect-ratio: 9/19;
     transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s;
     filter: drop-shadow(0 25px 40px rgba(0,0,0,0.6));
@@ -614,19 +614,19 @@ export const prerender = true;
     filter: drop-shadow(0 35px 50px rgba(0,0,0,0.7)) drop-shadow(0 0 20px rgba(0,255,102,0.05));
   }
   .phone-stack-container.state-0 .phone-home {
-    transform: translateX(110px) rotate(10deg) scale(0.85);
+    transform: translateX(130px) rotate(10deg) scale(0.85);
     z-index: 2;
     filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)) brightness(0.7);
   }
   .phone-stack-container.state-0 .phone-stream {
-    transform: translateX(190px) rotate(15deg) scale(0.75);
+    transform: translateX(220px) rotate(15deg) scale(0.75);
     z-index: 1;
     filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6)) brightness(0.5);
   }
 
   /* State 1: Home is center */
   .phone-stack-container.state-1 .phone-schedule {
-    transform: translateX(-110px) rotate(-10deg) scale(0.85);
+    transform: translateX(-130px) rotate(-10deg) scale(0.85);
     z-index: 1;
     filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)) brightness(0.6);
   }
@@ -636,19 +636,19 @@ export const prerender = true;
     filter: drop-shadow(0 35px 50px rgba(0,0,0,0.7)) drop-shadow(0 0 20px rgba(0,255,102,0.05));
   }
   .phone-stack-container.state-1 .phone-stream {
-    transform: translateX(110px) rotate(10deg) scale(0.85);
+    transform: translateX(130px) rotate(10deg) scale(0.85);
     z-index: 2;
     filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)) brightness(0.7);
   }
 
   /* State 2: Stream is center */
   .phone-stack-container.state-2 .phone-schedule {
-    transform: translateX(-190px) rotate(-15deg) scale(0.75);
+    transform: translateX(-220px) rotate(-15deg) scale(0.75);
     z-index: 1;
     filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6)) brightness(0.5);
   }
   .phone-stack-container.state-2 .phone-home {
-    transform: translateX(-110px) rotate(-10deg) scale(0.85);
+    transform: translateX(-130px) rotate(-10deg) scale(0.85);
     z-index: 2;
     filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)) brightness(0.7);
   }
@@ -696,30 +696,30 @@ export const prerender = true;
       transform: scale(1.05) translateY(-5px);
     }
     .phone-stack-container.state-0:hover .phone-home {
-      transform: translateX(180px) rotate(6deg) scale(0.9);
+      transform: translateX(200px) rotate(6deg) scale(0.9);
       filter: drop-shadow(0 20px 30px rgba(0,0,0,0.65)) brightness(0.85);
     }
     .phone-stack-container.state-0:hover .phone-stream {
-      transform: translateX(260px) rotate(9deg) scale(0.8);
+      transform: translateX(290px) rotate(9deg) scale(0.8);
     }
 
     .phone-stack-container.state-1:hover .phone-schedule {
-      transform: translateX(-180px) rotate(-6deg) scale(0.9);
+      transform: translateX(-200px) rotate(-6deg) scale(0.9);
       filter: drop-shadow(0 20px 30px rgba(0,0,0,0.65)) brightness(0.85);
     }
     .phone-stack-container.state-1:hover .phone-home {
       transform: scale(1.05) translateY(-5px);
     }
     .phone-stack-container.state-1:hover .phone-stream {
-      transform: translateX(180px) rotate(6deg) scale(0.9);
+      transform: translateX(200px) rotate(6deg) scale(0.9);
       filter: drop-shadow(0 20px 30px rgba(0,0,0,0.65)) brightness(0.9);
     }
 
     .phone-stack-container.state-2:hover .phone-schedule {
-      transform: translateX(-260px) rotate(-9deg) scale(0.8);
+      transform: translateX(-290px) rotate(-9deg) scale(0.8);
     }
     .phone-stack-container.state-2:hover .phone-home {
-      transform: translateX(-180px) rotate(-6deg) scale(0.9);
+      transform: translateX(-200px) rotate(-6deg) scale(0.9);
       filter: drop-shadow(0 20px 30px rgba(0,0,0,0.65)) brightness(0.85);
     }
     .phone-stack-container.state-2:hover .phone-stream {
@@ -1121,13 +1121,13 @@ export const prerender = true;
     <div class="mockup-container">
       <div class="phone-stack-container state-1" id="hero-stack" style="margin-bottom: 20px;">
         <div class="phone-stack-item phone-schedule">
-          <img src="https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Screenshot_2026-07-04-11-37-25-113_com.goplay.goplay-portrait.png" alt="Schedule Screen" decoding="async" fetchpriority="high" />
+          <img src="https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Goplay%20Screen%204.webp" alt="Schedule Screen" decoding="async" fetchpriority="high" />
         </div>
         <div class="phone-stack-item phone-home">
-          <img src="https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Screenshot_2026-07-04-11-36-54-980_com.goplay.goplay-portrait(1).png" alt="Home Dashboard Screen" decoding="async" fetchpriority="high" />
+          <img src="https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Goplay%20Screen1.webp" alt="Home Dashboard Screen" decoding="async" fetchpriority="high" />
         </div>
         <div class="phone-stack-item phone-stream">
-          <img id="hero-stream-img" src="https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Screenshot_2026-07-04-11-54-44-173_com.goplay.goplay-portrait.png" alt="Live Stream Player Screen" decoding="async" fetchpriority="high" />
+          <img id="hero-stream-img" src="https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Goplay%20Screen%203.webp" alt="Live Stream Player Screen" decoding="async" fetchpriority="high" />
         </div>
       </div>
     </div>
@@ -1185,13 +1185,13 @@ export const prerender = true;
   <div class="wrap showcase">
     <div class="phone-stack-container reveal state-1" id="showcase-stack">
       <div class="phone-stack-item phone-schedule">
-        <img src="https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Screenshot_2026-07-04-11-37-25-113_com.goplay.goplay-portrait.png" alt="Schedule Screen" loading="lazy" decoding="async" />
+        <img src="https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Goplay%20Screen%204.webp" alt="Schedule Screen" loading="lazy" decoding="async" />
       </div>
       <div class="phone-stack-item phone-home">
-        <img src="https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Screenshot_2026-07-04-11-36-54-980_com.goplay.goplay-portrait(1).png" alt="Home Dashboard Screen" loading="lazy" decoding="async" />
+        <img src="https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Goplay%20Screen1.webp" alt="Home Dashboard Screen" loading="lazy" decoding="async" />
       </div>
       <div class="phone-stack-item phone-stream">
-        <img src="https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Screenshot_2026-07-04-11-54-44-173_com.goplay.goplay-portrait.png" alt="Live Stream Player Screen" loading="lazy" decoding="async" />
+        <img src="https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Goplay%20Screen%203.webp" alt="Live Stream Player Screen" loading="lazy" decoding="async" />
       </div>
     </div>
 
@@ -1319,7 +1319,7 @@ export const prerender = true;
   const heroStreamImg = document.getElementById('hero-stream-img');
   const showcaseContainer = document.getElementById('showcase-stack');
   const checklistItems = document.querySelectorAll('.check-item');
-  const STREAM_IMG_SRC = "https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Screenshot_2026-07-04-11-54-44-173_com.goplay.goplay-portrait.png";
+  const STREAM_IMG_SRC = "https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Goplay%20Screen%203.webp";
   // index -> which stack state ("state-0/1/2") should be centered; same mapping for hero and showcase.
   const STACK_STATES = ['state-1', 'state-2', 'state-0'];
   const STATE_CLASSES = ['state-0', 'state-1', 'state-2'];
