@@ -95,6 +95,20 @@ final featuredEventsProvider = Provider<AsyncValue<List<SportEvent>>>((ref) {
   );
 });
 
+final todayEventsProvider = Provider<AsyncValue<List<SportEvent>>>((ref) {
+  final eventsState = ref.watch(eventsProvider);
+  return eventsState.whenData((events) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    return events.where((e) {
+      final localStart = e.startTime.toLocal();
+      return localStart.year == today.year &&
+          localStart.month == today.month &&
+          localStart.day == today.day;
+    }).toList();
+  });
+});
+
 // ─── Categories ───────────────────────────────────────────────
 final categoriesProvider = FutureProvider<List<Category>>((ref) async {
   final cache = ref.watch(cacheServiceProvider);
