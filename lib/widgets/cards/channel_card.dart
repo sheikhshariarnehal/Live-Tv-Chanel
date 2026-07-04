@@ -3,7 +3,87 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../models/channel.dart';
 
-/// Premium channel card widget for the channel grid
+// ─── Pre-cached card decorations — never reallocated ─────────
+const _cardDecoNormal = BoxDecoration(
+  gradient: LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0x0DFFFFFF), Color(0x03FFFFFF)],
+  ),
+  borderRadius: BorderRadius.all(Radius.circular(10)),
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x14FFFFFF), width: 0.8),
+  ),
+);
+
+const _cardDecoHovered = BoxDecoration(
+  gradient: LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0x14FFFFFF), Color(0x08FFFFFF)],
+  ),
+  borderRadius: BorderRadius.all(Radius.circular(10)),
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x6400E676), width: 0.8), // primary @ 39%
+  ),
+  boxShadow: [
+    BoxShadow(
+      color: Color(0x1400E676), // primary @ 8%
+      blurRadius: 12,
+      offset: Offset(0, 4),
+    ),
+  ],
+);
+
+// ─── Pre-cached quality badge decorations ────────────────────
+const _hd4kDeco = BoxDecoration(
+  color: Color(0x1E3B82F6), // blue @ 12%
+  borderRadius: BorderRadius.all(Radius.circular(4)),
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x323B82F6), width: 0.5), // blue @ 20%
+  ),
+);
+
+const _hdDeco = BoxDecoration(
+  color: Color(0x1900E676), // primary @ 10%
+  borderRadius: BorderRadius.all(Radius.circular(4)),
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x2800E676), width: 0.5), // primary @ 16%
+  ),
+);
+
+// ─── Pre-cached avatar decoration ────────────────────────────
+const _avatarDeco = BoxDecoration(
+  color: Color(0x14FFFFFF),
+  shape: BoxShape.circle,
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x1AFFFFFF), width: 1.0),
+  ),
+);
+
+// ─── Pre-cached text styles ───────────────────────────────────
+const _nameStyle = TextStyle(
+  color: GoPlayTheme.onSurface,
+  fontSize: 11.5,
+  fontWeight: FontWeight.w600,
+  height: 1.2,
+);
+
+const _hdStyle = TextStyle(
+  color: Color(0xFF60A5FA),
+  fontSize: 8,
+  fontWeight: FontWeight.w800,
+  letterSpacing: 0.5,
+);
+
+const _sdStyle = TextStyle(
+  color: GoPlayTheme.primary,
+  fontSize: 8,
+  fontWeight: FontWeight.w800,
+  letterSpacing: 0.5,
+);
+
+/// Premium channel card widget for the channel grid.
 class ChannelCard extends StatefulWidget {
   final Channel channel;
   final bool isFavorite;
@@ -20,21 +100,18 @@ class ChannelCard extends StatefulWidget {
   State<ChannelCard> createState() => _ChannelCardState();
 }
 
-class _ChannelCardState extends State<ChannelCard>
-    with SingleTickerProviderStateMixin {
+class _ChannelCardState extends State<ChannelCard> {
   bool _isHovered = false;
 
-  /// Builds a clean initials widget from the channel name
-  Widget _buildInitials(double fontSize) {
+  Widget _buildInitials() {
     final name = widget.channel.name;
-    final initials =
-        name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
+    final initials = name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
     return Center(
       child: Text(
         initials,
-        style: TextStyle(
-          color: GoPlayTheme.primary,
-          fontSize: fontSize,
+        style: const TextStyle(
+          color: Color(0xC8FFFFFF), // white @ 78%
+          fontSize: 14,
           fontWeight: FontWeight.w800,
           letterSpacing: 1,
         ),
@@ -45,6 +122,7 @@ class _ChannelCardState extends State<ChannelCard>
   @override
   Widget build(BuildContext context) {
     final channel = widget.channel;
+    final is4K = channel.quality == '4K';
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -53,226 +131,85 @@ class _ChannelCardState extends State<ChannelCard>
       child: GestureDetector(
         onTap: () => context.push('/player/${channel.id}'),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeInOut,
+          // Hovered: slight 3% scale — uses cached Matrix; not built per frame.
           transform: _isHovered
-              ? (Matrix4.identity()..scale(1.03))
+              ? Matrix4.diagonal3Values(1.03, 1.03, 1.0)
               : Matrix4.identity(),
-          decoration: BoxDecoration(
-            gradient: GoPlayTheme.cardGradient,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: _isHovered
-                  ? GoPlayTheme.primary.withAlpha(60)
-                  : GoPlayTheme.cardBorder,
-              width: _isHovered ? 1.0 : 0.5,
-            ),
-            boxShadow: _isHovered
-                ? [
-                    BoxShadow(
-                      color: GoPlayTheme.primary.withAlpha(15),
-                      blurRadius: 16,
-                      spreadRadius: 0,
-                    )
-                  ]
-                : null,
-          ),
+          // Switch between two pre-cached decorations — zero allocations.
+          decoration: _isHovered ? _cardDecoHovered : _cardDecoNormal,
           child: Stack(
+            alignment: Alignment
+                .center, // Vertically and horizontally centers the main content!
             children: [
-              // Main content (Logo and Title centered)
-              Center(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Logo circle (uniform border)
-                      _LogoAvatar(
-                        channel: channel,
-                        buildInitials: _buildInitials,
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Channel name centered
-                      Text(
-                        channel.name,
-                        style: const TextStyle(
-                          color: GoPlayTheme.onSurface,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          height: 1.2,
+              // ── Main Content ─────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Logo avatar — const decoration, no rebuild cost
+                    Center(
+                      child: SizedBox(
+                        width: 54,
+                        height: 54,
+                        child: DecoratedBox(
+                          decoration: _avatarDeco,
+                          child: ClipOval(
+                            child:
+                                channel.logo != null && channel.logo!.isNotEmpty
+                                ? Image.network(
+                                    channel.logo!,
+                                    fit: BoxFit.cover,
+                                    width: 54,
+                                    height: 54,
+                                    cacheWidth: 108,
+                                    cacheHeight: 108,
+                                    errorBuilder: (_, err, st) =>
+                                        _buildInitials(),
+                                  )
+                                : _buildInitials(),
+                          ),
                         ),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      channel.name,
+                      style: _nameStyle,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
 
-              // Quality badge — top left corner
+              // ── Quality Badge ─────────────────────────────────
               if (channel.quality != null)
                 Positioned(
-                  top: 8,
-                  left: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 5, vertical: 1.5),
-                    decoration: BoxDecoration(
-                      color: channel.quality == '4K'
-                          ? const Color(0xFF3B82F6).withAlpha(25)
-                          : GoPlayTheme.primary.withAlpha(20),
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: channel.quality == '4K'
-                            ? const Color(0xFF3B82F6).withAlpha(40)
-                            : GoPlayTheme.primary.withAlpha(30),
-                        width: 0.5,
+                  top: 6,
+                  left: 6,
+                  child: DecoratedBox(
+                    decoration: is4K ? _hd4kDeco : _hdDeco,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 1,
                       ),
-                    ),
-                    child: Text(
-                      channel.quality!,
-                      style: TextStyle(
-                        color: channel.quality == '4K'
-                            ? const Color(0xFF3B82F6)
-                            : GoPlayTheme.primary,
-                        fontSize: 8.5,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
+                      child: Text(
+                        channel.quality!,
+                        style: is4K ? _hdStyle : _sdStyle,
                       ),
-                    ),
-                  ),
-                ),
-
-              // Live badge — top right corner
-              if (channel.isLive)
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 5, vertical: 1.5),
-                    decoration: BoxDecoration(
-                      color: GoPlayTheme.liveBadge.withAlpha(20),
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: GoPlayTheme.liveBadge.withAlpha(40),
-                        width: 0.5,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 4,
-                          height: 4,
-                          decoration: const BoxDecoration(
-                            color: GoPlayTheme.liveBadge,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 3),
-                        const Text(
-                          'LIVE',
-                          style: TextStyle(
-                            color: GoPlayTheme.liveBadge,
-                            fontSize: 8.5,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-              // DRM badge — below quality badge (top left)
-              if (channel.hasDrm)
-                Positioned(
-                  bottom: 8,
-                  left: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 5, vertical: 1.5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF9800).withAlpha(20),
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: const Color(0xFFFF9800).withAlpha(40),
-                        width: 0.5,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(
-                          Icons.lock,
-                          color: Color(0xFFFF9800),
-                          size: 7,
-                        ),
-                        SizedBox(width: 3),
-                        Text(
-                          'DRM',
-                          style: TextStyle(
-                            color: Color(0xFFFF9800),
-                            fontSize: 8,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                 ),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// Logo avatar with clean standard border
-class _LogoAvatar extends StatelessWidget {
-  final Channel channel;
-  final Widget Function(double fontSize) buildInitials;
-
-  const _LogoAvatar({
-    required this.channel,
-    required this.buildInitials,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 52,
-      height: 52,
-      decoration: BoxDecoration(
-        color: GoPlayTheme.surfaceContainerHighest,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: channel.isLive
-              ? GoPlayTheme.primary.withAlpha(50)
-              : GoPlayTheme.cardBorder,
-          width: 1.5,
-        ),
-      ),
-      child: ClipOval(
-        child: channel.logo != null && channel.logo!.isNotEmpty
-            ? Image.network(
-                channel.logo!,
-                fit: BoxFit.cover,
-                width: 52,
-                height: 52,
-                cacheWidth: 104,
-                cacheHeight: 104,
-                errorBuilder: (context, error, stackTrace) =>
-                    buildInitials(14),
-              )
-            : buildInitials(14),
       ),
     );
   }

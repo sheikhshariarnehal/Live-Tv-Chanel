@@ -7,6 +7,35 @@ import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/cards/channel_card.dart';
 
+// ─── Pre-cached styles — allocated once, never again ─────────
+final TextStyle _titleStyle = GoogleFonts.orbitron(
+  fontSize: 20,
+  fontWeight: FontWeight.w900,
+  color: GoPlayTheme.primary,
+  letterSpacing: 3,
+);
+
+// ─── Pre-cached appbar glass decoration ──────────────────────
+const BoxDecoration _appBarGlass = BoxDecoration(
+  color: Color(0xCC0D0D12),
+  border: Border(bottom: BorderSide(color: Color(0x14FFFFFF), width: 0.8)),
+);
+
+// ─── Pre-cached search field decoration ──────────────────────
+const BoxDecoration _searchBoxDecoration = BoxDecoration(
+  color: Color(0x1F000000),
+  borderRadius: BorderRadius.all(Radius.circular(20)),
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x14FFFFFF), width: 0.8),
+  ),
+);
+
+// ─── Pre-cached search text style ────────────────────────────
+const TextStyle _searchTextStyle = TextStyle(
+  color: GoPlayTheme.onSurface,
+  fontSize: 14,
+);
+
 class ChannelsScreen extends ConsumerStatefulWidget {
   const ChannelsScreen({super.key});
 
@@ -40,9 +69,21 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
     });
   }
 
+  void _scrollToTop() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final selectedCategory = ref.watch(selectedCategoryProvider);
+    // Cache padding lookup — avoids full MediaQueryData allocation each frame
+    final topPad = MediaQuery.paddingOf(context).top;
     final channelsAsync = ref.watch(
       channelsByCategoryProvider(selectedCategory),
     );
@@ -52,9 +93,8 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
       body: CustomScrollView(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
-        cacheExtent: 150.0,
+        cacheExtent: 200.0,
         slivers: [
-          // Dynamic App Bar supporting search and categories
           SliverAppBar(
             floating: true,
             pinned: true,
@@ -65,77 +105,28 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
             titleSpacing: 16,
             toolbarHeight: 56,
             title: _isSearching
-                ? Container(
-                    height: 40,
-                    decoration: const BoxDecoration(
-                      color: Color(0x1F000000), // Very dark glossy backdrop
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
-                      border: Border.fromBorderSide(
-                        BorderSide(color: Color(0x14FFFFFF), width: 0.8),
-                      ),
-                    ),
-                    child: TextField(
-                      controller: _searchController,
-                      autofocus: true,
-                      onChanged: (val) {
-                        if (_debounceTimer?.isActive ?? false) {
-                          _debounceTimer!.cancel();
-                        }
-                        _debounceTimer = Timer(
-                          const Duration(milliseconds: 180),
-                          () {
-                            setState(() => _localSearchQuery = val);
-                          },
-                        );
-                      },
-                      style: const TextStyle(
-                        color: GoPlayTheme.onSurface,
-                        fontSize: 14,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'Search channels by name, country...',
-                        hintStyle: TextStyle(
-                          color: GoPlayTheme.onSurfaceVariant.withAlpha(120),
-                          fontSize: 14,
-                        ),
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                        border: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        prefixIcon: const Icon(
-                          Icons.search_rounded,
-                          color: GoPlayTheme.primary,
-                          size: 20,
-                        ),
-                        suffixIcon: IconButton(
-                          icon: const Icon(
-                            Icons.close_rounded,
-                            color: GoPlayTheme.onSurfaceVariant,
-                            size: 18,
-                          ),
-                          onPressed: () {
-                            if (_searchController.text.isEmpty) {
-                              _toggleSearch();
-                            } else {
-                              _searchController.clear();
-                              _debounceTimer?.cancel();
-                              setState(() => _localSearchQuery = '');
-                            }
-                          },
-                        ),
-                      ),
-                    ),
+                ? _SearchField(
+                    controller: _searchController,
+                    onChanged: (val) {
+                      if (_debounceTimer?.isActive ?? false) {
+                        _debounceTimer!.cancel();
+                      }
+                      _debounceTimer = Timer(
+                        const Duration(milliseconds: 180),
+                        () => setState(() => _localSearchQuery = val),
+                      );
+                    },
+                    onClose: () {
+                      if (_searchController.text.isEmpty) {
+                        _toggleSearch();
+                      } else {
+                        _searchController.clear();
+                        _debounceTimer?.cancel();
+                        setState(() => _localSearchQuery = '');
+                      }
+                    },
                   )
-                : Text(
-                    'CHANNELS',
-                    style: GoogleFonts.orbitron(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                      color: GoPlayTheme.primary,
-                      letterSpacing: 3,
-                    ),
-                  ),
+                : Text('CHANNELS', style: _titleStyle),
             actions: _isSearching
                 ? null
                 : [
@@ -149,115 +140,53 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
                     ),
                     const SizedBox(width: 8),
                   ],
-            flexibleSpace: ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 16.0, sigmaY: 16.0),
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Color(0xCC0D0D12), // Glassy premium dark theme
-                    border: Border(
-                      bottom: BorderSide(
-                        color: Color(
-                          0x14FFFFFF,
-                        ), // Translucent white border @ 8%
-                        width: 0.8,
-                      ),
-                    ),
+            // RepaintBoundary isolates the blur surface so it is not
+            // re-rasterised whenever the list scrolls beneath it.
+            flexibleSpace: RepaintBoundary(
+              child: ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 14.0, sigmaY: 14.0),
+                  child: const DecoratedBox(
+                    decoration: _appBarGlass,
+                    child: SizedBox.expand(),
                   ),
                 ),
               ),
             ),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(48),
-              child: _CategoryFilterBar(
-                onCategorySelected: () {
-                  // Scroll to top when changing category
-                  if (_scrollController.hasClients) {
-                    _scrollController.animateTo(
-                      0,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeOut,
-                    );
-                  }
-                },
-              ),
+              child: _CategoryFilterBar(onCategorySelected: _scrollToTop),
             ),
           ),
 
           // Channel Grid
           channelsAsync.when(
             data: (channels) {
-              // Apply search filter locally for instant performance
               final query = _localSearchQuery.trim().toLowerCase();
               final filtered = query.isEmpty
                   ? channels
                   : channels.where((ch) {
-                      final nameMatch = ch.name.toLowerCase().contains(query);
-                      final countryMatch =
-                          ch.country?.toLowerCase().contains(query) ?? false;
-                      final languageMatch =
-                          ch.language?.toLowerCase().contains(query) ?? false;
-                      return nameMatch || countryMatch || languageMatch;
+                      return ch.name.toLowerCase().contains(query) ||
+                          (ch.country?.toLowerCase().contains(query) ??
+                              false) ||
+                          (ch.language?.toLowerCase().contains(query) ?? false);
                     }).toList();
 
               if (filtered.isEmpty) {
                 return SliverFillRemaining(
                   hasScrollBody: false,
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: const BoxDecoration(
-                            color: Color(0x0DFFFFFF),
-                            shape: BoxShape.circle,
-                            border: Border.fromBorderSide(
-                              BorderSide(color: Color(0x14FFFFFF), width: 0.8),
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.live_tv_outlined,
-                            size: 32,
-                            color: GoPlayTheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _localSearchQuery.isNotEmpty
-                              ? 'No channels match your search'
-                              : 'No channels in this category',
-                          style: const TextStyle(
-                            color: GoPlayTheme.onSurfaceVariant,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextButton(
-                          onPressed: () {
-                            if (_localSearchQuery.isNotEmpty) {
-                              _searchController.clear();
-                              setState(() => _localSearchQuery = '');
-                            } else {
-                              ref
-                                  .read(selectedCategoryProvider.notifier)
-                                  .select('all');
-                            }
-                          },
-                          child: Text(
-                            _localSearchQuery.isNotEmpty
-                                ? 'Clear Search'
-                                : 'View all channels',
-                            style: const TextStyle(
-                              color: GoPlayTheme.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  child: _EmptyState(
+                    isSearch: _localSearchQuery.isNotEmpty,
+                    onAction: () {
+                      if (_localSearchQuery.isNotEmpty) {
+                        _searchController.clear();
+                        setState(() => _localSearchQuery = '');
+                      } else {
+                        ref
+                            .read(selectedCategoryProvider.notifier)
+                            .select('all');
+                      }
+                    },
                   ),
                 );
               }
@@ -266,19 +195,22 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
                 channels: filtered,
                 favorites: favorites,
                 ref: ref,
+                topPad: topPad,
               );
             },
             loading: () => SliverPadding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               sliver: SliverGrid(
-                gridDelegate: _getGridDelegate(context),
+                gridDelegate: _gridDelegate(context),
                 delegate: SliverChildBuilderDelegate(
-                  (context, index) => _ShimmerCard(),
+                  (ctx, i) => const _ShimmerCard(),
                   childCount: 12,
+                  addAutomaticKeepAlives: false,
+                  addRepaintBoundaries: false,
                 ),
               ),
             ),
-            error: (e, _) => SliverFillRemaining(
+            error: (e, s) => SliverFillRemaining(
               hasScrollBody: false,
               child: Center(
                 child: Column(
@@ -320,36 +252,137 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
     );
   }
 
-  static SliverGridDelegateWithFixedCrossAxisCount _getGridDelegate(
+  // Static — never changes at runtime so no need to recreate.
+  static SliverGridDelegateWithFixedCrossAxisCount _gridDelegate(
     BuildContext context,
   ) {
-    final width = MediaQuery.of(context).size.width;
-    int crossAxisCount;
-    double ratio;
-
+    final width = MediaQuery.sizeOf(context).width;
+    final int cols;
     if (width >= 1200) {
-      crossAxisCount = 6;
-      ratio = 1.15;
+      cols = 6;
     } else if (width >= 900) {
-      crossAxisCount = 5;
-      ratio = 1.12;
+      cols = 5;
     } else if (width >= 600) {
-      crossAxisCount = 4;
-      ratio = 1.08;
-    } else if (width >= 400) {
-      crossAxisCount = 3;
-      ratio = 1.05;
+      cols = 4;
     } else {
-      // Mobile - 2 columns
-      crossAxisCount = 2;
-      ratio = 1.15;
+      cols = 3;
     }
-
     return SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: crossAxisCount,
-      childAspectRatio: ratio,
-      crossAxisSpacing: 10,
-      mainAxisSpacing: 10,
+      crossAxisCount: cols,
+      childAspectRatio: 1.0,
+      crossAxisSpacing: 8,
+      mainAxisSpacing: 8,
+    );
+  }
+}
+
+// ─── Search Field — extracted so parent does not rebuild it ──
+class _SearchField extends StatelessWidget {
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onClose;
+
+  const _SearchField({
+    required this.controller,
+    required this.onChanged,
+    required this.onClose,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 40,
+      decoration: _searchBoxDecoration,
+      child: TextField(
+        controller: controller,
+        autofocus: true,
+        onChanged: onChanged,
+        style: _searchTextStyle,
+        decoration: InputDecoration(
+          hintText: 'Search channels by name, country...',
+          hintStyle: const TextStyle(
+            color: GoPlayTheme.onSurfaceVariant,
+            fontSize: 14,
+          ),
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(vertical: 8),
+          border: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          prefixIcon: const Icon(
+            Icons.search_rounded,
+            color: GoPlayTheme.primary,
+            size: 20,
+          ),
+          suffixIcon: IconButton(
+            icon: const Icon(
+              Icons.close_rounded,
+              color: GoPlayTheme.onSurfaceVariant,
+              size: 18,
+            ),
+            onPressed: onClose,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Empty State — extracted stateless widget ─────────────────
+class _EmptyState extends StatelessWidget {
+  final bool isSearch;
+  final VoidCallback onAction;
+
+  const _EmptyState({required this.isSearch, required this.onAction});
+
+  static const _iconDecoration = BoxDecoration(
+    color: Color(0x0DFFFFFF),
+    shape: BoxShape.circle,
+    border: Border.fromBorderSide(
+      BorderSide(color: Color(0x14FFFFFF), width: 0.8),
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: _iconDecoration,
+            child: const Icon(
+              Icons.live_tv_outlined,
+              size: 32,
+              color: GoPlayTheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            isSearch
+                ? 'No channels match your search'
+                : 'No channels in this category',
+            style: const TextStyle(
+              color: GoPlayTheme.onSurfaceVariant,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: onAction,
+            child: Text(
+              isSearch ? 'Clear Search' : 'View all channels',
+              style: const TextStyle(
+                color: GoPlayTheme.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -366,64 +399,54 @@ class _CategoryFilterBar extends ConsumerWidget {
     final allChannelsAsync = ref.watch(channelsProvider);
     final selectedCategory = ref.watch(selectedCategoryProvider);
 
-    return Container(
+    return SizedBox(
       height: 48,
-      color: Colors.transparent, // Let glassy background shine through
-      alignment: Alignment.center,
-      child: SizedBox(
-        height: 42,
-        child: categoriesAsync.when(
-          data: (categories) {
-            final allChannels = allChannelsAsync.when(
-              data: (data) => data,
-              loading: () => [],
-              error: (err, stack) => [],
-            );
-            final catCounts = <String, int>{};
-            for (final ch in allChannels) {
-              final cat = ch.category ?? 'uncategorized';
-              catCounts[cat] = (catCounts[cat] ?? 0) + 1;
-            }
+      child: categoriesAsync.when(
+        data: (categories) {
+          final allChannels = allChannelsAsync.maybeWhen(
+            data: (data) => data,
+            orElse: () => const [],
+          );
 
-            // Filter out categories with 0 channels to avoid empty screens
-            final activeCategories = categories
-                .where((cat) => (catCounts[cat.id] ?? 0) > 0)
-                .toList();
+          // Build count map once per provider change — not per chip build.
+          final catCounts = <String, int>{};
+          for (final ch in allChannels) {
+            final cat = ch.category ?? 'uncategorized';
+            catCounts[cat] = (catCounts[cat] ?? 0) + 1;
+          }
 
-            return ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              children: [
+          final activeCategories = categories
+              .where((cat) => (catCounts[cat.id] ?? 0) > 0)
+              .toList();
+
+          return ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            children: [
+              _CategoryChip(
+                label: 'All',
+                count: allChannels.length,
+                isSelected: selectedCategory == 'all',
+                onTap: () {
+                  ref.read(selectedCategoryProvider.notifier).select('all');
+                  onCategorySelected();
+                },
+              ),
+              for (final cat in activeCategories)
                 _CategoryChip(
-                  label: 'All',
-                  icon: '📺',
-                  count: allChannels.length,
-                  isSelected: selectedCategory == 'all',
+                  label: cat.name,
+                  count: catCounts[cat.id] ?? 0,
+                  isSelected: selectedCategory == cat.id,
                   onTap: () {
-                    ref.read(selectedCategoryProvider.notifier).select('all');
+                    ref.read(selectedCategoryProvider.notifier).select(cat.id);
                     onCategorySelected();
                   },
                 ),
-                ...activeCategories.map(
-                  (cat) => _CategoryChip(
-                    label: cat.name,
-                    icon: cat.icon ?? '📁',
-                    count: catCounts[cat.id] ?? 0,
-                    isSelected: selectedCategory == cat.id,
-                    onTap: () {
-                      ref
-                          .read(selectedCategoryProvider.notifier)
-                          .select(cat.id);
-                      onCategorySelected();
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-          loading: () => const SizedBox(height: 42),
-          error: (err, stack) => const SizedBox(height: 42),
-        ),
+            ],
+          );
+        },
+        loading: () => const SizedBox.shrink(),
+        error: (e, s) => const SizedBox.shrink(),
       ),
     );
   }
@@ -434,34 +457,37 @@ class _ResponsiveGrid extends StatelessWidget {
   final List channels;
   final Set<String> favorites;
   final WidgetRef ref;
+  final double topPad;
 
   const _ResponsiveGrid({
     required this.channels,
     required this.favorites,
     required this.ref,
+    required this.topPad,
   });
 
   @override
   Widget build(BuildContext context) {
     return SliverPadding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10),
       sliver: SliverGrid(
-        gridDelegate: _ChannelsScreenState._getGridDelegate(context),
+        gridDelegate: _ChannelsScreenState._gridDelegate(context),
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final channel = channels[index];
             return ChannelCard(
+              key: ValueKey(channel.id),
               channel: channel,
               isFavorite: favorites.contains(channel.id),
-              onFavoriteTap: () {
-                ref
-                    .read(favoriteChannelIdsProvider.notifier)
-                    .toggle(channel.id);
-              },
+              onFavoriteTap: () => ref
+                  .read(favoriteChannelIdsProvider.notifier)
+                  .toggle(channel.id),
             );
           },
           childCount: channels.length,
-          addAutomaticKeepAlives: true,
+          // Large catalogs: let the sliver recycle elements freely.
+          addAutomaticKeepAlives: false,
+          addRepaintBoundaries: true,
         ),
       ),
     );
@@ -471,18 +497,50 @@ class _ResponsiveGrid extends StatelessWidget {
 // ─── Category Chip ────────────────────────────────────────────
 class _CategoryChip extends StatelessWidget {
   final String label;
-  final String icon;
   final int count;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _CategoryChip({
     required this.label,
-    required this.icon,
     required this.count,
     required this.isSelected,
     required this.onTap,
   });
+
+  // Pre-allocated decorations — zero per-frame cost.
+  static const _unselectedDeco = BoxDecoration(
+    color: Color(0x0DFFFFFF),
+    borderRadius: BorderRadius.all(Radius.circular(20)),
+    border: Border.fromBorderSide(
+      BorderSide(color: Color(0x14FFFFFF), width: 0.8),
+    ),
+  );
+
+  static const _selectedDeco = BoxDecoration(
+    color: Color(0x1E00E676), // primary @ ~12%
+    borderRadius: BorderRadius.all(Radius.circular(20)),
+    border: Border.fromBorderSide(
+      BorderSide(color: Color(0x7800E676), width: 0.8), // primary @ ~47%
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: Color(0x2800E676), // primary @ ~16%
+        blurRadius: 8,
+        offset: Offset(0, 2),
+      ),
+    ],
+  );
+
+  static const _countSelectedDeco = BoxDecoration(
+    color: Color(0x3C00E676), // primary @ ~24%
+    borderRadius: BorderRadius.all(Radius.circular(10)),
+  );
+
+  static const _countUnselectedDeco = BoxDecoration(
+    color: Color(0x1AFFFFFF),
+    borderRadius: BorderRadius.all(Radius.circular(10)),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -490,38 +548,14 @@ class _CategoryChip extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
+        duration: const Duration(milliseconds: 220),
         curve: Curves.easeInOut,
         margin: const EdgeInsets.only(right: 8, bottom: 6, top: 2),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? GoPlayTheme.primary.withAlpha(30)
-              : const Color(0x0DFFFFFF), // Subtle translucent white
-          borderRadius: const BorderRadius.all(Radius.circular(20)),
-          border: Border.fromBorderSide(
-            BorderSide(
-              color: isSelected
-                  ? GoPlayTheme.primary.withAlpha(120)
-                  : const Color(0x14FFFFFF),
-              width: 0.8,
-            ),
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: GoPlayTheme.primary.withAlpha(40),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
+        decoration: isSelected ? _selectedDeco : _unselectedDeco,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(icon, style: const TextStyle(fontSize: 13)),
-            const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
@@ -532,15 +566,13 @@ class _CategoryChip extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 6),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
+            // Plain Container — AnimatedContainer here caused a second
+            // layout-pass per chip on every selection change.
+            Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? GoPlayTheme.primary.withAlpha(60)
-                    : const Color(0x1AFFFFFF),
-                borderRadius: const BorderRadius.all(Radius.circular(10)),
-              ),
+              decoration: isSelected
+                  ? _countSelectedDeco
+                  : _countUnselectedDeco,
               child: Text(
                 '$count',
                 style: TextStyle(
@@ -557,51 +589,53 @@ class _CategoryChip extends StatelessWidget {
   }
 }
 
-// ─── Shimmer Loading Card ─────────────────────────────────────
+// ─── Shimmer Loading Card — fully const ───────────────────────
 class _ShimmerCard extends StatelessWidget {
+  const _ShimmerCard();
+
+  static const _cardDeco = BoxDecoration(
+    color: Color(0x0DFFFFFF),
+    borderRadius: BorderRadius.all(Radius.circular(10)),
+    border: Border.fromBorderSide(
+      BorderSide(color: Color(0x14FFFFFF), width: 0.8),
+    ),
+  );
+
+  static const _circleDeco = BoxDecoration(
+    color: Color(0x1AFFFFFF),
+    shape: BoxShape.circle,
+  );
+
+  static const _barDeco = BoxDecoration(
+    color: Color(0x1AFFFFFF),
+    borderRadius: BorderRadius.all(Radius.circular(4)),
+  );
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Color(0x0DFFFFFF), // Subtle translucent white
-        borderRadius: BorderRadius.all(Radius.circular(16)),
-        border: Border.fromBorderSide(
-          BorderSide(color: Color(0x14FFFFFF), width: 0.8),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: const BoxDecoration(
-                color: Color(0x1AFFFFFF),
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              width: 60,
-              height: 12,
-              decoration: const BoxDecoration(
-                color: Color(0x1AFFFFFF),
-                borderRadius: BorderRadius.all(Radius.circular(4)),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Container(
-              width: 35,
-              height: 10,
-              decoration: const BoxDecoration(
-                color: Color(0x1AFFFFFF),
-                borderRadius: BorderRadius.all(Radius.circular(4)),
-              ),
-            ),
-          ],
-        ),
+    return DecoratedBox(
+      decoration: _cardDeco,
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 44,
+            height: 44,
+            child: DecoratedBox(decoration: _circleDeco),
+          ),
+          SizedBox(height: 8),
+          SizedBox(
+            width: 56,
+            height: 10,
+            child: DecoratedBox(decoration: _barDeco),
+          ),
+          SizedBox(height: 5),
+          SizedBox(
+            width: 32,
+            height: 8,
+            child: DecoratedBox(decoration: _barDeco),
+          ),
+        ],
       ),
     );
   }
