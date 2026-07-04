@@ -58,13 +58,24 @@ class UpcomingScreen extends ConsumerWidget {
                         ),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: const Color(
-                              0x0C0D0D12,
-                            ).withOpacity(0.4 + (0.45 * collapseRatio)),
+                            color: Color.fromARGB(
+                              ((0.4 + (0.45 * collapseRatio)) * 255)
+                                  .round()
+                                  .clamp(0, 255),
+                              0x0D,
+                              0x0D,
+                              0x12,
+                            ),
                             border: Border(
                               bottom: BorderSide(
-                                color: Colors.white.withOpacity(
-                                  0.08 * collapseRatio,
+                                color: Color.fromARGB(
+                                  ((0.08 * collapseRatio) * 255).round().clamp(
+                                    0,
+                                    255,
+                                  ),
+                                  0xFF,
+                                  0xFF,
+                                  0xFF,
                                 ),
                                 width: 0.8,
                               ),
