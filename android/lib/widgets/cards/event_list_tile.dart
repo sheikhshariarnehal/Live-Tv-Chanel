@@ -11,26 +11,26 @@ import '../countdown_timer.dart';
 // Allocated once at class-load time; never re-created during builds/scrolls.
 
 const _kLiveCardDecoration = BoxDecoration(
-  color: Color(0x0AFF1744), // FF1744 @ ~4 %
+  gradient: GoPlayTheme.cardGradient,
   borderRadius: BorderRadius.all(Radius.circular(12)),
   border: Border.fromBorderSide(
-    BorderSide(color: Color(0x40FF1744), width: 1.0), // FF1744 @ 25 %
+    BorderSide(color: GoPlayTheme.cardBorder, width: 1.0), // Alabaster Grey border
   ),
   boxShadow: [
     BoxShadow(color: Color(0x33000000), blurRadius: 16, offset: Offset(0, 8)),
-    BoxShadow(color: Color(0x08FF1744), blurRadius: 24, spreadRadius: 1),
+    BoxShadow(color: Color(0x0371768E), blurRadius: 24, spreadRadius: 1), // Alabaster Grey shadow @ 2%
   ],
 );
 
 const _kUpcomingCardDecoration = BoxDecoration(
-  color: Color(0x05FFFFFF), // white @ 2 %
+  gradient: GoPlayTheme.cardGradient,
   borderRadius: BorderRadius.all(Radius.circular(12)),
   border: Border.fromBorderSide(
-    BorderSide(color: Color(0x0FFFFFFF), width: 1.0), // white @ 6 %
+    BorderSide(color: GoPlayTheme.cardBorder, width: 1.0), // Alabaster Grey border
   ),
   boxShadow: [
     BoxShadow(color: Color(0x33000000), blurRadius: 16, offset: Offset(0, 8)),
-    BoxShadow(color: Color(0x082979FF), blurRadius: 24, spreadRadius: 1),
+    BoxShadow(color: Color(0x0371768E), blurRadius: 24, spreadRadius: 1), // Alabaster Grey shadow @ 2%
   ],
 );
 
@@ -48,12 +48,12 @@ const _kUpcomingBadgeDecoration = BoxDecoration(
   color: Color(0x0FFFFFFF),
   borderRadius: BorderRadius.all(Radius.circular(20)),
   border: Border.fromBorderSide(
-    BorderSide(color: Color(0x14FFFFFF), width: 0.8),
+    BorderSide(color: GoPlayTheme.cardBorder, width: 0.8),
   ),
 );
 
 const _kLeagueStyle = TextStyle(
-  color: Color(0x80FFFFFF),
+  color: GoPlayTheme.onSurfaceVariant, // Alabaster Grey
   fontSize: 10,
   fontWeight: FontWeight.w700,
   letterSpacing: 1.0,
@@ -80,13 +80,13 @@ const _kCountdownStyle = TextStyle(
 );
 
 const _kTimeInfoStyle = TextStyle(
-  color: Color(0x66FFFFFF),
+  color: GoPlayTheme.onSurfaceVariant, // Alabaster Grey
   fontSize: 10,
   fontWeight: FontWeight.w600,
 );
 
 const _kLiveTimeStyle = TextStyle(
-  color: GoPlayTheme.liveBadge,
+  color: GoPlayTheme.primary,
   fontSize: 18,
   fontWeight: FontWeight.w900,
   letterSpacing: -0.5,

@@ -115,12 +115,12 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF090D16),
+      backgroundColor: const Color(0xFF17181C), // Carbon Black
       body: SizedBox.expand(
         child: DecoratedBox(
           decoration: const BoxDecoration(
             gradient: RadialGradient(
-              colors: [Color(0xFF111827), Color(0xFF090D16)],
+              colors: [Color(0xFF222326), Color(0xFF17181C)],
               center: Alignment.center,
               radius: 1.0,
             ),
@@ -166,7 +166,7 @@ class _SplashScreenState extends State<SplashScreen>
                             child: Icon(
                               Icons.play_arrow_rounded,
                               size: 32,
-                              color: Color(0xFF090D16),
+                              color: Color(0xFF17181C), // Carbon Black
                             ),
                           ),
                         ),
@@ -204,7 +204,7 @@ class _SplashScreenState extends State<SplashScreen>
                         style: GoogleFonts.inter(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF9CA3AF),
+                          color: const Color(0xFF71768E), // Alabaster Grey
                           letterSpacing: 6.0,
                         ),
                       ),

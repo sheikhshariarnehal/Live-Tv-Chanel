@@ -62,20 +62,20 @@ class UpcomingScreen extends ConsumerWidget {
                               ((0.4 + (0.45 * collapseRatio)) * 255)
                                   .round()
                                   .clamp(0, 255),
-                              0x0D,
-                              0x0D,
-                              0x12,
+                              0x17,
+                              0x18,
+                              0x1C,
                             ),
                             border: Border(
                               bottom: BorderSide(
                                 color: Color.fromARGB(
-                                  ((0.08 * collapseRatio) * 255).round().clamp(
+                                  ((0.15 * collapseRatio) * 255).round().clamp(
                                     0,
                                     255,
                                   ),
-                                  0xFF,
-                                  0xFF,
-                                  0xFF,
+                                  0x71,
+                                  0x76,
+                                  0x8E,
                                 ),
                                 width: 0.8,
                               ),
@@ -240,7 +240,7 @@ class _DateGroup extends StatelessWidget {
               const Icon(
                 Icons.calendar_month_outlined,
                 size: 16,
-                color: Color(0xFF2979FF),
+                color: GoPlayTheme.onSurfaceVariant,
               ),
               const SizedBox(width: 8),
               Text(
@@ -279,9 +279,9 @@ class _EmptyState extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: const Color(0x05FFFFFF),
+            gradient: GoPlayTheme.cardGradient,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0x0FFFFFFF)),
+            border: Border.all(color: GoPlayTheme.cardBorder),
             boxShadow: const [
               BoxShadow(
                 color: Color(0x33000000),
@@ -300,13 +300,13 @@ class _EmptyState extends StatelessWidget {
                   height: 72,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: Color(0x0AFFFFFF),
+                      color: Color(0x0A71768E), // Alabaster Grey @ 4%
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.event_outlined,
                       size: 40,
-                      color: Color(0xB3FFFFFF),
+                      color: GoPlayTheme.onSurfaceVariant,
                     ),
                   ),
                 ),

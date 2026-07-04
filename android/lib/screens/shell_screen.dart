@@ -137,10 +137,10 @@ class ShellScreen extends StatelessWidget {
           child: Container(
             height: 64 + MediaQuery.of(context).padding.bottom,
             decoration: const BoxDecoration(
-              color: Color(0xCC0D0D12),
+              color: Color(0xCC17181C),
               border: Border(
                 top: BorderSide(
-                  color: Color(0x14FFFFFF), // White @ 8%
+                  color: GoPlayTheme.cardBorder,
                   width: 0.8,
                 ),
               ),
@@ -213,7 +213,7 @@ class _NavItem extends StatelessWidget {
                 isSelected ? selectedIcon : icon,
                 color: isSelected
                     ? GoPlayTheme.primary
-                    : const Color(0x80FFFFFF),
+                    : GoPlayTheme.onSurfaceVariant,
                 size: 23,
               ),
             ),
@@ -222,7 +222,7 @@ class _NavItem extends StatelessWidget {
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOutCubic,
               style: TextStyle(
-                color: isSelected ? Colors.white : const Color(0x66FFFFFF),
+                color: isSelected ? GoPlayTheme.onSurface : GoPlayTheme.onSurfaceVariant,
                 fontSize: 9.5,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
                 letterSpacing: 0.2,

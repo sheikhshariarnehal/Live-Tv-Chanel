@@ -96,7 +96,7 @@ void showChannelSelector({
                     return Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       decoration: BoxDecoration(
-                        color: GoPlayTheme.surfaceContainer,
+                        color: GoPlayTheme.surfaceContainerHigh,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: GoPlayTheme.cardBorder, width: 0.5),
                       ),

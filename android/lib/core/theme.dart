@@ -7,27 +7,28 @@ class GoPlayTheme {
   // Brand Colors
   static const Color primary = Color(0xFF00E676);
   static const Color primaryDark = Color(0xFF00C853);
-  static const Color surface = Color(0xFF0D0D0D);
-  static const Color surfaceContainer = Color(0xFF1A1A1A);
-  static const Color surfaceContainerHigh = Color(0xFF242424);
-  static const Color surfaceContainerHighest = Color(0xFF2E2E2E);
-  static const Color onSurface = Color(0xFFE8E8E8);
-  static const Color onSurfaceVariant = Color(0xFF9E9E9E);
-  static const Color error = Color(0xFFFF5252);
-  static const Color liveBadge = Color(0xFFFF1744);
-  static const Color cardBorder = Color(0xFF2A2A2A);
+  static const Color surface = Color(0xFF17181C); // Carbon Black
+  static const Color surfaceContainerLow = Color(0xFF18181B); // Graphite
+  static const Color surfaceContainer = Color(0xFF222326); // Base Card/Container
+  static const Color surfaceContainerHigh = Color(0xFF2C2D31); // Elevated Container
+  static const Color surfaceContainerHighest = Color(0xFF35373C); // Highly Elevated
+  static const Color onSurface = Color(0xFFF3F4F6); // Premium Off-White
+  static const Color onSurfaceVariant = Color(0xFF71768E); // Alabaster Grey
+  static const Color error = Color(0xFFFF453A); // iOS System Red
+  static const Color liveBadge = Color(0xFFFF3B30); // iOS Live Badge Red
+  static const Color cardBorder = Color(0x2671768E); // Alabaster Grey @ ~15% opacity
 
   // Gradients
   static const LinearGradient heroGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [Colors.transparent, Color(0xCC0D0D0D), Color(0xFF0D0D0D)],
+    colors: [Colors.transparent, Color(0xCC17181C), Color(0xFF17181C)],
   );
 
   static const LinearGradient cardGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF1E1E1E), Color(0xFF141414)],
+    colors: [Color(0xFF2C2D31), Color(0xFF222326)],
   );
 
   static ThemeData get darkTheme {
@@ -73,9 +74,9 @@ class GoPlayTheme {
         primaryContainer: Color(0xFF003D1A),
         secondary: Color(0xFF80CBC4),
         surface: surface,
-        surfaceContainerLow: surfaceContainer,
-        surfaceContainer: surfaceContainerHigh,
-        surfaceContainerHigh: surfaceContainerHighest,
+        surfaceContainerLow: surfaceContainerLow,
+        surfaceContainer: surfaceContainer,
+        surfaceContainerHigh: surfaceContainerHigh,
         error: error,
         onPrimary: Color(0xFF003300),
         onSurface: onSurface,
@@ -137,7 +138,15 @@ class GoPlayTheme {
         fillColor: surfaceContainerHigh,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(color: cardBorder, width: 0.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: cardBorder, width: 0.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: primary, width: 1.0),
         ),
         hintStyle: TextStyle(color: onSurfaceVariant.withAlpha(150)),
         prefixIconColor: onSurfaceVariant,

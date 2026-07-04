@@ -140,20 +140,20 @@ class HomeScreen extends ConsumerWidget {
                             0,
                             255,
                           ),
-                          0x0D,
-                          0x0D,
-                          0x12,
+                          0x17,
+                          0x18,
+                          0x1C,
                         ),
                         border: Border(
                           bottom: BorderSide(
                             color: Color.fromARGB(
-                              ((0.08 * collapseRatio) * 255).round().clamp(
+                              ((0.15 * collapseRatio) * 255).round().clamp(
                                 0,
                                 255,
                               ),
-                              0xFF,
-                              0xFF,
-                              0xFF,
+                              0x71,
+                              0x76,
+                              0x8E,
                             ),
                             width: 0.8,
                           ),
@@ -327,7 +327,7 @@ class _HeroBannerCard extends ConsumerWidget {
   static const _cardDecoration = BoxDecoration(
     borderRadius: _cardRadius,
     border: Border.fromBorderSide(
-      BorderSide(color: Color(0x14FFFFFF), width: 0.8), // White @ 8%
+      BorderSide(color: GoPlayTheme.cardBorder, width: 0.8),
     ),
     boxShadow: [
       BoxShadow(
@@ -358,7 +358,7 @@ class _HeroBannerCard extends ConsumerWidget {
       colors: [
         Color(0x20000000), // Transparent top
         Color(0x60000000), // Muted middle
-        Color(0xD90D0D12), // Solid background bottom for contrast
+        Color(0xD917181C), // Carbon Black bottom for contrast
       ],
     ),
   );

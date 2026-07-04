@@ -37,7 +37,7 @@ class ChannelAvatar extends StatelessWidget {
             ? Border.all(
                 color: channel.isLive
                     ? const Color(0x5000E676) // GoPlayTheme.primary @ 31%
-                    : const Color(0xFF2A2A2A),
+                    : GoPlayTheme.cardBorder,
                 width: 2,
               )
             : null,
