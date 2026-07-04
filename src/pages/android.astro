@@ -26,6 +26,20 @@ export const prerender = true;
     --chalk-dim: #9db3a8;
     --shadow: 0 30px 60px rgba(0,0,0,0.6);
     --gradient-glow: radial-gradient(circle, rgba(61,255,138,0.12) 0%, rgba(255,176,32,0.06) 50%, transparent 100%);
+    --container-padding: 24px;
+    --max-content-width: 1280px;
+  }
+
+  @media (min-width: 768px) {
+    :root {
+      --container-padding: 40px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    :root {
+      --container-padding: 64px;
+    }
   }
 
   * {
@@ -73,9 +87,10 @@ export const prerender = true;
   }
   
   .wrap {
-    max-width: 1200px;
+    max-width: var(--max-content-width);
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 var(--container-padding);
+    transition: padding 0.3s ease;
   }
 
   /* ---------- ambient glows ---------- */
@@ -122,9 +137,16 @@ export const prerender = true;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 24px;
-    max-width: 1200px;
+    padding: 16px var(--container-padding);
+    max-width: var(--max-content-width);
     margin: 0 auto;
+    transition: padding 0.3s ease;
+  }
+  
+  @media (min-width: 1024px) {
+    nav {
+      padding: 24px var(--container-padding);
+    }
   }
   
   .logo {
@@ -207,13 +229,21 @@ export const prerender = true;
   .hero {
     position: relative;
     z-index: 10;
-    padding: 100px 24px 80px;
-    max-width: 1200px;
+    padding: 100px var(--container-padding) 80px;
+    max-width: var(--max-content-width);
     margin: 0 auto;
     display: grid;
     grid-template-columns: 1.1fr 0.9fr;
     gap: 60px;
     align-items: center;
+    transition: padding 0.3s ease, gap 0.3s ease;
+  }
+  
+  @media (min-width: 1024px) {
+    .hero {
+      padding: 140px var(--container-padding) 100px;
+      gap: 80px;
+    }
   }
   
   @media(max-width:992px) {
@@ -471,7 +501,7 @@ export const prerender = true;
 
   /* ---------- sections ---------- */
   section.block {
-    padding: 120px 24px;
+    padding: 120px 0;
     position: relative;
     z-index: 10;
   }
@@ -953,7 +983,7 @@ export const prerender = true;
   /* ---------- footer ---------- */
   footer {
     border-top: 1px solid var(--line);
-    padding: 60px 24px 40px;
+    padding: 60px 0 40px;
     position: relative;
     z-index: 10;
     background: rgba(4, 9, 7, 0.8);
@@ -964,7 +994,7 @@ export const prerender = true;
   .footer-grid {
     display: grid;
     grid-template-columns: 1.5fr 1fr;
-    max-width: 1200px;
+    max-width: var(--max-content-width);
     margin: 0 auto;
     gap: 50px;
   }
@@ -994,7 +1024,7 @@ export const prerender = true;
   }
   
   .footer-bottom {
-    max-width: 1200px;
+    max-width: var(--max-content-width);
     margin: 40px auto 0;
     padding-top: 24px;
     border-top: 1px solid rgba(255,255,255,0.05);
