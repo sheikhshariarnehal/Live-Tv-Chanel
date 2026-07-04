@@ -29,13 +29,6 @@ final TextStyle _interLeagueBold = GoogleFonts.inter(
   fontWeight: FontWeight.bold,
 );
 
-final TextStyle _interUpcomingBadge = GoogleFonts.inter(
-  color: GoPlayTheme.primary,
-  fontSize: 9,
-  fontWeight: FontWeight.w800,
-  letterSpacing: 0.5,
-);
-
 final TextStyle _orbitronVS = GoogleFonts.orbitron(
   color: Colors.white,
   fontSize: 20,
@@ -123,11 +116,12 @@ class HomeScreen extends ConsumerWidget {
             flexibleSpace: LayoutBuilder(
               builder: (context, constraints) {
                 final double appBarHeight = constraints.biggest.height;
-                final double statusBarHeight = MediaQuery.of(
+                final double statusBarHeight = MediaQuery.paddingOf(
                   context,
-                ).padding.top;
+                ).top;
+                const double expandedHeight = 110.0;
                 final double minHeight = kToolbarHeight + statusBarHeight;
-                final double maxHeight = 110.0 + statusBarHeight;
+                final double maxHeight = expandedHeight + statusBarHeight;
 
                 final double collapseRatio =
                     ((maxHeight - appBarHeight) / (maxHeight - minHeight))
@@ -294,22 +288,23 @@ class _HeroBannerState extends ConsumerState<_HeroBanner> {
                 builder: (context, currentPage, _) {
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      events.length,
-                      (index) => Container(
+                    children: List.generate(events.length, (index) {
+                      final bool active = currentPage == index;
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
                         margin: const EdgeInsets.symmetric(horizontal: 4),
-                        width: currentPage == index ? 16 : 6,
+                        width: active ? 16 : 6,
                         height: 6,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(3),
-                          color: currentPage == index
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(3),
+                          ),
+                          color: active
                               ? GoPlayTheme.primary
-                              : const Color(
-                                  0x5000E676,
-                                ), // GoPlayTheme.primary @ 31%
+                              : const Color(0x5000E676),
                         ),
-                      ),
-                    ),
+                      );
+                    }),
                   );
                 },
               ),
@@ -317,17 +312,7 @@ class _HeroBannerState extends ConsumerState<_HeroBanner> {
           ],
         );
       },
-      loading: () => Container(
-        height: 200,
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          color: GoPlayTheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: const Center(
-          child: CircularProgressIndicator(color: GoPlayTheme.primary),
-        ),
-      ),
+      loading: () => const _HeroBannerSkeleton(),
       error: (err, stack) => const SizedBox.shrink(),
     );
   }
@@ -351,17 +336,6 @@ class _HeroBannerCard extends ConsumerWidget {
         offset: Offset(0, 4),
       ),
     ],
-  );
-
-  static const _upcomingBadgeDecoration = BoxDecoration(
-    color: Color(0x1E00E676), // GoPlayTheme.primary @ 12%
-    borderRadius: BorderRadius.all(Radius.circular(12)),
-    border: Border.fromBorderSide(
-      BorderSide(
-        color: Color(0x5000E676),
-        width: 0.5,
-      ), // GoPlayTheme.primary @ 31%
-    ),
   );
 
   static const _watchButtonDecoration = BoxDecoration(
@@ -439,6 +413,7 @@ class _HeroBannerCard extends ConsumerWidget {
                     vertical: 16,
                   ),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // Top Row: League and Status Badge
                       Row(
@@ -448,39 +423,9 @@ class _HeroBannerCard extends ConsumerWidget {
                           if (event.isLive)
                             const LiveBadge(fontSize: 11)
                           else
-                            DecoratedBox(
-                              decoration: _upcomingBadgeDecoration,
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    SizedBox(
-                                      width: 5,
-                                      height: 5,
-                                      child: DecoratedBox(
-                                        decoration: BoxDecoration(
-                                          color: GoPlayTheme.primary,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(width: 5),
-                                    Text(
-                                      'UPCOMING',
-                                      style: _interUpcomingBadge,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
+                            const _UpcomingBadge(),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      const Spacer(),
 
                       // Middle Row: Matchup details
                       Row(
@@ -516,8 +461,6 @@ class _HeroBannerCard extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      const Spacer(),
 
                       // Bottom Row: Watch/Hub Button
                       Center(
@@ -726,27 +669,11 @@ class _TrendingChannels extends ConsumerWidget {
             addAutomaticKeepAlives: false,
             itemBuilder: (context, index) {
               final ch = channels[index];
-              return GestureDetector(
+              return _ChannelItem(
+                channel: ch,
+                nameStyle: _nameStyle,
+                showBorder: true,
                 onTap: () => context.push('/player/${ch.id}'),
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: SizedBox(
-                    width: 75,
-                    child: Column(
-                      children: [
-                        ChannelAvatar(channel: ch),
-                        const SizedBox(height: 6),
-                        Text(
-                          ch.name,
-                          style: _nameStyle,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
               );
             },
           ),
@@ -780,30 +707,11 @@ class _RecentlyWatched extends ConsumerWidget {
             addAutomaticKeepAlives: false,
             itemBuilder: (context, index) {
               final ch = history[index];
-              return GestureDetector(
+              return _ChannelItem(
+                channel: ch,
+                nameStyle: _historyNameStyle,
+                showBorder: false,
                 onTap: () => context.push('/player/${ch.id}'),
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: SizedBox(
-                    width: 75,
-                    child: Column(
-                      children: [
-                        ChannelAvatar(channel: ch, showBorder: false),
-                        const SizedBox(height: 6),
-                        Text(
-                          ch.name,
-                          style: const TextStyle(
-                            color: GoPlayTheme.onSurface,
-                            fontSize: 10,
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
               );
             },
           ),
@@ -817,22 +725,6 @@ class _RecentlyWatched extends ConsumerWidget {
 class _AnnouncementsSection extends ConsumerWidget {
   const _AnnouncementsSection();
 
-  static const _warningDecoration = BoxDecoration(
-    color: Color(0x14FFC107), // amber @ 8%
-    borderRadius: BorderRadius.all(Radius.circular(16)),
-    border: Border.fromBorderSide(
-      BorderSide(color: Color(0x33FFC107), width: 0.8), // amber @ 20%
-    ),
-  );
-
-  static const _infoDecoration = BoxDecoration(
-    color: Color(0x0AFFFFFF), // white @ 4%
-    borderRadius: BorderRadius.all(Radius.circular(16)),
-    border: Border.fromBorderSide(
-      BorderSide(color: Color(0x14FFFFFF), width: 0.8), // white @ 8%
-    ),
-  );
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final announcementsAsync = ref.watch(announcementsProvider);
@@ -844,69 +736,7 @@ class _AnnouncementsSection extends ConsumerWidget {
         return Column(
           children: [
             const SectionHeader(title: 'Announcements'),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: EdgeInsets.zero,
-              itemCount: announcements.length,
-              addAutomaticKeepAlives: false,
-              addRepaintBoundaries: false,
-              itemBuilder: (context, index) {
-                final a = announcements[index];
-                final isWarning = a.type == 'warning';
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 4,
-                  ),
-                  child: DecoratedBox(
-                    decoration: isWarning
-                        ? _warningDecoration
-                        : _infoDecoration,
-                    child: Padding(
-                      padding: const EdgeInsets.all(14),
-                      child: Row(
-                        children: [
-                          Icon(
-                            isWarning
-                                ? Icons.warning_amber_rounded
-                                : Icons.info_outline_rounded,
-                            color: isWarning
-                                ? Colors.amber
-                                : GoPlayTheme.primary,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  a.title,
-                                  style: const TextStyle(
-                                    color: GoPlayTheme.onSurface,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  a.body,
-                                  style: const TextStyle(
-                                    color: GoPlayTheme.onSurfaceVariant,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
+            for (final a in announcements) _AnnouncementTile(announcement: a),
           ],
         );
       },
@@ -960,6 +790,196 @@ class _TeamCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─── Cached style ────────────────────────────────────────────────────────────
+const TextStyle _historyNameStyle = TextStyle(
+  color: GoPlayTheme.onSurface,
+  fontSize: 10,
+);
+
+// ─── _HeroBannerSkeleton ─────────────────────────────────────────────────────
+class _HeroBannerSkeleton extends StatelessWidget {
+  const _HeroBannerSkeleton();
+
+  static const _decoration = BoxDecoration(
+    color: GoPlayTheme.surfaceContainer,
+    borderRadius: BorderRadius.all(Radius.circular(20)),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: SizedBox(
+        height: 200,
+        child: DecoratedBox(
+          decoration: _decoration,
+          child: Center(
+            child: CircularProgressIndicator(color: GoPlayTheme.primary),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── _UpcomingBadge ──────────────────────────────────────────────────────────
+class _UpcomingBadge extends StatelessWidget {
+  const _UpcomingBadge();
+
+  static const _decoration = BoxDecoration(
+    color: Color(0x1E00E676),
+    borderRadius: BorderRadius.all(Radius.circular(12)),
+    border: Border.fromBorderSide(
+      BorderSide(color: Color(0x5000E676), width: 0.5),
+    ),
+  );
+
+  static const _dotDecoration = BoxDecoration(
+    color: GoPlayTheme.primary,
+    shape: BoxShape.circle,
+  );
+
+  static const _labelStyle = TextStyle(
+    color: GoPlayTheme.primary,
+    fontSize: 9,
+    fontWeight: FontWeight.w800,
+    letterSpacing: 0.5,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return const DecoratedBox(
+      decoration: _decoration,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 5,
+              height: 5,
+              child: DecoratedBox(decoration: _dotDecoration),
+            ),
+            SizedBox(width: 5),
+            Text('UPCOMING', style: _labelStyle),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── _ChannelItem ────────────────────────────────────────────────────────────
+class _ChannelItem extends StatelessWidget {
+  final dynamic channel;
+  final TextStyle nameStyle;
+  final bool showBorder;
+  final VoidCallback onTap;
+
+  const _ChannelItem({
+    required this.channel,
+    required this.nameStyle,
+    required this.showBorder,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.only(right: 12),
+        child: SizedBox(
+          width: 75,
+          child: Column(
+            children: [
+              ChannelAvatar(channel: channel, showBorder: showBorder),
+              const SizedBox(height: 6),
+              Text(
+                channel.name as String,
+                style: nameStyle,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── _AnnouncementTile ───────────────────────────────────────────────────────
+class _AnnouncementTile extends StatelessWidget {
+  final dynamic announcement;
+
+  const _AnnouncementTile({required this.announcement});
+
+  static const _warningDecoration = BoxDecoration(
+    color: Color(0x14FFC107),
+    borderRadius: BorderRadius.all(Radius.circular(16)),
+    border: Border.fromBorderSide(
+      BorderSide(color: Color(0x33FFC107), width: 0.8),
+    ),
+  );
+
+  static const _infoDecoration = BoxDecoration(
+    color: Color(0x0AFFFFFF),
+    borderRadius: BorderRadius.all(Radius.circular(16)),
+    border: Border.fromBorderSide(
+      BorderSide(color: Color(0x14FFFFFF), width: 0.8),
+    ),
+  );
+
+  static const _titleStyle = TextStyle(
+    color: GoPlayTheme.onSurface,
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+  );
+
+  static const _bodyStyle = TextStyle(
+    color: GoPlayTheme.onSurfaceVariant,
+    fontSize: 11,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isWarning = announcement.type == 'warning';
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: DecoratedBox(
+        decoration: isWarning ? _warningDecoration : _infoDecoration,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Icon(
+                isWarning
+                    ? Icons.warning_amber_rounded
+                    : Icons.info_outline_rounded,
+                color: isWarning ? Colors.amber : GoPlayTheme.primary,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(announcement.title as String, style: _titleStyle),
+                    const SizedBox(height: 2),
+                    Text(announcement.body as String, style: _bodyStyle),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
