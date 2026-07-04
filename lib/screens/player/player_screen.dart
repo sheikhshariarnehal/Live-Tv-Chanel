@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
 import '../../models/channel.dart';
@@ -36,6 +37,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     super.initState();
     _currentChannelId = widget.channelId;
     _startControlsTimer();
+
+    // Keep screen awake while player is active
+    WakelockPlus.enable();
 
     if (widget.forceFullscreen) {
       SystemChrome.setPreferredOrientations([
@@ -82,6 +86,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   @override
   void dispose() {
     _controlsTimer?.cancel();
+    // Allow screen to sleep again when leaving the player
+    WakelockPlus.disable();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();

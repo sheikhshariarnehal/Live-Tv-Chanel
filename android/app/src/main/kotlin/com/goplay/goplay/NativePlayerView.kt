@@ -64,6 +64,7 @@ class NativePlayerView(
     init {
         // Setup PlayerView
         playerView.useController = false // Flutter handles its own controls
+        playerView.keepScreenOn = true // Keep screen awake while video is playing
         playerView.layoutParams = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT

@@ -1,162 +1,329 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-import '../../core/theme.dart';
-import '../../providers/app_providers.dart';
-import '../../models/event.dart';
-import '../../widgets/cards/event_list_tile.dart';
-import '../../widgets/channel_selector.dart';
-
-class UpcomingScreen extends ConsumerWidget {
-  const UpcomingScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final eventsAsync = ref.watch(upcomingEventsProvider);
-
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          const SliverAppBar(
-            floating: true,
-            pinned: false,
-            leading: SizedBox.shrink(),
-            leadingWidth: 0,
-            title: Text('Upcoming'),
-          ),
-
-          eventsAsync.when(
-            data: (events) {
-              if (events.isEmpty) {
-                return SliverFillRemaining(
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.event_outlined,
-                            size: 60, color: GoPlayTheme.onSurfaceVariant),
-                        const SizedBox(height: 12),
-                        Text(
-                          'No upcoming events',
-                          style: TextStyle(
-                            color: GoPlayTheme.onSurfaceVariant,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-
-              // Group events by date
-              final grouped = _groupByDate(events);
-
-              return SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final entry = grouped.entries.elementAt(index);
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 16),
-                          // Date header
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: GoPlayTheme.primary.withAlpha(15),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              entry.key,
-                              style: TextStyle(
-                                color: GoPlayTheme.primary,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          // Events for this date
-                          ...entry.value.map((event) => EventListTile(
-                                event: event,
-                                onTap: () {
-                                  if (event.channels.isNotEmpty) {
-                                    context.push(
-                                      '/player/${event.channels.first}',
-                                      extra: {
-                                        'eventChannels': event.channels,
-                                        'forceFullscreen': true,
-                                      },
-                                    );
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('No channels available for this event.'),
-                                        backgroundColor: GoPlayTheme.error,
-                                      ),
-                                    );
-                                  }
-                                },
-                              )),
-                        ],
-                      ),
-                    );
-                  },
-                  childCount: grouped.length,
-                ),
-              );
-            },
-            loading: () => const SliverFillRemaining(
-              child: Center(
-                child: CircularProgressIndicator(color: GoPlayTheme.primary),
-              ),
-            ),
-            error: (e, _) => SliverFillRemaining(
-              child: Center(
-                child: Text('Error: $e',
-                    style: const TextStyle(color: GoPlayTheme.error)),
-              ),
-            ),
-          ),
-
-          // Bottom padding
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
-        ],
-      ),
-    );
-  }
-
-  Map<String, List<SportEvent>> _groupByDate(List<SportEvent> events) {
-    final Map<String, List<SportEvent>> grouped = {};
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final tomorrow = today.add(const Duration(days: 1));
-    final nextWeek = today.add(const Duration(days: 7));
-
-    for (final event in events) {
-      final localStart = event.startTime.toLocal();
-      final eventDate =
-          DateTime(localStart.year, localStart.month, localStart.day);
-
-      String label;
-      if (eventDate == today) {
-        label = '📅 Today';
-      } else if (eventDate == tomorrow) {
-        label = '📅 Tomorrow';
-      } else if (eventDate.isBefore(nextWeek)) {
-        label = '📅 ${DateFormat('EEEE, MMM d').format(localStart)}';
-      } else {
-        label = '📅 ${DateFormat('MMM d, yyyy').format(localStart)}';
-      }
-
-      grouped.putIfAbsent(label, () => []).add(event);
-    }
-
-    return grouped;
-  }
-}
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import '../../core/theme.dart';
+import '../../providers/app_providers.dart';
+import '../../models/event.dart';
+import '../../widgets/cards/event_list_tile.dart';
+
+class UpcomingScreen extends ConsumerWidget {
+  const UpcomingScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final eventsAsync = ref.watch(upcomingEventsProvider);
+
+    return Scaffold(
+      body: Stack(
+        children: [
+          // Solid background — cheapest possible widget.
+          const ColoredBox(
+            color: GoPlayTheme.surface,
+            child: SizedBox.expand(),
+          ),
+
+          // Scroll content
+          CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 110.0,
+                floating: false,
+                pinned: true,
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                leading: const SizedBox.shrink(),
+                leadingWidth: 0,
+                flexibleSpace: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final double appBarHeight = constraints.biggest.height;
+                    final double statusBarHeight = MediaQuery.of(
+                      context,
+                    ).padding.top;
+                    final double minHeight = kToolbarHeight + statusBarHeight;
+                    final double maxHeight = 110.0 + statusBarHeight;
+
+                    // Calculate collapse ratio: 0.0 (fully expanded) to 1.0 (fully collapsed)
+                    final double collapseRatio =
+                        ((maxHeight - appBarHeight) / (maxHeight - minHeight))
+                            .clamp(0.0, 1.0);
+
+                    return ClipRect(
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(
+                          sigmaX: 16 * collapseRatio,
+                          sigmaY: 16 * collapseRatio,
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: const Color(
+                              0x0C0D0D12,
+                            ).withOpacity(0.4 + (0.45 * collapseRatio)),
+                            border: Border(
+                              bottom: BorderSide(
+                                color: Colors.white.withOpacity(
+                                  0.08 * collapseRatio,
+                                ),
+                                width: 0.8,
+                              ),
+                            ),
+                          ),
+                          child: FlexibleSpaceBar(
+                            centerTitle: true,
+                            titlePadding: EdgeInsets.only(
+                              left: 20 - (20 * collapseRatio),
+                              bottom: 14 + (2 * collapseRatio),
+                            ),
+                            title: Align(
+                              alignment: Alignment.lerp(
+                                Alignment.bottomLeft,
+                                Alignment.bottomCenter,
+                                collapseRatio,
+                              )!,
+                              child: Text(
+                                'Upcoming',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 26 - (9 * collapseRatio),
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              eventsAsync.when(
+                data: (events) {
+                  if (events.isEmpty) {
+                    return const SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: _EmptyState(),
+                    );
+                  }
+
+                  final grouped = _groupByDate(events);
+                  final keys = grouped.keys.toList(growable: false);
+
+                  return SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final key = keys[index];
+                      final dayEvents = grouped[key]!;
+                      return _DateGroup(
+                        label: key,
+                        events: dayEvents,
+                        onEventTap: (event) {
+                          if (event.channels.isNotEmpty) {
+                            context.push(
+                              '/player/${event.channels.first}',
+                              extra: {
+                                'eventChannels': event.channels,
+                                'forceFullscreen': true,
+                              },
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'No channels available for this event.',
+                                ),
+                                backgroundColor: GoPlayTheme.error,
+                              ),
+                            );
+                          }
+                        },
+                      );
+                    }, childCount: grouped.length),
+                  );
+                },
+                loading: () => const SliverFillRemaining(
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: GoPlayTheme.primary,
+                    ),
+                  ),
+                ),
+                error: (e, _) => SliverFillRemaining(
+                  child: Center(
+                    child: Text(
+                      'Error: $e',
+                      style: const TextStyle(color: GoPlayTheme.error),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SliverToBoxAdapter(child: SizedBox(height: 120)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Map<String, List<SportEvent>> _groupByDate(List<SportEvent> events) {
+    final Map<String, List<SportEvent>> grouped = {};
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+    final nextWeek = today.add(const Duration(days: 7));
+
+    for (final event in events) {
+      final localStart = event.startTime.toLocal();
+      final eventDate = DateTime(
+        localStart.year,
+        localStart.month,
+        localStart.day,
+      );
+
+      final String label;
+      if (eventDate == today) {
+        label = 'Today';
+      } else if (eventDate == tomorrow) {
+        label = 'Tomorrow';
+      } else if (eventDate.isBefore(nextWeek)) {
+        label = DateFormat('EEEE, MMM d').format(localStart);
+      } else {
+        label = DateFormat('MMM d, yyyy').format(localStart);
+      }
+
+      grouped.putIfAbsent(label, () => []).add(event);
+    }
+
+    return grouped;
+  }
+}
+
+// ─── Extracted sub-widgets ───────────────────────────────────────────────────
+// Extracting to their own classes lets Flutter's element tree skip rebuilding
+// them when their inputs haven't changed.
+
+class _DateGroup extends StatelessWidget {
+  const _DateGroup({
+    required this.label,
+    required this.events,
+    required this.onEventTap,
+  });
+
+  final String label;
+  final List<SportEvent> events;
+  final void Function(SportEvent) onEventTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Date header
+          Row(
+            children: [
+              const Icon(
+                Icons.calendar_month_outlined,
+                size: 16,
+                color: Color(0xFF2979FF),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.1,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          // Event tiles
+          ...events.map(
+            (event) => EventListTile(
+              key: ValueKey(event.id),
+              event: event,
+              onTap: () => onEventTap(event),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: const Color(0x05FFFFFF),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0x0FFFFFFF)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x33000000),
+                blurRadius: 24,
+                offset: Offset(0, 12),
+              ),
+            ],
+          ),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 48),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 72,
+                  height: 72,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Color(0x0AFFFFFF),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.event_outlined,
+                      size: 40,
+                      color: Color(0xB3FFFFFF),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  'No Upcoming Events',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Check back later for scheduled live streams.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0x80FFFFFF),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

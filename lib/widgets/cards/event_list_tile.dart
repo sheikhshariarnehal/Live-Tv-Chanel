@@ -7,214 +7,355 @@ import '../live_badge.dart';
 import '../team_flag.dart';
 import '../countdown_timer.dart';
 
-/// Full-width event list tile used in Upcoming and Today's Schedule
-class EventListTile extends ConsumerWidget {
+// ─── Pre-computed static constants ───────────────────────────────────────────
+// Allocated once at class-load time; never re-created during builds/scrolls.
+
+const _kLiveCardDecoration = BoxDecoration(
+  color: Color(0x0AFF1744), // FF1744 @ ~4 %
+  borderRadius: BorderRadius.all(Radius.circular(12)),
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x40FF1744), width: 1.0), // FF1744 @ 25 %
+  ),
+  boxShadow: [
+    BoxShadow(color: Color(0x33000000), blurRadius: 16, offset: Offset(0, 8)),
+    BoxShadow(color: Color(0x08FF1744), blurRadius: 24, spreadRadius: 1),
+  ],
+);
+
+const _kUpcomingCardDecoration = BoxDecoration(
+  color: Color(0x05FFFFFF), // white @ 2 %
+  borderRadius: BorderRadius.all(Radius.circular(12)),
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x0FFFFFFF), width: 1.0), // white @ 6 %
+  ),
+  boxShadow: [
+    BoxShadow(color: Color(0x33000000), blurRadius: 16, offset: Offset(0, 8)),
+    BoxShadow(color: Color(0x082979FF), blurRadius: 24, spreadRadius: 1),
+  ],
+);
+
+const _kLiveAccentDecoration = BoxDecoration(
+  color: GoPlayTheme.liveBadge,
+  borderRadius: BorderRadius.all(Radius.circular(2)),
+);
+
+const _kUpcomingAccentDecoration = BoxDecoration(
+  color: GoPlayTheme.primary,
+  borderRadius: BorderRadius.all(Radius.circular(2)),
+);
+
+const _kUpcomingBadgeDecoration = BoxDecoration(
+  color: Color(0x0FFFFFFF),
+  borderRadius: BorderRadius.all(Radius.circular(20)),
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x14FFFFFF), width: 0.8),
+  ),
+);
+
+const _kLeagueStyle = TextStyle(
+  color: Color(0x80FFFFFF),
+  fontSize: 10,
+  fontWeight: FontWeight.w700,
+  letterSpacing: 1.0,
+);
+
+const _kBadgeStyle = TextStyle(
+  color: Color(0x99FFFFFF),
+  fontSize: 8,
+  fontWeight: FontWeight.w800,
+  letterSpacing: 0.5,
+);
+
+const _kTeamNameStyle = TextStyle(
+  color: Colors.white,
+  fontSize: 12,
+  fontWeight: FontWeight.w700,
+  letterSpacing: 0.2,
+);
+
+const _kCountdownStyle = TextStyle(
+  color: GoPlayTheme.primary,
+  fontSize: 10,
+  fontWeight: FontWeight.w800,
+);
+
+const _kTimeInfoStyle = TextStyle(
+  color: Color(0x66FFFFFF),
+  fontSize: 10,
+  fontWeight: FontWeight.w600,
+);
+
+const _kLiveTimeStyle = TextStyle(
+  color: GoPlayTheme.liveBadge,
+  fontSize: 18,
+  fontWeight: FontWeight.w900,
+  letterSpacing: -0.5,
+);
+
+const _kUpcomingTimeStyle = TextStyle(
+  color: Colors.white,
+  fontSize: 15,
+  fontWeight: FontWeight.w900,
+  letterSpacing: -0.5,
+);
+
+// ─── Months lookup — allocated once ─────────────────────────────────────────
+const _kMonths = [
+  'JAN',
+  'FEB',
+  'MAR',
+  'APR',
+  'MAY',
+  'JUN',
+  'JUL',
+  'AUG',
+  'SEP',
+  'OCT',
+  'NOV',
+  'DEC',
+];
+
+class EventListTile extends ConsumerStatefulWidget {
   final SportEvent event;
   final VoidCallback? onTap;
 
   const EventListTile({super.key, required this.event, this.onTap});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<EventListTile> createState() => _EventListTileState();
+}
+
+class _EventListTileState extends ConsumerState<EventListTile>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 150),
+  );
+
+  late final Animation<double> _scale = Tween<double>(
+    begin: 1.0,
+    end: 0.96,
+  ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+  // Cached values derived from event — recomputed only when event changes.
+  late String _homeAbbr;
+  late String _awayAbbr;
+  late String _timeLabel;
+  late bool _isToday;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateCache();
+  }
+
+  @override
+  void didUpdateWidget(EventListTile old) {
+    super.didUpdateWidget(old);
+    if (old.event != widget.event) _updateCache();
+  }
+
+  void _updateCache() {
+    final event = widget.event;
+    _homeAbbr = _abbreviate(event.homeTeam.name);
+    _awayAbbr = _abbreviate(event.awayTeam.name);
+    _timeLabel = _formatTime(event.startTime);
+
+    final now = DateTime.now();
+    final localStart = event.startTime.toLocal();
+    _isToday =
+        localStart.year == now.year &&
+        localStart.month == now.month &&
+        localStart.day == now.day;
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final event = widget.event;
+    final isLive = event.isLive;
+
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: GoPlayTheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: event.isLive
-                ? GoPlayTheme.liveBadge.withAlpha(40)
-                : GoPlayTheme.cardBorder,
-            width: 0.5,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Header Row: Match Title (League) + Status Badge
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    event.league,
-                    style: const TextStyle(
-                      color: GoPlayTheme.onSurface,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                if (event.isLive)
-                  const LiveBadge(
-                    fontSize: 8,
-                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  )
-                else
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: GoPlayTheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: GoPlayTheme.onSurfaceVariant.withAlpha(40),
-                        width: 0.5,
-                      ),
-                    ),
-                    child: const Text(
-                      'UPCOMING',
-                      style: TextStyle(
-                        color: GoPlayTheme.onSurfaceVariant,
-                        fontSize: 8,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            // Teams & Score/Time Row
-            Row(
-              children: [
-                // Home team
-                SizedBox(
-                  width: 48,
-                  child: Column(
+      onTapDown: (_) => _controller.forward(),
+      onTapUp: (_) {
+        _controller.reverse();
+        widget.onTap?.call();
+      },
+      onTapCancel: () => _controller.reverse(),
+      child: ScaleTransition(
+        scale: _scale,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: DecoratedBox(
+            decoration: isLive
+                ? _kLiveCardDecoration
+                : _kUpcomingCardDecoration,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      TeamFlagWidget(
-                        flag: event.homeTeam.flag,
-                        size: 22,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        _abbreviate(event.homeTeam.name),
-                        style: const TextStyle(
-                          color: GoPlayTheme.onSurface,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Score / Time
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        event.isLive ? 'VS' : _formatTime(event.startTime),
-                        style: const TextStyle(
-                          color: GoPlayTheme.onSurface,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      () {
-                        final now = DateTime.now();
-                        final localStart = event.startTime.toLocal();
-                        final isToday = localStart.year == now.year &&
-                            localStart.month == now.month &&
-                            localStart.day == now.day;
-
-                        if (event.isUpcoming && isToday) {
-                          return CountdownTimerWidget(
-                            startTime: event.startTime,
-                            onTimerFinished: () {
-                              ref.invalidate(eventsProvider);
-                            },
-                            style: const TextStyle(
-                              color: GoPlayTheme.primary,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 4,
+                              height: 12,
+                              child: DecoratedBox(
+                                decoration: isLive
+                                    ? _kLiveAccentDecoration
+                                    : _kUpcomingAccentDecoration,
+                              ),
                             ),
-                          );
-                        }
-                        return Text(
-                          _formatTimeInfo(event),
-                          style: const TextStyle(
-                            color: GoPlayTheme.onSurfaceVariant,
-                            fontSize: 10,
-                          ),
-                        );
-                      }(),
-                    ],
-                  ),
-                ),
-
-                // Away team
-                SizedBox(
-                  width: 48,
-                  child: Column(
-                    children: [
-                      TeamFlagWidget(
-                        flag: event.awayTeam.flag,
-                        size: 22,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        _abbreviate(event.awayTeam.name),
-                        style: const TextStyle(
-                          color: GoPlayTheme.onSurface,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                event.league.toUpperCase(),
+                                style: _kLeagueStyle,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
-                        maxLines: 1,
+                      ),
+                      const SizedBox(width: 8),
+                      if (isLive)
+                        const LiveBadge(
+                          fontSize: 8,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                        )
+                      else
+                        const DecoratedBox(
+                          decoration: _kUpcomingBadgeDecoration,
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            child: Text('UPCOMING', style: _kBadgeStyle),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  // Teams & time row
+                  Row(
+                    children: [
+                      // Home team
+                      Expanded(
+                        flex: 3,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TeamFlagWidget(flag: event.homeTeam.flag, size: 28),
+                            const SizedBox(height: 6),
+                            Text(
+                              _homeAbbr,
+                              style: _kTeamNameStyle,
+                              maxLines: 1,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Centre: score / time / countdown
+                      Expanded(
+                        flex: 4,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              isLive ? 'VS' : _timeLabel,
+                              style: isLive
+                                  ? _kLiveTimeStyle
+                                  : _kUpcomingTimeStyle,
+                            ),
+                            const SizedBox(height: 4),
+                            if (event.isUpcoming && _isToday)
+                              CountdownTimerWidget(
+                                startTime: event.startTime,
+                                onTimerFinished: () =>
+                                    ref.invalidate(eventsProvider),
+                                style: _kCountdownStyle,
+                              )
+                            else
+                              Text(
+                                _formatTimeInfo(event),
+                                style: _kTimeInfoStyle,
+                              ),
+                          ],
+                        ),
+                      ),
+
+                      // Away team
+                      Expanded(
+                        flex: 3,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TeamFlagWidget(flag: event.awayTeam.flag, size: 28),
+                            const SizedBox(height: 6),
+                            Text(
+                              _awayAbbr,
+                              style: _kTeamNameStyle,
+                              maxLines: 1,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  String _abbreviate(String name) {
+  static String _abbreviate(String name) {
     if (name.length <= 3) return name.toUpperCase();
     return name.substring(0, 3).toUpperCase();
   }
 
-  String _formatTime(DateTime time) {
-    final localTime = time.toLocal();
-    final hour = localTime.hour;
-    final minute = localTime.minute.toString().padLeft(2, '0');
-    final period = hour >= 12 ? 'PM' : 'AM';
-    final displayHour = hour % 12 == 0 ? 12 : hour % 12;
-    return '$displayHour:$minute $period';
+  static String _formatTime(DateTime time) {
+    final t = time.toLocal();
+    final h = t.hour;
+    final m = t.minute.toString().padLeft(2, '0');
+    final period = h >= 12 ? 'PM' : 'AM';
+    final display = h % 12 == 0 ? 12 : h % 12;
+    return '$display:$m $period';
   }
 
-  String _formatTimeInfo(SportEvent event) {
-    if (event.isLive) {
-      final elapsed = event.elapsedTime;
-      return '${elapsed.inMinutes}\'';
-    }
-    
-    final localTime = event.startTime.toLocal();
+  static String _formatTimeInfo(SportEvent event) {
+    if (event.isLive) return "${event.elapsedTime.inMinutes}'";
+
+    final t = event.startTime.toLocal();
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final tomorrow = today.add(const Duration(days: 1));
-    final eventDay = DateTime(localTime.year, localTime.month, localTime.day);
-    
-    if (eventDay == today) {
-      return 'TODAY';
-    } else if (eventDay == tomorrow) {
-      return 'TOMORROW';
-    } else {
-      final months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-      return '${months[localTime.month - 1]} ${localTime.day.toString().padLeft(2, '0')}';
-    }
+    final eventDay = DateTime(t.year, t.month, t.day);
+
+    if (eventDay == today) return 'TODAY';
+    if (eventDay == tomorrow) return 'TOMORROW';
+    return '${_kMonths[t.month - 1]} ${t.day.toString().padLeft(2, '0')}';
   }
 }
