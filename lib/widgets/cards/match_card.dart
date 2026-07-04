@@ -5,18 +5,18 @@ import '../live_badge.dart';
 import '../team_flag.dart';
 
 const _kLiveCardDecoration = BoxDecoration(
-  color: Color(0x0AFF1744), // liveBadge @ 4%
+  gradient: GoPlayTheme.cardGradient,
   borderRadius: BorderRadius.all(Radius.circular(12)),
   border: Border.fromBorderSide(
-    BorderSide(color: Color(0x3DFF1744), width: 1.0), // liveBadge @ 24%
+    BorderSide(color: GoPlayTheme.cardBorder, width: 0.8), // Alabaster Grey border
   ),
 );
 
 const _kUpcomingCardDecoration = BoxDecoration(
-  color: Color(0x05FFFFFF), // white @ 2%
+  gradient: GoPlayTheme.cardGradient,
   borderRadius: BorderRadius.all(Radius.circular(12)),
   border: Border.fromBorderSide(
-    BorderSide(color: Color(0x0FFFFFFF), width: 0.8), // white @ 6%
+    BorderSide(color: GoPlayTheme.cardBorder, width: 0.8), // Alabaster Grey border
   ),
 );
 
@@ -24,23 +24,23 @@ const _kUpcomingBadgeDecoration = BoxDecoration(
   color: Color(0x0AFFFFFF), // white @ 4%
   borderRadius: BorderRadius.all(Radius.circular(4)),
   border: Border.fromBorderSide(
-    BorderSide(color: Color(0x14FFFFFF), width: 0.5),
+    BorderSide(color: GoPlayTheme.cardBorder, width: 0.5),
   ),
 );
 
 const _kLiveTimeBadgeDecoration = BoxDecoration(
-  color: Color(0x1FFF1744), // liveBadge @ 12%
+  color: Color(0x0DFFFFFF), // white @ 6%
   borderRadius: BorderRadius.all(Radius.circular(8)),
   border: Border.fromBorderSide(
-    BorderSide(color: Color(0x3DFF1744), width: 0.5),
+    BorderSide(color: GoPlayTheme.cardBorder, width: 0.5),
   ),
 );
 
 const _kUpcomingTimeBadgeDecoration = BoxDecoration(
-  color: Color(0x0FFFFFFF), // white @ 6%
+  color: Color(0x0DFFFFFF), // white @ 6%
   borderRadius: BorderRadius.all(Radius.circular(8)),
   border: Border.fromBorderSide(
-    BorderSide(color: Color(0x14FFFFFF), width: 0.5),
+    BorderSide(color: GoPlayTheme.cardBorder, width: 0.5),
   ),
 );
 
@@ -180,7 +180,7 @@ class MatchCard extends StatelessWidget {
                       isLive ? 'VS' : _formatTime(event.startTime),
                       style: TextStyle(
                         color: isLive
-                            ? GoPlayTheme.liveBadge
+                            ? GoPlayTheme.primary
                             : GoPlayTheme.onSurfaceVariant,
                         fontSize: 11,
                         fontWeight: FontWeight.w800,

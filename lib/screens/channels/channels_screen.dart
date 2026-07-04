@@ -17,8 +17,8 @@ final TextStyle _titleStyle = GoogleFonts.orbitron(
 
 // ─── Pre-cached appbar glass decoration ──────────────────────
 const BoxDecoration _appBarGlass = BoxDecoration(
-  color: Color(0xCC0D0D12),
-  border: Border(bottom: BorderSide(color: Color(0x14FFFFFF), width: 0.8)),
+  color: Color(0xCC17181C),
+  border: Border(bottom: BorderSide(color: GoPlayTheme.cardBorder, width: 0.8)),
 );
 
 // ─── Pre-cached search field decoration ──────────────────────
@@ -26,7 +26,7 @@ const BoxDecoration _searchBoxDecoration = BoxDecoration(
   color: Color(0x1F000000),
   borderRadius: BorderRadius.all(Radius.circular(20)),
   border: Border.fromBorderSide(
-    BorderSide(color: Color(0x14FFFFFF), width: 0.8),
+    BorderSide(color: GoPlayTheme.cardBorder, width: 0.8),
   ),
 );
 

@@ -5,14 +5,10 @@ import '../../models/channel.dart';
 
 // ─── Pre-cached card decorations — never reallocated ─────────
 const _cardDecoNormal = BoxDecoration(
-  gradient: LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [Color(0x0DFFFFFF), Color(0x03FFFFFF)],
-  ),
+  gradient: GoPlayTheme.cardGradient,
   borderRadius: BorderRadius.all(Radius.circular(10)),
   border: Border.fromBorderSide(
-    BorderSide(color: Color(0x14FFFFFF), width: 0.8),
+    BorderSide(color: GoPlayTheme.cardBorder, width: 0.8),
   ),
 );
 
@@ -20,15 +16,15 @@ const _cardDecoHovered = BoxDecoration(
   gradient: LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0x14FFFFFF), Color(0x08FFFFFF)],
+    colors: [Color(0xFF35373C), Color(0xFF2C2D31)], // Highlighted container
   ),
   borderRadius: BorderRadius.all(Radius.circular(10)),
   border: Border.fromBorderSide(
-    BorderSide(color: Color(0x6400E676), width: 0.8), // primary @ 39%
+    BorderSide(color: Color(0x6471768E), width: 0.8), // Alabaster Grey @ 39%
   ),
   boxShadow: [
     BoxShadow(
-      color: Color(0x1400E676), // primary @ 8%
+      color: Color(0x1471768E), // Alabaster Grey @ 8%
       blurRadius: 12,
       offset: Offset(0, 4),
     ),
@@ -57,7 +53,7 @@ const _avatarDeco = BoxDecoration(
   color: Color(0x14FFFFFF),
   shape: BoxShape.circle,
   border: Border.fromBorderSide(
-    BorderSide(color: Color(0x1AFFFFFF), width: 1.0),
+    BorderSide(color: GoPlayTheme.cardBorder, width: 1.0),
   ),
 );
 
