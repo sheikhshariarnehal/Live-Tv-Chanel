@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,12 +18,9 @@ import '../../widgets/channel_avatar.dart';
 import '../../widgets/countdown_timer.dart';
 
 // ─── Cached Text Styles ──────────────────────────────────────
-// Avoids recreating GoogleFonts TextStyle objects on every frame.
-final TextStyle _orbitronTitle = GoogleFonts.orbitron(
-  fontSize: 22,
+final TextStyle _orbitronTitleBase = GoogleFonts.orbitron(
   fontWeight: FontWeight.w900,
   color: GoPlayTheme.primary,
-  letterSpacing: 3,
 );
 
 final TextStyle _interLeagueBold = GoogleFonts.inter(
@@ -43,50 +41,35 @@ final TextStyle _orbitronVS = GoogleFonts.orbitron(
   fontSize: 20,
   fontWeight: FontWeight.w900,
   letterSpacing: 1,
-  shadows: [
+  shadows: const [
     Shadow(
-      color: Colors.black.withAlpha(160),
+      color: Color(0xA0000000), // black @ ~63%
       blurRadius: 4,
-      offset: const Offset(0, 1),
+      offset: Offset(0, 1),
     ),
   ],
 );
 
 final TextStyle _interStartsIn = GoogleFonts.inter(
-  color: Colors.white.withAlpha(160),
+  color: const Color(0xA0FFFFFF), // white @ ~63%
   fontSize: 7.5,
   fontWeight: FontWeight.w800,
   letterSpacing: 0.5,
-  shadows: [
-    Shadow(
-      color: Colors.black.withAlpha(160),
-      blurRadius: 2,
-    ),
-  ],
+  shadows: const [Shadow(color: Color(0xA0000000), blurRadius: 2)],
 );
 
 final TextStyle _interLiveNow = GoogleFonts.inter(
   color: Colors.white,
   fontSize: 10,
   fontWeight: FontWeight.w800,
-  shadows: [
-    Shadow(
-      color: Colors.black.withAlpha(160),
-      blurRadius: 2,
-    ),
-  ],
+  shadows: const [Shadow(color: Color(0xA0000000), blurRadius: 2)],
 );
 
 final TextStyle _interCountdown = GoogleFonts.inter(
   color: Colors.white,
   fontSize: 10,
   fontWeight: FontWeight.w800,
-  shadows: [
-    Shadow(
-      color: Colors.black.withAlpha(160),
-      blurRadius: 2,
-    ),
-  ],
+  shadows: const [Shadow(color: Color(0xA0000000), blurRadius: 2)],
 );
 
 final TextStyle _interButtonLabel = GoogleFonts.inter(
@@ -100,11 +83,11 @@ final TextStyle _interTeamName = GoogleFonts.inter(
   color: Colors.white,
   fontSize: 11,
   fontWeight: FontWeight.w700,
-  shadows: [
+  shadows: const [
     Shadow(
-      color: Colors.black.withAlpha(180),
+      color: Color(0xB4000000), // black @ ~70%
       blurRadius: 4,
-      offset: const Offset(0, 1),
+      offset: Offset(0, 1),
     ),
   ],
 );
@@ -116,29 +99,96 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Kick off background sync now that Supabase is guaranteed ready.
     ref.watch(appSyncProvider);
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // App Bar
+          // Collapsing Frosted Glass App Bar
           SliverAppBar(
-            floating: true,
-            pinned: false,
+            expandedHeight: 110.0,
+            floating: false,
+            pinned: true,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.menu_rounded),
+              icon: const Icon(Icons.menu_rounded, color: Colors.white),
               onPressed: () {},
             ),
-            title: Text('GOPLAY', style: _orbitronTitle),
-            centerTitle: true,
             actions: [
               IconButton(
-                icon: const Icon(Icons.search_rounded),
+                icon: const Icon(Icons.search_rounded, color: Colors.white),
                 onPressed: () => context.push('/search'),
               ),
             ],
+            flexibleSpace: LayoutBuilder(
+              builder: (context, constraints) {
+                final double appBarHeight = constraints.biggest.height;
+                final double statusBarHeight = MediaQuery.of(
+                  context,
+                ).padding.top;
+                final double minHeight = kToolbarHeight + statusBarHeight;
+                final double maxHeight = 110.0 + statusBarHeight;
+
+                final double collapseRatio =
+                    ((maxHeight - appBarHeight) / (maxHeight - minHeight))
+                        .clamp(0.0, 1.0);
+
+                return ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(
+                      sigmaX: 16 * collapseRatio,
+                      sigmaY: 16 * collapseRatio,
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Color.fromARGB(
+                          ((0.4 + (0.45 * collapseRatio)) * 255).round().clamp(
+                            0,
+                            255,
+                          ),
+                          0x0D,
+                          0x0D,
+                          0x12,
+                        ),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: Color.fromARGB(
+                              ((0.08 * collapseRatio) * 255).round().clamp(
+                                0,
+                                255,
+                              ),
+                              0xFF,
+                              0xFF,
+                              0xFF,
+                            ),
+                            width: 0.8,
+                          ),
+                        ),
+                      ),
+                      child: FlexibleSpaceBar(
+                        centerTitle: true,
+                        titlePadding: EdgeInsets.only(
+                          bottom: 14 + (2 * collapseRatio),
+                        ),
+                        title: Text(
+                          'GOPLAY',
+                          style: _orbitronTitleBase.copyWith(
+                            fontSize: 22 - (3 * collapseRatio),
+                            letterSpacing: 3 - (1.0 * collapseRatio),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
 
           // Hero Banner
-          const SliverToBoxAdapter(child: RepaintBoundary(child: _HeroBanner())),
+          const SliverToBoxAdapter(
+            child: RepaintBoundary(child: _HeroBanner()),
+          ),
 
           // Trending Channels
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
@@ -149,18 +199,17 @@ class HomeScreen extends ConsumerWidget {
               onAction: () => context.go('/channels'),
             ),
           ),
-          const SliverToBoxAdapter(child: RepaintBoundary(child: _TrendingChannels())),
+          const SliverToBoxAdapter(
+            child: RepaintBoundary(child: _TrendingChannels()),
+          ),
 
           // Live/Ongoing Matches
           const SliverToBoxAdapter(child: SizedBox(height: 20)),
-          SliverToBoxAdapter(
-            child: SectionHeader(
-              title: 'Matches',
-            ),
-          ),
-          const SliverToBoxAdapter(child: RepaintBoundary(child: _MatchTabs())),
+          SliverToBoxAdapter(child: SectionHeader(title: 'Live Matches')),
           const SliverToBoxAdapter(child: SizedBox(height: 8)),
-          const SliverToBoxAdapter(child: RepaintBoundary(child: _MatchesSection())),
+          const SliverToBoxAdapter(
+            child: RepaintBoundary(child: _MatchesSection()),
+          ),
 
           // Today's Schedule
           const SliverToBoxAdapter(child: SizedBox(height: 20)),
@@ -171,15 +220,21 @@ class HomeScreen extends ConsumerWidget {
               onAction: () => context.go('/upcoming'),
             ),
           ),
-          const SliverToBoxAdapter(child: RepaintBoundary(child: _TodaySchedule())),
+          const SliverToBoxAdapter(
+            child: RepaintBoundary(child: _TodaySchedule()),
+          ),
 
           // Recently Watched
           const SliverToBoxAdapter(child: SizedBox(height: 20)),
-          const SliverToBoxAdapter(child: RepaintBoundary(child: _RecentlyWatched())),
+          const SliverToBoxAdapter(
+            child: RepaintBoundary(child: _RecentlyWatched()),
+          ),
 
           // Announcements
           const SliverToBoxAdapter(child: SizedBox(height: 20)),
-          const SliverToBoxAdapter(child: RepaintBoundary(child: _AnnouncementsSection())),
+          const SliverToBoxAdapter(
+            child: RepaintBoundary(child: _AnnouncementsSection()),
+          ),
 
           // Bottom padding
           const SliverToBoxAdapter(child: SizedBox(height: 100)),
@@ -249,7 +304,9 @@ class _HeroBannerState extends ConsumerState<_HeroBanner> {
                           borderRadius: BorderRadius.circular(3),
                           color: currentPage == index
                               ? GoPlayTheme.primary
-                              : GoPlayTheme.primary.withAlpha(80),
+                              : const Color(
+                                  0x5000E676,
+                                ), // GoPlayTheme.primary @ 31%
                         ),
                       ),
                     ),
@@ -271,38 +328,65 @@ class _HeroBannerState extends ConsumerState<_HeroBanner> {
           child: CircularProgressIndicator(color: GoPlayTheme.primary),
         ),
       ),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (err, stack) => const SizedBox.shrink(),
     );
   }
 }
 
-/// Individual hero banner card — extracted to its own widget to avoid
-/// rebuilding all cards when the page indicator changes.
+/// Individual hero banner card
 class _HeroBannerCard extends ConsumerWidget {
   final SportEvent event;
   const _HeroBannerCard({required this.event});
 
-  // Cache static decoration objects
-  static final _cardRadius = BorderRadius.circular(24);
-  static final _cardDecoration = BoxDecoration(
+  static const _cardRadius = BorderRadius.all(Radius.circular(20));
+  static const _cardDecoration = BoxDecoration(
     borderRadius: _cardRadius,
-    border: Border.all(color: Colors.white.withAlpha(20), width: 1.0),
-  );
-  static final _upcomingBadgeDecoration = BoxDecoration(
-    color: GoPlayTheme.primary.withAlpha(30),
-    borderRadius: BorderRadius.circular(12),
-    border: Border.all(color: GoPlayTheme.primary.withAlpha(80), width: 0.5),
-  );
-  static final _watchButtonDecoration = BoxDecoration(
-    color: GoPlayTheme.primary,
-    borderRadius: BorderRadius.circular(16),
+    border: Border.fromBorderSide(
+      BorderSide(color: Color(0x14FFFFFF), width: 0.8), // White @ 8%
+    ),
     boxShadow: [
       BoxShadow(
-        color: GoPlayTheme.primary.withAlpha(40),
-        blurRadius: 6,
-        offset: const Offset(0, 2),
+        color: Color(0x1F000000), // Soft shadow
+        blurRadius: 10,
+        offset: Offset(0, 4),
       ),
     ],
+  );
+
+  static const _upcomingBadgeDecoration = BoxDecoration(
+    color: Color(0x1E00E676), // GoPlayTheme.primary @ 12%
+    borderRadius: BorderRadius.all(Radius.circular(12)),
+    border: Border.fromBorderSide(
+      BorderSide(
+        color: Color(0x5000E676),
+        width: 0.5,
+      ), // GoPlayTheme.primary @ 31%
+    ),
+  );
+
+  static const _watchButtonDecoration = BoxDecoration(
+    color: GoPlayTheme.primary,
+    borderRadius: BorderRadius.all(Radius.circular(16)),
+    boxShadow: [
+      BoxShadow(
+        color: Color(0x2800E676), // GoPlayTheme.primary @ 16%
+        blurRadius: 6,
+        offset: Offset(0, 2),
+      ),
+    ],
+  );
+
+  static const _gradientOverlay = BoxDecoration(
+    borderRadius: _cardRadius,
+    gradient: LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Color(0x20000000), // Transparent top
+        Color(0x60000000), // Muted middle
+        Color(0xD90D0D12), // Solid background bottom for contrast
+      ],
+    ),
   );
 
   @override
@@ -312,10 +396,7 @@ class _HeroBannerCard extends ConsumerWidget {
         if (event.channels.isNotEmpty) {
           context.push(
             '/player/${event.channels.first}',
-            extra: {
-              'eventChannels': event.channels,
-              'forceFullscreen': true,
-            },
+            extra: {'eventChannels': event.channels, 'forceFullscreen': true},
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -342,199 +423,124 @@ class _HeroBannerCard extends ConsumerWidget {
                     fit: BoxFit.cover,
                     memCacheWidth: 800,
                     fadeInDuration: const Duration(milliseconds: 200),
-                    placeholder: (_, __) => const ColoredBox(
+                    placeholder: (context, url) => const ColoredBox(
                       color: GoPlayTheme.surfaceContainerHigh,
                     ),
-                    errorWidget: (_, __, ___) => const ColoredBox(
+                    errorWidget: (context, url, error) => const ColoredBox(
                       color: GoPlayTheme.surfaceContainerHigh,
                     ),
                   ),
-              // Content overlay
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                child: Column(
-                  children: [
-                    // Top Row: League and Status Badge
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(event.league, style: _interLeagueBold),
-                        if (event.isLive)
-                          const LiveBadge(fontSize: 11)
-                        else
-                          DecoratedBox(
-                            decoration: _upcomingBadgeDecoration,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const SizedBox(
-                                    width: 5,
-                                    height: 5,
-                                    child: DecoratedBox(
-                                      decoration: BoxDecoration(
-                                        color: GoPlayTheme.primary,
-                                        shape: BoxShape.circle,
+                // Gradient dark overlay
+                const DecoratedBox(decoration: _gradientOverlay),
+                // Content overlay
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                  child: Column(
+                    children: [
+                      // Top Row: League and Status Badge
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(event.league, style: _interLeagueBold),
+                          if (event.isLive)
+                            const LiveBadge(fontSize: 11)
+                          else
+                            DecoratedBox(
+                              decoration: _upcomingBadgeDecoration,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SizedBox(
+                                      width: 5,
+                                      height: 5,
+                                      child: DecoratedBox(
+                                        decoration: BoxDecoration(
+                                          color: GoPlayTheme.primary,
+                                          shape: BoxShape.circle,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Text('UPCOMING', style: _interUpcomingBadge),
-                                ],
+                                    SizedBox(width: 5),
+                                    Text(
+                                      'UPCOMING',
+                                      style: _interUpcomingBadge,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    const Spacer(),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      const Spacer(),
 
-                    // Middle Row: Matchup details
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _TeamCard(teamName: event.homeTeam.name, flag: event.homeTeam.flag),
-                        Expanded(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text('VS', style: _orbitronVS),
-                              const SizedBox(height: 6),
-                              Text('STARTS IN', style: _interStartsIn),
-                              if (event.isLive)
-                                Text('LIVE NOW', style: _interLiveNow)
-                              else
-                                CountdownTimerWidget(
-                                  startTime: event.startTime,
-                                  onTimerFinished: () {
-                                    ref.invalidate(eventsProvider);
-                                  },
-                                  style: _interCountdown,
-                                ),
-                            ],
+                      // Middle Row: Matchup details
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _TeamCard(
+                            teamName: event.homeTeam.name,
+                            flag: event.homeTeam.flag,
                           ),
-                        ),
-                        _TeamCard(teamName: event.awayTeam.name, flag: event.awayTeam.flag),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    const Spacer(),
+                          Expanded(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text('VS', style: _orbitronVS),
+                                const SizedBox(height: 6),
+                                Text('STARTS IN', style: _interStartsIn),
+                                if (event.isLive)
+                                  Text('LIVE NOW', style: _interLiveNow)
+                                else
+                                  CountdownTimerWidget(
+                                    startTime: event.startTime,
+                                    onTimerFinished: () {
+                                      ref.invalidate(eventsProvider);
+                                    },
+                                    style: _interCountdown,
+                                  ),
+                              ],
+                            ),
+                          ),
+                          _TeamCard(
+                            teamName: event.awayTeam.name,
+                            flag: event.awayTeam.flag,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      const Spacer(),
 
-                    // Bottom Row: Watch/Hub Button
-                    Center(
-                      child: DecoratedBox(
-                        decoration: _watchButtonDecoration,
-                        child: SizedBox(
-                          width: 150,
-                          height: 32,
-                          child: Center(
-                            child: Text(
-                              event.isLive ? 'WATCH LIVE' : 'MATCH HUB',
-                              style: _interButtonLabel,
+                      // Bottom Row: Watch/Hub Button
+                      Center(
+                        child: DecoratedBox(
+                          decoration: _watchButtonDecoration,
+                          child: SizedBox(
+                            width: 150,
+                            height: 32,
+                            child: Center(
+                              child: Text(
+                                event.isLive ? 'WATCH LIVE' : 'MATCH HUB',
+                                style: _interButtonLabel,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
-      ),
-    );
-  }
-}
-
-// ─── Match Tabs ────────────────────────────────────────────────
-final _matchTabProvider = NotifierProvider<_MatchTabNotifier, int>(
-  _MatchTabNotifier.new,
-);
-
-class _MatchTabNotifier extends Notifier<int> {
-  @override
-  int build() => 0;
-
-  void select(int tab) => state = tab;
-}
-
-class _MatchTabs extends ConsumerWidget {
-  const _MatchTabs();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tab = ref.watch(_matchTabProvider);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          _TabButton(
-            label: 'LIVE',
-            isSelected: tab == 0,
-            onTap: () => ref.read(_matchTabProvider.notifier).select(0),
-          ),
-          const SizedBox(width: 8),
-          _TabButton(
-            label: 'UPCOMING',
-            isSelected: tab == 1,
-            onTap: () => ref.read(_matchTabProvider.notifier).select(1),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TabButton extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _TabButton({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  static final _selectedDecoration = BoxDecoration(
-    color: GoPlayTheme.primary.withAlpha(25),
-    borderRadius: BorderRadius.circular(10),
-    border: Border.all(color: GoPlayTheme.primary, width: 1),
-  );
-  static final _unselectedDecoration = BoxDecoration(
-    color: Colors.transparent,
-    borderRadius: BorderRadius.circular(10),
-    border: Border.all(color: GoPlayTheme.cardBorder, width: 1),
-  );
-  static const _selectedTextStyle = TextStyle(
-    color: GoPlayTheme.primary,
-    fontSize: 12,
-    fontWeight: FontWeight.w700,
-    letterSpacing: 0.5,
-  );
-  static const _unselectedTextStyle = TextStyle(
-    color: GoPlayTheme.onSurfaceVariant,
-    fontSize: 12,
-    fontWeight: FontWeight.w700,
-    letterSpacing: 0.5,
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: isSelected ? _selectedDecoration : _unselectedDecoration,
-        child: Text(
-          label,
-          style: isSelected ? _selectedTextStyle : _unselectedTextStyle,
         ),
       ),
     );
@@ -547,30 +553,27 @@ class _MatchesSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tab = ref.watch(_matchTabProvider);
     final eventsAsync = ref.watch(eventsProvider);
 
     return eventsAsync.when(
       data: (allEvents) {
-        final events = tab == 0
-            ? allEvents.where((e) => e.isLive).toList()
-            : allEvents.where((e) => e.isUpcoming).toList();
+        final events = allEvents.where((e) => e.isLive).toList();
 
         if (events.isEmpty) {
-          return Padding(
-            padding: const EdgeInsets.all(24),
+          return const Padding(
+            padding: EdgeInsets.all(24),
             child: Center(
               child: Column(
                 children: [
                   Icon(
-                    tab == 0 ? Icons.live_tv_outlined : Icons.schedule_outlined,
+                    Icons.live_tv_outlined,
                     color: GoPlayTheme.onSurfaceVariant,
                     size: 40,
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Text(
-                    tab == 0 ? 'No live matches right now' : 'No upcoming matches',
-                    style: const TextStyle(color: GoPlayTheme.onSurfaceVariant),
+                    'No live matches right now',
+                    style: TextStyle(color: GoPlayTheme.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -614,11 +617,16 @@ class _MatchesSection extends ConsumerWidget {
       },
       loading: () => const Padding(
         padding: EdgeInsets.all(32),
-        child: Center(child: CircularProgressIndicator(color: GoPlayTheme.primary)),
+        child: Center(
+          child: CircularProgressIndicator(color: GoPlayTheme.primary),
+        ),
       ),
       error: (e, _) => Padding(
         padding: const EdgeInsets.all(16),
-        child: Text('Error: $e', style: const TextStyle(color: GoPlayTheme.error)),
+        child: Text(
+          'Error: $e',
+          style: const TextStyle(color: GoPlayTheme.error),
+        ),
       ),
     );
   }
@@ -652,7 +660,6 @@ class _TodaySchedule extends ConsumerWidget {
           );
         }
 
-        // Use ListView.builder for lazy rendering instead of Column + .map()
         return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -687,7 +694,7 @@ class _TodaySchedule extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (err, stack) => const SizedBox.shrink(),
     );
   }
 }
@@ -746,7 +753,7 @@ class _TrendingChannels extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox(height: 90),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (err, stack) => const SizedBox.shrink(),
     );
   }
 }
@@ -763,9 +770,7 @@ class _RecentlyWatched extends ConsumerWidget {
 
     return Column(
       children: [
-        const SectionHeader(
-          title: 'Recently Watched',
-        ),
+        const SectionHeader(title: 'Recently Watched'),
         SizedBox(
           height: 90,
           child: ListView.builder(
@@ -812,16 +817,20 @@ class _RecentlyWatched extends ConsumerWidget {
 class _AnnouncementsSection extends ConsumerWidget {
   const _AnnouncementsSection();
 
-  static final _warningDecoration = BoxDecoration(
-    color: const Color(0xFF3D3300).withAlpha(60),
-    borderRadius: BorderRadius.circular(12),
-    border: Border.all(color: Colors.amber.withAlpha(40), width: 0.5),
+  static const _warningDecoration = BoxDecoration(
+    color: Color(0x14FFC107), // amber @ 8%
+    borderRadius: BorderRadius.all(Radius.circular(16)),
+    border: Border.fromBorderSide(
+      BorderSide(color: Color(0x33FFC107), width: 0.8), // amber @ 20%
+    ),
   );
 
-  static final _infoDecoration = BoxDecoration(
-    color: GoPlayTheme.surfaceContainer,
-    borderRadius: BorderRadius.circular(12),
-    border: Border.all(color: GoPlayTheme.cardBorder, width: 0.5),
+  static const _infoDecoration = BoxDecoration(
+    color: Color(0x0AFFFFFF), // white @ 4%
+    borderRadius: BorderRadius.all(Radius.circular(16)),
+    border: Border.fromBorderSide(
+      BorderSide(color: Color(0x14FFFFFF), width: 0.8), // white @ 8%
+    ),
   );
 
   @override
@@ -846,9 +855,14 @@ class _AnnouncementsSection extends ConsumerWidget {
                 final a = announcements[index];
                 final isWarning = a.type == 'warning';
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
                   child: DecoratedBox(
-                    decoration: isWarning ? _warningDecoration : _infoDecoration,
+                    decoration: isWarning
+                        ? _warningDecoration
+                        : _infoDecoration,
                     child: Padding(
                       padding: const EdgeInsets.all(14),
                       child: Row(
@@ -857,7 +871,9 @@ class _AnnouncementsSection extends ConsumerWidget {
                             isWarning
                                 ? Icons.warning_amber_rounded
                                 : Icons.info_outline_rounded,
-                            color: isWarning ? Colors.amber : GoPlayTheme.primary,
+                            color: isWarning
+                                ? Colors.amber
+                                : GoPlayTheme.primary,
                             size: 20,
                           ),
                           const SizedBox(width: 12),
@@ -895,7 +911,7 @@ class _AnnouncementsSection extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (err, stack) => const SizedBox.shrink(),
     );
   }
 }
@@ -904,20 +920,18 @@ class _TeamCard extends StatelessWidget {
   final String teamName;
   final String? flag;
 
-  const _TeamCard({
-    required this.teamName,
-    required this.flag,
-  });
+  const _TeamCard({required this.teamName, required this.flag});
 
-  // Cache decoration to avoid recreating Border + BoxShadow objects per frame
-  static final _avatarDecoration = BoxDecoration(
+  static const _avatarDecoration = BoxDecoration(
     shape: BoxShape.circle,
-    border: Border.all(color: Colors.white, width: 1.5),
+    border: Border.fromBorderSide(
+      BorderSide(color: Color(0x33FFFFFF), width: 1.5), // white @ 20%
+    ),
     boxShadow: [
       BoxShadow(
-        color: Colors.black.withAlpha(60),
+        color: Color(0x3C000000), // black @ ~23%
         blurRadius: 6,
-        offset: const Offset(0, 2),
+        offset: Offset(0, 2),
       ),
     ],
   );
@@ -934,9 +948,7 @@ class _TeamCard extends StatelessWidget {
             child: SizedBox(
               width: 48,
               height: 48,
-              child: ClipOval(
-                child: TeamFlagWidget(flag: flag, size: 40),
-              ),
+              child: ClipOval(child: TeamFlagWidget(flag: flag, size: 40)),
             ),
           ),
           const SizedBox(height: 8),
@@ -952,4 +964,3 @@ class _TeamCard extends StatelessWidget {
     );
   }
 }
-
