@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -42,7 +43,9 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
   @override
   Widget build(BuildContext context) {
     final selectedCategory = ref.watch(selectedCategoryProvider);
-    final channelsAsync = ref.watch(channelsByCategoryProvider(selectedCategory));
+    final channelsAsync = ref.watch(
+      channelsByCategoryProvider(selectedCategory),
+    );
     final favorites = ref.watch(favoriteChannelIdsProvider);
 
     return Scaffold(
@@ -55,104 +58,115 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
           SliverAppBar(
             floating: true,
             pinned: true,
-            toolbarHeight: _isSearching ? kToolbarHeight : 0,
-            expandedHeight: _isSearching ? 104 : 100,
-            leading: const SizedBox.shrink(),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
             leadingWidth: 0,
+            leading: const SizedBox.shrink(),
+            titleSpacing: 16,
+            toolbarHeight: 56,
             title: _isSearching
-                ? TextField(
-                    controller: _searchController,
-                    autofocus: true,
-                    onChanged: (val) {
-                      if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
-                      _debounceTimer = Timer(const Duration(milliseconds: 180), () {
-                        setState(() => _localSearchQuery = val);
-                      });
-                    },
-                    style: const TextStyle(
-                      color: GoPlayTheme.onSurface,
-                      fontSize: 16,
+                ? Container(
+                    height: 40,
+                    decoration: const BoxDecoration(
+                      color: Color(0x1F000000), // Very dark glossy backdrop
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      border: Border.fromBorderSide(
+                        BorderSide(color: Color(0x14FFFFFF), width: 0.8),
+                      ),
                     ),
-                    decoration: InputDecoration(
-                      hintText: 'Search channels by name, country...',
-                      hintStyle: TextStyle(
-                        color: GoPlayTheme.onSurfaceVariant.withAlpha(120),
+                    child: TextField(
+                      controller: _searchController,
+                      autofocus: true,
+                      onChanged: (val) {
+                        if (_debounceTimer?.isActive ?? false) {
+                          _debounceTimer!.cancel();
+                        }
+                        _debounceTimer = Timer(
+                          const Duration(milliseconds: 180),
+                          () {
+                            setState(() => _localSearchQuery = val);
+                          },
+                        );
+                      },
+                      style: const TextStyle(
+                        color: GoPlayTheme.onSurface,
+                        fontSize: 14,
                       ),
-                      border: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      prefixIcon: const Icon(
-                        Icons.search_rounded,
-                        color: GoPlayTheme.primary,
-                      ),
-                      suffixIcon: IconButton(
-                        icon: const Icon(
-                          Icons.close_rounded,
-                          color: GoPlayTheme.onSurfaceVariant,
+                      decoration: InputDecoration(
+                        hintText: 'Search channels by name, country...',
+                        hintStyle: TextStyle(
+                          color: GoPlayTheme.onSurfaceVariant.withAlpha(120),
+                          fontSize: 14,
                         ),
-                        onPressed: () {
-                          if (_searchController.text.isEmpty) {
-                            _toggleSearch();
-                          } else {
-                            _searchController.clear();
-                            _debounceTimer?.cancel();
-                            setState(() => _localSearchQuery = '');
-                          }
-                        },
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                        border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        prefixIcon: const Icon(
+                          Icons.search_rounded,
+                          color: GoPlayTheme.primary,
+                          size: 20,
+                        ),
+                        suffixIcon: IconButton(
+                          icon: const Icon(
+                            Icons.close_rounded,
+                            color: GoPlayTheme.onSurfaceVariant,
+                            size: 18,
+                          ),
+                          onPressed: () {
+                            if (_searchController.text.isEmpty) {
+                              _toggleSearch();
+                            } else {
+                              _searchController.clear();
+                              _debounceTimer?.cancel();
+                              setState(() => _localSearchQuery = '');
+                            }
+                          },
+                        ),
                       ),
                     ),
                   )
-                : null,
-            flexibleSpace: _isSearching
-                ? null
-                : LayoutBuilder(
-                    builder: (context, constraints) {
-                      final top = constraints.biggest.height;
-                      final isCollapsed = top <=
-                          (48 + MediaQuery.of(context).padding.top + 10);
-                      return AnimatedOpacity(
-                        duration: const Duration(milliseconds: 150),
-                        opacity: isCollapsed ? 0.0 : 1.0,
-                        child: SafeArea(
-                          child: Align(
-                            alignment: Alignment.topCenter,
-                            child: SizedBox(
-                              height: 52,
-                              child: Stack(
-                                children: [
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(left: 16.0),
-                                      child: Text(
-                                        'CHANNELS',
-                                        style: GoogleFonts.orbitron(
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.w900,
-                                          color: GoPlayTheme.primary,
-                                          letterSpacing: 3,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(right: 8.0),
-                                      child: IconButton(
-                                        icon: const Icon(Icons.search_rounded),
-                                        onPressed: _toggleSearch,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
+                : Text(
+                    'CHANNELS',
+                    style: GoogleFonts.orbitron(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                      color: GoPlayTheme.primary,
+                      letterSpacing: 3,
+                    ),
                   ),
+            actions: _isSearching
+                ? null
+                : [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.search_rounded,
+                        color: Colors.white,
+                        size: 22,
+                      ),
+                      onPressed: _toggleSearch,
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+            flexibleSpace: ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 16.0, sigmaY: 16.0),
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Color(0xCC0D0D12), // Glassy premium dark theme
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Color(
+                          0x14FFFFFF,
+                        ), // Translucent white border @ 8%
+                        width: 0.8,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(48),
               child: _CategoryFilterBar(
@@ -178,17 +192,11 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
               final filtered = query.isEmpty
                   ? channels
                   : channels.where((ch) {
-                      final nameMatch = ch.name
-                          .toLowerCase()
-                          .contains(query);
-                      final countryMatch = ch.country
-                              ?.toLowerCase()
-                              .contains(query) ??
-                          false;
-                      final languageMatch = ch.language
-                              ?.toLowerCase()
-                              .contains(query) ??
-                          false;
+                      final nameMatch = ch.name.toLowerCase().contains(query);
+                      final countryMatch =
+                          ch.country?.toLowerCase().contains(query) ?? false;
+                      final languageMatch =
+                          ch.language?.toLowerCase().contains(query) ?? false;
                       return nameMatch || countryMatch || languageMatch;
                     }).toList();
 
@@ -202,13 +210,16 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
                         Container(
                           width: 80,
                           height: 80,
-                          decoration: BoxDecoration(
-                            color: GoPlayTheme.surfaceContainerHigh,
+                          decoration: const BoxDecoration(
+                            color: Color(0x0DFFFFFF),
                             shape: BoxShape.circle,
+                            border: Border.fromBorderSide(
+                              BorderSide(color: Color(0x14FFFFFF), width: 0.8),
+                            ),
                           ),
                           child: const Icon(
                             Icons.live_tv_outlined,
-                            size: 36,
+                            size: 32,
                             color: GoPlayTheme.onSurfaceVariant,
                           ),
                         ),
@@ -219,7 +230,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
                               : 'No channels in this category',
                           style: const TextStyle(
                             color: GoPlayTheme.onSurfaceVariant,
-                            fontSize: 15,
+                            fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -239,7 +250,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
                             _localSearchQuery.isNotEmpty
                                 ? 'Clear Search'
                                 : 'View all channels',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: GoPlayTheme.primary,
                               fontWeight: FontWeight.w600,
                             ),
@@ -273,19 +284,29 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.error_outline,
-                        size: 48, color: GoPlayTheme.error),
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: GoPlayTheme.error,
+                    ),
                     const SizedBox(height: 8),
-                    Text('Error loading channels',
-                        style: TextStyle(color: GoPlayTheme.error)),
+                    const Text(
+                      'Error loading channels',
+                      style: TextStyle(color: GoPlayTheme.error),
+                    ),
                     const SizedBox(height: 4),
-                    Text('$e',
-                        style: TextStyle(
-                            color: GoPlayTheme.onSurfaceVariant, fontSize: 12)),
+                    Text(
+                      '$e',
+                      style: const TextStyle(
+                        color: GoPlayTheme.onSurfaceVariant,
+                        fontSize: 12,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     TextButton.icon(
                       onPressed: () => ref.invalidate(
-                          channelsByCategoryProvider(selectedCategory)),
+                        channelsByCategoryProvider(selectedCategory),
+                      ),
                       icon: const Icon(Icons.refresh_rounded, size: 18),
                       label: const Text('Retry'),
                     ),
@@ -300,7 +321,8 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
   }
 
   static SliverGridDelegateWithFixedCrossAxisCount _getGridDelegate(
-      BuildContext context) {
+    BuildContext context,
+  ) {
     final width = MediaQuery.of(context).size.width;
     int crossAxisCount;
     double ratio;
@@ -336,9 +358,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
 class _CategoryFilterBar extends ConsumerWidget {
   final VoidCallback onCategorySelected;
 
-  const _CategoryFilterBar({
-    required this.onCategorySelected,
-  });
+  const _CategoryFilterBar({required this.onCategorySelected});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -348,16 +368,16 @@ class _CategoryFilterBar extends ConsumerWidget {
 
     return Container(
       height: 48,
-      color: GoPlayTheme.surface,
+      color: Colors.transparent, // Let glassy background shine through
       alignment: Alignment.center,
       child: SizedBox(
         height: 42,
         child: categoriesAsync.when(
           data: (categories) {
             final allChannels = allChannelsAsync.when(
-              data: (data) => data as List,
+              data: (data) => data,
               loading: () => [],
-              error: (_, __) => [],
+              error: (err, stack) => [],
             );
             final catCounts = <String, int>{};
             for (final ch in allChannels) {
@@ -366,8 +386,9 @@ class _CategoryFilterBar extends ConsumerWidget {
             }
 
             // Filter out categories with 0 channels to avoid empty screens
-            final activeCategories =
-                categories.where((cat) => (catCounts[cat.id] ?? 0) > 0).toList();
+            final activeCategories = categories
+                .where((cat) => (catCounts[cat.id] ?? 0) > 0)
+                .toList();
 
             return ListView(
               scrollDirection: Axis.horizontal,
@@ -379,29 +400,29 @@ class _CategoryFilterBar extends ConsumerWidget {
                   count: allChannels.length,
                   isSelected: selectedCategory == 'all',
                   onTap: () {
-                    ref
-                        .read(selectedCategoryProvider.notifier)
-                        .select('all');
+                    ref.read(selectedCategoryProvider.notifier).select('all');
                     onCategorySelected();
                   },
                 ),
-                ...activeCategories.map((cat) => _CategoryChip(
-                      label: cat.name,
-                      icon: cat.icon ?? '📁',
-                      count: catCounts[cat.id] ?? 0,
-                      isSelected: selectedCategory == cat.id,
-                      onTap: () {
-                        ref
-                            .read(selectedCategoryProvider.notifier)
-                            .select(cat.id);
-                        onCategorySelected();
-                      },
-                    )),
+                ...activeCategories.map(
+                  (cat) => _CategoryChip(
+                    label: cat.name,
+                    icon: cat.icon ?? '📁',
+                    count: catCounts[cat.id] ?? 0,
+                    isSelected: selectedCategory == cat.id,
+                    onTap: () {
+                      ref
+                          .read(selectedCategoryProvider.notifier)
+                          .select(cat.id);
+                      onCategorySelected();
+                    },
+                  ),
+                ),
               ],
             );
           },
           loading: () => const SizedBox(height: 42),
-          error: (_, __) => const SizedBox(height: 42),
+          error: (err, stack) => const SizedBox(height: 42),
         ),
       ),
     );
@@ -469,49 +490,61 @@ class _CategoryChip extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        margin: const EdgeInsets.only(right: 8, bottom: 4),
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+        margin: const EdgeInsets.only(right: 8, bottom: 6, top: 2),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: isSelected
-              ? GoPlayTheme.primary.withAlpha(25)
-              : GoPlayTheme.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? GoPlayTheme.primary : GoPlayTheme.cardBorder,
-            width: isSelected ? 1.5 : 1,
+              ? GoPlayTheme.primary.withAlpha(30)
+              : const Color(0x0DFFFFFF), // Subtle translucent white
+          borderRadius: const BorderRadius.all(Radius.circular(20)),
+          border: Border.fromBorderSide(
+            BorderSide(
+              color: isSelected
+                  ? GoPlayTheme.primary.withAlpha(120)
+                  : const Color(0x14FFFFFF),
+              width: 0.8,
+            ),
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: GoPlayTheme.primary.withAlpha(40),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(icon, style: const TextStyle(fontSize: 13)),
-            const SizedBox(width: 5),
+            const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
-                color:
-                    isSelected ? GoPlayTheme.primary : GoPlayTheme.onSurface,
+                color: isSelected ? Colors.white : GoPlayTheme.onSurfaceVariant,
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                letterSpacing: 0.2,
               ),
             ),
-            const SizedBox(width: 5),
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+            const SizedBox(width: 6),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? GoPlayTheme.primary.withAlpha(30)
-                    : GoPlayTheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
+                    ? GoPlayTheme.primary.withAlpha(60)
+                    : const Color(0x1AFFFFFF),
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
               ),
               child: Text(
                 '$count',
                 style: TextStyle(
-                  color: isSelected
-                      ? GoPlayTheme.primary
-                      : GoPlayTheme.onSurfaceVariant,
+                  color: isSelected ? Colors.white : const Color(0x99FFFFFF),
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
                 ),
@@ -529,10 +562,12 @@ class _ShimmerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        gradient: GoPlayTheme.cardGradient,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: GoPlayTheme.cardBorder, width: 0.5),
+      decoration: const BoxDecoration(
+        color: Color(0x0DFFFFFF), // Subtle translucent white
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+        border: Border.fromBorderSide(
+          BorderSide(color: Color(0x14FFFFFF), width: 0.8),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
@@ -542,27 +577,27 @@ class _ShimmerCard extends StatelessWidget {
             Container(
               width: 52,
               height: 52,
-              decoration: BoxDecoration(
-                color: GoPlayTheme.surfaceContainerHighest,
+              decoration: const BoxDecoration(
+                color: Color(0x1AFFFFFF),
                 shape: BoxShape.circle,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             Container(
               width: 60,
               height: 12,
-              decoration: BoxDecoration(
-                color: GoPlayTheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(4),
+              decoration: const BoxDecoration(
+                color: Color(0x1AFFFFFF),
+                borderRadius: BorderRadius.all(Radius.circular(4)),
               ),
             ),
             const SizedBox(height: 6),
             Container(
               width: 35,
               height: 10,
-              decoration: BoxDecoration(
-                color: GoPlayTheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(4),
+              decoration: const BoxDecoration(
+                color: Color(0x1AFFFFFF),
+                borderRadius: BorderRadius.all(Radius.circular(4)),
               ),
             ),
           ],
@@ -571,5 +606,3 @@ class _ShimmerCard extends StatelessWidget {
     );
   }
 }
-
-
