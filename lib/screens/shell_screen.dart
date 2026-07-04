@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../core/theme.dart';
@@ -27,10 +28,7 @@ class ShellScreen extends StatelessWidget {
             Container(
               decoration: const BoxDecoration(
                 border: Border(
-                  right: BorderSide(
-                    color: GoPlayTheme.cardBorder,
-                    width: 0.5,
-                  ),
+                  right: BorderSide(color: GoPlayTheme.cardBorder, width: 0.5),
                 ),
               ),
               child: NavigationRail(
@@ -53,36 +51,60 @@ class ShellScreen extends StatelessWidget {
                 labelType: NavigationRailLabelType.all,
                 destinations: [
                   NavigationRailDestination(
-                    icon: const Icon(Icons.home_outlined, color: GoPlayTheme.onSurfaceVariant),
-                    selectedIcon: const Icon(Icons.home_rounded, color: GoPlayTheme.primary),
+                    icon: const Icon(
+                      Icons.home_outlined,
+                      color: GoPlayTheme.onSurfaceVariant,
+                    ),
+                    selectedIcon: const Icon(
+                      Icons.home_rounded,
+                      color: GoPlayTheme.primary,
+                    ),
                     label: Text(
                       'Home',
                       style: TextStyle(
-                        color: index == 0 ? GoPlayTheme.primary : GoPlayTheme.onSurfaceVariant,
+                        color: index == 0
+                            ? GoPlayTheme.primary
+                            : GoPlayTheme.onSurfaceVariant,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                   NavigationRailDestination(
-                    icon: const Icon(Icons.live_tv_outlined, color: GoPlayTheme.onSurfaceVariant),
-                    selectedIcon: const Icon(Icons.live_tv_rounded, color: GoPlayTheme.primary),
+                    icon: const Icon(
+                      Icons.live_tv_outlined,
+                      color: GoPlayTheme.onSurfaceVariant,
+                    ),
+                    selectedIcon: const Icon(
+                      Icons.live_tv_rounded,
+                      color: GoPlayTheme.primary,
+                    ),
                     label: Text(
                       'Channels',
                       style: TextStyle(
-                        color: index == 1 ? GoPlayTheme.primary : GoPlayTheme.onSurfaceVariant,
+                        color: index == 1
+                            ? GoPlayTheme.primary
+                            : GoPlayTheme.onSurfaceVariant,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                   NavigationRailDestination(
-                    icon: const Icon(Icons.schedule_outlined, color: GoPlayTheme.onSurfaceVariant),
-                    selectedIcon: const Icon(Icons.schedule_rounded, color: GoPlayTheme.primary),
+                    icon: const Icon(
+                      Icons.schedule_outlined,
+                      color: GoPlayTheme.onSurfaceVariant,
+                    ),
+                    selectedIcon: const Icon(
+                      Icons.schedule_rounded,
+                      color: GoPlayTheme.primary,
+                    ),
                     label: Text(
                       'Upcoming',
                       style: TextStyle(
-                        color: index == 2 ? GoPlayTheme.primary : GoPlayTheme.onSurfaceVariant,
+                        color: index == 2
+                            ? GoPlayTheme.primary
+                            : GoPlayTheme.onSurfaceVariant,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -91,7 +113,7 @@ class ShellScreen extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Main Content Area
             Expanded(
               child: Center(
@@ -107,46 +129,114 @@ class ShellScreen extends StatelessWidget {
     }
 
     return Scaffold(
+      extendBody: true,
       body: child,
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: GoPlayTheme.cardBorder,
-              width: 0.5,
+      bottomNavigationBar: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          child: Container(
+            height: 64 + MediaQuery.of(context).padding.bottom,
+            decoration: BoxDecoration(
+              color: const Color(0xCC0D0D12),
+              border: Border(
+                top: BorderSide(
+                  color: Colors.white.withOpacity(0.08),
+                  width: 0.8,
+                ),
+              ),
+            ),
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).padding.bottom,
+            ),
+            child: Row(
+              children: [
+                _buildNavItem(
+                  icon: Icons.home_outlined,
+                  selectedIcon: Icons.home_rounded,
+                  label: 'Home',
+                  isSelected: index == 0,
+                  onTap: () => context.go('/home'),
+                ),
+                _buildNavItem(
+                  icon: Icons.live_tv_outlined,
+                  selectedIcon: Icons.live_tv_rounded,
+                  label: 'Channels',
+                  isSelected: index == 1,
+                  onTap: () => context.go('/channels'),
+                ),
+                _buildNavItem(
+                  icon: Icons.schedule_outlined,
+                  selectedIcon: Icons.schedule_rounded,
+                  label: 'Upcoming',
+                  isSelected: index == 2,
+                  onTap: () => context.go('/upcoming'),
+                ),
+              ],
             ),
           ),
         ),
-        child: NavigationBar(
-          selectedIndex: index,
-          onDestinationSelected: (i) {
-            switch (i) {
-              case 0:
-                context.go('/home');
-                break;
-              case 1:
-                context.go('/channels');
-                break;
-              case 2:
-                context.go('/upcoming');
-                break;
-            }
-          },
-          destinations: [
-            NavigationDestination(
-              icon: Icon(Icons.home_outlined, color: index == 0 ? GoPlayTheme.primary : GoPlayTheme.onSurfaceVariant),
-              selectedIcon: const Icon(Icons.home_rounded, color: GoPlayTheme.primary),
-              label: 'Home',
+      ),
+    );
+  }
+
+  Widget _buildNavItem({
+    required IconData icon,
+    required IconData selectedIcon,
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedScale(
+              scale: isSelected ? 1.08 : 1.0,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              child: Icon(
+                isSelected ? selectedIcon : icon,
+                color: isSelected
+                    ? GoPlayTheme.primary
+                    : const Color(0x80FFFFFF),
+                size: 23,
+              ),
             ),
-            NavigationDestination(
-              icon: Icon(Icons.live_tv_outlined, color: index == 1 ? GoPlayTheme.primary : GoPlayTheme.onSurfaceVariant),
-              selectedIcon: const Icon(Icons.live_tv_rounded, color: GoPlayTheme.primary),
-              label: 'Channels',
+            const SizedBox(height: 5),
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              style: TextStyle(
+                color: isSelected ? Colors.white : const Color(0x66FFFFFF),
+                fontSize: 9.5,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                letterSpacing: 0.2,
+              ),
+              child: Text(label),
             ),
-            NavigationDestination(
-              icon: Icon(Icons.schedule_outlined, color: index == 2 ? GoPlayTheme.primary : GoPlayTheme.onSurfaceVariant),
-              selectedIcon: const Icon(Icons.schedule_rounded, color: GoPlayTheme.primary),
-              label: 'Upcoming',
+            const SizedBox(height: 2),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              width: isSelected ? 12 : 0,
+              height: 2,
+              decoration: BoxDecoration(
+                color: GoPlayTheme.primary,
+                borderRadius: BorderRadius.circular(1),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: GoPlayTheme.primary.withOpacity(0.4),
+                          blurRadius: 4,
+                          spreadRadius: 0.5,
+                        ),
+                      ]
+                    : null,
+              ),
             ),
           ],
         ),
