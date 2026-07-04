@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { createAdminSupabaseClient } from '../utils/supabase';
 import { Plus, Edit2, Trash2, Save, X, Calendar, Search, Trophy, Check, AlertCircle, Star, Play, CheckCircle } from 'lucide-react';
 import 'flag-icons/css/flag-icons.min.css';
@@ -69,6 +69,40 @@ interface Playlist {
   channels: string[];
 }
 
+const formatToLocalDateTime = (utcString: string | null | undefined): string => {
+  if (!utcString) return '';
+  try {
+    const d = new Date(utcString);
+    if (isNaN(d.getTime())) return '';
+    // Adjust UTC date to match local time representation
+    const localTime = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+    return localTime.toISOString().slice(0, 16);
+  } catch {
+    return '';
+  }
+};
+
+const parseLocalDateTime = (localString: string | null | undefined): string => {
+  if (!localString) return new Date().toISOString();
+  try {
+    const parts = localString.split(/[-THH:mm]/);
+    if (parts.length >= 5) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
+      const day = parseInt(parts[2], 10);
+      const hour = parseInt(parts[3], 10);
+      const minute = parseInt(parts[4], 10);
+      const date = new Date(year, month, day, hour, minute);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString();
+      }
+    }
+    return new Date(localString).toISOString();
+  } catch {
+    return new Date().toISOString();
+  }
+};
+
 interface EventManagerProps {
   adminToken: string;
   onRefreshStats: () => void;
@@ -104,9 +138,9 @@ export default function EventManager({ adminToken, onRefreshStats }: EventManage
     is_featured: false
   });
 
-  const supabaseAdmin = createAdminSupabaseClient(adminToken);
+  const supabaseAdmin = useMemo(() => createAdminSupabaseClient(adminToken), [adminToken]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -142,13 +176,11 @@ export default function EventManager({ adminToken, onRefreshStats }: EventManage
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabaseAdmin]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [adminToken]);
+  }, [fetchData]);
 
   const showNotification = (type: 'success' | 'error', msg: string) => {
     if (type === 'success') {
@@ -170,8 +202,8 @@ export default function EventManager({ adminToken, onRefreshStats }: EventManage
       home_logo: event.home_team?.flag || '',
       away_name: event.away_team?.name || '',
       away_logo: event.away_team?.flag || '',
-      // Convert to local datetime-local format
-      start_time: event.start_time ? new Date(event.start_time).toISOString().slice(0, 16) : '',
+      // Convert to local datetime-local format (avoiding timezone offset shift)
+      start_time: formatToLocalDateTime(event.start_time),
       status: event.status,
       channels: event.channels || [],
       banner: event.banner || '',
@@ -224,7 +256,7 @@ export default function EventManager({ adminToken, onRefreshStats }: EventManage
           league: formData.league.trim(),
           home_team: { name: formData.home_name.trim(), flag: cleanFlagValue(formData.home_logo) || undefined },
           away_team: { name: formData.away_name.trim(), flag: cleanFlagValue(formData.away_logo) || undefined },
-          start_time: formData.start_time ? new Date(formData.start_time).toISOString() : new Date().toISOString(),
+          start_time: parseLocalDateTime(formData.start_time),
           status: formData.status,
           channels: formData.channels,
           banner: formData.banner.trim() || null,
@@ -279,7 +311,7 @@ export default function EventManager({ adminToken, onRefreshStats }: EventManage
           league: formData.league.trim(),
           home_team: { name: formData.home_name.trim(), flag: cleanFlagValue(formData.home_logo) || undefined },
           away_team: { name: formData.away_name.trim(), flag: cleanFlagValue(formData.away_logo) || undefined },
-          start_time: formData.start_time ? new Date(formData.start_time).toISOString() : new Date().toISOString(),
+          start_time: parseLocalDateTime(formData.start_time),
           status: formData.status,
           channels: formData.channels,
           banner: formData.banner.trim() || null,
@@ -360,13 +392,21 @@ export default function EventManager({ adminToken, onRefreshStats }: EventManage
     }
   };
 
-  // Filter events
-  const filteredEvents = events.filter(event => {
-    const nameStr = `${event.home_team?.name} vs ${event.away_team?.name} ${event.league} ${event.sport}`;
-    const matchesSearch = nameStr.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || event.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  // Filter events with memoization for performance optimization
+  const filteredEvents = useMemo(() => {
+    const term = searchTerm.toLowerCase().trim();
+    return events.filter(event => {
+      const home = event.home_team?.name || '';
+      const away = event.away_team?.name || '';
+      const league = event.league || '';
+      const sport = event.sport || '';
+      const nameStr = `${home} vs ${away} ${league} ${sport}`.toLowerCase();
+      
+      const matchesSearch = !term || nameStr.includes(term);
+      const matchesStatus = statusFilter === 'all' || event.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [events, searchTerm, statusFilter]);
 
   return (
     <div className="space-y-6">

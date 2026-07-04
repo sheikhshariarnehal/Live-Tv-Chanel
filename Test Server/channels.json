@@ -1,554 +1,1883 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DUDE TV Stream Tester</title>
-  
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- HLS.js for HLS streams -->
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  
-  <!-- Shaka Player for DASH / DRM streams -->
-  <script src="https://cdn.jsdelivr.net/npm/shaka-player@latest/dist/shaka-player.compiled.debug.js"></script>
-
-  <!-- mpegts.js for raw MPEG-TS streams -->
-  <script src="https://cdn.jsdelivr.net/npm/mpegts.js@latest/dist/mpegts.min.js"></script>
-
-  <style>
-    :root {
-      --bg: #0b0c10;
-      --surface: rgba(22, 26, 35, 0.65);
-      --surface-border: rgba(255, 255, 255, 0.08);
-      --accent: #ff2a2a;
-      --accent-glow: rgba(255, 42, 42, 0.4);
-      --text: #f5f6f8;
-      --text-muted: rgba(245, 246, 248, 0.6);
-      --green: #00e676;
-      --blue: #00b0ff;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: 'Outfit', sans-serif;
-      overflow: hidden;
-      height: 100vh;
-      display: flex;
-    }
-
-    /* Side Panel */
-    .sidebar {
-      width: 360px;
-      background: var(--surface);
-      backdrop-filter: blur(20px);
-      border-right: 1px solid var(--surface-border);
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      z-index: 10;
-    }
-
-    .brand {
-      padding: 24px;
-      border-bottom: 1px solid var(--surface-border);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .brand i {
-      color: var(--accent);
-      font-size: 24px;
-      text-shadow: 0 0 10px var(--accent-glow);
-    }
-
-    .brand h1 {
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      background: linear-gradient(90deg, #fff, var(--text-muted));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .settings-section {
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--surface-border);
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .section-title {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .proxy-selector {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .select-wrap {
-      position: relative;
-    }
-
-    select, input {
-      width: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid var(--surface-border);
-      padding: 10px 14px;
-      border-radius: 8px;
-      color: var(--text);
-      font-family: inherit;
-      font-size: 14px;
-      outline: none;
-      transition: all 0.3s ease;
-    }
-
-    select:focus, input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 8px var(--accent-glow);
-    }
-
-    .channel-list-container {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px 24px;
-    }
-
-    .channel-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .category-header {
-      padding: 14px 16px 6px 4px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--text-muted);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      margin-top: 8px;
-    }
-    
-    .category-header:first-of-type {
-      border-top: none;
-      margin-top: 0;
-    }
-    
-    .badge-count {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 2px 6px;
-      border-radius: 10px;
-      font-size: 9px;
-      font-weight: 600;
-      color: var(--text);
-    }
-
-    .channel-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--surface-border);
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.25s ease;
-    }
-
-    .channel-item:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.15);
-      transform: translateX(4px);
-    }
-
-    .channel-item.active {
-      background: rgba(255, 42, 42, 0.1);
-      border-color: var(--accent);
-      box-shadow: 0 0 12px rgba(255, 42, 42, 0.15);
-    }
-
-    .channel-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.05);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent);
-      font-size: 16px;
-      flex-shrink: 0;
-    }
-
-    .channel-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .channel-name {
-      font-size: 14px;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .channel-type {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    /* Main Content Area */
-    .main-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      background: radial-gradient(circle at top right, rgba(255, 42, 42, 0.03), transparent 60%);
-    }
-
-    .player-section {
-      flex: 1;
-      padding: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-
-    .player-container {
-      width: 100%;
-      max-width: 960px;
-      aspect-ratio: 16/9;
-      background: #000;
-      border-radius: 16px;
-      border: 1px solid var(--surface-border);
-      overflow: hidden;
-      position: relative;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    }
-
-    video {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .player-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(11, 12, 16, 0.9);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      z-index: 5;
-      transition: opacity 0.3s ease;
-    }
-
-    .player-overlay.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid rgba(255, 255, 255, 0.1);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .overlay-text {
-      font-size: 16px;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    /* Logs & Details Area */
-    .dashboard {
-      height: 280px;
-      background: rgba(15, 18, 25, 0.9);
-      border-top: 1px solid var(--surface-border);
-      display: flex;
-      z-index: 5;
-    }
-
-    .details-panel {
-      width: 320px;
-      border-right: 1px solid var(--surface-border);
-      padding: 20px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      overflow-y: auto;
-    }
-
-    .detail-item {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .detail-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .detail-value {
-      font-size: 13px;
-      font-weight: 500;
-      word-break: break-all;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    .badge-proxy {
-      background: rgba(0, 176, 255, 0.15);
-      color: var(--blue);
-      border: 1px solid rgba(0, 176, 255, 0.3);
-    }
-
-    .badge-direct {
-      background: rgba(0, 230, 118, 0.15);
-      color: var(--green);
-      border: 1px solid rgba(0, 230, 118, 0.3);
-    }
-
-    .console-panel {
-      flex: 1;
-      padding: 20px 24px;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-
-    .console-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .console-logs {
-      flex: 1;
-      background: rgba(0, 0, 0, 0.6);
-      border: 1px solid var(--surface-border);
-      border-radius: 8px;
-      font-family: monospace;
-      font-size: 12px;
-      padding: 12px 16px;
-      overflow-y: auto;
-      color: #9cdcfe;
-    }
-
-    .log-entry {
-      margin-bottom: 6px;
-      line-height: 1.4;
-      white-space: pre-wrap;
-    }
-
-    .log-info { color: #9cdcfe; }
-    .log-success { color: var(--green); }
-    .log-error { color: var(--accent); }
-    .log-warn { color: #ffeb3b; }
-
-    .btn-clear {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 12px;
-      transition: color 0.2s;
-    }
-
-    .btn-clear:hover {
-      color: var(--text);
-    }
-
-    .load-btn {
-      background: var(--accent);
-      border: none;
-      color: white;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-family: inherit;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .load-btn:hover {
-      box-shadow: 0 0 15px var(--accent-glow);
-      transform: translateY(-1px);
-    }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 3px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.25);
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <div class="brand">
-      <i class="fa-solid fa-circle-play"></i>
-      <h1>DUDE TV Link Tester</h1>
-    </div>
-
-    <!-- Proxy Config -->
-    <div class="settings-section">
-      <div class="detail-item">
-        <span class="section-title">Proxy Routing</span>
-        <div class="select-wrap">
-          <select id="proxySelect">
-            <option value="fifa" selected>Deployed Worker Proxy</option>
-            <option value="direct">Direct (No Proxy)</option>
-            <option value="custom">Custom Proxy...</option>
-          </select>
-        </div>
-      </div>
-      <div id="customProxyWrap" style="display: none;">
-        <input type="text" id="customProxyInput" placeholder="https://my-proxy.workers.dev/?url=">
-      </div>
-    </div>
-
-    <!-- Custom URL Input -->
-    <div class="settings-section">
-      <span class="section-title">Test Custom Link</span>
-      <div style="display: flex; gap: 8px;">
-        <input type="text" id="customUrl" placeholder="https://example.com/stream.m3u8">
-        <button class="load-btn" id="loadCustom">Load</button>
-      </div>
-    </div>
-
-    <!-- Channel List -->
-    <div class="channel-list-container">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px;">
-        <span class="section-title" id="sidebarTitle">Channels</span>
-        <input type="text" id="searchBox" placeholder="Search..." style="
-          background: rgba(0, 0, 0, 0.4);
-          border: 1px solid var(--surface-border);
-          border-radius: 6px;
-          padding: 6px 10px;
-          color: var(--text);
-          font-family: inherit;
-          font-size: 12px;
-          width: 140px;
-          outline: none;
-        ">
-      </div>
-      <div class="channel-list" id="channelList">
-        <!-- Rendered Dynamically -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Content Area -->
-  <div class="main-content">
-    
-    <!-- Player -->
-    <div class="player-section">
-      <div class="player-container">
-        <video id="videoPlayer" controls></video>
-        <div class="player-overlay" id="playerOverlay">
-          <div class="spinner" id="playerSpinner"></div>
-          <div class="overlay-text" id="overlayText">Select a channel to play</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Dashboard/Details -->
-    <div class="dashboard">
-      <div class="details-panel">
-        <div class="detail-item">
-          <span class="detail-label">Active Stream</span>
-          <span class="detail-value" id="activeName">-</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Proxy Mode</span>
-          <span id="activeProxyMode" class="badge badge-direct">Direct</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Resolved Stream URL</span>
-          <span class="detail-value" id="activeUrl" style="font-size: 11px; opacity: 0.8;">-</span>
-        </div>
-      </div>
-
-      <div class="console-panel">
-        <div class="console-header">
-          <span class="section-title">Console Output Logs</span>
-          <button class="btn-clear" id="clearConsole">Clear Logs</button>
-        </div>
-        <div class="console-logs" id="consoleLogs">
-          <!-- Log lines rendered here -->
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // Embedded channels.json Database
-    const CHANNELS = {
+{
   "categories": {
+    "fifa2026": {
+      "name": "FIFA 2026",
+      "channels": [
+        {
+          "id": "fox-sports-aq",
+          "name": "FOX SPORTS - AQ",
+          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/enc/ajfoeddkbz/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "f6564ec2aee819046328a0e153be574d",
+            "key": "ff46a8a1031eb27ef22576a077c98ab7"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "id": "tsn-sports-aq",
+          "name": "TSN SPORTS - AQ",
+          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/w0rehjjrwe/out/v1/69a2a7041395406b970598f61680e7cf/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "14eeabf30c14b7fbf3008c03099ce011",
+            "key": "17d2ac8dbc5429bd70af3433aa12158d"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "id": "caz-tv-br-aq",
+          "name": "CazéTV BR - AQ",
+          "url": "https://otte.cache.aiv-cdn.net/lhr-nitro/live/clients/dash/enc/3ynrpdanq2/out/v1/81fd4c26584044d2b1a1cc5b32fa9af0/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "34475edab991ad5e92548aebd710410a",
+            "key": "501b209cccd323ac00bf5ac15b406cb4"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "id": "d-sports-es-aq",
+          "name": "D SPORTS ES - AQ",
+          "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/dash/enc/z5oyxzsxdk/out/v1/7695a0f64a0e424b973d5b09a2a3eb91/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "f836853d8eac19446ed9535f5fc568b1",
+            "key": "b3bc5ef00602b29abac7e482d3d9fbf3"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "id": "wc-english-aq",
+          "name": "WC ENGLISH - AQ",
+          "url": "https://qp-pldt-live-bpk-ucd-prod.akamaized.net/bpk-tv/fifa_ppv1/default/index.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "2c338a117d434ce4bbe3569231af90f1",
+            "key": "a9633d901ee8a3f4f58ac314b5c5f4fb"
+          }
+        },
+        {
+          "id": "toffee-bd-aq",
+          "name": "TOFFEE BD - AQ",
+          "url": "https://prod-cdn01-live.toffeelive.com/live/FIFA-2026/sst/0/master_1500.m3u8?hdntl=Expires=1783185606~_GO=Generated~URLPrefix=aHR0cHM6Ly9wcm9kLWNkbjAxLWxpdmUudG9mZmVlbGl2ZS5jb20~Signature=AeQsclD6pVUxTkNDTXIo4mEC5xSJ8-U-NXdXhZ9U6pocmw2CavnEmnsN82pX4PPIDZoxNnQuUFRVAIk0BtTFoJALJBgN",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "rte-sports-aq",
+          "name": "RTE SPORTS - AQ",
+          "url": "https://dai.google.com/linear/dash/pa/event/oPeAYQs9T9yTHS98aR1EjQ/stream/66bcdbbf-5a90-41d5-b332-91c48db07257:BRU/manifest.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "d816287e21496989eae1312925a423c5",
+            "key": "00da00f13180e7e6cd5ce87d1c974e8d"
+          }
+        },
+        {
+          "id": "fox-sports-4k",
+          "name": "FOX SPORTS 4K",
+          "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/xyqyiuevpp/out/v1/fc40f22f10374517a2784e1d97cb23f4/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "1f68713028d439ec03be07f56c1d6213",
+            "key": "20093db6455160fffed4c394def3193d"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "id": "tsn4-sports-aq",
+          "name": "TSN4 SPORTS - AQ",
+          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/ihys8nw4wv/out/v1/fde190f369484bc6b6117cc16cd82a9f/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "abc5b2883121012850ebda05b528c5ec",
+            "key": "e5250924f4b738905f7163a0134587a7"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "id": "sportv-br-aq",
+          "name": "SporTV BR - AQ",
+          "url": "https://otte.cache.aiv-cdn.net/gru-nitro/live/clients/dash/enc/w8kwdfmlgs/out/v1/3aa321e477504937a439b602e078eb18/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "51c0ef23b17297e5c01cd7f36dd0a6ce",
+            "key": "8823f713ba6fdb9bbe0a2ad82d309a4b"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "id": "goltv-vivo-aq",
+          "name": "GOLTV VIVO - AQ",
+          "url": "https://dmbgaz4xf6jyh.cloudfront.net/live-stream-dai/69690cfcce0dc031830e7c1a/123a264b71764485bd49eca2d552cf33/d97743de3620a865848fff7a9de14dda1bf2409d/manifest.mpd?aid=688aae6d61c87d6274c05065&dnt=true&access_token=63ey9SOpQeHBRfWJYQLXQjelQc0QM1HXmlHp4iZrH8UCOCM8QtGIGg1sEEPJH0R0yXktUEXdLeB&uid=Knx65GY6UbaWSADZybEvf6m5MvqNIuNs&sid=bwRy9BgSc4RFeVhYh52hVIY8uPsJ4v4d&pid=A0xT1VnepBvKKqyeyRNtNkZBmHBrNNZM&ref=ditu.caracoltv.com&ext_pb=0&es=dmbgaz4xf6jyh.cloudfront.net&proto=https&pz=us&xr=us-east-2&manifestfilter=video_height:480-1080",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "1c6bfd8d1cdd4df69ea5fc4dd2f025bb",
+            "key": "b6fd90027dac7a94a9461f8b2638cbb4"
+          }
+        },
+        {
+          "id": "bbc-sports-hd",
+          "name": "BBC SPORTS HD",
+          "url": "https://chatgpt.hereisman.net/playlist/52856/load-playlist?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://gooz.aapmains.net"
+        },
+        {
+          "id": "tsn-sports-hd",
+          "name": "TSN SPORTS HD",
+          "url": "https://chatgpt.hereisman.net/playlist/52857/load-playlist?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://gooz.aapmains.net"
+        },
+        {
+          "id": "fox-sports-hd",
+          "name": "FOX SPORTS HD",
+          "url": "https://chatgpt.hereisman.net/playlist/52855/load-playlist?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://gooz.aapmains.net"
+        },
+        {
+          "id": "irib-4k",
+          "name": "IRIB 4K",
+          "url": "https://ncdn.telewebion.ir/faratar/live/playlist.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "binge-bd-aq",
+          "name": "BINGE+ BD - AQ",
+          "url": "https://tc-sg.rockstreamer.com/v1/019ed91616121ea540a8171c8e801f/019ed92ac80315fc600b1796d4ad8b/main.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://iscreen.com.bd/"
+        },
+        {
+          "id": "ct-sports-aq",
+          "name": "CT SPORTS - AQ",
+          "url": "https://dash2.antik.sk/stream/nvidia_ct_sport/playlist_cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "11223344556677889900112233445566",
+            "key": "4b80724d0ef86bcb2c21f7999d67739d"
+          }
+        },
+        {
+          "id": "telemundo-hd",
+          "name": "TELEMUNDO HD",
+          "url": "https://inproviszon.st/telemundo-usa.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "fox-english-hd",
+          "name": "FOX ENGLISH HD",
+          "url": "https://inproviszon.st/fox-usa.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "bein-max-fhd",
+          "name": "beIN MAX FHD",
+          "url": "https://inproviszon.st/beinsportsmax-sa.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "fast-server",
+          "name": "FAST SERVER",
+          "url": "https://pulltx.jdnzrgm.com/live/hd-en-6MvYMRSWnEwiwmGNYv.m3u8?txSecret=3d64b4f78e7df3e83c733c7d66bbf680&txTime=6A481CB8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "match-futbol-aq",
+          "name": "MATCH! FUTBOL - AQ",
+          "url": "https://video.beeline.tv/live/d/channel319.isml/manifest-stb.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "9145a6e0f778e61866f573d4944dd533",
+            "key": "d02173d40515fea5c83944f21d0f3114"
+          }
+        },
+        {
+          "id": "tsn-sports-4k",
+          "name": "TSN SPORTS 4K",
+          "url": "https://inproviszon.st/tsn4k-xyz-waUvqaAACr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "fox-english-4k",
+          "name": "FOX ENGLISH 4K",
+          "url": "https://inproviszon.st/fox4k-usa.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "bbc-sports-4k",
+          "name": "BBC SPORTS 4K",
+          "url": "https://inproviszon.st/bbc-4k-2.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "bein-max-4k",
+          "name": "beIN MAX 4K",
+          "url": "https://inproviszon.st/bein4k-xyz-waUvqaAACr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "telemundo-fhd",
+          "name": "TELEMUNDO FHD",
+          "url": "https://inproviszon.st/telemundo-xyz-waUvqaAACr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "bein-arabic-sd",
+          "name": "beiN ARABIC SD",
+          "url": "http://193.47.62.51/hls/dTHXCZckkkqr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "http://www.fawanews.sc/",
+          "origin": "http://www.fawanews.sc/"
+        },
+        {
+          "id": "all-in-one-reborn-2-live",
+          "name": "All in one reborn 2 LIVE",
+          "url": "https://instreams.pro/EU/HDWC1/tracks-v1a1/mono.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://instream.click/",
+          "origin": "https://instream.click"
+        },
+        {
+          "id": "hd-server-eng",
+          "name": "HD SERVER ENG",
+          "url": "https://edgestreams.pro/hls/24SDAZFcsqnj24.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://streamscenter.online/",
+          "origin": "https://streamscenter.online"
+        },
+        {
+          "id": "hd-server-ar",
+          "name": "HD SERVER AR",
+          "url": "https://mainstreams.pro/hls/eJmauBDCIf.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://streamscenter.online/",
+          "origin": "https://streamscenter.online"
+        },
+        {
+          "id": "bbc-sports-sd",
+          "name": "BBC SPORTS SD",
+          "url": "http://193.47.62.47/hls/dTHXCZzsss.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "http://www.fawanews.sc/",
+          "origin": "http://www.fawanews.sc/"
+        },
+        {
+          "id": "tv4-sports-sd",
+          "name": "TV4 SPORTS SD",
+          "url": "http://193.47.62.59/hls/dTHXCZckkkqq.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "http://www.fawanews.sc/",
+          "origin": "http://www.fawanews.sc/"
+        },
+        {
+          "id": "d-sports-es-sd",
+          "name": "D SPORTS ES SD",
+          "url": "http://193.47.62.59/hls/dTHXCZckkkqqq.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "http://www.fawanews.sc/",
+          "origin": "http://www.fawanews.sc/"
+        },
+        {
+          "id": "bein-sports-fr",
+          "name": "beiN SPORTS FR",
+          "url": "http://193.47.62.59/hls/dTHXCZckkkq.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "http://www.fawanews.sc/",
+          "origin": "http://www.fawanews.sc/"
+        },
+        {
+          "id": "fussball-tv-ger",
+          "name": "FUSSBALL TV (GER)",
+          "url": "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_hd/DASH/index.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "1cb20afcd9d979c833cfd208c7d3eeb2",
+            "key": "fef0c15b4a523370892edd5e4133c269"
+          }
+        },
+        {
+          "id": "zdf-german-ip",
+          "name": "ZDF (GERMAN IP)",
+          "url": "https://simplitv-live.mdn.ors.at/live/eds/zdf_hd/dash4h/zdf_hd.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "c1a0ac1044a433d0856ccdc08f245084",
+            "key": "7f0e8800a6d63d7915ac181bb88ce813"
+          }
+        },
+        {
+          "id": "unify-tv-ind",
+          "name": "UNiFy TV (IND)",
+          "url": "https://ngtv-live-cbj.gcdn.co/Content/DASH/Live/channel(fifa1)/master.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "10e2114398744f3880cc96653568da55",
+            "key": "d6d40441f9fbebea03ec64c4aea7211f"
+          }
+        },
+        {
+          "id": "orf-german-ip",
+          "name": "ORF (GERMAN IP)",
+          "url": "https://simplitv-live.mdn.ors.at/live/eds/orf_1_hd-1/dash4h/orf_1_hd-1.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "429bcf031bbf3146a67f3f583e4c4355",
+            "key": "d1b92aba5a38a518c8b8a1fd2bca4398"
+          }
+        },
+        {
+          "id": "telemundo-es-usa",
+          "name": "Telemundo ES (USA)",
+          "url": "https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s/Live/channel(WSNS)/master.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "7d6bb9f86e133e4cb33440b493b6b672",
+            "key": "584ad285dcb9e7d42cf3e93f1cc3fe11"
+          }
+        },
+        {
+          "id": "telemundo-usa",
+          "name": "TELEMUNDO (USA)",
+          "url": "https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s-v2/Live/channel(kvea)/master.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "ce7ab3022e753307997f58afe001bac4",
+            "key": "72d631a66e635c60829a0fe7705516c1"
+          }
+        },
+        {
+          "id": "fox-english-aq",
+          "name": "FOX ENGLISH - AQ",
+          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/enc/ajfoeddkbz/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "f6564ec2aee819046328a0e153be574d",
+            "key": "ff46a8a1031eb27ef22576a077c98ab7"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "id": "nctv-english-aq",
+          "name": "NCTV ENGLISH - AQ",
+          "url": "https://qp-pldt-live-bpk-ucd-prod.akamaized.net/bpk-tv/fifa_ppv1/default/index.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "2c338a117d434ce4bbe3569231af90f1",
+            "key": "a9633d901ee8a3f4f58ac314b5c5f4fb"
+          }
+        },
+        {
+          "id": "tsn-english-aq",
+          "name": "TSN ENGLISH - AQ",
+          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/w0rehjjrwe/out/v1/69a2a7041395406b970598f61680e7cf/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "14eeabf30c14b7fbf3008c03099ce011",
+            "key": "17d2ac8dbc5429bd70af3433aa12158d"
+          }
+        },
+        {
+          "id": "binge-bdix-bd",
+          "name": "BINGE+ BDIX BD",
+          "url": "https://tc-sg.rockstreamer.com/v1/019ed91616121ea540a8171c8e801f/019ed92ac80315fc600b1796d4ad8b/main.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://iscreen.com.bd/"
+        },
+        {
+          "id": "caze-tv-br-aq",
+          "name": "CAZE TV BR - AQ",
+          "url": "https://otte.cache.aiv-cdn.net/lhr-nitro/live/clients/dash/enc/3ynrpdanq2/out/v1/81fd4c26584044d2b1a1cc5b32fa9af0/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "34475edab991ad5e92548aebd710410a",
+            "key": "501b209cccd323ac00bf5ac15b406cb4"
+          }
+        },
+        {
+          "id": "d-sports-aq-es",
+          "name": "D SPORTS - AQ [ES]",
+          "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/dash/enc/z5oyxzsxdk/out/v1/7695a0f64a0e424b973d5b09a2a3eb91/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "f836853d8eac19446ed9535f5fc568b1",
+            "key": "b3bc5ef00602b29abac7e482d3d9fbf3"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "id": "sportv-br-aq",
+          "name": "SporTV BR - AQ",
+          "url": "https://otte.cache.aiv-cdn.net/gru-nitro/live/clients/dash/enc/w8kwdfmlgs/out/v1/3aa321e477504937a439b602e078eb18/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "51c0ef23b17297e5c01cd7f36dd0a6ce",
+            "key": "8823f713ba6fdb9bbe0a2ad82d309a4b"
+          }
+        },
+        {
+          "id": "fox-sports-4k",
+          "name": "FOX SPORTS 4K",
+          "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/xyqyiuevpp/out/v1/fc40f22f10374517a2784e1d97cb23f4/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "1f68713028d439ec03be07f56c1d6213",
+            "key": "20093db6455160fffed4c394def3193d"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "id": "irib-4k",
+          "name": "IRIB 4K",
+          "url": "https://ncdn.telewebion.ir/faratar/live/playlist.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "goltv-vivo-aq",
+          "name": "GOLTV VIVO - AQ",
+          "url": "https://dmbgaz4xf6jyh.cloudfront.net/live-stream-dai/69690cfcce0dc031830e7c1a/123a264b71764485bd49eca2d552cf33/d97743de3620a865848fff7a9de14dda1bf2409d/manifest.mpd?aid=688aae6d61c87d6274c05065&dnt=true&access_token=63ey9SOpQeHBRfWJYQLXQjelQc0QM1HXmlHp4iZrH8UCOCM8QtGIGg1sEEPJH0R0yXktUEXdLeB&uid=Knx65GY6UbaWSADZybEvf6m5MvqNIuNs&sid=bwRy9BgSc4RFeVhYh52hVIY8uPsJ4v4d&pid=A0xT1VnepBvKKqyeyRNtNkZBmHBrNNZM&ref=ditu.caracoltv.com&ext_pb=0&es=dmbgaz4xf6jyh.cloudfront.net&proto=https&pz=us&xr=us-east-2&manifestfilter=video_height:480-1080",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "1c6bfd8d1cdd4df69ea5fc4dd2f025bb",
+            "key": "b6fd90027dac7a94a9461f8b2638cbb4"
+          }
+        },
+        {
+          "id": "telemundo-hd",
+          "name": "TELEMUNDO HD",
+          "url": "https://inproviszon.st/telemundo-usa.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "bbc-sports-hd",
+          "name": "BBC SPORTS HD",
+          "url": "https://chatgpt.hereisman.net/playlist/52856/load-playlist?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://gooz.aapmains.net"
+        },
+        {
+          "id": "fox-sports-hd",
+          "name": "FOX SPORTS HD",
+          "url": "https://chatgpt.hereisman.net/playlist/52855/load-playlist?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://gooz.aapmains.net"
+        },
+        {
+          "id": "tsn-sports-hd",
+          "name": "TSN SPORTS HD",
+          "url": "https://chatgpt.hereisman.net/playlist/52857/load-playlist?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://gooz.aapmains.net"
+        },
+        {
+          "id": "bbc-sports",
+          "name": "BBC SPORTS",
+          "url": "https://inproviszon.st/bbc-xyz-waUvqaAACr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "rte-english-aq",
+          "name": "RTE ENGLISH - AQ",
+          "url": "https://dai.google.com/linear/dash/pa/event/oPeAYQs9T9yTHS98aR1EjQ/stream/6b0f1602-73b1-4228-8e64-fe2cec5ae9a3:BRU/manifest.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "d816287e21496989eae1312925a423c5",
+            "key": "00da00f13180e7e6cd5ce87d1c974e8d"
+          }
+        },
+        {
+          "id": "unite8-hindi-hd",
+          "name": "UNITE8 HINDI HD",
+          "url": "http://fastshare1.com/live/112233/445566/741567.ts",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "iscreen-bd-aq",
+          "name": "ISCREEN BD - AQ",
+          "url": "https://m3u-tvb.pages.dev/ics.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://iscreen.com.bd/"
+        },
+        {
+          "id": "bbc-sports-hd",
+          "name": "BBC SPORTS HD",
+          "url": "https://chatgpt.hereisman.net/playlist/52833/load-playlist?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://gooz.aapmains.net"
+        },
+        {
+          "id": "tsn-sports-hd",
+          "name": "TSN SPORTS HD",
+          "url": "https://inproviszon.st/tsn1-xyz-waUvqaAACr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "fox-sports-hd",
+          "name": "FOX SPORTS HD",
+          "url": "https://inproviszon.st/fox-usa.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "tsn-sports-4k",
+          "name": "TSN SPORTS 4K",
+          "url": "https://inproviszon.st/tsn4k-xyz-waUvqaAACr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "fox-sports-4k",
+          "name": "FOX SPORTS 4K",
+          "url": "https://inproviszon.st/fox4k-usa.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "bbc-sports-4k",
+          "name": "BBC SPORTS 4K",
+          "url": "https://inproviszon.st/bbc-4k-2.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "bein-sports-4k",
+          "name": "beIN SPORTS 4K",
+          "url": "https://inproviszon.st/bein4k-xyz-waUvqaAACr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "fussball-tv-4k",
+          "name": "FUSSBALL TV 4K",
+          "url": "https://inproviszon.st/fussballtv1uhd-de.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "tsn-sports-4k-s2",
+          "name": "TSN SPORTS 4K S2",
+          "url": "https://inproviszon.st/tsn4k-xyz-waUvqaAACr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "fussball-tv2-4k",
+          "name": "FUSSBALL TV2 4K",
+          "url": "https://da-50f11b292a028381000001120000000000000009.id.vx.tentcdn.eu/wp/at-live-7.tentcdn.eu/bpk-tv/WM_TV_2_UHD/default/index.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "ccdf9f3d9bbf5c508adf04f81918a285",
+            "key": "66cf0524fcc2eb0c7dab8bbbf8829827"
+          }
+        },
+        {
+          "id": "bein-france-aq",
+          "name": "BeIN FRANCE - AQ",
+          "url": "https://api-proxad.dc2.oqee.net/playlist/v1/live/966/1/live.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "3acea01244785a6363fc04b25d696392",
+            "key": "f0b8f84dbd93407af6ab0b41fc774249:9d8b1b819cfdcff845625b86cc4968f3:480b03fe4476bc187c6a9d43ba85b9db:3cf686dc4246f19bc4419c54da0f90bc:b40f599266c8a262ccf4a384dadce08a:b6362975ca29d0685b7cac721b6faa26:da04d180e9028af27482b6a37c81e020:6ca2f2c822444ff76d9570741dec7b2b:9fc3d71ab30e8d33f09ee29e5e453608"
+          }
+        },
+        {
+          "id": "match-tv-ru",
+          "name": "MATCH TV RU",
+          "url": "https://video.beeline.tv/live/d/channel319.isml/manifest-stb.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "9145a6e0f778e61866f573d4944dd533",
+            "key": "d02173d40515fea5c83944f21d0f3114"
+          }
+        },
+        {
+          "id": "trt-fast-fhd",
+          "name": "TRT FAST FHD",
+          "url": "https://andro.2385437.xyz/checklist/androstreamlivetrt1.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://andro.2385437.xyz",
+          "origin": "https://andro.2385437.xyz",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "id": "fussball-tv-2-uhd",
+          "name": "FUSSBALL TV 2 UHD",
+          "url": "https://raw.githubusercontent.com/hnnyo/lgi/refs/heads/main/fsb1hd.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "telemundo-hd",
+          "name": "TELEMUNDO HD",
+          "url": "https://chatgpt.hereisman.net/playlist/52827/load-playlist?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://gooz.aapmains.net"
+        },
+        {
+          "id": "hd-server-en",
+          "name": "HD SERVER EN",
+          "url": "https://instreams.pro/US/NFLHD1/index.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://instream.click/wc-us.php?stream=NFLHD1",
+          "origin": "https://instream.click/wc-us.php?stream=NFLHD1",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0"
+          }
+        },
+        {
+          "id": "hd-server-ar",
+          "name": "HD SERVER AR",
+          "url": "https://edge2caster.pro/hls/eJmauBDCIf.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://streamscenter.online/",
+          "origin": "https://streamscenter.online"
+        },
+        {
+          "id": "arabic-fhd",
+          "name": "ARABIC FHD",
+          "url": "https://inproviszon.st/bein-xyz-waUvqaAACr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "telemundo-fhd",
+          "name": "TELEMUNDO FHD",
+          "url": "https://inproviszon.st/telemundo-xyz-waUvqaAACr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://xyzstreams.st/"
+        },
+        {
+          "id": "fussball-tv-uhd",
+          "name": "FUSSBALL TV UHD",
+          "url": "https://inproviszon.st/fussballtv1uhd-de.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "hd-stream-eng",
+          "name": "HD STREAM ENG",
+          "url": "https://edge2caster.pro/hls/24SDAZFcsqnj24.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://streamscenter.online/",
+          "origin": "https://streamscenter.online"
+        },
+        {
+          "id": "telemundo-fhd",
+          "name": "TELEMUNDO FHD",
+          "url": "https://inproviszon.st/telemundo-xyz-waUvqaAACr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "fussball-4k-live",
+          "name": "FUSSBALL 4K LIVE",
+          "url": "https://inproviszon.st/fussballtv1uhd-de.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "telemundo-fhd",
+          "name": "TELEMUNDO FHD",
+          "url": "https://chatgpt.hereisman.net/playlist/52836/load-playlist?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://gooz.aapmains.net"
+        },
+        {
+          "id": "bein-arabic-hd",
+          "name": "BEIN ARABIC HD",
+          "url": "https://mainstreams.pro/hls/eJmauBDCIf.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://streams.center",
+          "origin": "https://streams.center",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0"
+          }
+        },
+        {
+          "id": "hd-server-eng",
+          "name": "HD SERVER ENG",
+          "url": "https://mainstreams.pro/hls/24SDAZFcsqnj24.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://streams.center",
+          "origin": "https://streams.center",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0"
+          }
+        },
+        {
+          "id": "hd-spanish",
+          "name": "HD SPANISH",
+          "url": "https://mainstreams.pro/hls/b0h5fNwDKH.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://streams.center",
+          "origin": "https://streams.center",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0"
+          }
+        },
+        {
+          "id": "telemundo-es-usa",
+          "name": "Telemundo ES (USA)",
+          "url": "https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s/Live/channel(WSNS)/master.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "7d6bb9f86e133e4cb33440b493b6b672",
+            "key": "584ad285dcb9e7d42cf3e93f1cc3fe11"
+          }
+        },
+        {
+          "id": "telemundo-usa",
+          "name": "TELEMUNDO (USA)",
+          "url": "https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s-v2/Live/channel(kvea)/master.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "ce7ab3022e753307997f58afe001bac4",
+            "key": "72d631a66e635c60829a0fe7705516c1"
+          }
+        },
+        {
+          "id": "fussball-tv-ger",
+          "name": "FUSSBALL TV (GER)",
+          "url": "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_hd/DASH/index.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "1cb20afcd9d979c833cfd208c7d3eeb2",
+            "key": "fef0c15b4a523370892edd5e4133c269"
+          }
+        },
+        {
+          "id": "m6-france-usa-vpn",
+          "name": "M6 FRANCE (USA VPN]",
+          "url": "https://edge-fastly-m6web.live.6cloud.fr/out/v1/6play/6play-m6/cmaf_cenc00/dash-short-hd.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "0182ed7af02734ecb17a2f55eec98f99",
+            "key": "60346785b1095596de621031e9daf3ec"
+          }
+        },
+        {
+          "id": "fox-sports-4k-usa-vpn",
+          "name": "FOX SPORTS 4k [USA VPN]",
+          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/buf9inoetu/out/v1/31d30c91fc65458789b84209d3fa22e4/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "1f68713028d439ec03be07f56c1d6213",
+            "key": "20093db6455160fffed4c394def3193d"
+          }
+        },
+        {
+          "id": "tsn-sports-fhd",
+          "name": "TSN SPORTS FHD",
+          "url": "https://inproviszon.st/tsn1-xyz-waUvqaAACr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "peacock-usa",
+          "name": "PEACOCK [USA]",
+          "url": "https://g003-sle-us-cmaf-prd-cf.cdn.peacocktv.com/pck-sle/us-west-2/v1/dash/6f3f45fea6332a47667932dede90d20a96f2690c/peacock-dash-sle-4s-generic-cfd/co01/pcksle2/Content/CMAF_CTR-4s-v2/Live/channel(5021713-723571-491357670b3)/master_2hr.mpd?c3.ri=6a46ada3_Q1ZYMDc_0_Q0xPVURGUk9OVA_39a48feb8299%3A0&aws.sessionId=b1ad0c12-3474-4954-bd43-b02423089a9d",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "0022178a64e9eb8b90bd02e14faac0d4",
+            "key": "eadc21c522bba634d34b5311440efad4"
+          }
+        },
+        {
+          "id": "somoy-tv-hd",
+          "name": "SOMOY TV HD",
+          "url": "http://198.195.239.50:8095/somoyTv/tracks-v1a1/mono.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "btv-bdix-hd",
+          "name": "BTV BDIX HD",
+          "url": "http://198.195.239.50:8095/btv/tracks-v1a1/mono.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "tsports-hd",
+          "name": "TSports HD",
+          "url": "http://198.195.239.50:8095/tsports/tracks-v1a1/mono.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "fussball-tv1-4k",
+          "name": "FUSSBALL TV1 4K",
+          "url": "https://da-50f11b292a028381000001120000000000000009.id.vx.tentcdn.eu/wp/at-live-7.tentcdn.eu/bpk-tv/WM_TV_1_UHD/default/index.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "4f558eae1b005126b2ac6e9eb1a7849e",
+            "key": "17aea325d91b5e66f06a8c574f2f0b03"
+          }
+        },
+        {
+          "id": "arabic-sports-hd",
+          "name": "ARABIC SPORTS HD",
+          "url": "http://het134a.mediox.online/live/1515000000/index.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "bein-arabic-fhd",
+          "name": "beIN ARABIC FHD",
+          "url": "https://inproviszon.st/bein-xyz-waUvqaAACr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "unite8-2-fhd",
+          "name": "UNITE8 2 FHD",
+          "url": "http://180.94.28.28:8097/Fifa-2026/index.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "bein-max-fhd",
+          "name": "beIN MAX FHD",
+          "url": "https://inproviszon.st/beinsportsmax-sa.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "sd-stream",
+          "name": "SD STREAM",
+          "url": "http://193.47.62.47/hls/dTHXCZzsss.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "http://www.fawanews.sc/",
+          "origin": "http://www.fawanews.sc/"
+        },
+        {
+          "id": "fast-server",
+          "name": "FAST SERVER",
+          "url": "https://pulltx.jdnzrgm.com/live/hd-en-6MvYMRSWnEwiwmGNYv.m3u8?txSecret=3d64b4f78e7df3e83c733c7d66bbf680&txTime=6A481CB8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "fox-one-aq",
+          "name": "FOX ONE - AQ",
+          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/enc/ajfoeddkbz/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "f6564ec2aee819046328a0e153be574d",
+            "key": "ff46a8a1031eb27ef22576a077c98ab7"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "id": "tsn-sports-fhd",
+          "name": "TSN SPORTS FHD",
+          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/w0rehjjrwe/out/v1/69a2a7041395406b970598f61680e7cf/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "14eeabf30c14b7fbf3008c03099ce011",
+            "key": "17d2ac8dbc5429bd70af3433aa12158d"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "id": "toffe-bdix-bd",
+          "name": "TOFFE BDIX (BD)",
+          "url": "https://prod-cdn01-live.toffeelive.com/live/FIFA-2026/sst/0/master_1500.m3u8?hdntl=Expires=1783185606~_GO=Generated~URLPrefix=aHR0cHM6Ly9wcm9kLWNkbjAxLWxpdmUudG9mZmVlbGl2ZS5jb20~Signature=AeQsclD6pVUxTkNDTXIo4mEC5xSJ8-U-NXdXhZ9U6pocmw2CavnEmnsN82pX4PPIDZoxNnQuUFRVAIk0BtTFoJALJBgN",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "binge-bdix-bd",
+          "name": "Binge BDIX (BD)",
+          "url": "https://tc-sg.rockstreamer.com/v1/019ed91616121ea540a8171c8e801f/019ed92ac80315fc600b1796d4ad8b/main.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://iscreen.com.bd/"
+        },
+        {
+          "id": "unite8-hindi",
+          "name": "UNITE8 HINDI",
+          "url": "https://hugh.cdn.rumble.cloud/live/kd32s8ur/slot-19/q1h3-shbv/chunklist.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "tsn4-sports-fhd",
+          "name": "TSN4 SPORTS FHD",
+          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/ihys8nw4wv/out/v1/fde190f369484bc6b6117cc16cd82a9f/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "abc5b2883121012850ebda05b528c5ec",
+            "key": "e5250924f4b738905f7163a0134587a7"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "id": "wc-tv-fhd",
+          "name": "WC TV FHD",
+          "url": "https://qp-pldt-live-bpk-ucd-prod.akamaized.net/bpk-tv/fifa_ppv1/default/index.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "2c338a117d434ce4bbe3569231af90f1",
+            "key": "a9633d901ee8a3f4f58ac314b5c5f4fb"
+          }
+        },
+        {
+          "id": "rte-sports-fhd",
+          "name": "RTE SPORTS FHD",
+          "url": "https://dai.google.com/linear/dash/pa/event/oPeAYQs9T9yTHS98aR1EjQ/stream/f63170fb-3c13-4829-8e8c-0977ed9011d7:BRU/manifest.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "d816287e21496989eae1312925a423c5",
+            "key": "00da00f13180e7e6cd5ce87d1c974e8d"
+          }
+        },
+        {
+          "id": "dsports-fhd",
+          "name": "DSports FHD",
+          "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/dash/enc/z5oyxzsxdk/out/v1/7695a0f64a0e424b973d5b09a2a3eb91/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "f836853d8eac19446ed9535f5fc568b1",
+            "key": "b3bc5ef00602b29abac7e482d3d9fbf3"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "id": "caze-tv-fhd",
+          "name": "CAZE TV FHD",
+          "url": "https://otte.cache.aiv-cdn.net/lhr-nitro/live/clients/dash/enc/3ynrpdanq2/out/v1/81fd4c26584044d2b1a1cc5b32fa9af0/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "34475edab991ad5e92548aebd710410a",
+            "key": "501b209cccd323ac00bf5ac15b406cb4"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "id": "sportv-br-fhd",
+          "name": "SporTV BR FHD",
+          "url": "https://otte.cache.aiv-cdn.net/gru-nitro/live/clients/dash/enc/w8kwdfmlgs/out/v1/3aa321e477504937a439b602e078eb18/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "51c0ef23b17297e5c01cd7f36dd0a6ce",
+            "key": "8823f713ba6fdb9bbe0a2ad82d309a4b"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "id": "fox-one-4k",
+          "name": "FOX ONE 4K",
+          "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/xyqyiuevpp/out/v1/fc40f22f10374517a2784e1d97cb23f4/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "1f68713028d439ec03be07f56c1d6213",
+            "key": "20093db6455160fffed4c394def3193d"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "id": "goltv-vivo",
+          "name": "GOLTV VIVO",
+          "url": "https://dmbgaz4xf6jyh.cloudfront.net/live-stream-dai/69690cfcce0dc031830e7c1a/123a264b71764485bd49eca2d552cf33/d97743de3620a865848fff7a9de14dda1bf2409d/manifest.mpd?aid=688aae6d61c87d6274c05065&dnt=true&access_token=63ey9SOpQeHBRfWJYQLXQjelQc0QM1HXmlHp4iZrH8UCOCM8QtGIGg1sEEPJH0R0yXktUEXdLeB&uid=Knx65GY6UbaWSADZybEvf6m5MvqNIuNs&sid=bwRy9BgSc4RFeVhYh52hVIY8uPsJ4v4d&pid=A0xT1VnepBvKKqyeyRNtNkZBmHBrNNZM&ref=ditu.caracoltv.com&ext_pb=0&es=dmbgaz4xf6jyh.cloudfront.net&proto=https&pz=us&xr=us-east-2&manifestfilter=video_height:480-1080",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "1c6bfd8d1cdd4df69ea5fc4dd2f025bb",
+            "key": "b6fd90027dac7a94a9461f8b2638cbb4"
+          }
+        },
+        {
+          "id": "bbc-sports-hd",
+          "name": "BBC SPORTS HD",
+          "url": "https://chatgpt.hereisman.net/playlist/52856/load-playlist?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://gooz.aapmains.net"
+        },
+        {
+          "id": "telemundo-hd",
+          "name": "TELEMUNDO HD",
+          "url": "https://inproviszon.st/telemundo-usa.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "fox-one-hd",
+          "name": "FOX ONE HD",
+          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/zpfs5hlgya/out/v1/84b1d591a23640178a8e8aa43c6e59a7/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "0cc2f872759c96de70237e6fa6de03d0",
+            "key": "a879b1d38ed002d4018bce96f9219b8d"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "id": "npo1-dutch-fhd",
+          "name": "NPO1 DUTCH FHD",
+          "url": "https://npo-nl-ams-p17-am3.cdn.streamgate.nl/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODMxODcyMzEsInVyaSI6IlwvbGl2ZVwvbnBvXC91XzNfNFwvbnBvcGx1c1wvZHJtXC9kYXNoX2NlbmNcL25wby0xXC8wXC8wXC8wXC9ucG8tMS5pc21sIiwidmlld2VyIjoidmlld2VyIiwicmlkIjoiZGE4OTEzYSJ9.tRTSOKtB-18EqmwTxmKLSECnk2RLcyhEJR1ctHCNunw/live/npo/u_3_4/npoplus/drm/dash_cenc/npo-1/0/0/0/npo-1.isml/stream.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "8d3c85fa30730fdc39efc09de476415f",
+            "key": "8fdccd948bb2cc6d99d5305ccffebcb7"
+          }
+        },
+        {
+          "id": "vrt-sports-belgium",
+          "name": "VRT SPORTS (Belgium)",
+          "url": "https://live.vrtcdn.be/groupd/live/0761024f-37fe-4254-bc37-e95d7c62b2d1/playout_cgyt8a.isml/.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "1a55840f87681db7e9e87ebfeecbb316",
+            "key": "e06e221dc1b66687bc2d2fca24f67360"
+          }
+        },
+        {
+          "id": "m6-france-usa",
+          "name": "M6 FRANCE (USA)",
+          "url": "https://edge-fastly-m6web.live.6cloud.fr/out/v1/6play/6play-m6/cmaf_cenc00/dash-short-hd.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "0182ed7af02734ecb17a2f55eec98f99",
+            "key": "60346785b1095596de621031e9daf3ec"
+          }
+        },
+        {
+          "id": "tsn-sports-hd",
+          "name": "TSN SPORTS HD",
+          "url": "https://inproviszon.st/tsn1-xyz-waUvqaAACr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "fox-sports-hd",
+          "name": "FOX SPORTS HD",
+          "url": "https://inproviszon.st/fox-usa.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "bein-max-fhd",
+          "name": "beIN MAX FHD",
+          "url": "https://inproviszon.st/beinsportsmax-sa.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "fast-server",
+          "name": "FAST SERVER",
+          "url": "https://pulltx.jdnzrgm.com/live/hd-en-6MvYMRSWnEwiwmGNYv.m3u8?txSecret=3d64b4f78e7df3e83c733c7d66bbf680&txTime=6A481CB8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "telemundo-hd",
+          "name": "TELEMUNDO HD",
+          "url": "https://instreams.pro/US/NFLHD2/tracks-v1a1/mono.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://instream.click/",
+          "origin": "https://instream.click"
+        },
+        {
+          "id": "unite8-hindi-hd",
+          "name": "UNITE8 HINDI HD",
+          "url": "http://fastshare1.com/live/112233/445566/741567.ts",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "tsn-sports-fhd",
+          "name": "TSN Sports FHD",
+          "url": "https://abeqnpaaaaaaaaamkm25dx7jyzllj.ta.bia-cf.live.pv-cdn.net/iad-nitro/live/clients/dash/enc/cjglydxghe/out/v1/8977baf175da4b94873194613dd3fe55/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "14eeabf30c14b7fbf3008c03099ce011",
+            "key": "17d2ac8dbc5429bd70af3433aa12158d"
+          }
+        },
+        {
+          "id": "fox-one-fhd",
+          "name": "FOX ONE FHD",
+          "url": "https://abeqnpaaaaaaaaamkm25dx7jyzllj.ta.bia-cf.live.pv-cdn.net/iad-nitro/live/dash/enc/ajfoeddkbz/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "f6564ec2aee819046328a0e153be574d",
+            "key": "ff46a8a1031eb27ef22576a077c98ab7"
+          }
+        },
+        {
+          "id": "fox-4k-alt",
+          "name": "FOX 4K [ALT]",
+          "url": "https://abeqnpaaaaaaaaamkm25dx7jyzllj.ta.bia-cf.live.pv-cdn.net/iad-nitro/live/clients/enc/xyqyiuevpp/out/v1/fc40f22f10374517a2784e1d97cb23f4/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "1f68713028d439ec03be07f56c1d6213",
+            "key": "20093db6455160fffed4c394def3193d"
+          }
+        },
+        {
+          "id": "fox-one-alt",
+          "name": "FOX ONE [ALT]",
+          "url": "https://abgh3fbaaaaaaaambylpff72g6up6.ta.bia-cf.live.pv-cdn.net/iad-nitro/live/dash/enc/ajfoeddkbz/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "f6564ec2aee819046328a0e153be574d",
+            "key": "ff46a8a1031eb27ef22576a077c98ab7"
+          }
+        },
+        {
+          "id": "tsn-sports-alt",
+          "name": "TSN SPORTS [ALT]",
+          "url": "https://abgh3fbaaaaaaaambylpff72g6up6.ta.bia-cf.live.pv-cdn.net/iad-nitro/live/dash/enc/w0rehjjrwe/out/v1/69a2a7041395406b970598f61680e7cf/cenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "14eeabf30c14b7fbf3008c03099ce011",
+            "key": "17d2ac8dbc5429bd70af3433aa12158d"
+          }
+        },
+        {
+          "id": "peacock-fhd-alt",
+          "name": "PEACOCK FHD [ALT]",
+          "url": "https://g003-sle-us-cmaf-prd-fy.cdn.peacocktv.com/pck-sle/us-west-2/v1/dash/6f3f45fea6332a47667932dede90d20a96f2690c/peacock-dash-sle-4s-generic-cfd/co01/pcksle2/Content/CMAF_CTR-4s-v2/Live/channel(5021721-723579-49135f082bb)/master_2hr.mpd?c3.ri=6a47f363_Q1ZYMDc_0_RkFTVExZ_49fa4fc06b4e%3A0&aws.sessionId=ef6fe915-591d-43cb-9a8c-f46708cbeb6f",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "002273c3a766d1ce78ed615584f91c02",
+            "key": "fd69c54eb4f884efe2f22659de5bdcb6"
+          }
+        },
+        {
+          "id": "telemundo-usa",
+          "name": "TELEMUNDO [USA]",
+          "url": "https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s/Live/channel(WSNS)/master.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "7d6bb9f86e133e4cb33440b493b6b672",
+            "key": "584ad285dcb9e7d42cf3e93f1cc3fe11"
+          }
+        },
+        {
+          "id": "tsn-sports-4k",
+          "name": "TSN SPORTS 4K",
+          "url": "https://inproviszon.st/tsn4k-xyz-waUvqaAACr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "fox-one-4k",
+          "name": "FOX ONE 4K",
+          "url": "https://inproviszon.st/fox4k-usa.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "fox-4k-live",
+          "name": "FOX 4K LIVE",
+          "url": "https://inproviszon.st/fox4k-usa.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://xyzstreams.st/"
+        },
+        {
+          "id": "bbc-sports-4k",
+          "name": "BBC SPORTS 4K",
+          "url": "https://inproviszon.st/bbc-4k-2.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "bein-max-4k",
+          "name": "beIN MAX 4K",
+          "url": "https://inproviszon.st/bein4k-xyz-waUvqaAACr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "telemundo-fhd",
+          "name": "TELEMUNDO FHD",
+          "url": "https://inproviszon.st/telemundo-xyz-waUvqaAACr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "dazn-mundial",
+          "name": "DAZN MUNDIAL",
+          "url": "https://inproviszon.st/daznmundial-es.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "fussball-tv-4k",
+          "name": "FUSSBALL TV 4K",
+          "url": "https://inproviszon.st/fussballtv1uhd-de.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "arabic-live-fhd",
+          "name": "ARABIC LIVE FHD",
+          "url": "https://inproviszon.st/bein-xyz-waUvqaAACr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://vileembeds.pages.dev/"
+        },
+        {
+          "id": "fussball-tv-4k",
+          "name": "FUSSBALL TV 4K",
+          "url": "https://da-50f11b292a028381000001120000000000000009.id.vx.tentcdn.eu/wp/at-live-7.tentcdn.eu/bpk-tv/WM_TV_1_UHD/default/index.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "4f558eae1b005126b2ac6e9eb1a7849e",
+            "key": "17aea325d91b5e66f06a8c574f2f0b03"
+          }
+        },
+        {
+          "id": "fussball-tv2-4k",
+          "name": "FUSSBALL TV2 4K",
+          "url": "https://da-50f11b292a028381000001120000000000000009.id.vx.tentcdn.eu/wp/at-live-7.tentcdn.eu/bpk-tv/WM_TV_2_UHD/default/index.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "ccdf9f3d9bbf5c508adf04f81918a285",
+            "key": "66cf0524fcc2eb0c7dab8bbbf8829827"
+          }
+        },
+        {
+          "id": "irib-4k",
+          "name": "IRIB 4K",
+          "url": "https://ncdn.telewebion.ir/faratar/live/playlist.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "tsn-sports-hd",
+          "name": "TSN SPORTS HD",
+          "url": "https://chatgpt.hereisman.net/playlist/52857/load-playlist?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://gooz.aapmains.net"
+        },
+        {
+          "id": "fox-sports-hd",
+          "name": "FOX SPORTS HD",
+          "url": "https://chatgpt.hereisman.net/playlist/52855/load-playlist?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://gooz.aapmains.net"
+        },
+        {
+          "id": "dazn-spanish",
+          "name": "DAZN SPANISH",
+          "url": "https://1nyaler.streamhostingcdn.top/stream/94/index.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "btv-bdix-hd",
+          "name": "BTV BDIX HD",
+          "url": "http://198.195.239.50:8095/btv/tracks-v1a1/mono.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "tsports-hd",
+          "name": "TSports HD",
+          "url": "http://198.195.239.50:8095/tsports/tracks-v1a1/mono.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "somoy-tv-hd",
+          "name": "SOMOY TV HD",
+          "url": "http://198.195.239.50:8095/somoyTv/tracks-v1a1/mono.m3u8",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "all-in-one-reborn-4-live",
+          "name": "All in one reborn 4 Live",
+          "url": "https://instreams.pro/US/NFLHD1/tracks-v1a1/mono.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://instream.click/",
+          "origin": "https://instream.click"
+        },
+        {
+          "id": "hd-server-eng",
+          "name": "HD SERVER ENG",
+          "url": "https://edgestreams.pro/hls/24SDAZFcsqnj24.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://streamscenter.online/",
+          "origin": "https://streamscenter.online"
+        },
+        {
+          "id": "hd-server-ar",
+          "name": "HD SERVER AR",
+          "url": "https://mainstreams.pro/hls/eJmauBDCIf.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://streamscenter.online/",
+          "origin": "https://streamscenter.online"
+        },
+        {
+          "id": "hd-server-es",
+          "name": "HD SERVER ES",
+          "url": "https://edge2caster.pro/hls/b0h5fNwDKH.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "https://streamscenter.online/",
+          "origin": "https://streamscenter.online"
+        },
+        {
+          "id": "match-tv-ru",
+          "name": "MATCH TV RU",
+          "url": "https://video.beeline.tv/live/d/channel319.isml/manifest-stb.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "9145a6e0f778e61866f573d4944dd533",
+            "key": "d02173d40515fea5c83944f21d0f3114"
+          }
+        },
+        {
+          "id": "fussball-4k-ger",
+          "name": "FUSSBALL 4K [GER]",
+          "url": "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_uhd/DASH/index.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "1f09d5788fbbb03a053d03cc731f31a9",
+            "key": "d493d5a70c793362324638f61d1726ac"
+          }
+        },
+        {
+          "id": "fussball2-4k-ger",
+          "name": "FUSSBALL2 4K [GER]",
+          "url": "https://svc45.main.sl.t-online.de/bpk-tv/KID01064_FUSSBALLTV2_uhd/DASH/index.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "1b98a0f2de7784c6e132942385a089f3",
+            "key": "546eae09a8d81c498dfd08532dcd68a5"
+          }
+        },
+        {
+          "id": "fussball-tv-fhd",
+          "name": "FUSSBALL TV FHD",
+          "url": "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_hd/DASH/index.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "1cb20afcd9d979c833cfd208c7d3eeb2",
+            "key": "fef0c15b4a523370892edd5e4133c269"
+          }
+        },
+        {
+          "id": "fussball2-tv-fhd",
+          "name": "FUSSBALL2 TV FHD",
+          "url": "https://svc45.main.sl.t-online.de/bpk-tv/KID01064_FUSSBALLTV2_hd/DASH/index.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "1889c6c8cdf57aa3bc90bb976ca6cbdc",
+            "key": "48ef3649d9076965b70e79e58b0028ef"
+          }
+        },
+        {
+          "id": "telemundo-usa",
+          "name": "TELEMUNDO [USA]",
+          "url": "https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s/Live/channel(WSNS)/master.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "7d6bb9f86e133e4cb33440b493b6b672",
+            "key": "584ad285dcb9e7d42cf3e93f1cc3fe11"
+          }
+        },
+        {
+          "id": "sd-server-eng",
+          "name": "SD SERVER [ENG]",
+          "url": "http://193.47.62.47/hls/dTHXCZzsss.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "http://www.fawanews.sc/",
+          "origin": "http://www.fawanews.sc/"
+        },
+        {
+          "id": "eng-server-sd",
+          "name": "ENG SERVER SD",
+          "url": "http://193.47.62.42/hls/dTHXCZzsssQ.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "http://www.fawanews.sc/",
+          "origin": "http://www.fawanews.sc/"
+        },
+        {
+          "id": "sd-server-ar",
+          "name": "SD SERVER AR",
+          "url": "http://193.47.62.51/hls/dTHXCZckkkqr.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "http://www.fawanews.sc/",
+          "origin": "http://www.fawanews.sc/"
+        },
+        {
+          "id": "sd-server-swe",
+          "name": "SD SERVER [SWE]",
+          "url": "http://193.47.62.59/hls/dTHXCZckkkqq.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "http://www.fawanews.sc/",
+          "origin": "http://www.fawanews.sc/"
+        },
+        {
+          "id": "bein-sports-fr",
+          "name": "beiN SPORTS FR",
+          "url": "http://193.47.62.59/hls/dTHXCZckkkq.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "http://www.fawanews.sc/",
+          "origin": "http://www.fawanews.sc/"
+        },
+        {
+          "id": "espanol-sd",
+          "name": "ESPANOL SD",
+          "url": "http://193.47.62.59/hls/dTHXCZckkkqqq.m3u8?",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "referer": "http://www.fawanews.sc/",
+          "origin": "http://www.fawanews.sc/"
+        },
+        {
+          "id": "tipik-fr-fhd",
+          "name": "TIPIK FR FHD",
+          "url": "https://c9851ec-rbm-hilv-fsly.cdn.redbee.live/L26/6b640fa2/a765d074.isml/dash/.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": true,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "adca25b8779e4168a0cd710f59f61ccf",
+            "key": "be5383ed3cd8079f4ffe78ad067f476a"
+          }
+        }
+      ]
+    },
     "fifa-world-cup-2026": {
       "name": "FIFA™",
       "channels": [
@@ -7581,592 +8910,4 @@
       ]
     }
   }
-};
-
-    const PROXIES = {
-      hls: 'https://live-stream-proxy.sheikhshariarnehal.workers.dev/?url=',
-      fifa: 'https://live-stream-proxy.sheikhshariarnehal.workers.dev/?url=',
-      direct: ''
-    };
-
-    // DOM Elements
-    const video = document.getElementById('videoPlayer');
-    const proxySelect = document.getElementById('proxySelect');
-    const customProxyWrap = document.getElementById('customProxyWrap');
-    const customProxyInput = document.getElementById('customProxyInput');
-    const customUrl = document.getElementById('customUrl');
-    const loadCustom = document.getElementById('loadCustom');
-    const channelList = document.getElementById('channelList');
-    const playerOverlay = document.getElementById('playerOverlay');
-    const playerSpinner = document.getElementById('playerSpinner');
-    const overlayText = document.getElementById('overlayText');
-    const activeName = document.getElementById('activeName');
-    const activeProxyMode = document.getElementById('activeProxyMode');
-    const activeUrl = document.getElementById('activeUrl');
-    const consoleLogs = document.getElementById('consoleLogs');
-    const clearConsole = document.getElementById('clearConsole');
-
-    let shakaPlayerInstance = null;
-    let hlsInstance = null;
-    let mpegtsPlayerInstance = null;
-    let selectedChannel = null;
-    let currentProxyPrefix = '';
-    let currentExtraParams = '';
-
-    // Logging helpers
-    function log(msg, type = 'info') {
-      const entry = document.createElement('div');
-      entry.className = `log-entry log-${type}`;
-      const time = new Date().toLocaleTimeString();
-      entry.textContent = `[${time}] ${msg}`;
-      consoleLogs.appendChild(entry);
-      consoleLogs.scrollTop = consoleLogs.scrollHeight;
-      console.log(`[${type.toUpperCase()}] ${msg}`);
-    }
-
-    clearConsole.addEventListener('click', () => {
-      consoleLogs.innerHTML = '';
-      log("Logs cleared", "info");
-    });
-
-    // Handle Proxy Selector changes
-    proxySelect.addEventListener('change', () => {
-      if (proxySelect.value === 'custom') {
-        customProxyWrap.style.display = 'block';
-      } else {
-        customProxyWrap.style.display = 'none';
-      }
-      log(`Proxy mode switched to: ${proxySelect.value.toUpperCase()}`);
-      if (selectedChannel) {
-        loadStream(selectedChannel);
-      }
-    });
-
-    customProxyInput.addEventListener('input', () => {
-      if (selectedChannel) {
-        loadStream(selectedChannel);
-      }
-    });
-
-    // Search filter event listener
-    const searchBox = document.getElementById('searchBox');
-    searchBox.addEventListener('input', () => {
-      const q = searchBox.value.toLowerCase().trim();
-      const items = channelList.querySelectorAll('.channel-item');
-      
-      items.forEach(item => {
-        const name = item.querySelector('.channel-name').textContent.toLowerCase();
-        if (name.includes(q)) {
-          item.style.display = 'flex';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-      
-      // Toggle category headers based on visibility of items under it
-      let currentHeader = null;
-      let hasVisibleItem = false;
-      const children = Array.from(channelList.children);
-      children.forEach(child => {
-        if (child.classList.contains('category-header')) {
-          if (currentHeader && !hasVisibleItem) {
-            currentHeader.style.display = 'none';
-          }
-          currentHeader = child;
-          child.style.display = 'flex';
-          hasVisibleItem = false;
-        } else if (child.classList.contains('channel-item')) {
-          if (child.style.display === 'flex') {
-            hasVisibleItem = true;
-          }
-        }
-      });
-      if (currentHeader && !hasVisibleItem) {
-        currentHeader.style.display = 'none';
-      }
-    });
-
-    // Populate Channel List
-    function init() {
-      // Try loading channels.json database first
-      fetch('channels.json')
-        .then(res => res.json())
-        .then(data => {
-          if (data.categories) {
-            log("Dynamically loaded database from channels.json", "success");
-            renderCategorizedChannels(data.categories);
-          } else {
-            log("Loaded channels.json but format is flat. Rendering flat...", "info");
-            renderChannels(data.channels || data);
-          }
-        })
-        .catch(() => {
-          log("Could not load channels.json directly. Trying scrabe_1.json...", "info");
-          fetch('scrabe_1.json')
-            .then(res => res.json())
-            .then(data => {
-              log("Dynamically loaded channels from scrabe_1.json", "success");
-              renderChannels(data.channels || data);
-            })
-            .catch(() => {
-              log("No external database accessible. Using fallback channel list.", "warn");
-              if (CHANNELS.categories) { renderCategorizedChannels(CHANNELS.categories); } else { renderChannels(CHANNELS); }
-            });
-        });
-
-      // Install Shaka polyfills
-      shaka.polyfill.installAll();
-      if (!shaka.Player.isBrowserSupported()) {
-        log("DASH/DRM Playback is NOT supported in this browser!", "error");
-      }
-    }
-
-    function renderCategorizedChannels(categories) {
-      channelList.innerHTML = '';
-      let total = 0;
-      
-      for (const catKey in categories) {
-        const cat = categories[catKey];
-        if (!cat.channels || cat.channels.length === 0) continue;
-        
-        const header = document.createElement('div');
-        header.className = 'category-header';
-        header.innerHTML = `<span>${cat.name}</span> <span class="badge-count">${cat.channels.length}</span>`;
-        channelList.appendChild(header);
-        
-        cat.channels.forEach(ch => {
-          total++;
-          const item = document.createElement('div');
-          item.className = 'channel-item';
-          item.dataset.id = ch.id;
-          
-          const isFifa = ch.name.toLowerCase().includes('fifa') || cat.name.toLowerCase().includes('fifa');
-          const iconClass = isFifa ? 'fa-solid fa-trophy' : (catKey.includes('movie') ? 'fa-solid fa-film' : 'fa-solid fa-tv');
-          const streamType = ch.url.includes('.mpd') ? 'DASH (DRM)' : 'HLS';
-          
-          item.innerHTML = `
-            <div class="channel-icon">
-              <i class="${iconClass}"></i>
-            </div>
-            <div class="channel-info">
-              <div class="channel-name">${ch.name}</div>
-              <div class="channel-type">${streamType}</div>
-            </div>
-          `;
-          
-          item.addEventListener('click', () => {
-            document.querySelectorAll('.channel-item').forEach(el => el.classList.remove('active'));
-            item.classList.add('active');
-            
-            // Auto toggle proxy based on database config for this channel
-            proxySelect.value = ch.proxy ? 'fifa' : 'direct';
-            customProxyWrap.style.display = 'none';
-            
-            selectedChannel = ch;
-            loadStream(ch);
-          });
-          
-          channelList.appendChild(item);
-        });
-      }
-      log(`Rendered ${total} categorized channels in sidebar`, "success");
-    }
-
-    function renderChannels(list) {
-      channelList.innerHTML = '';
-      list.forEach(ch => {
-        const item = document.createElement('div');
-        item.className = 'channel-item';
-        item.dataset.id = ch.id;
-
-        const isFifa = ch.name.toLowerCase().includes('fifa');
-        const iconClass = isFifa ? 'fa-solid fa-trophy' : 'fa-solid fa-tv';
-        const streamType = ch.url.includes('.mpd') ? 'DASH (DRM)' : 'HLS';
-
-        item.innerHTML = `
-          <div class="channel-icon">
-            <i class="${iconClass}"></i>
-          </div>
-          <div class="channel-info">
-            <div class="channel-name">${ch.name}</div>
-            <div class="channel-type">${streamType}</div>
-          </div>
-        `;
-
-        item.addEventListener('click', () => {
-          document.querySelectorAll('.channel-item').forEach(el => el.classList.remove('active'));
-          item.classList.add('active');
-          
-          proxySelect.value = ch.proxy ? 'fifa' : 'direct';
-          customProxyWrap.style.display = 'none';
-          
-          selectedChannel = ch;
-          loadStream(ch);
-        });
-
-        channelList.appendChild(item);
-      });
-      log(`Rendered ${list.length} channels in sidebar`, "success");
-    }
-
-    // Load Stream Helper
-    async function loadStream(ch, bypassProxy = false) {
-      // Reset players
-      destroyPlayers();
-      showOverlay("Loading stream...", true);
-
-      activeName.textContent = ch.name + (bypassProxy ? " (Direct Fallback)" : "");
-      
-      // Determine Proxy URL
-      let proxyPrefix = '';
-      if (!bypassProxy) {
-        const mode = proxySelect.value;
-        if (mode === 'custom') {
-          proxyPrefix = customProxyInput.value;
-        } else {
-          proxyPrefix = PROXIES[mode];
-        }
-      }
-
-      // Extract custom headers for proxying
-      let extraParams = '';
-      if (!bypassProxy) {
-        const ref = ch.referer || ch.Referer || '';
-        const ua = ch['user-agent'] || ch.userAgent || ch.UserAgent || '';
-        if (ref) extraParams += `&referer=${encodeURIComponent(ref)}`;
-        if (ua) extraParams += `&user-agent=${encodeURIComponent(ua)}`;
-      }
-
-      // Update global proxy state
-      currentProxyPrefix = proxyPrefix;
-      currentExtraParams = extraParams;
-
-      const resolvedUrl = proxyPrefix ? proxyPrefix + encodeURIComponent(ch.url) + extraParams : ch.url;
-      activeUrl.textContent = resolvedUrl;
-      
-      activeProxyMode.textContent = proxyPrefix ? 'PROXIED' : 'DIRECT';
-      activeProxyMode.className = `badge ${proxyPrefix ? 'badge-proxy' : 'badge-direct'}`;
-
-      log(`Preparing to load: ${ch.name}`);
-      log(`Stream URL: ${ch.url}`);
-      if (proxyPrefix) log(`Proxied URL: ${resolvedUrl}`);
-
-      const isMpd = ch.url.includes('.mpd');
-      const isTs = ch.url.includes('.ts') || ch.url.includes('/ts/') || ch.url.includes('/ts');
-      if (isMpd) {
-        await playMpd(resolvedUrl, ch.drm, ch, bypassProxy);
-      } else if (isTs) {
-        playMpegTs(resolvedUrl, ch, bypassProxy);
-      } else {
-        playHls(resolvedUrl, ch, bypassProxy);
-      }
-    }
-
-    // HLS.js playback
-    function playHls(url, ch, bypassProxy) {
-      log("Initializing HLS.js player...", "info");
-      
-      if (Hls.isSupported()) {
-        hlsInstance = new Hls({
-          enableWorker: true,
-          lowLatencyMode: true
-        });
-
-        hlsInstance.loadSource(url);
-        hlsInstance.attachMedia(video);
-
-        hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-          log("HLS manifest parsed successfully! Starting playback...", "success");
-          hideOverlay();
-          video.play().catch(err => {
-            log(`Autoplay blocked: ${err.message}. Click play manually.`, "warn");
-          });
-        });
-
-        let fallbackTriggered = false;
-
-        hlsInstance.on(Hls.Events.ERROR, (event, data) => {
-          if (data.fatal) {
-            log(`Fatal HLS error encountered: ${data.type} - ${data.details}`, "error");
-            
-            const is403 = data.response && data.response.code === 403;
-            const is400 = data.response && data.response.code === 400;
-            const is5xx = data.response && data.response.code >= 500;
-            
-            if (is403) {
-              log("Tip: Received 403 Forbidden. This HLS stream is likely Geo-Blocked (needs VPN) or has expired.", "warn");
-            } else if (is400) {
-              log("Tip: Received 400 Bad Request. The server or proxy rejected the request headers.", "warn");
-            }
-
-            if (!bypassProxy && !fallbackTriggered && (is403 || is400 || is5xx || data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR)) {
-              fallbackTriggered = true;
-              log("Proxy playback failed. Initiating direct fallback play...", "warn");
-              destroyPlayers();
-              loadStream(ch, true);
-              return;
-            }
-
-            showOverlay(`Playback failed: ${data.details}`, false);
-            switch (data.type) {
-              case Hls.ErrorTypes.NETWORK_ERROR:
-                log("Network error. Attempting recovery...", "warn");
-                hlsInstance.startLoad();
-                break;
-              case Hls.ErrorTypes.MEDIA_ERROR:
-                log("Media error. Attempting recovery...", "warn");
-                hlsInstance.recoverMediaError();
-                break;
-              default:
-                destroyPlayers();
-                break;
-            }
-          }
-        });
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        log("Browser supports native HLS playback (Safari).", "info");
-        video.src = url;
-        video.addEventListener('loadedmetadata', () => {
-          hideOverlay();
-          video.play();
-        });
-        video.addEventListener('error', () => {
-          log("Native HLS playback failed", "error");
-          showOverlay("Native playback error", false);
-        });
-      } else {
-        log("HLS is not supported in this browser.", "error");
-        showOverlay("HLS unsupported on this browser", false);
-      }
-    }
-
-    // Shaka DASH DRM playback
-    async function playMpd(url, drm, ch, bypassProxy) {
-      log("Initializing Shaka Player for DASH/DRM stream...", "info");
-      
-      try {
-        shakaPlayerInstance = new shaka.Player(video);
-        
-        // Configure shorter timeouts/retries so the player doesn't hang on dead/blocked streams
-        shakaPlayerInstance.configure({
-          manifest: {
-            retryParameters: {
-              maxAttempts: 2,
-              timeout: 5000,
-              backoffFactor: 1.5,
-              baseDelay: 1000
-            }
-          },
-          streaming: {
-            retryParameters: {
-              maxAttempts: 2,
-              timeout: 5000,
-              backoffFactor: 1.5,
-              baseDelay: 1000
-            }
-          }
-        });
-        
-        // Configure Request Filter to route all requests through the proxy (including media segments)
-        shakaPlayerInstance.getNetworkingEngine().registerRequestFilter((type, request) => {
-          const uri = request.uris[0];
-          if (currentProxyPrefix && !uri.startsWith(currentProxyPrefix) && !uri.startsWith('data:') && !uri.startsWith('blob:')) {
-            let proxiedUrl = currentProxyPrefix + encodeURIComponent(uri);
-            if (currentExtraParams) {
-              proxiedUrl += currentExtraParams;
-            }
-            request.uris[0] = proxiedUrl;
-          }
-        });
-        
-        // Listen to error events
-        shakaPlayerInstance.addEventListener('error', (event) => {
-          let errorMsg = event.detail.message;
-          const code = event.detail.code;
-          if (code === 6005) {
-            errorMsg = "DRM CDM Creation Failed (Insecure Context / Unique Origin). Use http://localhost:8080/player.html or HTTPS.";
-            log(errorMsg, "error");
-            log("Pro-tip: Do NOT load via file:// protocol or local network IPs (e.g. 192.168.x.x) - browsers block DRM decryption on insecure origins.", "warn");
-          } else if (code === 1002 || (errorMsg && errorMsg.includes('403'))) {
-            log(`Shaka Player Error: ${code} - 403 Forbidden`, "error");
-            log("Tip: This stream returned 403 Forbidden. It is likely Geo-Blocked (e.g., requires a VPN like USA VPN) or the URL has expired.", "warn");
-          } else if (code === 1002 && errorMsg && errorMsg.includes('400')) {
-            log(`Shaka Player Error: ${code} - 400 Bad Request`, "error");
-            log("Tip: This stream returned 400 Bad Request. The server or proxy rejected the request headers.", "warn");
-          } else {
-            log(`Shaka Player Error: ${code} - ${errorMsg}`, "error");
-          }
-          showOverlay(`DASH Error: code ${code}`, false);
-        });
-
-        // Configure DRM ClearKey if present
-        if (drm && drm.kid && drm.key) {
-          log(`Configuring ClearKey DRM for DASH stream...`, "info");
-          log(`KeyID: ${drm.kid} | Key: ${drm.key}`, "info");
-          shakaPlayerInstance.configure({
-            drm: {
-              clearKeys: {
-                [drm.kid]: drm.key
-              }
-            }
-          });
-        }
-
-        // Load stream
-        await shakaPlayerInstance.load(url);
-        log("DASH manifest loaded successfully! Starting playback...", "success");
-        hideOverlay();
-        video.play().catch(err => {
-          log(`Autoplay blocked: ${err.message}`, "warn");
-        });
-      } catch (error) {
-        let errorMsg = error.message || error;
-        const code = error.code;
-        
-        const is403 = code === 1002 && errorMsg && errorMsg.toString().includes('403');
-        const is400 = code === 1002 && errorMsg && errorMsg.toString().includes('400');
-        const isDRMBlock = code === 6005 || (errorMsg && errorMsg.toString().includes('FAILED_TO_CREATE_CDM'));
-        const isNetworkError = code === 1002 || (error.severity && error.severity === 2 && error.category === 1);
-
-        if (isDRMBlock) {
-          errorMsg = "DRM CDM Creation Failed. EME is blocked on insecure/unique origins! Please use http://localhost:8080/player.html or HTTPS.";
-          log(errorMsg, "error");
-          log("Pro-tip: Do NOT load via file:// protocol or local network IPs (e.g. 192.168.x.x) - browsers block DRM decryption on insecure origins.", "warn");
-        } else if (is403) {
-          log("DASH playback failed with 403 Forbidden.", "error");
-          log("Tip: This stream is likely Geo-Blocked (e.g., requires a VPN like USA VPN) or the stream URL has expired.", "warn");
-        } else if (is400) {
-          log("DASH playback failed with 400 Bad Request.", "error");
-          log("Tip: This stream returned 400 Bad Request. The server or proxy rejected the request headers.", "warn");
-        } else {
-          log(`Shaka loading failed: ${errorMsg}`, "error");
-        }
-
-        if (!bypassProxy && !isDRMBlock && isNetworkError) {
-          log("Proxy playback failed. Initiating direct fallback play...", "warn");
-          destroyPlayers();
-          loadStream(ch, true);
-          return;
-        }
-
-        showOverlay(`DASH playback failed: ${errorMsg}`, false);
-        destroyPlayers();
-      }
-    }
-
-    function playMpegTs(url, ch, bypassProxy) {
-      log("Initializing mpegts.js player for raw MPEG-TS stream...", "info");
-      
-      try {
-        if (mpegts.getFeatureList().mseLivePlayback) {
-          mpegtsPlayerInstance = mpegts.createPlayer({
-            type: 'mpegts',
-            isLive: true,
-            url: url
-          }, {
-            enableWorker: true,
-            enableStashBuffer: false
-          });
-          
-          mpegtsPlayerInstance.attachMediaElement(video);
-          mpegtsPlayerInstance.load();
-          
-          let fallbackTriggered = false;
-
-          mpegtsPlayerInstance.on(mpegts.Events.ERROR, (type, detail, info) => {
-            log(`MPEG-TS Player Error: ${type} - ${detail}`, "error");
-            
-            if (!bypassProxy && !fallbackTriggered && (type === mpegts.ErrorTypes.NETWORK_ERROR)) {
-              fallbackTriggered = true;
-              log("Proxy playback failed. Initiating direct fallback play...", "warn");
-              destroyPlayers();
-              loadStream(ch, true);
-              return;
-            }
-
-            showOverlay(`TS Error: ${detail}`, false);
-          });
-          
-          hideOverlay();
-          mpegtsPlayerInstance.play().catch(err => {
-            log(`Autoplay blocked: ${err.message}`, "warn");
-          });
-          log("MPEG-TS player started successfully!", "success");
-        } else {
-          log("MSE live playback not supported on this browser.", "error");
-          showOverlay("MSE playback unsupported", false);
-        }
-      } catch (error) {
-        log(`MPEG-TS loading failed: ${error.message}`, "error");
-        
-        if (!bypassProxy) {
-          log("Proxy playback failed. Initiating direct fallback play...", "warn");
-          destroyPlayers();
-          loadStream(ch, true);
-          return;
-        }
-
-        showOverlay("TS playback failed", false);
-        destroyPlayers();
-      }
-    }
-
-    function destroyPlayers() {
-      if (hlsInstance) {
-        hlsInstance.destroy();
-        hlsInstance = null;
-        log("HLS instance destroyed", "info");
-      }
-      if (shakaPlayerInstance) {
-        shakaPlayerInstance.destroy();
-        shakaPlayerInstance = null;
-        log("Shaka player instance destroyed", "info");
-      }
-      if (mpegtsPlayerInstance) {
-        mpegtsPlayerInstance.destroy();
-        mpegtsPlayerInstance = null;
-        log("MPEG-TS instance destroyed", "info");
-      }
-      video.removeAttribute('src');
-      video.load();
-    }
-
-    function showOverlay(text, spin = true) {
-      playerOverlay.classList.remove('hidden');
-      overlayText.textContent = text;
-      playerSpinner.style.display = spin ? 'block' : 'none';
-    }
-
-    function hideOverlay() {
-      playerOverlay.classList.add('hidden');
-    }
-
-    // Load Custom URL manually
-    loadCustom.addEventListener('click', () => {
-      const url = customUrl.value.trim();
-      if (!url) {
-        log("Please enter a valid URL", "error");
-        return;
-      }
-      selectedChannel = {
-        name: "Custom Test Link",
-        url: url
-      };
-      
-      // Auto toggle proxy based on type
-      if (url.toLowerCase().includes('fifa')) {
-        proxySelect.value = 'fifa';
-      } else {
-        proxySelect.value = 'hls';
-      }
-      customProxyWrap.style.display = 'none';
-
-      document.querySelectorAll('.channel-item').forEach(el => el.classList.remove('active'));
-      loadStream(selectedChannel);
-    });
-
-    // Start
-    init();
-  </script>
-</body>
-</html>
+}
