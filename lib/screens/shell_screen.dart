@@ -136,11 +136,11 @@ class ShellScreen extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
           child: Container(
             height: 64 + MediaQuery.of(context).padding.bottom,
-            decoration: BoxDecoration(
-              color: const Color(0xCC0D0D12),
+            decoration: const BoxDecoration(
+              color: Color(0xCC0D0D12),
               border: Border(
                 top: BorderSide(
-                  color: Colors.white.withOpacity(0.08),
+                  color: Color(0x14FFFFFF), // White @ 8%
                   width: 0.8,
                 ),
               ),
@@ -150,21 +150,21 @@ class ShellScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                _buildNavItem(
+                _NavItem(
                   icon: Icons.home_outlined,
                   selectedIcon: Icons.home_rounded,
                   label: 'Home',
                   isSelected: index == 0,
                   onTap: () => context.go('/home'),
                 ),
-                _buildNavItem(
+                _NavItem(
                   icon: Icons.live_tv_outlined,
                   selectedIcon: Icons.live_tv_rounded,
                   label: 'Channels',
                   isSelected: index == 1,
                   onTap: () => context.go('/channels'),
                 ),
-                _buildNavItem(
+                _NavItem(
                   icon: Icons.schedule_outlined,
                   selectedIcon: Icons.schedule_rounded,
                   label: 'Upcoming',
@@ -178,14 +178,25 @@ class ShellScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildNavItem({
-    required IconData icon,
-    required IconData selectedIcon,
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
+class _NavItem extends StatelessWidget {
+  final IconData icon;
+  final IconData selectedIcon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _NavItem({
+    required this.icon,
+    required this.selectedIcon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Expanded(
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -228,9 +239,11 @@ class ShellScreen extends StatelessWidget {
                 color: GoPlayTheme.primary,
                 borderRadius: BorderRadius.circular(1),
                 boxShadow: isSelected
-                    ? [
+                    ? const [
                         BoxShadow(
-                          color: GoPlayTheme.primary.withOpacity(0.4),
+                          color: Color(
+                            0x6600E676,
+                          ), // 40% opacity of GoPlayTheme.primary (0xFF00E676)
                           blurRadius: 4,
                           spreadRadius: 0.5,
                         ),
