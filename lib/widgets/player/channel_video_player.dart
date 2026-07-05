@@ -9,6 +9,9 @@ abstract class ChannelVideoPlayer extends StatefulWidget {
   final bool isFullscreen;
   final bool showControls;
   final VoidCallback? onTap;
+  final VoidCallback? onPreviousChannel;
+  final VoidCallback? onNextChannel;
+  final VoidCallback? onInteract;
 
   const ChannelVideoPlayer({
     super.key,
@@ -17,6 +20,9 @@ abstract class ChannelVideoPlayer extends StatefulWidget {
     this.isFullscreen = false,
     this.showControls = true,
     this.onTap,
+    this.onPreviousChannel,
+    this.onNextChannel,
+    this.onInteract,
   });
 
   static Widget create({
@@ -25,6 +31,9 @@ abstract class ChannelVideoPlayer extends StatefulWidget {
     bool isFullscreen = false,
     bool showControls = true,
     VoidCallback? onTap,
+    VoidCallback? onPreviousChannel,
+    VoidCallback? onNextChannel,
+    VoidCallback? onInteract,
   }) {
     return getChannelVideoPlayer(
       channel: channel,
@@ -32,6 +41,9 @@ abstract class ChannelVideoPlayer extends StatefulWidget {
       isFullscreen: isFullscreen,
       showControls: showControls,
       onTap: onTap,
+      onPreviousChannel: onPreviousChannel,
+      onNextChannel: onNextChannel,
+      onInteract: onInteract,
     );
   }
 }
