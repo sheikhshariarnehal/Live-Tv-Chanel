@@ -9,6 +9,9 @@ Widget getChannelVideoPlayer({
   bool isFullscreen = false,
   bool showControls = true,
   VoidCallback? onTap,
+  VoidCallback? onPreviousChannel,
+  VoidCallback? onNextChannel,
+  VoidCallback? onInteract,
 }) {
   return ChannelVideoPlayerWeb(
     channel: channel,
@@ -16,6 +19,9 @@ Widget getChannelVideoPlayer({
     isFullscreen: isFullscreen,
     showControls: showControls,
     onTap: onTap,
+    onPreviousChannel: onPreviousChannel,
+    onNextChannel: onNextChannel,
+    onInteract: onInteract,
   );
 }
 
@@ -34,6 +40,12 @@ class ChannelVideoPlayerWeb extends StatefulWidget implements ChannelVideoPlayer
   final bool showControls;
   @override
   final VoidCallback? onTap;
+  @override
+  final VoidCallback? onPreviousChannel;
+  @override
+  final VoidCallback? onNextChannel;
+  @override
+  final VoidCallback? onInteract;
 
   const ChannelVideoPlayerWeb({
     super.key,
@@ -42,6 +54,9 @@ class ChannelVideoPlayerWeb extends StatefulWidget implements ChannelVideoPlayer
     this.isFullscreen = false,
     this.showControls = true,
     this.onTap,
+    this.onPreviousChannel,
+    this.onNextChannel,
+    this.onInteract,
   });
 
   @override

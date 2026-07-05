@@ -117,17 +117,135 @@ class NativePlayerView(
                 player?.stop()
                 result.success(true)
             }
+            "seekTo" -> {
+                val positionMs = (call.arguments as? Number)?.toLong() ?: 0L
+                player?.seekTo(positionMs)
+                result.success(true)
+            }
             "setVolume" -> {
                 val volume = (call.arguments as? Double)?.toFloat() ?: 1.0f
                 player?.volume = volume
                 result.success(true)
             }
+            "setQuality" -> {
+                val height = call.arguments as? Int ?: -1
+                val exoPlayer = player
+                if (exoPlayer != null) {
+                    val currentParams = exoPlayer.trackSelectionParameters
+                    val builder = currentParams.buildUpon()
+                    if (height > 0) {
+                        val width = when (height) {
+                            1080 -> 1920
+                            720 -> 1280
+                            480 -> 854
+                            360 -> 640
+                            else -> height * 16 / 9
+                        }
+                        builder.setMaxVideoSize(width, height)
+                        builder.setMinVideoSize(width, height)
+                    } else {
+                        builder.setMaxVideoSize(Int.MAX_VALUE, Int.MAX_VALUE)
+                        builder.setMinVideoSize(0, 0)
+                    }
+                    exoPlayer.trackSelectionParameters = builder.build()
+                    result.success(true)
+                } else {
+                    result.success(false)
+                }
+            }
+            "getVideoQualities" -> {
+                val exoPlayer = player
+                if (exoPlayer != null) {
+                    val heights = mutableListOf<Int>()
+                    val currentTracks = exoPlayer.currentTracks
+                    for (group in currentTracks.groups) {
+                        if (group.type == C.TRACK_TYPE_VIDEO) {
+                            for (i in 0 until group.length) {
+                                val format = group.getTrackFormat(i)
+                                if (format.height > 0) {
+                                    heights.add(format.height)
+                                }
+                            }
+                        }
+                    }
+                    val sortedHeights = heights.distinct().sortedDescending()
+                    result.success(sortedHeights)
+                } else {
+                    result.success(emptyList<Int>())
+                }
+            }
+            "setResizeMode" -> {
+                val mode = call.arguments as? Int ?: 0
+                playerView.resizeMode = mode
+                result.success(true)
+            }
+            "toggleSubtitles" -> {
+                val exoPlayer = player
+                if (exoPlayer != null) {
+                    val currentParams = exoPlayer.trackSelectionParameters
+                    val isTextDisabled = currentParams.disabledTrackTypes.contains(C.TRACK_TYPE_TEXT)
+                    val builder = currentParams.buildUpon()
+                    builder.setTrackTypeDisabled(C.TRACK_TYPE_TEXT, !isTextDisabled)
+                    exoPlayer.trackSelectionParameters = builder.build()
+                    result.success(isTextDisabled) // returns the new enabled state (true if it was disabled)
+                } else {
+                    result.success(false)
+                }
+            }
+            "cycleAudioTrack" -> {
+                val exoPlayer = player
+                if (exoPlayer != null) {
+                    val currentParams = exoPlayer.trackSelectionParameters
+                    val builder = currentParams.buildUpon()
+                    val currentTracks = exoPlayer.currentTracks
+                    val audioGroups = currentTracks.groups.filter { it.type == C.TRACK_TYPE_AUDIO }
+                    
+                    if (audioGroups.isNotEmpty()) {
+                        val languages = audioGroups.flatMap { group ->
+                            (0 until group.length).mapNotNull { trackIdx ->
+                                group.getTrackFormat(trackIdx).language
+                            }
+                        }.distinct()
+                        
+                        if (languages.size > 1) {
+                            val currentLang = currentParams.preferredAudioLanguages.firstOrNull()
+                            val nextIdx = if (currentLang != null) {
+                                (languages.indexOf(currentLang) + 1) % languages.size
+                            } else {
+                                1
+                            }
+                            val nextLang = languages[nextIdx]
+                            builder.setPreferredAudioLanguage(nextLang)
+                            exoPlayer.trackSelectionParameters = builder.build()
+                            result.success(nextLang)
+                        } else {
+                            result.success("Default")
+                        }
+                    } else {
+                        result.success("None")
+                    }
+                } else {
+                    result.success(null)
+                }
+            }
+            "setPlaybackSpeed" -> {
+                val speed = (call.arguments as? Double)?.toFloat() ?: 1.0f
+                player?.setPlaybackSpeed(speed)
+                result.success(true)
+            }
             "getState" -> {
+                val exoPlayer = player
+                val duration = exoPlayer?.duration ?: 0L
+                val position = exoPlayer?.currentPosition ?: 0L
+                val bufferedPosition = exoPlayer?.bufferedPosition ?: 0L
+                val isLive = exoPlayer?.isCurrentMediaItemLive == true
                 result.success(mapOf(
-                    "isPlaying" to (player?.isPlaying == true),
-                    "playbackState" to (player?.playbackState ?: Player.STATE_IDLE),
-                    "duration" to (player?.duration ?: 0L),
-                    "position" to (player?.currentPosition ?: 0L)
+                    "isPlaying" to (exoPlayer?.isPlaying == true),
+                    "playbackState" to (exoPlayer?.playbackState ?: Player.STATE_IDLE),
+                    "duration" to if (duration == C.TIME_UNSET) 0L else duration,
+                    "position" to position,
+                    "bufferedPosition" to bufferedPosition,
+                    "isLive" to isLive
                 ))
             }
             "dispose" -> {

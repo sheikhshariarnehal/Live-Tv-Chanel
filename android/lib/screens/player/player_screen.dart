@@ -31,6 +31,15 @@ const _kSidePanelDeco = BoxDecoration(
   border: Border(left: BorderSide(color: GoPlayTheme.cardBorder, width: 0.8)),
 );
 
+// Top-bar gradient pre-cached — avoids allocation on every fullscreen build
+const _kTopBarGradient = BoxDecoration(
+  gradient: LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xDC000000), Color(0x78000000), Colors.transparent],
+  ),
+);
+
 // Tile decorations — current / hovered / normal
 const _kTileDecoActive = BoxDecoration(
   color: GoPlayTheme.surfaceContainerHigh,
@@ -82,17 +91,17 @@ const _kPlayingTagStyle = TextStyle(
 
 // Server chip decorations
 const _kChipDecoActive = BoxDecoration(
-  color: Color(0x2400E676),
-  borderRadius: BorderRadius.all(Radius.circular(12)),
+  color: Color(0x1F2196F3),
+  borderRadius: BorderRadius.all(Radius.circular(20)),
   border: Border.fromBorderSide(
-    BorderSide(color: GoPlayTheme.primary, width: 0.8),
+    BorderSide(color: Color(0xFF2196F3), width: 1.2),
   ),
 );
 const _kChipDecoInactive = BoxDecoration(
-  color: GoPlayTheme.surfaceContainerHigh,
-  borderRadius: BorderRadius.all(Radius.circular(12)),
+  color: Colors.transparent,
+  borderRadius: BorderRadius.all(Radius.circular(20)),
   border: Border.fromBorderSide(
-    BorderSide(color: GoPlayTheme.cardBorder, width: 0.8),
+    BorderSide(color: Colors.white30, width: 1.0),
   ),
 );
 
@@ -189,16 +198,14 @@ const _kPillStyleDrm = TextStyle(
 const _kTileMetaActiveStyle = TextStyle(color: Color(0xCC00E676), fontSize: 10.5);
 const _kTileMetaNormalStyle = TextStyle(color: Colors.white38, fontSize: 10.5);
 const _kChipActiveStyle = TextStyle(
-  color: GoPlayTheme.primary,
-  fontSize: 10,
-  fontWeight: FontWeight.w700,
-  letterSpacing: 0.5,
+  color: Colors.white,
+  fontSize: 11,
+  fontWeight: FontWeight.w600,
 );
 const _kChipInactiveStyle = TextStyle(
   color: Colors.white70,
-  fontSize: 10,
-  fontWeight: FontWeight.w700,
-  letterSpacing: 0.5,
+  fontSize: 11,
+  fontWeight: FontWeight.w500,
 );
 
 // Cached identity matrix — never reallocated
@@ -226,6 +233,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   bool _controlsVisible = true;
   Timer? _controlsTimer;
   String? _lastHistoryChannelId;
+  static const _pipChannel = MethodChannel('com.goplay/pip');
 
   @override
   void initState() {
@@ -243,6 +251,18 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       ]);
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     }
+
+    _pipChannel.invokeMethod('setPlayerActive', true);
+    _pipChannel.setMethodCallHandler((call) async {
+      if (call.method == 'onPiPModeChanged') {
+        final isInPiP = call.arguments as bool? ?? false;
+        if (isInPiP) {
+          setState(() {
+            _controlsVisible = false;
+          });
+        }
+      }
+    });
   }
 
   void _startControlsTimer() {
@@ -262,6 +282,12 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     }
   }
 
+  void _onPlayerInteract() {
+    if (_controlsVisible) {
+      _startControlsTimer();
+    }
+  }
+
   void _toggleFullscreen() {
     final isFullscreen =
         MediaQuery.of(context).orientation == Orientation.landscape;
@@ -270,10 +296,18 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
       ]);
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      Future.delayed(const Duration(milliseconds: 250), () {
+        if (mounted) {
+          SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+        }
+      });
     } else {
-      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      Future.delayed(const Duration(milliseconds: 150), () {
+        if (mounted) {
+          SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+        }
+      });
     }
     setState(() => _controlsVisible = true);
     _startControlsTimer();
@@ -282,6 +316,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   @override
   void dispose() {
     _controlsTimer?.cancel();
+    _pipChannel.invokeMethod('setPlayerActive', false);
+    _pipChannel.setMethodCallHandler(null);
     // Allow screen to sleep again when leaving the player
     WakelockPlus.disable();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -339,6 +375,31 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
               _addToHistory(channel);
 
+              // Find related channels to enable prev/next buttons
+              final relatedChannels = widget.eventChannels != null
+                  ? channels.where((c) => widget.eventChannels!.contains(c.id)).toList()
+                  : channels.where((c) => c.category == channel.category).toList();
+
+              final currentIndex = relatedChannels.indexWhere((c) => c.id == channel.id);
+              final prevChannel = (currentIndex > 0) ? relatedChannels[currentIndex - 1] : null;
+              final nextChannel = (currentIndex != -1 && currentIndex < relatedChannels.length - 1)
+                  ? relatedChannels[currentIndex + 1]
+                  : null;
+
+              final onPrev = prevChannel != null ? () {
+                setState(() {
+                  _currentChannelId = prevChannel.id;
+                });
+                _startControlsTimer();
+              } : null;
+
+              final onNext = nextChannel != null ? () {
+                setState(() {
+                  _currentChannelId = nextChannel.id;
+                });
+                _startControlsTimer();
+              } : null;
+
               // DESKTOP LAYOUT
               if (isDesktop && !isFullscreen) {
                 return Row(
@@ -352,6 +413,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                         onTap: _onPlayerTap,
                         onFullscreenToggle: _toggleFullscreen,
                         showBackButton: true,
+                        onPreviousChannel: onPrev,
+                        onNextChannel: onNext,
+                        onInteract: _onPlayerInteract,
                       ),
                     ),
                     const VerticalDivider(
@@ -396,10 +460,52 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
               }
 
               // MOBILE / FULLSCREEN LAYOUT
-              return Column(
+              return Stack(
                 children: [
-                  Expanded(
-                    flex: isFullscreen ? 1 : 0,
+                  // 1. Details & scrollable channels list (placed at the bottom)
+                  // We only display and layout this if not in fullscreen mode.
+                  // We use Offstage with maintainState: true to keep it alive
+                  // and avoid destroying/recreating the list during transitions.
+                  Positioned.fill(
+                    child: Offstage(
+                      offstage: isFullscreen,
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 240), // Placeholder for the player
+                          Expanded(
+                            child: SafeArea(
+                              top: false,
+                              bottom: true,
+                              child: ListView(
+                                padding: EdgeInsets.zero,
+                                physics: const BouncingScrollPhysics(),
+                                children: [
+                                  _ChannelInfoBar(channel: channel),
+                                  const _SectionLabel(text: 'SWITCH CHANNEL'),
+                                  _RelatedChannelsList(
+                                    category: channel.category ?? '',
+                                    currentChannelId: channel.id,
+                                    isScrollable: false,
+                                    onChannelSelected: (id) =>
+                                        setState(() => _currentChannelId = id),
+                                    eventChannels: widget.eventChannels,
+                                  ),
+                                  const SizedBox(height: 24),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // 2. Video Player Container (placed on top)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: isFullscreen ? mq.size.height : 240,
                     child: SafeArea(
                       top: !isFullscreen,
                       bottom: false,
@@ -412,6 +518,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                         onTap: _onPlayerTap,
                         onFullscreenToggle: _toggleFullscreen,
                         showBackButton: !isFullscreen,
+                        onPreviousChannel: onPrev,
+                        onNextChannel: onNext,
+                        onInteract: _onPlayerInteract,
                         topBar: isFullscreen
                             ? _FullscreenTopBar(
                                 category: channel.category ?? '',
@@ -429,30 +538,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                       ),
                     ),
                   ),
-                  if (!isFullscreen)
-                    Expanded(
-                      child: SafeArea(
-                        top: false,
-                        bottom: true,
-                        child: ListView(
-                          padding: EdgeInsets.zero,
-                          physics: const BouncingScrollPhysics(),
-                          children: [
-                            _ChannelInfoBar(channel: channel),
-                            const _SectionLabel(text: 'SWITCH CHANNEL'),
-                            _RelatedChannelsList(
-                              category: channel.category ?? '',
-                              currentChannelId: channel.id,
-                              isScrollable: false,
-                              onChannelSelected: (id) =>
-                                  setState(() => _currentChannelId = id),
-                              eventChannels: widget.eventChannels,
-                            ),
-                            const SizedBox(height: 24),
-                          ],
-                        ),
-                      ),
-                    ),
                 ],
               );
             },
@@ -485,6 +570,9 @@ class _PlayerContainer extends StatelessWidget {
   final VoidCallback onFullscreenToggle;
   final bool showBackButton;
   final Widget? topBar;
+  final VoidCallback? onPreviousChannel;
+  final VoidCallback? onNextChannel;
+  final VoidCallback? onInteract;
 
   const _PlayerContainer({
     required this.channel,
@@ -494,6 +582,9 @@ class _PlayerContainer extends StatelessWidget {
     required this.onFullscreenToggle,
     this.showBackButton = false,
     this.topBar,
+    this.onPreviousChannel,
+    this.onNextChannel,
+    this.onInteract,
   });
 
   @override
@@ -513,14 +604,17 @@ class _PlayerContainer extends StatelessWidget {
                 onFullscreenToggle: onFullscreenToggle,
                 showControls: controlsVisible,
                 onTap: onTap,
+                onPreviousChannel: onPreviousChannel,
+                onNextChannel: onNextChannel,
+                onInteract: onInteract,
               ),
             ),
 
             // Back button
             if (showBackButton)
               Positioned(
-                top: 12,
-                left: 12,
+                top: 16,
+                left: 16,
                 child: IgnorePointer(
                   ignoring: !controlsVisible,
                   child: AnimatedOpacity(
@@ -590,31 +684,28 @@ class _ChannelInfoBar extends StatelessWidget {
     return DecoratedBox(
       decoration: _kInfoCardDeco,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              _ChannelAvatar(name: channel.name, logo: channel.logo, size: 44),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      channel.name,
-                      style: _kTitleStyle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 6),
-                    _MetadataRow(channel: channel),
-                  ],
-                ),
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+        child: Row(
+          children: [
+            _ChannelAvatar(name: channel.name, logo: channel.logo, size: 44),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    channel.name,
+                    style: _kTitleStyle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  _MetadataRow(channel: channel),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -1066,77 +1157,63 @@ class _FullscreenTopBar extends ConsumerWidget {
     final channelsAsync = ref.watch(channelsProvider);
 
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xDC000000), Color(0x78000000), Colors.transparent],
-        ),
-      ),
+      decoration: _kTopBarGradient,
       child: SafeArea(
         top: true,
         bottom: false,
-        left: false,
-        right: false,
+        left: true,
+        right: true,
         child: SizedBox(
-          height: 58,
-          child: Padding(
-            padding: const EdgeInsets.only(
-              left: 6,
-              right: 12,
-              top: 12,
-              bottom: 4,
-            ),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: onBackPressed,
-                  behavior: HitTestBehavior.opaque,
-                  child: const Padding(
-                    padding: EdgeInsets.all(8),
-                    child: Icon(
-                      Icons.arrow_back,
-                      color: Colors.white,
-                      size: 22,
-                    ),
+          height: 52,
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: onBackPressed,
+                behavior: HitTestBehavior.opaque,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                    size: 24,
                   ),
                 ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: channelsAsync.when(
-                    data: (channels) {
-                      final List<Channel> related;
-                      if (eventChannels != null) {
-                        related = channels
-                            .where((c) => eventChannels!.contains(c.id))
-                            .toList();
-                      } else {
-                        related = channels
-                            .where((c) => c.category == category)
-                            .toList();
-                      }
-                      if (related.isEmpty) return const SizedBox.shrink();
-                      return ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: related.length,
-                        itemBuilder: (context, index) {
-                          final ch = related[index];
-                          final isCurrent = ch.id == currentChannelId;
-                          return _ServerChip(
-                            label: ch.name,
-                            isCurrent: isCurrent,
-                            onTap: () => onChannelSelected(ch.id),
-                          );
-                        },
-                      );
-                    },
-                    loading: () => const SizedBox.shrink(),
-                    error: (e, s) => const SizedBox.shrink(),
-                  ),
+              ),
+              Expanded(
+                child: channelsAsync.when(
+                  data: (channels) {
+                    final List<Channel> related;
+                    if (eventChannels != null) {
+                      related = channels
+                          .where((c) => eventChannels!.contains(c.id))
+                          .toList();
+                    } else {
+                      related = channels
+                          .where((c) => c.category == category)
+                          .toList();
+                    }
+                    if (related.isEmpty) return const SizedBox.shrink();
+                    return ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.only(right: 16),
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: related.length,
+                      itemBuilder: (context, index) {
+                        final ch = related[index];
+                        final isCurrent = ch.id == currentChannelId;
+                        return _ServerChip(
+                          label: ch.name,
+                          isCurrent: isCurrent,
+                          onTap: () => onChannelSelected(ch.id),
+                        );
+                      },
+                    );
+                  },
+                  loading: () => const SizedBox.shrink(),
+                  error: (e, s) => const SizedBox.shrink(),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1157,17 +1234,17 @@ class _ServerChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-      child: GestureDetector(
-        onTap: isCurrent ? null : onTap,
-        child: DecoratedBox(
-          decoration: isCurrent ? _kChipDecoActive : _kChipDecoInactive,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-            child: Center(
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 5),
+        child: GestureDetector(
+          onTap: isCurrent ? null : onTap,
+          child: DecoratedBox(
+            decoration: isCurrent ? _kChipDecoActive : _kChipDecoInactive,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               child: Text(
-                label.toUpperCase(),
+                label,
                 style: isCurrent ? _kChipActiveStyle : _kChipInactiveStyle,
               ),
             ),
