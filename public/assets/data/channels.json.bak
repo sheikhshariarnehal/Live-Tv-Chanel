@@ -6,7 +6,7 @@
         {
           "id": "fifa-2026-live-server-1",
           "name": "FIFA 2026 Live (Server 1)",
-          "url": "https://live-stream-proxy.sheikhshariarnehal.workers.dev/?url=https%3A%2F%2Fm3u-tvb.pages.dev%2Fics.m3u8&referer=https%3A%2F%2Fiscreen.com.bd%2F",
+          "url": "https://live-stream-proxy.sheikhshariarnehal.workers.dev/?url=https%3A%2F%2Ftc-sg.rockstreamer.com%2Fv1%2F019ed91616121ea540a8171c8e801f%2F019ed92ac80315fc600b1796d4ad8b%2Fmain.m3u8&referer=https%3A%2F%2Fiscreen.com.bd%2F",
           "logo": "https://carboncredits.com/wp-content/uploads/2025/09/shutterstock_2306088965-e1757112807302-1068x749.jpg"
         },
         {
@@ -30,7 +30,7 @@
         {
           "id": "fifa-2026-live-server-5",
           "name": "FIFA 2026 Live (Server 5)",
-          "url": "https://live-stream-proxy.sheikhshariarnehal.workers.dev/?url=https%3A%2F%2Ftc-sg.rockstreamer.com%2Fv1%2F019ed91616121ea540a8171c8e801f%2F019ed92ac80315fc600b1796d4ad8b%2Fmain.m3u8&referer=https%3A%2F%2Fiscreen.com.bd%2F",
+          "url": "https://live-stream-proxy.sheikhshariarnehal.workers.dev/?url=https%3A%2F%2Fm3u-tvb.pages.dev%2Fics.m3u8&referer=https%3A%2F%2Fiscreen.com.bd%2F",
           "logo": "https://carboncredits.com/wp-content/uploads/2025/09/shutterstock_2306088965-e1757112807302-1068x749.jpg"
         },
         {
@@ -194,6 +194,272 @@
           "name": "Server 4",
           "url": "https://fox4k.fifalive4k.workers.dev/",
           "logo": "https://pub-66c415049e354d59968472f8a48aff3d.r2.dev/Gemini_Generated_Image_dkp0p0dkp0p0dkp0.webp"
+        },
+        {
+          "id": "circleplay-fifa-world-cup-2026",
+          "name": "CirclePlay FIFA World Cup 2026",
+          "url": "https://qp-pldt-live-bpk-ucd-prod.akamaized.net/bpk-tv/fifa_ppv1/default/index.mpd",
+          "logo": "https://circleplay.top/assets/images/FIFA World Cup 20261781104112.png",
+          "drm": {
+            "kid": "2c338a117d434ce4bbe3569231af90f1",
+            "key": "a9633d901ee8a3f4f58ac314b5c5f4fb"
+          }
+        },
+        {
+          "id": "circleplay-australia-vs-egypt",
+          "name": "CirclePlay Australia vs Egypt",
+          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/w0rehjjrwe/out/v1/69a2a7041395406b970598f61680e7cf/cenc.mpd",
+          "logo": "https://circleplay.top/assets/images/Australia vs Egypt1783064255.png",
+          "drm": {
+            "kid": "14eeabf30c14b7fbf3008c03099ce011",
+            "key": "17d2ac8dbc5429bd70af3433aa12158d"
+          }
+        },
+        {
+          "id": "circleplay-4k-hdr",
+          "name": "CirclePlay 4K HDR",
+          "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/ypwo5fhwov/out/v1/31d30c91fc65458789b84209d3fa22e4/cenc.mpd",
+          "logo": "https://circleplay.top/assets/images/4K HDR1783014490.png",
+          "drm": {
+            "kid": "1f68713028d439ec03be07f56c1d6213",
+            "key": "20093db6455160fffed4c394def3193d"
+          }
+        },
+        {
+          "id": "circleplay-fox",
+          "name": "CirclePlay Fox",
+          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/zpfs5hlgya/out/v1/84b1d591a23640178a8e8aa43c6e59a7/cenc.mpd",
+          "logo": "https://circleplay.top/assets/images/Fox1782345770.png",
+          "drm": {
+            "kid": "0cc2f872759c96de70237e6fa6de03d0",
+            "key": "a879b1d38ed002d4018bce96f9219b8d"
+          }
+        },
+        {
+          "id": "circleplay-bein-sports-arabic",
+          "name": "CirclePlay Bein Sports (Arabic)",
+          "url": "https://edge22.776740.ir.cdn.ir/hls2/sport.m3u8",
+          "logo": "https://circleplay.top/assets/images/Bein Sports (Arabic)1782340238.png"
+        },
+        {
+          "id": "circleplay-dsports",
+          "name": "CirclePlay DSports",
+          "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/dash/enc/z5oyxzsxdk/out/v1/7695a0f64a0e424b973d5b09a2a3eb91/cenc.mpd",
+          "logo": "https://circleplay.top/assets/images/DSports1781216822.png",
+          "drm": {
+            "kid": "f836853d8eac19446ed9535f5fc568b1",
+            "key": "b3bc5ef00602b29abac7e482d3d9fbf3"
+          }
+        },
+        {
+          "id": "circleplay-argentina-vs-cabo-verde",
+          "name": "CirclePlay Argentina vs Cabo Verde",
+          "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/w0rehjjrwe/out/v1/69a2a7041395406b970598f61680e7cf/cenc.mpd",
+          "logo": "https://circleplay.top/assets/images/Argentina vs Cabo Verde1783064283.png",
+          "drm": {
+            "kid": "14eeabf30c14b7fbf3008c03099ce011",
+            "key": "17d2ac8dbc5429bd70af3433aa12158d"
+          }
+        },
+        {
+          "id": "circleplay-sri-lanka-vs-west-indies",
+          "name": "CirclePlay Sri Lanka vs West Indies",
+          "url": "https://vomos.phantemlis.top/premium346/index.m3u8?md5v1=kybcCFAm_ezrdeEd_6zf3A&md5v2=Flr6CTIkIFhU5LCFAs5Y3Q&expires=1783110971",
+          "logo": "https://circleplay.top/assets/images/Sri Lanka vs West Indies1780733143.png"
+        },
+        {
+          "id": "circleplay-tnt-sports",
+          "name": "CirclePlay TNT Sports",
+          "url": "https://pontos.phantemlis.top/premium32/index.m3u8?md5v1=v0tHh0v5YGvsIBY-LCWo1g&md5v2=0O2wxr4gM7mXun9pvBhrdA&expires=1783110974",
+          "logo": "https://circleplay.top/assets/images/TNT Sports1760853587.png"
+        },
+        {
+          "id": "circleplay-willow",
+          "name": "CirclePlay Willow",
+          "url": "https://vomos.phantemlis.top/premium346/index.m3u8?md5v1=1BnzJbW_YMFn4IohVPkAoA&md5v2=IOdsWkCNGRLqgzQrwLH16A&expires=1783110977",
+          "logo": "https://circleplay.top/assets/images/Willow1739030832.png"
+        },
+        {
+          "id": "circleplay-sky-sports-cricket",
+          "name": "CirclePlay Sky Sports Cricket",
+          "url": "https://fomis.phantemlis.top/premium65/index.m3u8?md5v1=gpHrbAFX73bFae8iIBqOiQ&md5v2=ZsNnnBYekcgBZKC9jtcZEw&expires=1783110979",
+          "logo": "https://circleplay.top/assets/images/Sky Sports Cricket1731555381.png"
+        },
+        {
+          "id": "circleplay-formula-1",
+          "name": "CirclePlay Formula 1",
+          "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/dash/enc/fdb3pubmek/out/v1/aefca6420f944a9482e117f315de535f/cenc.mpd",
+          "logo": "https://circleplay.top/assets/images/Formula 11762616767.png",
+          "drm": {
+            "kid": "7e9239c1982d984a002df3ed049d0756",
+            "key": "1b8a17598129a3618535c8fb05f103fe"
+          }
+        },
+        {
+          "id": "circleplay-sky-sports-f1",
+          "name": "CirclePlay Sky Sports F1",
+          "url": "https://kolis.phantemlis.top/premium60/index.m3u8?md5v1=1OuUCb5IB9gL6d64NADI6Q&md5v2=08_aEatwf81bTTEopRxvHQ&expires=1783110984",
+          "logo": "https://circleplay.top/assets/images/Sky Sports F11758372153.png"
+        },
+        {
+          "id": "circleplay-star-sports-1",
+          "name": "CirclePlay Star Sports 1",
+          "url": "https://circleplay.top/api/cdn3/live.php?key=play&c=star1in",
+          "logo": "https://circleplay.top/assets/images/Star Sports 11739645911.png"
+        },
+        {
+          "id": "circleplay-a-sports",
+          "name": "CirclePlay A Sports",
+          "url": "https://circleplay.top/api/cdn3/live.php?key=play&c=asportshd",
+          "logo": "https://circleplay.top/assets/images/A Sports HD1731555294.png"
+        },
+        {
+          "id": "circleplay-tnt-sports-1",
+          "name": "CirclePlay TNT Sports 1",
+          "url": "https://pontos.phantemlis.top/premium31/index.m3u8?md5v1=kvNsqCk42dBNAmRBf4WKdQ&md5v2=1gtQOR28x98Scac9XcUpfw&expires=1783110990",
+          "logo": "https://circleplay.top/assets/images/TNT Sports 11731512861.png"
+        },
+        {
+          "id": "circleplay-tnt-sports-2",
+          "name": "CirclePlay TNT Sports 2",
+          "url": "https://pontos.phantemlis.top/premium32/index.m3u8?md5v1=MkXtHWSGPSQjpUN7x1y6dA&md5v2=Wt3awppf_zUTauVoz-lA5A&expires=1783110993",
+          "logo": "https://circleplay.top/assets/images/TNT Sports 21731488146.png"
+        },
+        {
+          "id": "circleplay-tnt-sports-3",
+          "name": "CirclePlay TNT Sports 3",
+          "url": "https://pontos.phantemlis.top/premium33/index.m3u8?md5v1=hz4oTIrqrMFV2YgIhxim_w&md5v2=vOCS6WWBr-xLAxA08m1N0w&expires=1783110996",
+          "logo": "https://circleplay.top/assets/images/TNT Sports 31731488195.png"
+        },
+        {
+          "id": "circleplay-tnt-sports-4",
+          "name": "CirclePlay TNT Sports 4",
+          "url": "https://pontos.phantemlis.top/premium34/index.m3u8?md5v1=NwAyn_SJV3tNn2TA3tUrFA&md5v2=5lgZYunzweQ8bh49rFZNXw&expires=1783110999",
+          "logo": "https://circleplay.top/assets/images/TNT Sports 41731488218.png"
+        },
+        {
+          "id": "circleplay-ten-sports",
+          "name": "CirclePlay Ten Sports",
+          "url": "https://circleplay.top/api/cdn3/live.php?key=play&c=tenspk",
+          "logo": "https://circleplay.top/assets/images/Ten Sports1759214836.png"
+        },
+        {
+          "id": "circleplay-willow-xtra",
+          "name": "CirclePlay Willow Xtra",
+          "url": "https://vomos.phantemlis.top/premium598/index.m3u8?md5v1=w2M2wEDs0BGvjwlko4XKiw&md5v2=TE500uJXhE-I8x7F1wXxmw&expires=1783111002",
+          "logo": "https://circleplay.top/assets/images/Willow Xtra1739030423.png"
+        },
+        {
+          "id": "circleplay-bein-sports-2",
+          "name": "CirclePlay Bein Sports 2",
+          "url": "https://a166aivottlinear-a.akamaihd.net/OTTB/syd-nitro/live/clients/dash/enc/8m8cd46i1t/out/v1/83985c68e4174e90a58a1f2c024be4c9/cenc.mpd",
+          "logo": "https://circleplay.top/assets/images/Bein Sports 21739038964.png",
+          "drm": {
+            "kid": "0b42be2664d7e811d04f3e504e0924c5",
+            "key": "ae24090123b8c72ac5404dc152847cb8"
+          }
+        },
+        {
+          "id": "circleplay-bein-sports-3",
+          "name": "CirclePlay Bein Sports 3",
+          "url": "https://a166aivottlinear-a.akamaihd.net/OTTB/syd-nitro/live/clients/dash/enc/q4u5nwaogz/out/v1/18de6d3e65934f3a8de4358e69eab86c/cenc.mpd",
+          "logo": "https://circleplay.top/assets/images/Bein Sports 31739038991.png",
+          "drm": {
+            "kid": "7995c724a13748ed970840a8ab5bb9b3",
+            "key": "67bdaf1e2175b9ff682fcdf0e2354b1e"
+          }
+        },
+        {
+          "id": "circleplay-sky-sports-football",
+          "name": "CirclePlay Sky Sports Football",
+          "url": "https://circleplay.top/api/cdn3/live.php?key=play&c=skysfott",
+          "logo": "https://circleplay.top/assets/images/Sky Sports Football1739650569.png"
+        },
+        {
+          "id": "circleplay-sky-sports-premier-league",
+          "name": "CirclePlay Sky Sports Premier League",
+          "url": "https://circleplay.top/api/cdn3/live.php?key=play&c=skysprem",
+          "logo": "https://circleplay.top/assets/images/Sky Sports Premier League1759602141.png"
+        },
+        {
+          "id": "circleplay-sky-sports-main-event",
+          "name": "CirclePlay Sky Sports Main Event",
+          "url": "https://vomos.phantemlis.top/premium38/index.m3u8?md5v1=LUGdCbBl3s9G8GdjI9HpMA&md5v2=G2GQLofvyk7XMAivl1QW3A&expires=1783111012",
+          "logo": "https://circleplay.top/assets/images/Sky Sports Main Event1774677951.png"
+        },
+        {
+          "id": "circleplay-premier-sports-1",
+          "name": "CirclePlay Premier Sports 1",
+          "url": "https://a122aivottlinear-a.akamaihd.net/OTTB/fra-nitro/live/dash/enc/vwq77hfgzw/out/v1/b858e0b845c64cec953887bd4269e4ea/cenc.mpd",
+          "logo": "https://circleplay.top/assets/images/Premier Sports 11749582372.png",
+          "drm": {
+            "kid": "1444f4235529f183f0a5a486befe9cdb",
+            "key": "e5e3fec67a1bb3472a2089c8a0a2557f"
+          }
+        },
+        {
+          "id": "circleplay-premier-sports-2",
+          "name": "CirclePlay Premier Sports 2",
+          "url": "https://a205aivottlinear-a.akamaihd.net/IAD/lhr-nitro/live/clients/dash/enc/bcj3iscpd6/out/v1/fcd137b391214f7cb99dd4d7be90ca87/cenc.mpd",
+          "logo": "https://circleplay.top/assets/images/Premier Sports 21749582471.png",
+          "drm": {
+            "kid": "1a5df53609ebc9857898c490f4724918",
+            "key": "77f62980d582ec541280796acf8b2d19"
+          }
+        },
+        {
+          "id": "circleplay-sky-sport-1",
+          "name": "CirclePlay Sky Sport 1",
+          "url": "https://circleplay.top/api/cdn3/live.php?key=play&c=sky1nz",
+          "logo": "https://circleplay.top/assets/images/Sky Sport 11738830996.png"
+        },
+        {
+          "id": "circleplay-sky-sport-2",
+          "name": "CirclePlay Sky Sport 2",
+          "url": "https://circleplay.top/api/cdn3/live.php?key=play&c=sky2nz",
+          "logo": "https://circleplay.top/assets/images/Sky Sport 21738831014.png"
+        },
+        {
+          "id": "circleplay-sky-sport-3",
+          "name": "CirclePlay Sky Sport 3",
+          "url": "https://circleplay.top/api/cdn3/live.php?key=play&c=sky3nz",
+          "logo": "https://circleplay.top/assets/images/Sky Sport 31738831032.png"
+        },
+        {
+          "id": "circleplay-sky-sport-4",
+          "name": "CirclePlay Sky Sport 4",
+          "url": "https://circleplay.top/api/cdn3/live.php?key=play&c=sky4nz",
+          "logo": "https://circleplay.top/assets/images/Sky Sport 41738952685.png"
+        },
+        {
+          "id": "circleplay-sky-sport-5",
+          "name": "CirclePlay Sky Sport 5",
+          "url": "https://circleplay.top/api/cdn3/live.php?key=play&c=sky5nz",
+          "logo": "https://circleplay.top/assets/images/Sky Sport 51745075624.png"
+        },
+        {
+          "id": "circleplay-sky-sport-6",
+          "name": "CirclePlay Sky Sport 6",
+          "url": "https://circleplay.top/api/cdn3/live.php?key=play&c=sky6nz",
+          "logo": "https://circleplay.top/assets/images/Sky Sport 61745075654.png"
+        },
+        {
+          "id": "circleplay-sky-sport-7",
+          "name": "CirclePlay Sky Sport 7",
+          "url": "https://circleplay.top/api/cdn3/live.php?key=play&c=sky7nz",
+          "logo": "https://circleplay.top/assets/images/Sky Sport 71745075676.png"
+        },
+        {
+          "id": "circleplay-sky-sport-8",
+          "name": "CirclePlay Sky Sport 8",
+          "url": "https://circleplay.top/api/cdn3/live.php?key=play&c=sky8nz",
+          "logo": "https://circleplay.top/assets/images/Sky Sport 81739729112.png"
+        },
+        {
+          "id": "circleplay-sky-sport-9",
+          "name": "CirclePlay Sky Sport 9",
+          "url": "https://circleplay.top/api/cdn3/live.php?key=play&c=sky9nz",
+          "logo": "https://circleplay.top/assets/images/Sky Sport 91778396913.png"
         }
       ]
     },
