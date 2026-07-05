@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -95,30 +96,26 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // Collapsing Frosted Glass App Bar
+          // Collapsing Dark-Themed App Bar
           SliverAppBar(
-            expandedHeight: 110.0,
+            expandedHeight: 130.0,
             floating: false,
             pinned: true,
             backgroundColor: Colors.transparent,
             elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.menu_rounded, color: Colors.white),
-              onPressed: () {},
+            automaticallyImplyLeading: false,
+            systemOverlayStyle: const SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness: Brightness.light,
+              statusBarBrightness: Brightness.dark,
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.search_rounded, color: Colors.white),
-                onPressed: () => context.push('/search'),
-              ),
-            ],
             flexibleSpace: LayoutBuilder(
               builder: (context, constraints) {
                 final double appBarHeight = constraints.biggest.height;
                 final double statusBarHeight = MediaQuery.paddingOf(
                   context,
                 ).top;
-                const double expandedHeight = 110.0;
+                const double expandedHeight = 130.0;
                 final double minHeight = kToolbarHeight + statusBarHeight;
                 final double maxHeight = expandedHeight + statusBarHeight;
 
@@ -134,41 +131,140 @@ class HomeScreen extends ConsumerWidget {
                     ),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Color.fromARGB(
-                          ((0.4 + (0.45 * collapseRatio)) * 255).round().clamp(
-                            0,
-                            255,
-                          ),
-                          0x17,
-                          0x18,
-                          0x1C,
-                        ),
+                        color: GoPlayTheme.surface.withOpacity(0.85 + (0.10 * collapseRatio)),
                         border: Border(
                           bottom: BorderSide(
-                            color: Color.fromARGB(
-                              ((0.15 * collapseRatio) * 255).round().clamp(
-                                0,
-                                255,
-                              ),
-                              0x71,
-                              0x76,
-                              0x8E,
-                            ),
+                            color: GoPlayTheme.cardBorder.withOpacity(0.5 * collapseRatio),
                             width: 0.8,
                           ),
                         ),
+                        boxShadow: [
+                          if (collapseRatio > 0.05)
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.15 * collapseRatio),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                        ],
                       ),
-                      child: FlexibleSpaceBar(
-                        centerTitle: true,
-                        titlePadding: EdgeInsets.only(
-                          bottom: 14 + (2 * collapseRatio),
-                        ),
-                        title: Text(
-                          'GOPLAY',
-                          style: _orbitronTitleBase.copyWith(
-                            fontSize: 22 - (3 * collapseRatio),
-                            letterSpacing: 3 - (1.0 * collapseRatio),
-                          ),
+                      child: Padding(
+                        padding: EdgeInsets.only(top: statusBarHeight),
+                        child: Stack(
+                          children: [
+                            // Static Title "GOPLAY" at top-left (replacing drawer menu position)
+                            Positioned(
+                              left: 16,
+                              top: 0,
+                              height: kToolbarHeight,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  'GOPLAY',
+                                  style: _orbitronTitleBase.copyWith(
+                                    color: GoPlayTheme.primary,
+                                    fontSize: 22 - (2 * collapseRatio),
+                                    letterSpacing: 3 - (1.0 * collapseRatio),
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            // Search Icon on top-right, fading in on scroll
+                            Positioned(
+                              right: 48,
+                              top: 0,
+                              height: kToolbarHeight,
+                              child: Center(
+                                child: Opacity(
+                                  opacity: collapseRatio,
+                                  child: IgnorePointer(
+                                    ignoring: collapseRatio < 0.5,
+                                    child: IconButton(
+                                      icon: const Icon(
+                                        Icons.search_rounded,
+                                        color: GoPlayTheme.primary,
+                                      ),
+                                      onPressed: () => context.push('/search'),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            // 3-dot Menu Icon on far top-right, always visible
+                            Positioned(
+                              right: 8,
+                              top: 0,
+                              height: kToolbarHeight,
+                              child: Center(
+                                child: IconButton(
+                                  icon: const Icon(
+                                    Icons.more_vert_rounded,
+                                    color: GoPlayTheme.primary,
+                                  ),
+                                  onPressed: () {}, // For future actions/menus
+                                ),
+                              ),
+                            ),
+
+                            // Search text field below, fading/sliding out on scroll
+                            Positioned(
+                              left: 16,
+                              right: 16,
+                              bottom: 12 * (1.0 - collapseRatio),
+                              height: 44,
+                              child: Opacity(
+                                opacity: (1.0 - collapseRatio * 1.5).clamp(0.0, 1.0),
+                                child: IgnorePointer(
+                                  ignoring: collapseRatio > 0.5,
+                                  child: Theme(
+                                    data: Theme.of(context).copyWith(
+                                      inputDecorationTheme: InputDecorationTheme(
+                                        filled: true,
+                                        fillColor: GoPlayTheme.surfaceContainer,
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                        contentPadding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 8,
+                                        ),
+                                      ),
+                                    ),
+                                    child: TextField(
+                                      readOnly: true,
+                                      onTap: () => context.push('/search'),
+                                      style: GoogleFonts.inter(
+                                        color: GoPlayTheme.onSurface,
+                                        fontSize: 14,
+                                      ),
+                                      decoration: InputDecoration(
+                                        hintText: 'Search channels, events...',
+                                        hintStyle: GoogleFonts.inter(
+                                          color: GoPlayTheme.onSurfaceVariant.withOpacity(0.6),
+                                          fontSize: 14,
+                                        ),
+                                        prefixIcon: const Icon(
+                                          Icons.search_rounded,
+                                          color: GoPlayTheme.primary,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),

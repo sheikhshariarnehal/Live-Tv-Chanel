@@ -230,27 +230,6 @@ class _NavItem extends StatelessWidget {
               child: Text(label),
             ),
             const SizedBox(height: 2),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOutCubic,
-              width: isSelected ? 12 : 0,
-              height: 2,
-              decoration: BoxDecoration(
-                color: GoPlayTheme.primary,
-                borderRadius: BorderRadius.circular(1),
-                boxShadow: isSelected
-                    ? const [
-                        BoxShadow(
-                          color: Color(
-                            0x6600E676,
-                          ), // 40% opacity of GoPlayTheme.primary (0xFF00E676)
-                          blurRadius: 4,
-                          spreadRadius: 0.5,
-                        ),
-                      ]
-                    : null,
-              ),
-            ),
           ],
         ),
       ),
