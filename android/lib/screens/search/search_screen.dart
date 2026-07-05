@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
 import '../../models/channel.dart';
@@ -24,6 +25,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     super.dispose();
   }
 
+  void _setQuery(String queryText) {
+    setState(() {
+      _query = queryText;
+      _controller.text = queryText;
+      // Place cursor at the end of the text
+      _controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: queryText.length),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final channelsAsync = ref.watch(channelsProvider);
@@ -34,36 +46,78 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Search bar
-            Padding(
-              padding: const EdgeInsets.all(16),
+            // Highly polished, glossy iOS-like search bar
+            Container(
+              padding: const EdgeInsets.fromLTRB(8, 8, 16, 16),
+              decoration: BoxDecoration(
+                color: GoPlayTheme.surface.withOpacity(0.8),
+                border: Border(
+                  bottom: BorderSide(
+                    color: GoPlayTheme.cardBorder.withOpacity(0.15),
+                    width: 0.8,
+                  ),
+                ),
+              ),
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_rounded,
-                        color: GoPlayTheme.onSurface),
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: GoPlayTheme.onSurface,
+                      size: 20,
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      autofocus: true,
-                      onChanged: (value) => setState(() => _query = value),
-                      style: const TextStyle(
-                          color: GoPlayTheme.onSurface, fontSize: 16),
-                      decoration: InputDecoration(
-                        hintText: 'Search channels, teams, sports...',
-                        prefixIcon: const Icon(Icons.search_rounded),
-                        suffixIcon: _query.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear_rounded,
-                                    color: GoPlayTheme.onSurfaceVariant),
-                                onPressed: () {
-                                  _controller.clear();
-                                  setState(() => _query = '');
-                                },
-                              )
-                            : null,
+                    child: Container(
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.06),
+                        borderRadius: BorderRadius.circular(22),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.08),
+                          width: 1,
+                        ),
+                      ),
+                      child: TextField(
+                        controller: _controller,
+                        autofocus: true,
+                        onChanged: (value) => setState(() => _query = value),
+                        style: GoogleFonts.inter(
+                          color: GoPlayTheme.onSurface,
+                          fontSize: 14,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Search channels, teams, sports...',
+                          hintStyle: GoogleFonts.inter(
+                            color: GoPlayTheme.onSurfaceVariant.withOpacity(0.5),
+                            fontSize: 14,
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search_rounded,
+                            color: GoPlayTheme.primary.withOpacity(0.8),
+                            size: 20,
+                          ),
+                          suffixIcon: _query.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(
+                                    Icons.close_rounded,
+                                    color: GoPlayTheme.onSurfaceVariant,
+                                    size: 18,
+                                  ),
+                                  onPressed: () {
+                                    _controller.clear();
+                                    setState(() => _query = '');
+                                  },
+                                )
+                              : null,
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 11,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -71,10 +125,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
             ),
 
-            // Results
+            // Results / Empty State
             Expanded(
               child: _query.isEmpty
-                  ? _EmptySearchState()
+                  ? _EmptySearchState(
+                      channelsAsync: channelsAsync,
+                      onTagSelect: _setQuery,
+                    )
                   : _SearchResults(
                       query: _query,
                       channelsAsync: channelsAsync,
@@ -89,20 +146,236 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 }
 
 class _EmptySearchState extends StatelessWidget {
+  final AsyncValue<List<Channel>> channelsAsync;
+  final Function(String) onTagSelect;
+
+  const _EmptySearchState({
+    required this.channelsAsync,
+    required this.onTagSelect,
+  });
+
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.search_rounded,
-              size: 60, color: GoPlayTheme.onSurfaceVariant.withAlpha(80)),
-          const SizedBox(height: 12),
-          const Text(
-            'Search for channels, teams, or sports',
-            style: TextStyle(color: GoPlayTheme.onSurfaceVariant),
+    final popularTags = [
+      '⚽ Football',
+      '🏏 Cricket',
+      '🔥 Live',
+      '🍿 Movies',
+      '📺 Sports',
+      '🌐 News'
+    ];
+
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      physics: const BouncingScrollPhysics(),
+      children: [
+        // Section: Popular Tags
+        Text(
+          'POPULAR SEARCHES',
+          style: GoogleFonts.inter(
+            color: GoPlayTheme.onSurfaceVariant.withOpacity(0.5),
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.5,
           ),
-        ],
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 8,
+          runSpacing: 10,
+          children: popularTags.map((tag) {
+            // Extract core keyword for searching
+            final queryText = tag.substring(2);
+            return GestureDetector(
+              onTap: () => onTagSelect(queryText),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: GoPlayTheme.surfaceContainer.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.04),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  tag,
+                  style: GoogleFonts.inter(
+                    color: GoPlayTheme.onSurface,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 36),
+
+        // Section: Recommendations
+        Text(
+          'RECOMMENDED CHANNELS',
+          style: GoogleFonts.inter(
+            color: GoPlayTheme.onSurfaceVariant.withOpacity(0.5),
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.5,
+          ),
+        ),
+        const SizedBox(height: 16),
+        channelsAsync.when(
+          data: (channels) {
+            final liveList = channels.where((ch) => ch.isLive).take(4).toList();
+            if (liveList.isEmpty) {
+              final fallbacks = channels.take(4).toList();
+              if (fallbacks.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    'No channels available right now.',
+                    style: GoogleFonts.inter(
+                      color: GoPlayTheme.onSurfaceVariant,
+                      fontSize: 13,
+                    ),
+                  ),
+                );
+              }
+              return Column(
+                children: fallbacks.map((ch) => buildRecommendationCard(context, ch)).toList(),
+              );
+            }
+            return Column(
+              children: liveList.map((ch) => buildRecommendationCard(context, ch)).toList(),
+            );
+          },
+          loading: () => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24.0),
+              child: CircularProgressIndicator(color: GoPlayTheme.primary),
+            ),
+          ),
+          error: (err, stack) => const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
+
+  Widget buildRecommendationCard(BuildContext context, Channel ch) {
+    return GestureDetector(
+      onTap: () => context.push('/player/${ch.id}'),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: GoPlayTheme.surfaceContainer.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.04),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: GoPlayTheme.surfaceContainerHigh,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.08),
+                  width: 1,
+                ),
+              ),
+              child: ClipOval(
+                child: ch.logo != null && ch.logo!.isNotEmpty
+                    ? Image.network(
+                        ch.logo!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Center(
+                          child: Text(
+                            ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
+                            style: const TextStyle(
+                              color: GoPlayTheme.primary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      )
+                    : Center(
+                        child: Text(
+                          ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
+                          style: const TextStyle(
+                            color: GoPlayTheme.primary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    ch.name,
+                    style: GoogleFonts.inter(
+                      color: GoPlayTheme.onSurface,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${ch.category ?? 'General'} • ${ch.country ?? 'Global'}',
+                    style: GoogleFonts.inter(
+                      color: GoPlayTheme.onSurfaceVariant,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (ch.isLive)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: GoPlayTheme.liveBadge.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: GoPlayTheme.liveBadge.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 5,
+                      height: 5,
+                      decoration: const BoxDecoration(
+                        color: GoPlayTheme.liveBadge,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      'LIVE',
+                      style: GoogleFonts.inter(
+                        color: GoPlayTheme.liveBadge,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -124,7 +397,8 @@ class _SearchResults extends StatelessWidget {
     final lowerQuery = query.toLowerCase();
 
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      physics: const BouncingScrollPhysics(),
       children: [
         // Channel results
         channelsAsync.when(
@@ -142,93 +416,29 @@ class _SearchResults extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.only(bottom: 12),
                   child: Text(
-                    'CHANNELS (${filtered.length})',
-                    style: const TextStyle(
-                      color: GoPlayTheme.onSurfaceVariant,
+                    'CHANNELS',
+                    style: GoogleFonts.inter(
+                      color: GoPlayTheme.onSurfaceVariant.withOpacity(0.5),
                       fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.5,
                     ),
                   ),
                 ),
-                ...filtered.map((ch) => ListTile(
-                      leading: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: GoPlayTheme.surfaceContainerHigh,
-                          shape: BoxShape.circle,
-                        ),
-                        child: ClipOval(
-                          child: ch.logo != null && ch.logo!.isNotEmpty
-                              ? Image.network(
-                                  ch.logo!,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => Center(
-                                    child: Text(
-                                      ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
-                                      style: TextStyle(
-                                        color: GoPlayTheme.primary,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              : Center(
-                                  child: Text(
-                                    ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
-                                    style: TextStyle(
-                                      color: GoPlayTheme.primary,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                        ),
-                      ),
-                      title: Text(
-                        ch.name,
-                        style: const TextStyle(color: GoPlayTheme.onSurface),
-                      ),
-                      subtitle: Text(
-                        '${ch.category ?? ''} • ${ch.country ?? ''}',
-                        style: const TextStyle(
-                          color: GoPlayTheme.onSurfaceVariant,
-                          fontSize: 12,
-                        ),
-                      ),
-                      trailing: ch.isLive
-                          ? Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: GoPlayTheme.liveBadge.withAlpha(30),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: const Text(
-                                'LIVE',
-                                style: TextStyle(
-                                  color: GoPlayTheme.liveBadge,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            )
-                          : null,
-                      contentPadding: EdgeInsets.zero,
-                      onTap: () => context.push('/player/${ch.id}'),
-                    )),
-                const SizedBox(height: 16),
+                ...filtered.map((ch) => buildChannelResultCard(context, ch)),
+                const SizedBox(height: 20),
               ],
             );
           },
           loading: () => const Center(
-            child: CircularProgressIndicator(color: GoPlayTheme.primary),
+            child: Padding(
+              padding: EdgeInsets.all(24.0),
+              child: CircularProgressIndicator(color: GoPlayTheme.primary),
+            ),
           ),
-          error: (_, __) => const SizedBox.shrink(),
+          error: (err, stack) => const SizedBox.shrink(),
         ),
 
         // Event results
@@ -247,78 +457,259 @@ class _SearchResults extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.only(bottom: 12),
                   child: Text(
-                    'EVENTS (${filtered.length})',
-                    style: const TextStyle(
-                      color: GoPlayTheme.onSurfaceVariant,
+                    'LIVE EVENTS',
+                    style: GoogleFonts.inter(
+                      color: GoPlayTheme.onSurfaceVariant.withOpacity(0.5),
                       fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.5,
                     ),
                   ),
                 ),
-                ...filtered.map((event) => ListTile(
-                      leading: TeamFlagWidget(
-                        flag: event.homeTeam.flag,
-                        size: 24,
-                      ),
-                      title: Text(
-                        '${event.homeTeam.name} vs ${event.awayTeam.name}',
-                        style: const TextStyle(color: GoPlayTheme.onSurface),
-                      ),
-                      subtitle: Text(
-                        '${event.league} • ${event.sport}',
-                        style: const TextStyle(
-                          color: GoPlayTheme.onSurfaceVariant,
-                          fontSize: 12,
-                        ),
-                      ),
-                      trailing: event.isLive
-                          ? Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: GoPlayTheme.liveBadge.withAlpha(30),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: const Text(
-                                'LIVE',
-                                style: TextStyle(
-                                  color: GoPlayTheme.liveBadge,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            )
-                          : null,
-                      contentPadding: EdgeInsets.zero,
-                      onTap: () {
-                        if (event.channels.isNotEmpty) {
-                          context.push(
-                            '/player/${event.channels.first}',
-                            extra: {
-                              'eventChannels': event.channels,
-                              'forceFullscreen': true,
-                            },
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('No channels available for this event.'),
-                              backgroundColor: GoPlayTheme.error,
-                            ),
-                          );
-                        }
-                      },
-                    )),
+                ...filtered.map((event) => buildEventResultCard(context, event)),
+                const SizedBox(height: 20),
               ],
             );
           },
           loading: () => const SizedBox.shrink(),
-          error: (_, __) => const SizedBox.shrink(),
+          error: (err, stack) => const SizedBox.shrink(),
         ),
       ],
+    );
+  }
+
+  Widget buildChannelResultCard(BuildContext context, Channel ch) {
+    return GestureDetector(
+      onTap: () => context.push('/player/${ch.id}'),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: GoPlayTheme.surfaceContainer.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.04),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: GoPlayTheme.surfaceContainerHigh,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.08),
+                  width: 1,
+                ),
+              ),
+              child: ClipOval(
+                child: ch.logo != null && ch.logo!.isNotEmpty
+                    ? Image.network(
+                        ch.logo!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Center(
+                          child: Text(
+                            ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
+                            style: const TextStyle(
+                              color: GoPlayTheme.primary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      )
+                    : Center(
+                        child: Text(
+                          ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
+                          style: const TextStyle(
+                            color: GoPlayTheme.primary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    ch.name,
+                    style: GoogleFonts.inter(
+                      color: GoPlayTheme.onSurface,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${ch.category ?? 'General'} • ${ch.country ?? 'Global'}',
+                    style: GoogleFonts.inter(
+                      color: GoPlayTheme.onSurfaceVariant,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (ch.isLive)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: GoPlayTheme.liveBadge.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: GoPlayTheme.liveBadge.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 5,
+                      height: 5,
+                      decoration: const BoxDecoration(
+                        color: GoPlayTheme.liveBadge,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      'LIVE',
+                      style: GoogleFonts.inter(
+                        color: GoPlayTheme.liveBadge,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildEventResultCard(BuildContext context, SportEvent event) {
+    return GestureDetector(
+      onTap: () {
+        if (event.channels.isNotEmpty) {
+          context.push(
+            '/player/${event.channels.first}',
+            extra: {
+              'eventChannels': event.channels,
+              'forceFullscreen': true,
+            },
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No channels available for this event.'),
+              backgroundColor: GoPlayTheme.error,
+            ),
+          );
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: GoPlayTheme.surfaceContainer.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.04),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: GoPlayTheme.surfaceContainerHigh.withOpacity(0.6),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.06),
+                  width: 1,
+                ),
+              ),
+              child: TeamFlagWidget(
+                flag: event.homeTeam.flag,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${event.homeTeam.name} vs ${event.awayTeam.name}',
+                    style: GoogleFonts.inter(
+                      color: GoPlayTheme.onSurface,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${event.league} • ${event.sport}',
+                    style: GoogleFonts.inter(
+                      color: GoPlayTheme.onSurfaceVariant,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (event.isLive)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: GoPlayTheme.liveBadge.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: GoPlayTheme.liveBadge.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 5,
+                      height: 5,
+                      decoration: const BoxDecoration(
+                        color: GoPlayTheme.liveBadge,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      'LIVE',
+                      style: GoogleFonts.inter(
+                        color: GoPlayTheme.liveBadge,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
