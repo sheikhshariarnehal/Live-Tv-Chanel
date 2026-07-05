@@ -1,14 +1,209 @@
 import 'dart:async';
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
 import '../../models/channel.dart';
 import '../../widgets/player/channel_video_player.dart';
+
+// ─── Pre-cached top-level constants — zero per-frame allocations ─
+
+const _kScreenBg = BoxDecoration(
+  color: GoPlayTheme.surface,
+);
+
+const _kInfoCardDeco = BoxDecoration(
+  color: GoPlayTheme.surfaceContainer,
+  borderRadius: BorderRadius.all(Radius.circular(20)),
+  border: Border.fromBorderSide(
+    BorderSide(color: GoPlayTheme.cardBorder, width: 0.8),
+  ),
+);
+
+const _kSidePanelDeco = BoxDecoration(
+  color: GoPlayTheme.surfaceContainerLow,
+  border: Border(left: BorderSide(color: GoPlayTheme.cardBorder, width: 0.8)),
+);
+
+// Tile decorations — current / hovered / normal
+const _kTileDecoActive = BoxDecoration(
+  color: GoPlayTheme.surfaceContainerHigh,
+  borderRadius: BorderRadius.all(Radius.circular(16)),
+  border: Border.fromBorderSide(
+    BorderSide(color: GoPlayTheme.primary, width: 1.0),
+  ),
+  boxShadow: [
+    BoxShadow(color: Color(0x1F00E676), blurRadius: 8, offset: Offset(0, 2)),
+  ],
+);
+// Tile decorations — hovered / normal
+const _kTileDecoHovered = BoxDecoration(
+  color: GoPlayTheme.surfaceContainerHigh,
+  borderRadius: BorderRadius.all(Radius.circular(16)),
+  border: Border.fromBorderSide(
+    BorderSide(color: GoPlayTheme.cardBorder, width: 0.8),
+  ),
+);
+const _kTileDecoNormal = BoxDecoration(
+  color: GoPlayTheme.surfaceContainer,
+  borderRadius: BorderRadius.all(Radius.circular(16)),
+  border: Border.fromBorderSide(
+    BorderSide(color: GoPlayTheme.cardBorder, width: 0.8),
+  ),
+);
+
+// Back-button decoration
+const _kBackBtnDeco = BoxDecoration(
+  color: Color(0x78000000),
+  shape: BoxShape.circle,
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x2BFFFFFF), width: 0.8),
+  ),
+);
+
+// Playing tag
+const _kPlayingTagDeco = BoxDecoration(
+  color: Color(0x1A00E676),
+  borderRadius: BorderRadius.all(Radius.circular(12)),
+  border: Border.fromBorderSide(BorderSide(color: Color(0x3200E676), width: 0.5)),
+);
+const _kPlayingTagStyle = TextStyle(
+  color: GoPlayTheme.primary,
+  fontSize: 8,
+  fontWeight: FontWeight.w800,
+  letterSpacing: 0.4,
+);
+
+// Server chip decorations
+const _kChipDecoActive = BoxDecoration(
+  color: Color(0x2400E676),
+  borderRadius: BorderRadius.all(Radius.circular(12)),
+  border: Border.fromBorderSide(
+    BorderSide(color: GoPlayTheme.primary, width: 0.8),
+  ),
+);
+const _kChipDecoInactive = BoxDecoration(
+  color: GoPlayTheme.surfaceContainerHigh,
+  borderRadius: BorderRadius.all(Radius.circular(12)),
+  border: Border.fromBorderSide(
+    BorderSide(color: GoPlayTheme.cardBorder, width: 0.8),
+  ),
+);
+
+// Avatar decoration
+const _kAvatarDeco = BoxDecoration(
+  color: Color(0x14FFFFFF),
+  shape: BoxShape.circle,
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x1AFFFFFF), width: 1.0),
+  ),
+);
+
+// Pill decorations (pre-cached for each variant)
+const _kPillDecoHd = BoxDecoration(
+  color: Color(0x1E3B82F6),
+  borderRadius: BorderRadius.all(Radius.circular(6)),
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x323B82F6), width: 0.5),
+  ),
+);
+const _kPillDecoSd = BoxDecoration(
+  color: Color(0x1E00E676),
+  borderRadius: BorderRadius.all(Radius.circular(6)),
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x3200E676), width: 0.5),
+  ),
+);
+const _kPillDecoNeutral = BoxDecoration(
+  color: Color(0x0CFFFFFF),
+  borderRadius: BorderRadius.all(Radius.circular(6)),
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x10FFFFFF), width: 0.5),
+  ),
+);
+const _kPillDecoDrm = BoxDecoration(
+  color: Color(0x1EFF9800),
+  borderRadius: BorderRadius.all(Radius.circular(6)),
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x32FF9800), width: 0.5),
+  ),
+);
+
+// Text styles (pre-cached Google Fonts — allocated once at startup)
+final _kTitleStyle = GoogleFonts.outfit(
+  color: Colors.white,
+  fontSize: 16,
+  fontWeight: FontWeight.w700,
+  letterSpacing: 0.1,
+);
+final _kSectionLabelStyle = GoogleFonts.outfit(
+  color: Colors.white60,
+  fontSize: 12,
+  fontWeight: FontWeight.w700,
+  letterSpacing: 1.5,
+);
+
+final _kTileNameActiveStyle = GoogleFonts.outfit(
+  color: GoPlayTheme.primary,
+  fontSize: 13.5,
+  fontWeight: FontWeight.w700,
+  letterSpacing: 0.1,
+);
+final _kTileNameNormalStyle = GoogleFonts.outfit(
+  color: Colors.white,
+  fontSize: 13.5,
+  fontWeight: FontWeight.w600,
+  letterSpacing: 0.1,
+);
+
+const _kPillStyleHd = TextStyle(
+  color: Color(0xFF60A5FA),
+  fontSize: 9,
+  fontWeight: FontWeight.w700,
+  letterSpacing: 0.5,
+);
+const _kPillStyleSd = TextStyle(
+  color: GoPlayTheme.primary,
+  fontSize: 9,
+  fontWeight: FontWeight.w700,
+  letterSpacing: 0.5,
+);
+const _kPillStyleNeutral = TextStyle(
+  color: Colors.white60,
+  fontSize: 9,
+  fontWeight: FontWeight.w700,
+  letterSpacing: 0.5,
+);
+const _kPillStyleDrm = TextStyle(
+  color: Color(0xFFFFB74D),
+  fontSize: 9,
+  fontWeight: FontWeight.w700,
+  letterSpacing: 0.5,
+);
+const _kTileMetaActiveStyle = TextStyle(color: Color(0xCC00E676), fontSize: 10.5);
+const _kTileMetaNormalStyle = TextStyle(color: Colors.white38, fontSize: 10.5);
+const _kChipActiveStyle = TextStyle(
+  color: GoPlayTheme.primary,
+  fontSize: 10,
+  fontWeight: FontWeight.w700,
+  letterSpacing: 0.5,
+);
+const _kChipInactiveStyle = TextStyle(
+  color: Colors.white70,
+  fontSize: 10,
+  fontWeight: FontWeight.w700,
+  letterSpacing: 0.5,
+);
+
+// Cached identity matrix — never reallocated
+final _kIdentityMatrix = Matrix4.identity();
+final _kHoverMatrix = Matrix4.translationValues(0.0, -1.0, 0.0);
 
 class PlayerScreen extends ConsumerStatefulWidget {
   final String channelId;
@@ -68,7 +263,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   }
 
   void _toggleFullscreen() {
-    final isFullscreen = MediaQuery.of(context).orientation == Orientation.landscape;
+    final isFullscreen =
+        MediaQuery.of(context).orientation == Orientation.landscape;
     if (!isFullscreen) {
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
@@ -97,7 +293,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     if (_lastHistoryChannelId != channel.id) {
       _lastHistoryChannelId = channel.id;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) ref.read(watchHistoryProvider.notifier).addChannel(channel);
+        if (mounted) {
+          ref.read(watchHistoryProvider.notifier).addChannel(channel);
+        }
       });
     }
   }
@@ -111,7 +309,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
     return PopScope(
       canPop: !isFullscreen || widget.forceFullscreen,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         if (widget.forceFullscreen) {
           Navigator.of(context).pop();
@@ -120,119 +318,134 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.black,
-        body: channelsAsync.when(
-          data: (channels) {
-            final channel = channels.cast<Channel?>().firstWhere(
-                  (c) => c?.id == _currentChannelId,
-                  orElse: () => null,
-                );
-
-            if (channel == null) {
-              return const Center(
-                child: Text('Channel not found', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF070709),
+        body: DecoratedBox(
+          decoration: _kScreenBg,
+          child: channelsAsync.when(
+            data: (channels) {
+              final channel = channels.cast<Channel?>().firstWhere(
+                (c) => c?.id == _currentChannelId,
+                orElse: () => null,
               );
-            }
 
-            _addToHistory(channel);
-
-            // DESKTOP LAYOUT
-            if (isDesktop && !isFullscreen) {
-              return Row(
-                children: [
-                  Expanded(
-                    flex: 7,
-                    child: _PlayerContainer(
-                      channel: channel,
-                      isFullscreen: false,
-                      controlsVisible: _controlsVisible,
-                      onTap: _onPlayerTap,
-                      onFullscreenToggle: _toggleFullscreen,
-                      showBackButton: true,
-                    ),
+              if (channel == null) {
+                return const Center(
+                  child: Text(
+                    'Channel not found',
+                    style: TextStyle(color: Colors.white),
                   ),
-                  const VerticalDivider(width: 0.5, thickness: 0.5, color: GoPlayTheme.cardBorder),
-                  SizedBox(
-                    width: 360,
-                    child: ColoredBox(
-                      color: GoPlayTheme.surface,
-                      child: SafeArea(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _ChannelInfoBar(channel: channel),
-                            const Divider(color: GoPlayTheme.cardBorder, height: 1),
-                            const _SectionLabel(text: 'SWITCH CHANNEL'),
-                            Expanded(
-                              child: _RelatedChannelsList(
-                                category: channel.category ?? '',
-                                currentChannelId: channel.id,
-                                isScrollable: true,
-                                onChannelSelected: (id) => setState(() => _currentChannelId = id),
-                                eventChannels: widget.eventChannels,
+                );
+              }
+
+              _addToHistory(channel);
+
+              // DESKTOP LAYOUT
+              if (isDesktop && !isFullscreen) {
+                return Row(
+                  children: [
+                    Expanded(
+                      flex: 7,
+                      child: _PlayerContainer(
+                        channel: channel,
+                        isFullscreen: false,
+                        controlsVisible: _controlsVisible,
+                        onTap: _onPlayerTap,
+                        onFullscreenToggle: _toggleFullscreen,
+                        showBackButton: true,
+                      ),
+                    ),
+                    const VerticalDivider(
+                      width: 0.8,
+                      thickness: 0.8,
+                      color: Color(0x14FFFFFF),
+                    ),
+                    SizedBox(
+                      width: 360,
+                      child: DecoratedBox(
+                        decoration: _kSidePanelDeco,
+                        child: SafeArea(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _ChannelInfoBar(channel: channel),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16),
+                                child: Divider(
+                                  color: Color(0x0FFFFFFF),
+                                  height: 1,
+                                ),
                               ),
-                            ),
-                          ],
+                              const _SectionLabel(text: 'SWITCH CHANNEL'),
+                              Expanded(
+                                child: _RelatedChannelsList(
+                                  category: channel.category ?? '',
+                                  currentChannelId: channel.id,
+                                  isScrollable: true,
+                                  onChannelSelected: (id) =>
+                                      setState(() => _currentChannelId = id),
+                                  eventChannels: widget.eventChannels,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              );
-            }
+                  ],
+                );
+              }
 
-            // MOBILE / FULLSCREEN LAYOUT
-            return Column(
-              children: [
-                Expanded(
-                  flex: isFullscreen ? 1 : 0,
-                  child: SafeArea(
-                    top: !isFullscreen,
-                    bottom: false,
-                    left: false,
-                    right: false,
-                    child: _PlayerContainer(
-                      channel: channel,
-                      isFullscreen: isFullscreen,
-                      controlsVisible: _controlsVisible,
-                      onTap: _onPlayerTap,
-                      onFullscreenToggle: _toggleFullscreen,
-                      showBackButton: !isFullscreen,
-                      topBar: isFullscreen
-                          ? _FullscreenTopBar(
-                              category: channel.category ?? '',
-                              currentChannelId: channel.id,
-                              onBackPressed: widget.forceFullscreen
-                                  ? () => Navigator.of(context).pop()
-                                  : _toggleFullscreen,
-                              onChannelSelected: (id) {
-                                setState(() => _currentChannelId = id);
-                                _startControlsTimer();
-                              },
-                              eventChannels: widget.eventChannels,
-                            )
-                          : null,
+              // MOBILE / FULLSCREEN LAYOUT
+              return Column(
+                children: [
+                  Expanded(
+                    flex: isFullscreen ? 1 : 0,
+                    child: SafeArea(
+                      top: !isFullscreen,
+                      bottom: false,
+                      left: false,
+                      right: false,
+                      child: _PlayerContainer(
+                        channel: channel,
+                        isFullscreen: isFullscreen,
+                        controlsVisible: _controlsVisible,
+                        onTap: _onPlayerTap,
+                        onFullscreenToggle: _toggleFullscreen,
+                        showBackButton: !isFullscreen,
+                        topBar: isFullscreen
+                            ? _FullscreenTopBar(
+                                category: channel.category ?? '',
+                                currentChannelId: channel.id,
+                                onBackPressed: widget.forceFullscreen
+                                    ? () => Navigator.of(context).pop()
+                                    : _toggleFullscreen,
+                                onChannelSelected: (id) {
+                                  setState(() => _currentChannelId = id);
+                                  _startControlsTimer();
+                                },
+                                eventChannels: widget.eventChannels,
+                              )
+                            : null,
+                      ),
                     ),
                   ),
-                ),
-                if (!isFullscreen)
-                  Expanded(
-                    child: ColoredBox(
-                      color: GoPlayTheme.surface,
+                  if (!isFullscreen)
+                    Expanded(
                       child: SafeArea(
                         top: false,
                         bottom: true,
                         child: ListView(
                           padding: EdgeInsets.zero,
+                          physics: const BouncingScrollPhysics(),
                           children: [
                             _ChannelInfoBar(channel: channel),
-                            const Divider(color: GoPlayTheme.cardBorder, height: 1),
                             const _SectionLabel(text: 'SWITCH CHANNEL'),
                             _RelatedChannelsList(
                               category: channel.category ?? '',
                               currentChannelId: channel.id,
                               isScrollable: false,
-                              onChannelSelected: (id) => setState(() => _currentChannelId = id),
+                              onChannelSelected: (id) =>
+                                  setState(() => _currentChannelId = id),
                               eventChannels: widget.eventChannels,
                             ),
                             const SizedBox(height: 24),
@@ -240,15 +453,21 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                         ),
                       ),
                     ),
-                  ),
-              ],
-            );
-          },
-          loading: () => const Center(
-            child: CircularProgressIndicator(color: GoPlayTheme.primary, strokeWidth: 2),
-          ),
-          error: (e, s) => Center(
-            child: Text('Error: $e', style: const TextStyle(color: GoPlayTheme.error)),
+                ],
+              );
+            },
+            loading: () => const Center(
+              child: CircularProgressIndicator(
+                color: GoPlayTheme.primary,
+                strokeWidth: 2,
+              ),
+            ),
+            error: (e, s) => Center(
+              child: Text(
+                'Error: $e',
+                style: const TextStyle(color: GoPlayTheme.error),
+              ),
+            ),
           ),
         ),
       ),
@@ -306,7 +525,7 @@ class _PlayerContainer extends StatelessWidget {
                   ignoring: !controlsVisible,
                   child: AnimatedOpacity(
                     opacity: controlsVisible ? 1.0 : 0.0,
-                    duration: const Duration(milliseconds: 200),
+                    duration: const Duration(milliseconds: 250),
                     child: const _BackButton(),
                   ),
                 ),
@@ -315,12 +534,14 @@ class _PlayerContainer extends StatelessWidget {
             // Fullscreen top bar
             if (topBar != null)
               Positioned(
-                top: 0, left: 0, right: 0,
+                top: 0,
+                left: 0,
+                right: 0,
                 child: IgnorePointer(
                   ignoring: !controlsVisible,
                   child: AnimatedOpacity(
                     opacity: controlsVisible ? 1.0 : 0.0,
-                    duration: const Duration(milliseconds: 200),
+                    duration: const Duration(milliseconds: 250),
                     child: topBar!,
                   ),
                 ),
@@ -332,7 +553,7 @@ class _PlayerContainer extends StatelessWidget {
   }
 }
 
-// ─── Back Button (lightweight, no BackdropFilter) ───────────────
+// ─── Back Button (premium glass design) ─────────────────────────
 
 class _BackButton extends StatelessWidget {
   const _BackButton();
@@ -342,23 +563,23 @@ class _BackButton extends StatelessWidget {
     return GestureDetector(
       onTap: () => Navigator.of(context).pop(),
       behavior: HitTestBehavior.opaque,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.black54,
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white12, width: 0.5),
-        ),
-        child: const SizedBox(
-          width: 32,
-          height: 32,
-          child: Icon(Icons.arrow_back_rounded, color: Colors.white, size: 16),
+      child: SizedBox(
+        width: 34,
+        height: 34,
+        child: DecoratedBox(
+          decoration: _kBackBtnDeco,
+          child: const Icon(
+            Icons.arrow_back_rounded,
+            color: Colors.white,
+            size: 18,
+          ),
         ),
       ),
     );
   }
 }
 
-// ─── Channel Info Bar (compact) ─────────────────────────────────
+// ─── Channel Info Bar (premium glass card) ──────────────────────
 
 class _ChannelInfoBar extends StatelessWidget {
   final Channel channel;
@@ -366,33 +587,35 @@ class _ChannelInfoBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-      child: Row(
-        children: [
-          _ChannelAvatar(name: channel.name, logo: channel.logo, size: 40),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  channel.name,
-                  style: const TextStyle(
-                    color: GoPlayTheme.onSurface,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+    return DecoratedBox(
+      decoration: _kInfoCardDeco,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              _ChannelAvatar(name: channel.name, logo: channel.logo, size: 44),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      channel.name,
+                      style: _kTitleStyle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    _MetadataRow(channel: channel),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                _MetadataRow(channel: channel),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -406,43 +629,48 @@ class _MetadataRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final categoryName = channel.category?.toUpperCase() ?? '';
+
     return Wrap(
-      spacing: 5,
-      runSpacing: 3,
+      spacing: 6,
+      runSpacing: 4,
       children: [
         if (channel.quality != null)
-          _Pill(channel.quality!, GoPlayTheme.primary.withAlpha(25), GoPlayTheme.primary),
-        if (channel.category != null && channel.category!.isNotEmpty)
-          _Pill(channel.category!.toUpperCase(), GoPlayTheme.surfaceContainerHighest, GoPlayTheme.onSurfaceVariant),
+          DecoratedBox(
+            decoration: channel.quality == '4K' ? _kPillDecoHd : _kPillDecoSd,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+              child: Text(
+                channel.quality!,
+                style: channel.quality == '4K' ? _kPillStyleHd : _kPillStyleSd,
+              ),
+            ),
+          ),
+        if (categoryName.isNotEmpty)
+          DecoratedBox(
+            decoration: _kPillDecoNeutral,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+              child: Text(categoryName, style: _kPillStyleNeutral),
+            ),
+          ),
         if (channel.country != null && channel.country!.isNotEmpty)
-          _Pill(channel.country!, GoPlayTheme.surfaceContainerHighest, GoPlayTheme.onSurfaceVariant),
+          DecoratedBox(
+            decoration: _kPillDecoNeutral,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+              child: Text(channel.country!, style: _kPillStyleNeutral),
+            ),
+          ),
         if (channel.hasDrm)
-          _Pill('DRM', Colors.orange.withAlpha(30), Colors.orange),
+          DecoratedBox(
+            decoration: _kPillDecoDrm,
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+              child: Text('DRM', style: _kPillStyleDrm),
+            ),
+          ),
       ],
-    );
-  }
-}
-
-class _Pill extends StatelessWidget {
-  final String text;
-  final Color bg;
-  final Color fg;
-  const _Pill(this.text, this.bg, this.fg);
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(5),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-        child: Text(
-          text,
-          style: TextStyle(color: fg, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 0.3),
-        ),
-      ),
     );
   }
 }
@@ -456,16 +684,8 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: GoPlayTheme.onSurfaceVariant,
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 1,
-        ),
-      ),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+      child: Text(text, style: _kSectionLabelStyle),
     );
   }
 }
@@ -481,21 +701,12 @@ class _ChannelAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final initials = name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
-    final textStyle = TextStyle(
-      color: GoPlayTheme.onSurfaceVariant,
-      fontSize: size * 0.28,
-      fontWeight: FontWeight.w800,
-    );
 
     return SizedBox(
       width: size,
       height: size,
       child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: GoPlayTheme.surfaceContainerHighest,
-          shape: BoxShape.circle,
-          border: Border.all(color: GoPlayTheme.cardBorder, width: 1),
-        ),
+        decoration: _kAvatarDeco,
         child: ClipOval(
           child: logo != null && logo!.isNotEmpty
               ? CachedNetworkImage(
@@ -506,10 +717,37 @@ class _ChannelAvatar extends StatelessWidget {
                   memCacheWidth: (size * 2).toInt(),
                   memCacheHeight: (size * 2).toInt(),
                   fadeInDuration: const Duration(milliseconds: 150),
-                  placeholder: (_, __) => Center(child: Text(initials, style: textStyle)),
-                  errorWidget: (_, __, ___) => Center(child: Text(initials, style: textStyle)),
+                  placeholder: (context, url) => Center(
+                    child: Text(
+                      initials,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: size * 0.28,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, err) => Center(
+                    child: Text(
+                      initials,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: size * 0.28,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
                 )
-              : Center(child: Text(initials, style: textStyle)),
+              : Center(
+                  child: Text(
+                    initials,
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: size * 0.28,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
         ),
       ),
     );
@@ -541,7 +779,9 @@ class _RelatedChannelsList extends ConsumerWidget {
       data: (channels) {
         final List<Channel> related;
         if (eventChannels != null) {
-          related = channels.where((c) => eventChannels!.contains(c.id)).toList();
+          related = channels
+              .where((c) => eventChannels!.contains(c.id))
+              .toList();
         } else {
           related = channels.where((c) => c.category == category).toList();
         }
@@ -552,7 +792,7 @@ class _RelatedChannelsList extends ConsumerWidget {
             child: Center(
               child: Text(
                 'No other channels in this category',
-                style: TextStyle(color: GoPlayTheme.onSurfaceVariant, fontSize: 13),
+                style: TextStyle(color: Colors.white38, fontSize: 13),
               ),
             ),
           );
@@ -562,6 +802,7 @@ class _RelatedChannelsList extends ConsumerWidget {
           return ListView.builder(
             padding: const EdgeInsets.only(bottom: 20),
             itemCount: related.length,
+            physics: const BouncingScrollPhysics(),
             itemBuilder: (context, index) {
               final ch = related[index];
               final isCurrent = ch.id == currentChannelId;
@@ -588,16 +829,21 @@ class _RelatedChannelsList extends ConsumerWidget {
       },
       loading: () => const Padding(
         padding: EdgeInsets.all(20),
-        child: Center(child: CircularProgressIndicator(color: GoPlayTheme.primary, strokeWidth: 2)),
+        child: Center(
+          child: CircularProgressIndicator(
+            color: GoPlayTheme.primary,
+            strokeWidth: 2,
+          ),
+        ),
       ),
       error: (e, s) => const SizedBox.shrink(),
     );
   }
 }
 
-// ─── Channel Tile (flat, minimal depth) ─────────────────────────
+// ─── Channel Tile (interactive hover & stateful animation) ──────
 
-class _ChannelTile extends StatelessWidget {
+class _ChannelTile extends StatefulWidget {
   final Channel channel;
   final bool isCurrent;
   final VoidCallback onTap;
@@ -609,67 +855,90 @@ class _ChannelTile extends StatelessWidget {
   });
 
   @override
+  State<_ChannelTile> createState() => _ChannelTileState();
+}
+
+class _ChannelTileState extends State<_ChannelTile> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
+    final channel = widget.channel;
+    final isCurrent = widget.isCurrent;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-      child: Material(
-        color: isCurrent ? GoPlayTheme.primary.withAlpha(12) : GoPlayTheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(10),
-        child: InkWell(
-          onTap: isCurrent ? null : onTap,
-          borderRadius: BorderRadius.circular(10),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Row(
-              children: [
-                _ChannelAvatar(name: channel.name, logo: channel.logo, size: 36),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              channel.name,
-                              style: TextStyle(
-                                color: isCurrent ? GoPlayTheme.primary : GoPlayTheme.onSurface,
-                                fontSize: 13,
-                                fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w600,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          if (isCurrent) ...[
-                            const SizedBox(width: 6),
-                            const _EqualizerBars(),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        [channel.quality, channel.category, channel.country]
-                            .where((s) => s != null && s.isNotEmpty)
-                            .join(' · '),
-                        style: TextStyle(
-                          color: isCurrent ? GoPlayTheme.primary.withAlpha(140) : GoPlayTheme.onSurfaceVariant,
-                          fontSize: 10.5,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        cursor: isCurrent ? SystemMouseCursors.basic : SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: isCurrent ? null : widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut,
+            transform: _isHovered && !isCurrent
+                ? _kHoverMatrix
+                : _kIdentityMatrix,
+            decoration: isCurrent
+                ? _kTileDecoActive
+                : (_isHovered ? _kTileDecoHovered : _kTileDecoNormal),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Row(
+                children: [
+                  _ChannelAvatar(
+                    name: channel.name,
+                    logo: channel.logo,
+                    size: 38,
                   ),
-                ),
-                const SizedBox(width: 8),
-                if (isCurrent)
-                  _buildPlayingTag()
-                else if (channel.isLive)
-                  const _LiveDot(),
-              ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                channel.name,
+                                style: isCurrent
+                                    ? _kTileNameActiveStyle
+                                    : _kTileNameNormalStyle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (isCurrent) ...[
+                              const SizedBox(width: 8),
+                              const _EqualizerBars(),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          [
+                            channel.quality,
+                            channel.category,
+                            channel.country,
+                          ].where((s) => s != null && s.isNotEmpty).join(' · '),
+                          style: isCurrent
+                              ? _kTileMetaActiveStyle
+                              : _kTileMetaNormalStyle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  if (isCurrent)
+                    _buildPlayingTag()
+                  else if (channel.isLive)
+                    const _LiveDot(),
+                ],
+              ),
             ),
           ),
         ),
@@ -678,17 +947,11 @@ class _ChannelTile extends StatelessWidget {
   }
 
   Widget _buildPlayingTag() {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: GoPlayTheme.primary.withAlpha(18),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Padding(
+    return const DecoratedBox(
+      decoration: _kPlayingTagDeco,
+      child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-        child: Text(
-          'PLAYING',
-          style: TextStyle(color: GoPlayTheme.primary, fontSize: 8, fontWeight: FontWeight.w800, letterSpacing: 0.4),
-        ),
+        child: Text('PLAYING', style: _kPlayingTagStyle),
       ),
     );
   }
@@ -702,7 +965,10 @@ class _LiveDot extends StatelessWidget {
       width: 6,
       height: 6,
       child: DecoratedBox(
-        decoration: BoxDecoration(color: GoPlayTheme.liveBadge, shape: BoxShape.circle),
+        decoration: BoxDecoration(
+          color: GoPlayTheme.liveBadge,
+          shape: BoxShape.circle,
+        ),
       ),
     );
   }
@@ -716,13 +982,17 @@ class _EqualizerBars extends StatefulWidget {
   State<_EqualizerBars> createState() => _EqualizerBarsState();
 }
 
-class _EqualizerBarsState extends State<_EqualizerBars> with SingleTickerProviderStateMixin {
+class _EqualizerBarsState extends State<_EqualizerBars>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
 
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 800))..repeat();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..repeat();
   }
 
   @override
@@ -754,17 +1024,24 @@ class _EqualizerPainter extends CustomPainter {
 
     for (int i = 0; i < 3; i++) {
       final phase = i * (2 / 3 * math.pi);
-      final h = 2 + 8 * (0.5 + 0.5 * math.sin(animation.value * 2 * math.pi + phase)).abs();
+      final h =
+          2 +
+          8 *
+              (0.5 + 0.5 * math.sin(animation.value * 2 * math.pi + phase))
+                  .abs();
       final x = i * (barW + gap);
       canvas.drawRRect(
-        RRect.fromRectAndRadius(Rect.fromLTWH(x, size.height - h, barW, h), const Radius.circular(1.5)),
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(x, size.height - h, barW, h),
+          const Radius.circular(1.5),
+        ),
         paint,
       );
     }
   }
 
   @override
-  bool shouldRepaint(_EqualizerPainter old) => false; // repaint driven by animation listener
+  bool shouldRepaint(_EqualizerPainter old) => false;
 }
 
 // ─── Fullscreen Top Bar ─────────────────────────────────────────
@@ -804,7 +1081,12 @@ class _FullscreenTopBar extends ConsumerWidget {
         child: SizedBox(
           height: 58,
           child: Padding(
-            padding: const EdgeInsets.only(left: 6, right: 12, top: 12, bottom: 4),
+            padding: const EdgeInsets.only(
+              left: 6,
+              right: 12,
+              top: 12,
+              bottom: 4,
+            ),
             child: Row(
               children: [
                 GestureDetector(
@@ -812,7 +1094,11 @@ class _FullscreenTopBar extends ConsumerWidget {
                   behavior: HitTestBehavior.opaque,
                   child: const Padding(
                     padding: EdgeInsets.all(8),
-                    child: Icon(Icons.arrow_back, color: Colors.white, size: 22),
+                    child: Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 22,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -821,9 +1107,13 @@ class _FullscreenTopBar extends ConsumerWidget {
                     data: (channels) {
                       final List<Channel> related;
                       if (eventChannels != null) {
-                        related = channels.where((c) => eventChannels!.contains(c.id)).toList();
+                        related = channels
+                            .where((c) => eventChannels!.contains(c.id))
+                            .toList();
                       } else {
-                        related = channels.where((c) => c.category == category).toList();
+                        related = channels
+                            .where((c) => c.category == category)
+                            .toList();
                       }
                       if (related.isEmpty) return const SizedBox.shrink();
                       return ListView.builder(
@@ -859,7 +1149,11 @@ class _ServerChip extends StatelessWidget {
   final bool isCurrent;
   final VoidCallback onTap;
 
-  const _ServerChip({required this.label, required this.isCurrent, required this.onTap});
+  const _ServerChip({
+    required this.label,
+    required this.isCurrent,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -868,23 +1162,13 @@ class _ServerChip extends StatelessWidget {
       child: GestureDetector(
         onTap: isCurrent ? null : onTap,
         child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: isCurrent ? GoPlayTheme.primary : Colors.white24,
-            ),
-          ),
+          decoration: isCurrent ? _kChipDecoActive : _kChipDecoInactive,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
             child: Center(
               child: Text(
                 label.toUpperCase(),
-                style: TextStyle(
-                  color: isCurrent ? GoPlayTheme.primary : Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.4,
-                ),
+                style: isCurrent ? _kChipActiveStyle : _kChipInactiveStyle,
               ),
             ),
           ),
