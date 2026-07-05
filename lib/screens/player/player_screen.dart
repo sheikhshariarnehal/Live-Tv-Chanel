@@ -1161,7 +1161,7 @@ class _FullscreenTopBar extends ConsumerWidget {
       child: SafeArea(
         top: true,
         bottom: false,
-        left: true,
+        left: false,
         right: true,
         child: SizedBox(
           height: 52,
@@ -1171,7 +1171,7 @@ class _FullscreenTopBar extends ConsumerWidget {
                 onTap: onBackPressed,
                 behavior: HitTestBehavior.opaque,
                 child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 12),
                   child: Icon(
                     Icons.arrow_back,
                     color: Colors.white,

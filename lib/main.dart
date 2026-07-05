@@ -13,6 +13,7 @@ import 'core/router.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'utils/web_helper.dart';
 import 'services/local_proxy.dart';
+import 'widgets/update_handler.dart';
 
 // Global future that SplashScreen waits on before navigating.
 // Completes when all heavy init is done.
@@ -83,6 +84,9 @@ class GoPlayApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: GoPlayTheme.darkTheme,
       routerConfig: appRouter,
+      builder: (context, child) {
+        return UpdateHandler(child: child!);
+      },
     );
   }
 }

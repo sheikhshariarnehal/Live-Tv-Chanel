@@ -23,67 +23,7 @@ final TextStyle _orbitronTitleBase = GoogleFonts.orbitron(
   color: GoPlayTheme.primary,
 );
 
-final TextStyle _interLeagueBold = GoogleFonts.inter(
-  color: Colors.white,
-  fontSize: 14,
-  fontWeight: FontWeight.bold,
-);
 
-final TextStyle _orbitronVS = GoogleFonts.orbitron(
-  color: Colors.white,
-  fontSize: 20,
-  fontWeight: FontWeight.w900,
-  letterSpacing: 1,
-  shadows: const [
-    Shadow(
-      color: Color(0xA0000000), // black @ ~63%
-      blurRadius: 4,
-      offset: Offset(0, 1),
-    ),
-  ],
-);
-
-final TextStyle _interStartsIn = GoogleFonts.inter(
-  color: const Color(0xA0FFFFFF), // white @ ~63%
-  fontSize: 7.5,
-  fontWeight: FontWeight.w800,
-  letterSpacing: 0.5,
-  shadows: const [Shadow(color: Color(0xA0000000), blurRadius: 2)],
-);
-
-final TextStyle _interLiveNow = GoogleFonts.inter(
-  color: Colors.white,
-  fontSize: 10,
-  fontWeight: FontWeight.w800,
-  shadows: const [Shadow(color: Color(0xA0000000), blurRadius: 2)],
-);
-
-final TextStyle _interCountdown = GoogleFonts.inter(
-  color: Colors.white,
-  fontSize: 10,
-  fontWeight: FontWeight.w800,
-  shadows: const [Shadow(color: Color(0xA0000000), blurRadius: 2)],
-);
-
-final TextStyle _interButtonLabel = GoogleFonts.inter(
-  color: const Color(0xFF003300),
-  fontSize: 11,
-  fontWeight: FontWeight.w900,
-  letterSpacing: 0.5,
-);
-
-final TextStyle _interTeamName = GoogleFonts.inter(
-  color: Colors.white,
-  fontSize: 11,
-  fontWeight: FontWeight.w700,
-  shadows: const [
-    Shadow(
-      color: Color(0xB4000000), // black @ ~70%
-      blurRadius: 4,
-      offset: Offset(0, 1),
-    ),
-  ],
-);
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -276,12 +216,48 @@ class HomeScreen extends ConsumerWidget {
                               top: 0,
                               height: kToolbarHeight,
                               child: Center(
-                                child: IconButton(
+                                child: PopupMenuButton<String>(
                                   icon: const Icon(
                                     Icons.more_vert_rounded,
                                     color: GoPlayTheme.primary,
                                   ),
-                                  onPressed: () {}, // For future actions/menus
+                                  color: GoPlayTheme.surfaceContainerHigh,
+                                  elevation: 4,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    side: const BorderSide(
+                                      color: GoPlayTheme.cardBorder,
+                                      width: 0.5,
+                                    ),
+                                  ),
+                                  onSelected: (value) {
+                                    if (value == 'settings') {
+                                      context.push('/settings');
+                                    }
+                                  },
+                                  itemBuilder: (BuildContext context) => [
+                                    PopupMenuItem<String>(
+                                      value: 'settings',
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.settings_rounded,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Text(
+                                            'App Settings',
+                                            style: GoogleFonts.inter(
+                                              color: Colors.white,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -504,31 +480,6 @@ class _HeroBannerCard extends ConsumerWidget {
     ],
   );
 
-  static const _watchButtonDecoration = BoxDecoration(
-    color: GoPlayTheme.primary,
-    borderRadius: BorderRadius.all(Radius.circular(16)),
-    boxShadow: [
-      BoxShadow(
-        color: Color(0x2800E676), // GoPlayTheme.primary @ 16%
-        blurRadius: 6,
-        offset: Offset(0, 2),
-      ),
-    ],
-  );
-
-  static const _gradientOverlay = BoxDecoration(
-    borderRadius: _cardRadius,
-    gradient: LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [
-        Color(0x20000000), // Transparent top
-        Color(0x60000000), // Muted middle
-        Color(0xD917181C), // Carbon Black bottom for contrast
-      ],
-    ),
-  );
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
@@ -556,7 +507,7 @@ class _HeroBannerCard extends ConsumerWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                // Cached banner image
+                // 1. Cached Banner Image
                 if (event.banner != null && event.banner!.isNotEmpty)
                   CachedNetworkImage(
                     imageUrl: event.banner!,
@@ -570,81 +521,222 @@ class _HeroBannerCard extends ConsumerWidget {
                       color: GoPlayTheme.surfaceContainerHigh,
                     ),
                   ),
-                // Gradient dark overlay
-                const DecoratedBox(decoration: _gradientOverlay),
-                // Content overlay
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16,
+
+                // 2. Cinematic Gradient Overlay (No heavy BackdropFilter)
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0x40000000), // Soft dark top for badge contrast
+                        Colors.transparent,
+                        Color(0x50000000), // Soft bottom shading
+                      ],
+                    ),
                   ),
-                  child: Column(
+                ),
+
+                // 3. Floating Top Badges (League & Status)
+                Positioned(
+                  top: 12,
+                  left: 12,
+                  right: 12,
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Top Row: League and Status Badge
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(event.league, style: _interLeagueBold),
-                          if (event.isLive)
-                            const LiveBadge(fontSize: 11)
-                          else
-                            const _UpcomingBadge(),
-                        ],
-                      ),
-
-                      // Middle Row: Matchup details
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _TeamCard(
-                            teamName: event.homeTeam.name,
-                            flag: event.homeTeam.flag,
-                          ),
-                          Expanded(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text('VS', style: _orbitronVS),
-                                const SizedBox(height: 6),
-                                Text('STARTS IN', style: _interStartsIn),
-                                if (event.isLive)
-                                  Text('LIVE NOW', style: _interLiveNow)
-                                else
-                                  CountdownTimerWidget(
-                                    startTime: event.startTime,
-                                    onTimerFinished: () {
-                                      ref.invalidate(eventsProvider);
-                                    },
-                                    style: _interCountdown,
-                                  ),
-                              ],
-                            ),
-                          ),
-                          _TeamCard(
-                            teamName: event.awayTeam.name,
-                            flag: event.awayTeam.flag,
-                          ),
-                        ],
-                      ),
-
-                      // Bottom Row: Watch/Hub Button
-                      Center(
-                        child: DecoratedBox(
-                          decoration: _watchButtonDecoration,
-                          child: SizedBox(
-                            width: 150,
-                            height: 32,
-                            child: Center(
-                              child: Text(
-                                event.isLive ? 'WATCH LIVE' : 'MATCH HUB',
-                                style: _interButtonLabel,
-                              ),
-                            ),
+                      // League Badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.55),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0x20FFFFFF), width: 0.5),
+                        ),
+                        child: Text(
+                          event.league.toUpperCase(),
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
                           ),
                         ),
                       ),
+                      // Live / Status Badge
+                      if (event.isLive)
+                        const LiveBadge(fontSize: 9)
+                      else
+                        const _UpcomingBadge(),
                     ],
+                  ),
+                ),
+
+                // 4. Integrated Bottom Content Row (Native drawing, with top divider border)
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: 68,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Color(0xE61F2026), // Lighter premium dark slate (90% opacity)
+                      border: Border(
+                        top: BorderSide(
+                          color: Color(0x24FFFFFF), // Sleek divider line
+                          width: 0.8,
+                        ),
+                      ),
+                    ),
+                    padding: const EdgeInsets.only(left: 14, right: 14, top: 6, bottom: 8),
+                    child: Row(
+                      children: [
+                        // Left Column: Matchup & Subtitle
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Matchup Title
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (event.homeTeam.flag != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 6.0),
+                                      child: SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: ClipOval(
+                                          child: TeamFlagWidget(
+                                            flag: event.homeTeam.flag,
+                                            size: 16,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  Flexible(
+                                    child: Text(
+                                      '${event.homeTeam.name} vs ${event.awayTeam.name}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.inter(
+                                        color: Colors.white,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  if (event.awayTeam.flag != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 6.0),
+                                      child: SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: ClipOval(
+                                          child: TeamFlagWidget(
+                                            flag: event.awayTeam.flag,
+                                            size: 16,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 3),
+                              // Subtitle status details
+                              if (event.isLive)
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 5,
+                                      height: 5,
+                                      decoration: const BoxDecoration(
+                                        color: GoPlayTheme.primary,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      'LIVE NOW',
+                                      style: GoogleFonts.inter(
+                                        color: GoPlayTheme.primary,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              else
+                                Row(
+                                  children: [
+                                    Text(
+                                      'STARTS IN: ',
+                                      style: GoogleFonts.inter(
+                                        color: const Color(0x80FFFFFF),
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                    CountdownTimerWidget(
+                                      startTime: event.startTime,
+                                      onTimerFinished: () {
+                                        ref.invalidate(eventsProvider);
+                                      },
+                                      style: GoogleFonts.inter(
+                                        color: GoPlayTheme.primary,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(width: 12),
+
+                        // Right Side: Slim CTA Accent Button
+                        Container(
+                          height: 32,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: GoPlayTheme.primary,
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x2000E676),
+                                blurRadius: 6,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                event.isLive ? Icons.play_arrow_rounded : Icons.info_outline_rounded,
+                                color: const Color(0xFF17181C),
+                                size: 14,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                event.isLive ? 'WATCH' : 'DETAILS',
+                                style: GoogleFonts.inter(
+                                  color: const Color(0xFF17181C),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -819,54 +911,7 @@ class _AnnouncementsSection extends ConsumerWidget {
   }
 }
 
-class _TeamCard extends StatelessWidget {
-  final String teamName;
-  final String? flag;
 
-  const _TeamCard({required this.teamName, required this.flag});
-
-  static const _avatarDecoration = BoxDecoration(
-    shape: BoxShape.circle,
-    border: Border.fromBorderSide(
-      BorderSide(color: Color(0x33FFFFFF), width: 1.5), // white @ 20%
-    ),
-    boxShadow: [
-      BoxShadow(
-        color: Color(0x3C000000), // black @ ~23%
-        blurRadius: 6,
-        offset: Offset(0, 2),
-      ),
-    ],
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 100,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          DecoratedBox(
-            decoration: _avatarDecoration,
-            child: SizedBox(
-              width: 48,
-              height: 48,
-              child: ClipOval(child: TeamFlagWidget(flag: flag, size: 40)),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            teamName,
-            style: _interTeamName,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // ─── Cached style ────────────────────────────────────────────────────────────
 const TextStyle _historyNameStyle = TextStyle(
