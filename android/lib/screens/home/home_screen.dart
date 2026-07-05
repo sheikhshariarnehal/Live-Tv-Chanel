@@ -90,9 +90,88 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Kick off background sync now that Supabase is guaranteed ready.
-    ref.watch(appSyncProvider);
+    // Watch the appSyncProvider to check initialization state
+    final syncState = ref.watch(appSyncProvider);
+    final cache = ref.watch(cacheServiceProvider);
+    final localChannels = cache.getLocalChannels();
 
+    // If local cache is empty, we must show loading/error states for the initial sync.
+    if (localChannels.isEmpty) {
+      return syncState.when(
+        data: (_) => _buildMainContent(context, ref),
+        loading: () => const Scaffold(
+          backgroundColor: GoPlayTheme.surface,
+          body: Center(
+            child: CircularProgressIndicator(
+              color: GoPlayTheme.primary,
+            ),
+          ),
+        ),
+        error: (error, stack) => Scaffold(
+          backgroundColor: GoPlayTheme.surface,
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.cloud_off_rounded,
+                    size: 64,
+                    color: GoPlayTheme.error,
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'CONNECTION ERROR',
+                    style: GoogleFonts.orbitron(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    error.toString().replaceAll('Exception: ', ''),
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      color: GoPlayTheme.onSurfaceVariant,
+                      fontSize: 14,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      // Refresh the sync provider to trigger a reload
+                      ref.invalidate(appSyncProvider);
+                    },
+                    icon: const Icon(Icons.refresh_rounded, size: 20),
+                    label: const Text('RETRY CONNECTION'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: GoPlayTheme.primary,
+                      foregroundColor: const Color(0xFF003300),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return _buildMainContent(context, ref);
+  }
+
+  Widget _buildMainContent(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: CustomScrollView(
         slivers: [

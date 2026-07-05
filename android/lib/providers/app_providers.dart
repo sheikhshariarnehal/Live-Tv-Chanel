@@ -33,11 +33,9 @@ final channelsProvider = FutureProvider<List<Channel>>((ref) async {
   final localChannels = cache.getLocalChannels();
   
   if (localChannels.isEmpty) {
-    // If the local cache is empty (first install), fetch from remote immediately
-    final remoteService = ref.watch(supabaseServiceProvider);
-    final remoteChannels = await remoteService.getChannels();
-    await cache.saveLocalChannels(remoteChannels);
-    return remoteChannels;
+    // If the local cache is empty (first install), wait for the background sync to populate it
+    await ref.watch(appSyncProvider.future);
+    return cache.getLocalChannels();
   }
   return localChannels;
 });
@@ -70,10 +68,9 @@ final eventsProvider = FutureProvider<List<SportEvent>>((ref) async {
   final localEvents = cache.getLocalEvents();
 
   if (localEvents.isEmpty) {
-    final remoteService = ref.watch(supabaseServiceProvider);
-    final remoteEvents = await remoteService.getEvents();
-    await cache.saveLocalEvents(remoteEvents);
-    return remoteEvents;
+    // If the local cache is empty (first install), wait for the background sync to populate it
+    await ref.watch(appSyncProvider.future);
+    return cache.getLocalEvents();
   }
   return localEvents;
 });
@@ -115,10 +112,9 @@ final categoriesProvider = FutureProvider<List<Category>>((ref) async {
   final localCategories = cache.getLocalCategories();
 
   if (localCategories.isEmpty) {
-    final remoteService = ref.watch(supabaseServiceProvider);
-    final remoteCategories = await remoteService.getCategories();
-    await cache.saveLocalCategories(remoteCategories);
-    return remoteCategories;
+    // If the local cache is empty (first install), wait for the background sync to populate it
+    await ref.watch(appSyncProvider.future);
+    return cache.getLocalCategories();
   }
   return localCategories;
 });
