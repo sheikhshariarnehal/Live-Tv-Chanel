@@ -1,0 +1,11 @@
+{
+    "latestVersion": "1.2.1",
+    "minimumVersion": "1.0.0",
+    "forceUpdate": false,
+    "apkUrl": "https://cdn.ntechbd.app/goplay-1.2.1.apk",
+    "releaseNotes": [
+        "Added 10 new channels",
+        "Player improvements"
+    ],
+    "publishedAt": "2026-07-06T02:00:00Z"
+}

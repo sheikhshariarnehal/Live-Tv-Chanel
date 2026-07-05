@@ -6,22 +6,27 @@ import '../screens/channels/channels_screen.dart';
 import '../screens/upcoming/upcoming_screen.dart';
 import '../screens/player/player_screen.dart';
 import '../screens/search/search_screen.dart';
-
 import '../screens/splash/splash_screen.dart';
+import '../screens/settings/settings_screen.dart';
 
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
-final _shellNavigatorKey = GlobalKey<NavigatorState>();
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+final shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final appRouter = GoRouter(
-  navigatorKey: _rootNavigatorKey,
+  navigatorKey: rootNavigatorKey,
   initialLocation: '/',
   routes: [
     GoRoute(
       path: '/',
       builder: (context, state) => const SplashScreen(),
     ),
+    GoRoute(
+      path: '/settings',
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const SettingsScreen(),
+    ),
     ShellRoute(
-      navigatorKey: _shellNavigatorKey,
+      navigatorKey: shellNavigatorKey,
       builder: (context, state, child) => ShellScreen(child: child),
       routes: [
         GoRoute(
@@ -51,7 +56,7 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/player/:channelId',
-      parentNavigatorKey: _rootNavigatorKey,
+      parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) {
         final channelId = state.pathParameters['channelId']!;
         List<String>? eventChannels;
@@ -72,7 +77,7 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/search',
-      parentNavigatorKey: _rootNavigatorKey,
+      parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) => const SearchScreen(),
     ),
   ],

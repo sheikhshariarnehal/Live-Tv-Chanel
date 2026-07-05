@@ -18,4 +18,7 @@ class AppConstants {
   // App Info
   static const String appName = 'GoPlay';
   static const String appVersion = '1.0.0';
+  
+  // Updates
+  static const String updateJsonUrl = 'https://cdn.ntechbd.app/update.json';
 }
