@@ -10,7 +10,6 @@ import '../../providers/app_providers.dart';
 import '../../models/event.dart';
 
 import '../../widgets/cards/event_list_tile.dart';
-import '../../widgets/cards/match_card.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/live_badge.dart';
 import '../../widgets/team_flag.dart';
@@ -195,14 +194,6 @@ class HomeScreen extends ConsumerWidget {
           ),
           const SliverToBoxAdapter(
             child: RepaintBoundary(child: _TrendingChannels()),
-          ),
-
-          // Live/Ongoing Matches
-          const SliverToBoxAdapter(child: SizedBox(height: 20)),
-          SliverToBoxAdapter(child: SectionHeader(title: 'Live Matches')),
-          const SliverToBoxAdapter(child: SizedBox(height: 8)),
-          const SliverToBoxAdapter(
-            child: RepaintBoundary(child: _MatchesSection()),
           ),
 
           // Today's Schedule
@@ -484,91 +475,6 @@ class _HeroBannerCard extends ConsumerWidget {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Matches Section ──────────────────────────────────────────
-class _MatchesSection extends ConsumerWidget {
-  const _MatchesSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final eventsAsync = ref.watch(eventsProvider);
-
-    return eventsAsync.when(
-      data: (allEvents) {
-        final events = allEvents.where((e) => e.isLive).toList();
-
-        if (events.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.all(24),
-            child: Center(
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.live_tv_outlined,
-                    color: GoPlayTheme.onSurfaceVariant,
-                    size: 40,
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'No live matches right now',
-                    style: TextStyle(color: GoPlayTheme.onSurfaceVariant),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        return SizedBox(
-          height: 125,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: events.length,
-            addAutomaticKeepAlives: false,
-            itemBuilder: (context, index) {
-              final event = events[index];
-              return MatchCard(
-                event: event,
-                onTap: () {
-                  if (event.channels.isNotEmpty) {
-                    context.push(
-                      '/player/${event.channels.first}',
-                      extra: {
-                        'eventChannels': event.channels,
-                        'forceFullscreen': true,
-                      },
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('No channels available for this event.'),
-                        backgroundColor: GoPlayTheme.error,
-                      ),
-                    );
-                  }
-                },
-              );
-            },
-          ),
-        );
-      },
-      loading: () => const Padding(
-        padding: EdgeInsets.all(32),
-        child: Center(
-          child: CircularProgressIndicator(color: GoPlayTheme.primary),
-        ),
-      ),
-      error: (e, _) => Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(
-          'Error: $e',
-          style: const TextStyle(color: GoPlayTheme.error),
         ),
       ),
     );

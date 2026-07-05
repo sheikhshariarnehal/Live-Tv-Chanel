@@ -74,9 +74,8 @@ const formatToLocalDateTime = (utcString: string | null | undefined): string => 
   try {
     const d = new Date(utcString);
     if (isNaN(d.getTime())) return '';
-    // Adjust UTC date to match local time representation
-    const localTime = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-    return localTime.toISOString().slice(0, 16);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   } catch {
     return '';
   }
@@ -85,19 +84,24 @@ const formatToLocalDateTime = (utcString: string | null | undefined): string => 
 const parseLocalDateTime = (localString: string | null | undefined): string => {
   if (!localString) return new Date().toISOString();
   try {
-    const parts = localString.split(/[-THH:mm]/);
-    if (parts.length >= 5) {
-      const year = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
-      const day = parseInt(parts[2], 10);
-      const hour = parseInt(parts[3], 10);
-      const minute = parseInt(parts[4], 10);
-      const date = new Date(year, month, day, hour, minute);
+    const match = localString.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/);
+    if (match) {
+      const year = parseInt(match[1], 10);
+      const month = parseInt(match[2], 10) - 1; // Month is 0-indexed
+      const day = parseInt(match[3], 10);
+      const hour = parseInt(match[4], 10);
+      const minute = parseInt(match[5], 10);
+      const second = match[6] ? parseInt(match[6], 10) : 0;
+      const date = new Date(year, month, day, hour, minute, second);
       if (!isNaN(date.getTime())) {
         return date.toISOString();
       }
     }
-    return new Date(localString).toISOString();
+    const fallback = new Date(localString);
+    if (!isNaN(fallback.getTime())) {
+      return fallback.toISOString();
+    }
+    return new Date().toISOString();
   } catch {
     return new Date().toISOString();
   }
