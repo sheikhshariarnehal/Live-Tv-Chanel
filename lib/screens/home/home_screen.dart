@@ -19,7 +19,7 @@ import '../../widgets/countdown_timer.dart';
 
 // ─── Cached Text Styles ──────────────────────────────────────
 final TextStyle _orbitronTitleBase = GoogleFonts.orbitron(
-  fontWeight: FontWeight.w900,
+  fontWeight: FontWeight.w300,
   color: GoPlayTheme.primary,
 );
 

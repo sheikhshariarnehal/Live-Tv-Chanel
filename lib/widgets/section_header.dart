@@ -19,7 +19,7 @@ class SectionHeader extends StatelessWidget {
   static const _titleStyle = TextStyle(
     color: GoPlayTheme.onSurface,
     fontSize: 16,
-    fontWeight: FontWeight.w800,
+    fontWeight: FontWeight.w300,
     letterSpacing: 1.5,
   );
 

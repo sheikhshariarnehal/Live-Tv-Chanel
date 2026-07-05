@@ -10,7 +10,7 @@ import '../../widgets/cards/channel_card.dart';
 // ─── Pre-cached styles — allocated once, never again ─────────
 final TextStyle _titleStyle = GoogleFonts.orbitron(
   fontSize: 20,
-  fontWeight: FontWeight.w900,
+  fontWeight: FontWeight.w300,
   color: GoPlayTheme.primary,
   letterSpacing: 3,
 );
