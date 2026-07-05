@@ -1,4 +1,4 @@
-import 'dart:developer' as developer;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'cache_service.dart';
 import 'supabase_service.dart';
@@ -13,7 +13,7 @@ class SyncService {
   /// Compares local cache versions with remote Supabase versions,
   /// downloads any modified tables, and updates Riverpod states.
   Future<void> sync() async {
-    developer.log('Starting background sync...', name: 'SyncService');
+    debugPrint('SyncService: Starting background sync...');
     try {
       final SupabaseService supabase = _ref.read(supabaseServiceProvider);
       final CacheService cache = _ref.read(cacheServiceProvider);
@@ -21,7 +21,10 @@ class SyncService {
       // 1. Fetch remote versions from Supabase
       final remoteVersions = await supabase.getSyncVersions();
       if (remoteVersions == null) {
-        developer.log('Failed to fetch remote versions. Sync skipped.', name: 'SyncService');
+        debugPrint('SyncService: Failed to fetch remote versions. Sync skipped.');
+        if (cache.getLocalChannels().isEmpty) {
+          throw Exception('Failed to connect to server. Please check your internet connection.');
+        }
         return;
       }
 
@@ -31,9 +34,8 @@ class SyncService {
       final localChannelsVer = cache.getLocalChannelsVersion();
       final localEventsVer = cache.getLocalEventsVersion();
 
-      developer.log(
-        'Version check - Channels: local=$localChannelsVer, remote=$remoteChannelsVer | Events: local=$localEventsVer, remote=$remoteEventsVer',
-        name: 'SyncService',
+      debugPrint(
+        'SyncService: Version check - Channels: local=$localChannelsVer, remote=$remoteChannelsVer | Events: local=$localEventsVer, remote=$remoteEventsVer',
       );
 
       bool channelsUpdated = false;
@@ -41,7 +43,7 @@ class SyncService {
 
       // 2. Synchronize Channels and Categories
       if (localChannelsVer == null || remoteChannelsVer > localChannelsVer) {
-        developer.log('Channels version changed. Downloading channels and categories...', name: 'SyncService');
+        debugPrint('SyncService: Channels version changed. Downloading channels and categories...');
         
         // Sync categories first since channels have foreign-key-like category IDs
         final remoteCategories = await supabase.getCategories();
@@ -54,12 +56,12 @@ class SyncService {
         // Update local version
         await cache.saveLocalChannelsVersion(remoteChannelsVer);
         channelsUpdated = true;
-        developer.log('Channels and categories synchronized.', name: 'SyncService');
+        debugPrint('SyncService: Channels and categories synchronized.');
       }
 
       // 3. Synchronize Events
       if (localEventsVer == null || remoteEventsVer > localEventsVer) {
-        developer.log('Events version changed. Downloading events...', name: 'SyncService');
+        debugPrint('SyncService: Events version changed. Downloading events...');
         
         final remoteEvents = await supabase.getEvents();
         await cache.saveLocalEvents(remoteEvents);
@@ -67,29 +69,30 @@ class SyncService {
         // Update local version
         await cache.saveLocalEventsVersion(remoteEventsVer);
         eventsUpdated = true;
-        developer.log('Events synchronized.', name: 'SyncService');
+        debugPrint('SyncService: Events synchronized.');
       }
 
       // 4. Invalidate providers if anything changed to trigger reactive UI updates
-      if (channelsUpdated) {
-        developer.log('Invalidating channels and categories providers...', name: 'SyncService');
+      // Only invalidate if we had a prior valid local version (meaning we displayed old cache and need to refresh it).
+      // If the local version was null, the provider was awaiting the sync completion anyway, so it will naturally load the new data.
+      if (channelsUpdated && localChannelsVer != null) {
+        debugPrint('SyncService: Invalidating channels and categories providers...');
         _ref.invalidate(channelsProvider);
         _ref.invalidate(categoriesProvider);
       }
 
-      if (eventsUpdated) {
-        developer.log('Invalidating events providers...', name: 'SyncService');
+      if (eventsUpdated && localEventsVer != null) {
+        debugPrint('SyncService: Invalidating events providers...');
         _ref.invalidate(eventsProvider);
       }
 
-      developer.log('Background sync check completed successfully.', name: 'SyncService');
+      debugPrint('SyncService: Background sync check completed successfully.');
     } catch (e, stackTrace) {
-      developer.log(
-        'Error occurred during synchronization',
-        error: e,
-        stackTrace: stackTrace,
-        name: 'SyncService',
-      );
+      debugPrint('SyncService: Error occurred during synchronization: $e\n$stackTrace');
+      final cache = _ref.read(cacheServiceProvider);
+      if (cache.getLocalChannels().isEmpty) {
+        rethrow;
+      }
     }
   }
 }
