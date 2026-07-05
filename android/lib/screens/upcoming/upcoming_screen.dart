@@ -103,7 +103,7 @@ class UpcomingScreen extends ConsumerWidget {
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 26 - (9 * collapseRatio),
-                                  fontWeight: FontWeight.w900,
+                                  fontWeight: FontWeight.w300,
                                   letterSpacing: -0.5,
                                 ),
                               ),
@@ -252,7 +252,7 @@ class _DateGroup extends StatelessWidget {
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w300,
                   letterSpacing: -0.1,
                 ),
               ),
