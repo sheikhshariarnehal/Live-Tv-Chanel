@@ -84,7 +84,18 @@ const formatToLocalDateTime = (utcString: string | null | undefined): string => 
 const parseLocalDateTime = (localString: string | null | undefined): string => {
   if (!localString) return new Date().toISOString();
   try {
-    const match = localString.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/);
+    const trimmed = localString.trim();
+    // Check if the string has a timezone offset/Z suffix (only if it contains a time colon)
+    const hasTimezone = trimmed.includes(':') && /(Z|[+-]\d{2}(?::?\d{2})?)$/.test(trimmed);
+    
+    if (hasTimezone) {
+      const d = new Date(trimmed);
+      if (!isNaN(d.getTime())) {
+        return d.toISOString();
+      }
+    }
+
+    const match = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/);
     if (match) {
       const year = parseInt(match[1], 10);
       const month = parseInt(match[2], 10) - 1; // Month is 0-indexed
@@ -97,7 +108,7 @@ const parseLocalDateTime = (localString: string | null | undefined): string => {
         return date.toISOString();
       }
     }
-    const fallback = new Date(localString);
+    const fallback = new Date(trimmed);
     if (!isNaN(fallback.getTime())) {
       return fallback.toISOString();
     }
@@ -802,8 +813,8 @@ export default function EventManager({ adminToken, onRefreshStats }: EventManage
                       {isEditing ? (
                         <span className="text-[10px] text-zinc-500">Channel edit in form context</span>
                       ) : event.channels && event.channels.length > 0 ? (
-                        event.channels.map(chId => (
-                          <span key={chId} className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-zinc-950 text-purple-300">
+                        event.channels.map((chId, index) => (
+                          <span key={`${chId}-${index}`} className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-zinc-950 text-purple-300">
                             {channels.find(ch => ch.id === chId)?.name || chId}
                           </span>
                         ))

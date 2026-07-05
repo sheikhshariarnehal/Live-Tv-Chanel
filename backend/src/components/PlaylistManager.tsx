@@ -410,8 +410,8 @@ export default function PlaylistManager({ adminToken, onRefreshStats }: Playlist
 
                   <div className="mt-4 flex flex-wrap gap-1 max-h-24 overflow-y-auto">
                     {playlist.channels && playlist.channels.length > 0 ? (
-                      playlist.channels.map(chId => (
-                        <span key={chId} className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-zinc-950/80 text-zinc-500">
+                      playlist.channels.map((chId, index) => (
+                        <span key={`${chId}-${index}`} className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-zinc-950/80 text-zinc-500">
                           {channels.find(c => c.id === chId)?.name || chId}
                         </span>
                       ))
