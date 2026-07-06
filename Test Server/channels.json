@@ -8908,6 +8908,400 @@
           "proxy": true
         }
       ]
+    },
+    "bdix-fifa-world-cup": {
+      "name": "BDIX-FIFA World CUP",
+      "channels": [
+        {
+          "id": "btv-bdix-fifa",
+          "name": "BTV",
+          "url": "http://103.114.11.37:8081/BTV/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "t-sports-1080p-bdix-fifa",
+          "name": "T Sports 1080p",
+          "url": "http://103.114.11.37:8081/T-Sports-HD/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "t-sports-bdix-bdix-fifa",
+          "name": "T Sports BDIX",
+          "url": "http://103.114.11.37:8081/T-Sports-BDIX/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "a-sports-bdix-bdix-fifa",
+          "name": "A Sports BDIX",
+          "url": "http://103.114.11.37:8081/A-sports-BDIX/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "bein-sports-bdix-fifa",
+          "name": "BEIN SPORTS",
+          "url": "http://103.114.11.37:8081/BEIN-SPORTS/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "ptv-bdix-fifa",
+          "name": "PTV",
+          "url": "http://103.114.11.37:8081/PTV/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "ptv-bdix-bdix-fifa",
+          "name": "PTV BDIX",
+          "url": "http://103.114.11.37:8081/PTV-BDIX/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "somoy-tv-bdix-fifa",
+          "name": "Somoy TV",
+          "url": "http://103.114.11.37:8081/SOMOY-TV/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "sony-sports-1-bdix-fifa",
+          "name": "Sony Sports 1",
+          "url": "http://103.114.11.37:8081/Sony-sports-1/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "sony-sports-2-bdix-fifa",
+          "name": "Sony Sports 2",
+          "url": "http://103.114.11.37:8081/Sony-sports-2/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "sony-sports-3-bdix-fifa",
+          "name": "Sony Sports 3",
+          "url": "http://103.114.11.37:8081/Sony-sports-3/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "star-select-1-bdix-fifa",
+          "name": "Star Select 1",
+          "url": "http://103.114.11.37:8081/Star-select-1/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "star-select-3-bdix-fifa",
+          "name": "Star Select 3",
+          "url": "http://103.114.11.37:8081/Star-select-3/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "star-sports-1-bdix-fifa",
+          "name": "Star Sports 1",
+          "url": "http://103.114.11.37:8081/Star-sports-1/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "star-sports-2-bdix-fifa",
+          "name": "Star Sports 2",
+          "url": "http://103.114.11.37:8081/Star-sports-2/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "unite8-sports-1-1080p-bdix-fifa",
+          "name": "Unite8 Sports 1 1080p",
+          "url": "http://103.114.11.37:8081/Unite8-sports-2/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "caze-tv-1080p-bdix-fifa",
+          "name": "Caze Tv 1080p",
+          "url": "http://103.114.11.37:8081/CazeTv1080p/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "caze-tv-720p-bdix-fifa",
+          "name": "Caze Tv 720p",
+          "url": "http://103.114.11.37:8081/caze-tv-720p/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "colors-bangla-bdix-fifa",
+          "name": "Colors Bangla",
+          "url": "http://103.114.11.37:8081/Colours-bangla/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "jalsha-movies-bdix-fifa",
+          "name": "Jalsha Movies",
+          "url": "http://103.114.11.37:8081/Jalsha-Movies/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "sony-aath-bdix-fifa",
+          "name": "Sony Aath",
+          "url": "http://103.114.11.37:8081/Sony-8/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "star-jalsha-bdix-fifa",
+          "name": "Star Jalsha",
+          "url": "http://103.114.11.37:8081/Star-Jalsha/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "zee-bangla-bdix-fifa",
+          "name": "ZEE Bangla",
+          "url": "http://103.114.11.37:8081/ZEE-Bangla/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "zee-cinema-bdix-fifa",
+          "name": "Zee Cinema",
+          "url": "http://103.114.11.37:8081/Z-Cinema/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        }
+      ]
+    },
+    "world-cup-bdix": {
+      "name": "World Cup (BDIX)",
+      "channels": [
+        {
+          "id": "btv-bdix-fifa",
+          "name": "BTV",
+          "url": "http://103.114.11.37:8081/BTV/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "t-sports-1080p-bdix-fifa",
+          "name": "T Sports 1080p",
+          "url": "http://103.114.11.37:8081/T-Sports-HD/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "t-sports-bdix-bdix-fifa",
+          "name": "T Sports BDIX",
+          "url": "http://103.114.11.37:8081/T-Sports-BDIX/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "a-sports-bdix-bdix-fifa",
+          "name": "A Sports BDIX",
+          "url": "http://103.114.11.37:8081/A-sports-BDIX/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "bein-sports-bdix-fifa",
+          "name": "BEIN SPORTS",
+          "url": "http://103.114.11.37:8081/BEIN-SPORTS/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "ptv-bdix-fifa",
+          "name": "PTV",
+          "url": "http://103.114.11.37:8081/PTV/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "ptv-bdix-bdix-fifa",
+          "name": "PTV BDIX",
+          "url": "http://103.114.11.37:8081/PTV-BDIX/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "somoy-tv-bdix-fifa",
+          "name": "Somoy TV",
+          "url": "http://103.114.11.37:8081/SOMOY-TV/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "sony-sports-1-bdix-fifa",
+          "name": "Sony Sports 1",
+          "url": "http://103.114.11.37:8081/Sony-sports-1/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "sony-sports-2-bdix-fifa",
+          "name": "Sony Sports 2",
+          "url": "http://103.114.11.37:8081/Sony-sports-2/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "sony-sports-3-bdix-fifa",
+          "name": "Sony Sports 3",
+          "url": "http://103.114.11.37:8081/Sony-sports-3/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "star-select-1-bdix-fifa",
+          "name": "Star Select 1",
+          "url": "http://103.114.11.37:8081/Star-select-1/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "star-select-3-bdix-fifa",
+          "name": "Star Select 3",
+          "url": "http://103.114.11.37:8081/Star-select-3/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "star-sports-1-bdix-fifa",
+          "name": "Star Sports 1",
+          "url": "http://103.114.11.37:8081/Star-sports-1/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "star-sports-2-bdix-fifa",
+          "name": "Star Sports 2",
+          "url": "http://103.114.11.37:8081/Star-sports-2/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "unite8-sports-1-1080p-bdix-fifa",
+          "name": "Unite8 Sports 1 1080p",
+          "url": "http://103.114.11.37:8081/Unite8-sports-2/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "caze-tv-1080p-bdix-fifa",
+          "name": "Caze Tv 1080p",
+          "url": "http://103.114.11.37:8081/CazeTv1080p/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "caze-tv-720p-bdix-fifa",
+          "name": "Caze Tv 720p",
+          "url": "http://103.114.11.37:8081/caze-tv-720p/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "colors-bangla-bdix-fifa",
+          "name": "Colors Bangla",
+          "url": "http://103.114.11.37:8081/Colours-bangla/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "jalsha-movies-bdix-fifa",
+          "name": "Jalsha Movies",
+          "url": "http://103.114.11.37:8081/Jalsha-Movies/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "sony-aath-bdix-fifa",
+          "name": "Sony Aath",
+          "url": "http://103.114.11.37:8081/Sony-8/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "star-jalsha-bdix-fifa",
+          "name": "Star Jalsha",
+          "url": "http://103.114.11.37:8081/Star-Jalsha/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "zee-bangla-bdix-fifa",
+          "name": "ZEE Bangla",
+          "url": "http://103.114.11.37:8081/ZEE-Bangla/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        },
+        {
+          "id": "zee-cinema-bdix-fifa",
+          "name": "Zee Cinema",
+          "url": "http://103.114.11.37:8081/Z-Cinema/video.m3u8?token=iK4pAMF8tQ",
+          "logo": "",
+          "resolution": "HD",
+          "proxy": true
+        }
+      ]
     }
   }
 }
