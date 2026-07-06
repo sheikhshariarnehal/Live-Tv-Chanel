@@ -69,53 +69,76 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   Expanded(
-                    child: Container(
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.06),
-                        borderRadius: BorderRadius.circular(22),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.08),
-                          width: 1,
+                    child: Theme(
+                      data: Theme.of(context).copyWith(
+                        inputDecorationTheme: InputDecorationTheme(
+                          filled: true,
+                          fillColor: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white.withOpacity(0.06)
+                              : Colors.black.withOpacity(0.04),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white.withOpacity(0.08)
+                                  : Colors.black.withOpacity(0.06),
+                              width: 1,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white.withOpacity(0.08)
+                                  : Colors.black.withOpacity(0.06),
+                              width: 1,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: Theme.of(context).colorScheme.primary,
+                              width: 1.0,
+                            ),
+                          ),
                         ),
                       ),
-                      child: TextField(
-                        controller: _controller,
-                        autofocus: true,
-                        onChanged: (value) => setState(() => _query = value),
-                        style: GoogleFonts.inter(
-                          color: GoPlayTheme.onSurface,
-                          fontSize: 14,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'Search channels, teams, sports...',
-                          hintStyle: GoogleFonts.inter(
-                            color: GoPlayTheme.onSurfaceVariant.withOpacity(0.5),
+                      child: SizedBox(
+                        height: 44,
+                        child: TextField(
+                          controller: _controller,
+                          autofocus: true,
+                          onChanged: (value) => setState(() => _query = value),
+                          style: GoogleFonts.inter(
+                            color: GoPlayTheme.onSurface,
                             fontSize: 14,
                           ),
-                          prefixIcon: Icon(
-                            Icons.search_rounded,
-                            color: GoPlayTheme.primary.withOpacity(0.8),
-                            size: 20,
-                          ),
-                          suffixIcon: _query.isNotEmpty
-                              ? IconButton(
-                                  icon: const Icon(
-                                    Icons.close_rounded,
-                                    color: GoPlayTheme.onSurfaceVariant,
-                                    size: 18,
-                                  ),
-                                  onPressed: () {
-                                    _controller.clear();
-                                    setState(() => _query = '');
-                                  },
-                                )
-                              : null,
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 11,
+                          decoration: InputDecoration(
+                            hintText: 'Search channels, teams, sports...',
+                            hintStyle: GoogleFonts.inter(
+                              color: GoPlayTheme.onSurfaceVariant.withOpacity(0.5),
+                              fontSize: 14,
+                            ),
+                            isDense: true,
+                            prefixIcon: Icon(
+                              Icons.search_rounded,
+                              color: GoPlayTheme.primary.withOpacity(0.8),
+                              size: 20,
+                            ),
+                            suffixIcon: _query.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(
+                                      Icons.close_rounded,
+                                      color: GoPlayTheme.onSurfaceVariant,
+                                      size: 18,
+                                    ),
+                                    onPressed: () {
+                                      _controller.clear();
+                                      setState(() => _query = '');
+                                    },
+                                  )
+                                : null,
                           ),
                         ),
                       ),
