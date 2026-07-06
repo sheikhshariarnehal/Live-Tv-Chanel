@@ -1,10 +1,13 @@
 {
-    "latestVersion": "1.2.5",
+    "latestVersion": "1.2.6",
     "minimumVersion": "1.0.0",
     "forceUpdate": false,
-    "apkUrl": "https://cdn.ntechbd.app/goplay-1.2.5.apk",
+    "apkUrl": "https://cdn.ntechbd.app/goplay-1.2.6.apk",
     "releaseNotes": [
-        "fIX timezone-shifting bug"
+        "Major performance optimizations for smoother video playback",
+        "Optimized image memory usage across the app",
+        "Resolved UI jank during channel navigation",
+        "Under-the-hood stability improvements and bug fixes"
     ],
-    "publishedAt": "2026-07-06T13:13:00+06:00"
+    "publishedAt": "2026-07-07T00:10:00+06:00"
 }

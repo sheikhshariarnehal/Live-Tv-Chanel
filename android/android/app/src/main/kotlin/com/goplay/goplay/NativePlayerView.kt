@@ -14,6 +14,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.drm.DefaultDrmSessionManager
 import androidx.media3.exoplayer.drm.LocalMediaDrmCallback
 import androidx.media3.exoplayer.drm.FrameworkMediaDrm
@@ -240,7 +241,7 @@ class NativePlayerView(
                 val bufferedPosition = exoPlayer?.bufferedPosition ?: 0L
                 val isLive = exoPlayer?.isCurrentMediaItemLive == true
                 result.success(mapOf(
-                    "isPlaying" to (exoPlayer?.isPlaying == true),
+                    "isPlaying" to (exoPlayer?.playWhenReady == true),
                     "playbackState" to (exoPlayer?.playbackState ?: Player.STATE_IDLE),
                     "duration" to if (duration == C.TIME_UNSET) 0L else duration,
                     "position" to position,
@@ -305,8 +306,20 @@ class NativePlayerView(
             else -> null
         }
 
+        // --- Build LoadControl ---
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(
+                15_000, // minBufferMs: Minimum duration of media that the player will attempt to keep buffered (Default: 50,000)
+                50_000, // maxBufferMs: Maximum duration of media that the player will buffer (Default: 50,000)
+                1_500,  // bufferForPlaybackMs: Duration of media that must be buffered before starting playback (Default: 2,500)
+                2_000   // bufferForPlaybackAfterRebufferMs: Duration of media that must be buffered to resume after rebuffer (Default: 5,000)
+            )
+            .setPrioritizeTimeOverSizeThresholds(true)
+            .build()
+
         // --- Build ExoPlayer ---
         val playerBuilder = ExoPlayer.Builder(context)
+            .setLoadControl(loadControl)
 
         if (drmSessionManager != null) {
             val mediaSourceFactory = DefaultMediaSourceFactory(httpFactory)
@@ -437,18 +450,18 @@ class NativePlayerView(
                     Player.STATE_ENDED -> "ended"
                     else -> "unknown"
                 }
-                Log.d(TAG, "Playback state: $stateName")
-                methodChannel.invokeMethod("onStateChanged", mapOf(
-                    "state" to stateName,
-                    "isPlaying" to exoPlayer.isPlaying
-                ))
+                Log.d(TAG, "Playback state changed: $stateName")
+                sendPlayerState()
+            }
+
+            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                Log.d(TAG, "playWhenReady changed: $playWhenReady, reason: $reason")
+                sendPlayerState()
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                methodChannel.invokeMethod("onStateChanged", mapOf(
-                    "state" to if (isPlaying) "playing" else "paused",
-                    "isPlaying" to isPlaying
-                ))
+                Log.d(TAG, "isPlaying changed: $isPlaying")
+                sendPlayerState()
             }
         })
 
@@ -457,6 +470,25 @@ class NativePlayerView(
         exoPlayer.prepare()
         exoPlayer.playWhenReady = true
         Log.d(TAG, "Player prepared and starting playback")
+    }
+
+    private fun sendPlayerState() {
+        val exoPlayer = player ?: return
+        val playbackState = exoPlayer.playbackState
+        val playWhenReady = exoPlayer.playWhenReady
+
+        val stateName = when (playbackState) {
+            Player.STATE_IDLE -> "idle"
+            Player.STATE_BUFFERING -> "buffering"
+            Player.STATE_READY -> if (playWhenReady) "ready" else "paused"
+            Player.STATE_ENDED -> "ended"
+            else -> "unknown"
+        }
+
+        methodChannel.invokeMethod("onStateChanged", mapOf(
+            "state" to stateName,
+            "isPlaying" to playWhenReady
+        ))
     }
 
     /**
