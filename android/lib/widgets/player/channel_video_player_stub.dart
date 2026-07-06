@@ -156,15 +156,21 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
         final args = Map<String, dynamic>.from(call.arguments as Map);
         final state = args['state'] as String;
         final isPlaying = args['isPlaying'] as bool? ?? false;
+        final nowBuffering = state == 'buffering';
+        final isReady = state == 'ready' || state == 'playing';
 
-        setState(() {
-          _isPlaying = isPlaying;
-          _isBuffering = state == 'buffering';
-          if (state == 'ready' || state == 'playing') {
-            _hasError = false;
-            _errorMessage = null;
-          }
-        });
+        // Only rebuild if state actually changed
+        if (_isPlaying != isPlaying || _isBuffering != nowBuffering ||
+            (isReady && (_hasError || _errorMessage != null))) {
+          setState(() {
+            _isPlaying = isPlaying;
+            _isBuffering = nowBuffering;
+            if (isReady) {
+              _hasError = false;
+              _errorMessage = null;
+            }
+          });
+        }
 
         if (isPlaying) {
           _startProgressTimer();
@@ -208,11 +214,38 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
     try {
       final state = await _methodChannel!.invokeMethod<Map>('getState');
       if (state != null && mounted) {
+        final newPlaying = state['isPlaying'] as bool? ?? _isPlaying;
+        final newPos = Duration(milliseconds: (state['position'] as int? ?? 0));
+        final newDur = Duration(milliseconds: (state['duration'] as int? ?? 0));
+        final newBuf = Duration(milliseconds: (state['bufferedPosition'] as int? ?? 0));
+
+        // Skip rebuild when controls are hidden AND position delta is <2s
+        // (the seek bar is invisible, so no visual update needed)
+        if (!widget.showControls &&
+            newPlaying == _isPlaying &&
+            (newPos - _position).abs() < const Duration(seconds: 2) &&
+            newDur == _duration) {
+          // Still update internal state for when controls reappear
+          _isPlaying = newPlaying;
+          _position = newPos;
+          _duration = newDur;
+          _bufferedPosition = newBuf;
+          return;
+        }
+
+        // Skip rebuild if nothing actually changed
+        if (newPlaying == _isPlaying &&
+            newPos == _position &&
+            newDur == _duration &&
+            newBuf == _bufferedPosition) {
+          return;
+        }
+
         setState(() {
-          _isPlaying = state['isPlaying'] as bool? ?? _isPlaying;
-          _position = Duration(milliseconds: (state['position'] as int? ?? 0));
-          _duration = Duration(milliseconds: (state['duration'] as int? ?? 0));
-          _bufferedPosition = Duration(milliseconds: (state['bufferedPosition'] as int? ?? 0));
+          _isPlaying = newPlaying;
+          _position = newPos;
+          _duration = newDur;
+          _bufferedPosition = newBuf;
         });
       }
     } catch (e) {
@@ -646,54 +679,58 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
           ),
         ),
 
-        // Bottom Controls Bar
+        // Bottom Controls Bar — isolated from central controls repaints
         Positioned(
           left: 0,
           right: 0,
           bottom: 0,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Seek Bar / Timeline
-              PlayerProgressBar(
-                position: _position,
-                duration: _duration,
-                bufferedPosition: _bufferedPosition,
-                onSeek: _seekTo,
-              ),
-
-              // Bottom Buttons row
-              Padding(
-                padding: EdgeInsets.only(
-                  left: widget.isFullscreen ? 24.0 : 12.0,
-                  right: widget.isFullscreen ? 24.0 : 12.0,
-                  bottom: widget.isFullscreen ? 20.0 : 8.0,
-                  top: widget.isFullscreen ? 4.0 : 2.0,
+          child: RepaintBoundary(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Seek Bar / Timeline — isolated from time-text repaints
+                RepaintBoundary(
+                  child: PlayerProgressBar(
+                    position: _position,
+                    duration: _duration,
+                    bufferedPosition: _bufferedPosition,
+                    onSeek: _seekTo,
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    // Time text
-                    Text(
-                      '${_formatDuration(_position)} · ${_formatDuration(_duration)}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
+
+                // Bottom Buttons row
+                Padding(
+                  padding: EdgeInsets.only(
+                    left: widget.isFullscreen ? 24.0 : 12.0,
+                    right: widget.isFullscreen ? 24.0 : 12.0,
+                    bottom: widget.isFullscreen ? 20.0 : 8.0,
+                    top: widget.isFullscreen ? 4.0 : 2.0,
+                  ),
+                  child: Row(
+                    children: [
+                      // Time text
+                      Text(
+                        '${_formatDuration(_position)} · ${_formatDuration(_duration)}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
-                    ),
 
-                    const Spacer(),
+                      const Spacer(),
 
-                    // Lock and right controls
-                    if (widget.isFullscreen)
-                      _buildFullscreenRightControls()
-                    else
-                      _buildPortraitRightControls(),
-                  ],
+                      // Lock and right controls
+                      if (widget.isFullscreen)
+                        _buildFullscreenRightControls()
+                      else
+                        _buildPortraitRightControls(),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],

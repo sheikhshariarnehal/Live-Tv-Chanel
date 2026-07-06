@@ -79,6 +79,10 @@ const _sdStyle = TextStyle(
   letterSpacing: 0.5,
 );
 
+// ─── Pre-cached Matrix4 transforms ───────────────────────────
+final _kIdentity = Matrix4.identity();
+final _kHoverScale = Matrix4.diagonal3Values(1.03, 1.03, 1.0);
+
 /// Premium channel card widget for the channel grid.
 class ChannelCard extends StatefulWidget {
   final Channel channel;
@@ -129,10 +133,8 @@ class _ChannelCardState extends State<ChannelCard> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeInOut,
-          // Hovered: slight 3% scale — uses cached Matrix; not built per frame.
-          transform: _isHovered
-              ? Matrix4.diagonal3Values(1.03, 1.03, 1.0)
-              : Matrix4.identity(),
+          // Hovered: slight 3% scale — pre-cached matrices, zero allocations.
+          transform: _isHovered ? _kHoverScale : _kIdentity,
           // Switch between two pre-cached decorations — zero allocations.
           decoration: _isHovered ? _cardDecoHovered : _cardDecoNormal,
           child: Stack(
