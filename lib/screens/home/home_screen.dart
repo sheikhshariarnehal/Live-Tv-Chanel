@@ -683,6 +683,7 @@ class _HeroBannerCard extends ConsumerWidget {
                                     CountdownTimerWidget(
                                       startTime: event.startTime,
                                       onTimerFinished: () {
+                                        ref.read(syncServiceProvider).sync();
                                         ref.invalidate(eventsProvider);
                                       },
                                       style: GoogleFonts.inter(

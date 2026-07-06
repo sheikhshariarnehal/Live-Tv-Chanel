@@ -289,8 +289,10 @@ class _EventListTileState extends ConsumerState<EventListTile>
                             if (event.isUpcoming && _isToday)
                               CountdownTimerWidget(
                                 startTime: event.startTime,
-                                onTimerFinished: () =>
-                                    ref.invalidate(eventsProvider),
+                                onTimerFinished: () {
+                                  ref.read(syncServiceProvider).sync();
+                                  ref.invalidate(eventsProvider);
+                                },
                                 style: _kCountdownStyle,
                               )
                             else
