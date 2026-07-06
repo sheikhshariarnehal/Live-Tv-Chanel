@@ -69,16 +69,34 @@ interface Playlist {
   channels: string[];
 }
 
-const formatToLocalDateTime = (utcString: string | null | undefined): string => {
-  if (!utcString) return '';
+const parseUtcDate = (utcString: string | null | undefined): Date | null => {
+  if (!utcString) return null;
   try {
-    const d = new Date(utcString);
-    if (isNaN(d.getTime())) return '';
-    const pad = (n: number) => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    let cleaned = utcString.trim();
+    // Replace space between date and time with T (e.g. "2026-07-07 00:00:00+00" -> "2026-07-07T00:00:00+00")
+    if (/^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}/.test(cleaned)) {
+      cleaned = cleaned.replace(/\s+/, 'T');
+    }
+    // Normalize UTC offset to Z for standard ISO parsing
+    if (cleaned.endsWith('+00')) {
+      cleaned = cleaned.slice(0, -3) + 'Z';
+    } else if (/\+\d{2}$/.test(cleaned)) {
+      cleaned = cleaned + ':00';
+    } else if (/-\d{2}$/.test(cleaned)) {
+      cleaned = cleaned + ':00';
+    }
+    const d = new Date(cleaned);
+    return isNaN(d.getTime()) ? null : d;
   } catch {
-    return '';
+    return null;
   }
+};
+
+const formatToLocalDateTime = (utcString: string | null | undefined): string => {
+  const d = parseUtcDate(utcString);
+  if (!d) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
 const parseLocalDateTime = (localString: string | null | undefined): string => {
@@ -89,8 +107,8 @@ const parseLocalDateTime = (localString: string | null | undefined): string => {
     const hasTimezone = trimmed.includes(':') && /(Z|[+-]\d{2}(?::?\d{2})?)$/.test(trimmed);
     
     if (hasTimezone) {
-      const d = new Date(trimmed);
-      if (!isNaN(d.getTime())) {
+      const d = parseUtcDate(trimmed);
+      if (d && !isNaN(d.getTime())) {
         return d.toISOString();
       }
     }
@@ -108,8 +126,8 @@ const parseLocalDateTime = (localString: string | null | undefined): string => {
         return date.toISOString();
       }
     }
-    const fallback = new Date(trimmed);
-    if (!isNaN(fallback.getTime())) {
+    const fallback = parseUtcDate(trimmed);
+    if (fallback && !isNaN(fallback.getTime())) {
       return fallback.toISOString();
     }
     return new Date().toISOString();
@@ -802,7 +820,7 @@ export default function EventManager({ adminToken, onRefreshStats }: EventManage
                     <div className="text-center space-y-1 mb-4">
                       <p className="text-xs text-zinc-400">{event.league}</p>
                       <p className="text-[10px] text-zinc-500">
-                        {event.start_time ? new Date(event.start_time).toLocaleString() : 'No Time Set'}
+                        {event.start_time ? (parseUtcDate(event.start_time)?.toLocaleString() || 'Invalid Date') : 'No Time Set'}
                       </p>
                     </div>
                   )}

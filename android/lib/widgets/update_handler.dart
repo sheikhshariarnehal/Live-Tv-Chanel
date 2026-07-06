@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/router.dart';
 import '../providers/update_notifier.dart';
+import '../providers/app_providers.dart';
 import 'update_dialog.dart';
 
 /// A wrapper widget that listens for update events and monitors the app lifecycle (resumes).
@@ -43,18 +44,29 @@ class _UpdateHandlerState extends ConsumerState<UpdateHandler> with WidgetsBindi
     if (state == AppLifecycleState.resumed) {
       // Trigger a silent update check when the app returns to the foreground
       ref.read(updateProvider.notifier).checkForUpdates(isManual: false);
+      // Trigger a silent sync with Supabase to get the latest matches/channels
+      ref.read(syncServiceProvider).sync();
     }
   }
 
   void _triggerUpdateDialog() async {
     if (_isDialogShowing) return;
 
-    final context = rootNavigatorKey.currentContext;
-    if (context == null) return;
-
     _isDialogShowing = true;
     try {
-      await UpdateDialog.show(context);
+      // If the app is currently on the splash screen ('/'), wait until it navigates away
+      // to avoid showing/dismissing the dialog during the initial route transition.
+      if (appRouter.routerDelegate.currentConfiguration.uri.path == '/') {
+        await Future.doWhile(() async {
+          await Future.delayed(const Duration(milliseconds: 200));
+          return appRouter.routerDelegate.currentConfiguration.uri.path == '/';
+        });
+      }
+
+      final context = rootNavigatorKey.currentContext;
+      if (context != null && mounted) {
+        await UpdateDialog.show(context);
+      }
     } catch (_) {
       // Dialog failed to open or closed unexpectedly
     } finally {
