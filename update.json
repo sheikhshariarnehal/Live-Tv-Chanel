@@ -1,13 +1,10 @@
 {
-    "latestVersion": "1.2.6",
+    "latestVersion": "1.2.7",
     "minimumVersion": "1.0.0",
     "forceUpdate": false,
-    "apkUrl": "https://cdn.ntechbd.app/goplay-1.2.6.apk",
+    "apkUrl": "https://cdn.ntechbd.app/goplay-1.2.7.apk",
     "releaseNotes": [
-        "Major performance optimizations for smoother video playback",
-        "Optimized image memory usage across the app",
-        "Resolved UI jank during channel navigation",
-        "Under-the-hood stability improvements and bug fixes"
+        "added new icon"
     ],
-    "publishedAt": "2026-07-07T00:10:00+06:00"
+    "publishedAt": "2026-07-07T12:30:00+06:00"
 }
