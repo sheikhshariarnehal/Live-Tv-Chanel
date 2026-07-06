@@ -3,38 +3,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/cards/channel_card.dart';
-
-// ─── Pre-cached styles — allocated once, never again ─────────
-final TextStyle _titleStyle = GoogleFonts.orbitron(
-  fontSize: 20,
-  fontWeight: FontWeight.w300,
-  color: GoPlayTheme.primary,
-  letterSpacing: 3,
-);
-
-// ─── Pre-cached appbar glass decoration ──────────────────────
-const BoxDecoration _appBarGlass = BoxDecoration(
-  color: Color(0xCC17181C),
-  border: Border(bottom: BorderSide(color: GoPlayTheme.cardBorder, width: 0.8)),
-);
-
-// ─── Pre-cached search field decoration ──────────────────────
-const BoxDecoration _searchBoxDecoration = BoxDecoration(
-  color: Color(0x1F000000),
-  borderRadius: BorderRadius.all(Radius.circular(20)),
-  border: Border.fromBorderSide(
-    BorderSide(color: GoPlayTheme.cardBorder, width: 0.8),
-  ),
-);
-
-// ─── Pre-cached search text style ────────────────────────────
-const TextStyle _searchTextStyle = TextStyle(
-  color: GoPlayTheme.onSurface,
-  fontSize: 14,
-);
 
 class ChannelsScreen extends ConsumerStatefulWidget {
   const ChannelsScreen({super.key});
@@ -46,13 +18,14 @@ class ChannelsScreen extends ConsumerStatefulWidget {
 class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
   final _searchController = TextEditingController();
   bool _isSearching = false;
-  String _localSearchQuery = '';
+  final _searchQueryNotifier = ValueNotifier<String>('');
   final _scrollController = ScrollController();
   Timer? _debounceTimer;
 
   @override
   void dispose() {
     _searchController.dispose();
+    _searchQueryNotifier.dispose();
     _scrollController.dispose();
     _debounceTimer?.cancel();
     super.dispose();
@@ -64,7 +37,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
       _debounceTimer?.cancel();
       if (!_isSearching) {
         _searchController.clear();
-        _localSearchQuery = '';
+        _searchQueryNotifier.value = '';
       }
     });
   }
@@ -81,6 +54,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final selectedCategory = ref.watch(selectedCategoryProvider);
     // Cache padding lookup — avoids full MediaQueryData allocation each frame
     final topPad = MediaQuery.paddingOf(context).top;
@@ -88,6 +62,17 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
       channelsByCategoryProvider(selectedCategory),
     );
     final favorites = ref.watch(favoriteChannelIdsProvider);
+
+    final titleStyle = GoogleFonts.orbitron(
+      fontSize: 20,
+      fontWeight: FontWeight.w300,
+      color: theme.colorScheme.primary,
+      letterSpacing: 3,
+    );
+
+    final appBarGlassDeco = BoxDecoration(
+      color: theme.colorScheme.surface.withOpacity(0.8),
+    );
 
     return Scaffold(
       body: CustomScrollView(
@@ -112,8 +97,8 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
                         _debounceTimer!.cancel();
                       }
                       _debounceTimer = Timer(
-                        const Duration(milliseconds: 180),
-                        () => setState(() => _localSearchQuery = val),
+                        const Duration(milliseconds: 150),
+                        () => _searchQueryNotifier.value = val,
                       );
                     },
                     onClose: () {
@@ -122,21 +107,69 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
                       } else {
                         _searchController.clear();
                         _debounceTimer?.cancel();
-                        setState(() => _localSearchQuery = '');
+                        _searchQueryNotifier.value = '';
                       }
                     },
                   )
-                : Text('CHANNELS', style: _titleStyle),
+                : Text('CHANNELS', style: titleStyle),
             actions: _isSearching
                 ? null
                 : [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.search_rounded,
-                        color: Colors.white,
+                        color: theme.colorScheme.onSurface,
                         size: 22,
                       ),
                       onPressed: _toggleSearch,
+                    ),
+                    PopupMenuButton<String>(
+                      icon: Icon(
+                        Icons.more_vert_rounded,
+                        color: theme.colorScheme.onSurface,
+                        size: 22,
+                      ),
+                      color: theme.brightness == Brightness.dark
+                          ? GoPlayTheme.darkSurfaceContainerHigh
+                          : GoPlayTheme.lightSurfaceContainerHigh,
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(
+                          color: theme.brightness == Brightness.dark
+                              ? GoPlayTheme.darkCardBorder
+                              : GoPlayTheme.lightCardBorder,
+                          width: 0.5,
+                        ),
+                      ),
+                      onSelected: (value) {
+                        if (value == 'settings') {
+                          context.push('/settings');
+                        }
+                      },
+                      itemBuilder: (BuildContext context) => [
+                        PopupMenuItem<String>(
+                          value: 'settings',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.settings_rounded,
+                                color: theme.colorScheme.onSurface,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'App Settings',
+                                style: GoogleFonts.inter(
+                                  color: theme.colorScheme.onSurface,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(width: 8),
                   ],
@@ -146,9 +179,9 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
               child: ClipRect(
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 14.0, sigmaY: 14.0),
-                  child: const DecoratedBox(
-                    decoration: _appBarGlass,
-                    child: SizedBox.expand(),
+                  child: DecoratedBox(
+                    decoration: appBarGlassDeco,
+                    child: const SizedBox.expand(),
                   ),
                 ),
               ),
@@ -162,40 +195,12 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
           // Channel Grid
           channelsAsync.when(
             data: (channels) {
-              final query = _localSearchQuery.trim().toLowerCase();
-              final filtered = query.isEmpty
-                  ? channels
-                  : channels.where((ch) {
-                      return ch.name.toLowerCase().contains(query) ||
-                          (ch.country?.toLowerCase().contains(query) ??
-                              false) ||
-                          (ch.language?.toLowerCase().contains(query) ?? false);
-                    }).toList();
-
-              if (filtered.isEmpty) {
-                return SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: _EmptyState(
-                    isSearch: _localSearchQuery.isNotEmpty,
-                    onAction: () {
-                      if (_localSearchQuery.isNotEmpty) {
-                        _searchController.clear();
-                        setState(() => _localSearchQuery = '');
-                      } else {
-                        ref
-                            .read(selectedCategoryProvider.notifier)
-                            .select('all');
-                      }
-                    },
-                  ),
-                );
-              }
-
               return _ResponsiveGrid(
-                channels: filtered,
+                channels: channels,
                 favorites: favorites,
                 ref: ref,
                 topPad: topPad,
+                searchQueryNotifier: _searchQueryNotifier,
               );
             },
             loading: () => SliverPadding(
@@ -276,7 +281,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
   }
 }
 
-// ─── Search Field — extracted so parent does not rebuild it ──
+// ─── Search Field ──────────────────────────────────────────────
 class _SearchField extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
@@ -290,37 +295,70 @@ class _SearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 40,
-      decoration: _searchBoxDecoration,
-      child: TextField(
-        controller: controller,
-        autofocus: true,
-        onChanged: onChanged,
-        style: _searchTextStyle,
-        decoration: InputDecoration(
-          hintText: 'Search channels by name, country...',
-          hintStyle: const TextStyle(
-            color: GoPlayTheme.onSurfaceVariant,
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Theme(
+      data: theme.copyWith(
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: isDark
+              ? Colors.white.withOpacity(0.08)
+              : Colors.black.withOpacity(0.05),
+          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.08),
+              width: 0.8,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.08),
+              width: 0.8,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: theme.colorScheme.primary,
+              width: 1.0,
+            ),
+          ),
+        ),
+      ),
+      child: SizedBox(
+        height: 40,
+        child: TextField(
+          controller: controller,
+          autofocus: true,
+          onChanged: onChanged,
+          style: TextStyle(
+            color: theme.colorScheme.onSurface,
             fontSize: 14,
           ),
-          isDense: true,
-          contentPadding: const EdgeInsets.symmetric(vertical: 8),
-          border: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          prefixIcon: const Icon(
-            Icons.search_rounded,
-            color: GoPlayTheme.primary,
-            size: 20,
-          ),
-          suffixIcon: IconButton(
-            icon: const Icon(
-              Icons.close_rounded,
-              color: GoPlayTheme.onSurfaceVariant,
-              size: 18,
+          decoration: InputDecoration(
+            hintText: 'Search channels by name, country...',
+            hintStyle: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.6),
+              fontSize: 14,
             ),
-            onPressed: onClose,
+            isDense: true,
+            prefixIcon: Icon(
+              Icons.search_rounded,
+              color: theme.colorScheme.primary,
+              size: 20,
+            ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                Icons.close_rounded,
+                color: theme.colorScheme.onSurfaceVariant,
+                size: 18,
+              ),
+              onPressed: onClose,
+            ),
           ),
         ),
       ),
@@ -453,39 +491,101 @@ class _CategoryFilterBar extends ConsumerWidget {
 }
 
 // ─── Responsive Grid ──────────────────────────────────────────
-class _ResponsiveGrid extends StatelessWidget {
+class _ResponsiveGrid extends StatefulWidget {
   final List channels;
   final Set<String> favorites;
   final WidgetRef ref;
   final double topPad;
+  final ValueNotifier<String> searchQueryNotifier;
 
   const _ResponsiveGrid({
     required this.channels,
     required this.favorites,
     required this.ref,
     required this.topPad,
+    required this.searchQueryNotifier,
   });
 
   @override
+  State<_ResponsiveGrid> createState() => _ResponsiveGridState();
+}
+
+class _ResponsiveGridState extends State<_ResponsiveGrid> {
+  @override
+  void initState() {
+    super.initState();
+    widget.searchQueryNotifier.addListener(_onSearchChanged);
+  }
+
+  @override
+  void didUpdateWidget(_ResponsiveGrid oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.searchQueryNotifier != widget.searchQueryNotifier) {
+      oldWidget.searchQueryNotifier.removeListener(_onSearchChanged);
+      widget.searchQueryNotifier.addListener(_onSearchChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.searchQueryNotifier.removeListener(_onSearchChanged);
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final query = widget.searchQueryNotifier.value.trim().toLowerCase();
+    final filtered = query.isEmpty
+        ? widget.channels
+        : widget.channels.where((ch) {
+            return ch.name.toLowerCase().contains(query) ||
+                (ch.country?.toLowerCase().contains(query) ?? false) ||
+                (ch.language?.toLowerCase().contains(query) ?? false);
+          }).toList();
+
+    if (filtered.isEmpty) {
+      return SliverFillRemaining(
+        hasScrollBody: false,
+        child: _EmptyState(
+          isSearch: query.isNotEmpty,
+          onAction: () {
+            if (query.isNotEmpty) {
+              widget.searchQueryNotifier.value = '';
+            } else {
+              widget.ref.read(selectedCategoryProvider.notifier).select('all');
+            }
+          },
+        ),
+      );
+    }
+
+    final bottomPadding = MediaQuery.paddingOf(context).bottom + 80.0;
     return SliverPadding(
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.only(
+        left: 10,
+        right: 10,
+        top: 10,
+        bottom: bottomPadding,
+      ),
       sliver: SliverGrid(
         gridDelegate: _ChannelsScreenState._gridDelegate(context),
         delegate: SliverChildBuilderDelegate(
           (context, index) {
-            final channel = channels[index];
+            final channel = filtered[index];
             return ChannelCard(
               key: ValueKey(channel.id),
               channel: channel,
-              isFavorite: favorites.contains(channel.id),
-              onFavoriteTap: () => ref
+              isFavorite: widget.favorites.contains(channel.id),
+              onFavoriteTap: () => widget.ref
                   .read(favoriteChannelIdsProvider.notifier)
                   .toggle(channel.id),
             );
           },
-          childCount: channels.length,
-          // Large catalogs: let the sliver recycle elements freely.
+          childCount: filtered.length,
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: true,
         ),
@@ -495,7 +595,7 @@ class _ResponsiveGrid extends StatelessWidget {
 }
 
 // ─── Category Chip ────────────────────────────────────────────
-class _CategoryChip extends StatelessWidget {
+class _CategoryChip extends StatefulWidget {
   final String label;
   final int count;
   final bool isSelected;
@@ -508,81 +608,104 @@ class _CategoryChip extends StatelessWidget {
     required this.onTap,
   });
 
-  // Pre-allocated decorations — zero per-frame cost.
-  static const _unselectedDeco = BoxDecoration(
-    color: Color(0x0DFFFFFF),
-    borderRadius: BorderRadius.all(Radius.circular(20)),
-    border: Border.fromBorderSide(
-      BorderSide(color: Color(0x14FFFFFF), width: 0.8),
-    ),
-  );
+  @override
+  State<_CategoryChip> createState() => _CategoryChipState();
+}
 
-  static const _selectedDeco = BoxDecoration(
-    color: Color(0x1E00E676), // primary @ ~12%
-    borderRadius: BorderRadius.all(Radius.circular(20)),
-    border: Border.fromBorderSide(
-      BorderSide(color: Color(0x7800E676), width: 0.8), // primary @ ~47%
-    ),
-    boxShadow: [
-      BoxShadow(
-        color: Color(0x2800E676), // primary @ ~16%
-        blurRadius: 8,
-        offset: Offset(0, 2),
-      ),
-    ],
-  );
-
-  static const _countSelectedDeco = BoxDecoration(
-    color: Color(0x3C00E676), // primary @ ~24%
-    borderRadius: BorderRadius.all(Radius.circular(10)),
-  );
-
-  static const _countUnselectedDeco = BoxDecoration(
-    color: Color(0x1AFFFFFF),
-    borderRadius: BorderRadius.all(Radius.circular(10)),
-  );
+class _CategoryChipState extends State<_CategoryChip> {
+  bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeInOut,
-        margin: const EdgeInsets.only(right: 8, bottom: 6, top: 2),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: isSelected ? _selectedDeco : _unselectedDeco,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? Colors.white : GoPlayTheme.onSurfaceVariant,
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                letterSpacing: 0.2,
-              ),
-            ),
-            const SizedBox(width: 6),
-            // Plain Container — AnimatedContainer here caused a second
-            // layout-pass per chip on every selection change.
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-              decoration: isSelected
-                  ? _countSelectedDeco
-                  : _countUnselectedDeco,
-              child: Text(
-                '$count',
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
+    final isDark = theme.brightness == Brightness.dark;
+
+    final selectedDeco = BoxDecoration(
+      color: primaryColor.withOpacity(0.12),
+      borderRadius: const BorderRadius.all(Radius.circular(20)),
+      border: Border.fromBorderSide(
+        BorderSide(color: primaryColor.withOpacity(0.47), width: 0.8),
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: primaryColor.withOpacity(0.16),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    );
+
+    final unselectedDeco = BoxDecoration(
+      color: _isHovered
+          ? (isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.08))
+          : (isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.04)),
+      borderRadius: const BorderRadius.all(Radius.circular(20)),
+      border: Border.fromBorderSide(
+        BorderSide(
+          color: _isHovered
+              ? (isDark ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.15))
+              : (isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.06)),
+          width: 0.8,
+        ),
+      ),
+    );
+
+    final countSelectedDeco = BoxDecoration(
+      color: primaryColor.withOpacity(0.24),
+      borderRadius: const BorderRadius.all(Radius.circular(10)),
+    );
+
+    final countUnselectedDeco = BoxDecoration(
+      color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.08),
+      borderRadius: const BorderRadius.all(Radius.circular(10)),
+    );
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeInOut,
+          margin: const EdgeInsets.only(right: 8, bottom: 6, top: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: widget.isSelected ? selectedDeco : unselectedDeco,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                widget.label,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : const Color(0x99FFFFFF),
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
+                  color: widget.isSelected
+                      ? primaryColor
+                      : theme.colorScheme.onSurface.withOpacity(0.7),
+                  fontSize: 12,
+                  fontWeight: widget.isSelected ? FontWeight.w700 : FontWeight.w500,
+                  letterSpacing: 0.2,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                decoration: widget.isSelected
+                    ? countSelectedDeco
+                    : countUnselectedDeco,
+                child: Text(
+                  '${widget.count}',
+                  style: TextStyle(
+                    color: widget.isSelected
+                        ? primaryColor
+                        : theme.colorScheme.onSurface.withOpacity(0.5),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

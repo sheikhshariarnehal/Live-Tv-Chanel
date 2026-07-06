@@ -444,7 +444,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               borderRadius: BorderRadius.circular(14),
               gradient: value
                   ? const LinearGradient(
-                      colors: [GoPlayTheme.primary, Color(0xFF00C853)],
+                      colors: [GoPlayTheme.primary, GoPlayTheme.primaryDark],
                     )
                   : null,
               color: value ? null : Colors.white.withOpacity(0.08),
@@ -537,7 +537,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         onPressed: () => notifier.startDownload(),
         icon: Icons.download_rounded,
         label: 'DOWNLOAD & UPDATE',
-        gradientColors: [GoPlayTheme.primary, const Color(0xFF00C853)], // Theme Green Gradient
+        gradientColors: [GoPlayTheme.primary, GoPlayTheme.primaryDark], // Theme Green Gradient
       );
     }
 
