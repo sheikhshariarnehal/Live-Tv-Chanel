@@ -113,6 +113,8 @@ void showChannelSelector({
                                 ? Image.network(
                                     channel.logo!,
                                     fit: BoxFit.cover,
+                                    cacheWidth: 80,
+                                    cacheHeight: 80,
                                     errorBuilder: (context, error, stackTrace) => const Icon(
                                       Icons.live_tv_rounded,
                                       color: GoPlayTheme.primary,

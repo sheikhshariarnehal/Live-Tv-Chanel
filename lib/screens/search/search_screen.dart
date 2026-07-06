@@ -292,6 +292,8 @@ class _EmptySearchState extends StatelessWidget {
                     ? Image.network(
                         ch.logo!,
                         fit: BoxFit.cover,
+                        cacheWidth: 88,
+                        cacheHeight: 88,
                         errorBuilder: (context, error, stackTrace) => Center(
                           child: Text(
                             ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
@@ -512,6 +514,8 @@ class _SearchResults extends StatelessWidget {
                     ? Image.network(
                         ch.logo!,
                         fit: BoxFit.cover,
+                        cacheWidth: 88,
+                        cacheHeight: 88,
                         errorBuilder: (context, error, stackTrace) => Center(
                           child: Text(
                             ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),

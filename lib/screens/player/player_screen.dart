@@ -377,7 +377,13 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
               // Find related channels to enable prev/next buttons
               final relatedChannels = widget.eventChannels != null
-                  ? channels.where((c) => widget.eventChannels!.contains(c.id)).toList()
+                  ? widget.eventChannels!
+                      .map((id) {
+                        final match = channels.where((c) => c.id == id);
+                        return match.isNotEmpty ? match.first : null;
+                      })
+                      .whereType<Channel>()
+                      .toList()
                   : channels.where((c) => c.category == channel.category).toList();
 
               final currentIndex = relatedChannels.indexWhere((c) => c.id == channel.id);
@@ -870,8 +876,12 @@ class _RelatedChannelsList extends ConsumerWidget {
       data: (channels) {
         final List<Channel> related;
         if (eventChannels != null) {
-          related = channels
-              .where((c) => eventChannels!.contains(c.id))
+          related = eventChannels!
+              .map((id) {
+                final match = channels.where((c) => c.id == id);
+                return match.isNotEmpty ? match.first : null;
+              })
+              .whereType<Channel>()
               .toList();
         } else {
           related = channels.where((c) => c.category == category).toList();
@@ -1184,8 +1194,12 @@ class _FullscreenTopBar extends ConsumerWidget {
                   data: (channels) {
                     final List<Channel> related;
                     if (eventChannels != null) {
-                      related = channels
-                          .where((c) => eventChannels!.contains(c.id))
+                      related = eventChannels!
+                          .map((id) {
+                            final match = channels.where((c) => c.id == id);
+                            return match.isNotEmpty ? match.first : null;
+                          })
+                          .whereType<Channel>()
                           .toList();
                     } else {
                       related = channels

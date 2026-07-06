@@ -68,7 +68,6 @@ Future<void> startProxy() async {
     print('Local Proxy Server started on port $_port');
 
     _server!.listen((HttpRequest request) async {
-      print('Local Proxy: Incoming request: ${request.uri.path}');
       String? targetUrlStr;
       Map<String, String> customHeaders = {};
 
@@ -187,13 +186,7 @@ Future<void> startProxy() async {
           clientRequest.headers.removeAll(HttpHeaders.contentLengthHeader);
         }
 
-        // Print sent headers for debugging
-        final sentHeaders = <String, String>{};
-        clientRequest.headers.forEach((name, values) {
-          sentHeaders[name] = values.join(', ');
-        });
-        print('Local Proxy: Routing request to: $targetUrlStr');
-        print('Local Proxy: Sent headers: $sentHeaders');
+        // Forward request headers (strip non-standard ones)
 
         // Forward request body if present
         if (request.contentLength > 0) {
@@ -201,12 +194,6 @@ Future<void> startProxy() async {
         }
 
         final clientResponse = await clientRequest.close();
-        print('Local Proxy: CDN response status: ${clientResponse.statusCode}');
-        final respHeaders = <String, String>{};
-        clientResponse.headers.forEach((name, values) {
-          respHeaders[name] = values.join(', ');
-        });
-        print('Local Proxy: CDN response headers: $respHeaders');
 
         // Intercept and print error body from upstream CDN
         if (clientResponse.statusCode >= 400) {
