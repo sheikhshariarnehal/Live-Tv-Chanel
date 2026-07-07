@@ -24,7 +24,7 @@ class SectionHeader extends StatelessWidget {
   );
 
   static const _actionStyle = TextStyle(
-    color: GoPlayTheme.primary,
+    color: Colors.white,
     fontSize: 12,
     fontWeight: FontWeight.w600,
   );
@@ -36,7 +36,7 @@ class SectionHeader extends StatelessWidget {
       child: Row(
         children: [
           if (icon != null) ...[
-            Icon(icon, color: GoPlayTheme.primary, size: 20),
+            Icon(icon, color: Colors.white, size: 20),
             const SizedBox(width: 8),
           ],
           Text(title.toUpperCase(), style: _titleStyle),

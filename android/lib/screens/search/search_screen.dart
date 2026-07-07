@@ -73,32 +73,26 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       data: Theme.of(context).copyWith(
                         inputDecorationTheme: InputDecorationTheme(
                           filled: true,
-                          fillColor: Theme.of(context).brightness == Brightness.dark
-                              ? Colors.white.withOpacity(0.06)
-                              : Colors.black.withOpacity(0.04),
+                          fillColor: const Color(0xFF222326),
                           contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                              color: Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.white.withOpacity(0.08)
-                                  : Colors.black.withOpacity(0.06),
+                              color: Colors.white.withOpacity(0.08),
                               width: 1,
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                              color: Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.white.withOpacity(0.08)
-                                  : Colors.black.withOpacity(0.06),
+                              color: Colors.white.withOpacity(0.08),
                               width: 1,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                              color: Theme.of(context).colorScheme.primary,
+                              color: Colors.white.withOpacity(0.25),
                               width: 1.0,
                             ),
                           ),
@@ -110,27 +104,28 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           controller: _controller,
                           autofocus: true,
                           onChanged: (value) => setState(() => _query = value),
+                          cursorColor: Colors.white,
                           style: GoogleFonts.inter(
-                            color: GoPlayTheme.onSurface,
+                            color: Colors.white,
                             fontSize: 14,
                           ),
                           decoration: InputDecoration(
                             hintText: 'Search channels, teams, sports...',
                             hintStyle: GoogleFonts.inter(
-                              color: GoPlayTheme.onSurfaceVariant.withOpacity(0.5),
+                              color: Colors.white.withOpacity(0.5),
                               fontSize: 14,
                             ),
                             isDense: true,
-                            prefixIcon: Icon(
+                            prefixIcon: const Icon(
                               Icons.search_rounded,
-                              color: GoPlayTheme.primary.withOpacity(0.8),
+                              color: Colors.white70,
                               size: 20,
                             ),
                             suffixIcon: _query.isNotEmpty
                                 ? IconButton(
                                     icon: const Icon(
                                       Icons.close_rounded,
-                                      color: GoPlayTheme.onSurfaceVariant,
+                                      color: Colors.white70,
                                       size: 18,
                                     ),
                                     onPressed: () {

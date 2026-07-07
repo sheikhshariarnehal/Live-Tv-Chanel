@@ -151,12 +151,6 @@ class HomeScreen extends ConsumerWidget {
                     child: Container(
                       decoration: BoxDecoration(
                         color: GoPlayTheme.surface.withOpacity(0.85 + (0.10 * collapseRatio)),
-                        border: Border(
-                          bottom: BorderSide(
-                            color: GoPlayTheme.cardBorder.withOpacity(0.5 * collapseRatio),
-                            width: 0.8,
-                          ),
-                        ),
                         boxShadow: [
                           if (collapseRatio > 0.05)
                             BoxShadow(
@@ -201,7 +195,7 @@ class HomeScreen extends ConsumerWidget {
                                     child: IconButton(
                                       icon: const Icon(
                                         Icons.search_rounded,
-                                        color: GoPlayTheme.primary,
+                                        color: Colors.white,
                                       ),
                                       onPressed: () => context.push('/search'),
                                     ),
@@ -219,7 +213,7 @@ class HomeScreen extends ConsumerWidget {
                                 child: PopupMenuButton<String>(
                                   icon: const Icon(
                                     Icons.more_vert_rounded,
-                                    color: GoPlayTheme.primary,
+                                    color: Colors.white,
                                   ),
                                   color: GoPlayTheme.surfaceContainerHigh,
                                   elevation: 4,
@@ -299,18 +293,18 @@ class HomeScreen extends ConsumerWidget {
                                       readOnly: true,
                                       onTap: () => context.push('/search'),
                                       style: GoogleFonts.inter(
-                                        color: GoPlayTheme.onSurface,
+                                        color: Colors.white,
                                         fontSize: 14,
                                       ),
                                       decoration: InputDecoration(
                                         hintText: 'Search channels, events...',
                                         hintStyle: GoogleFonts.inter(
-                                          color: GoPlayTheme.onSurfaceVariant.withOpacity(0.6),
+                                          color: Colors.white.withOpacity(0.6),
                                           fontSize: 14,
                                         ),
                                         prefixIcon: const Icon(
                                           Icons.search_rounded,
-                                          color: GoPlayTheme.primary,
+                                          color: Colors.white70,
                                           size: 20,
                                         ),
                                       ),
@@ -339,7 +333,7 @@ class HomeScreen extends ConsumerWidget {
           SliverToBoxAdapter(
             child: SectionHeader(
               title: 'Trending Channels',
-              actionLabel: 'All Channels',
+              actionLabel: 'See All',
               onAction: () => context.go('/channels'),
             ),
           ),
