@@ -64,7 +64,7 @@ class _UpdateHandlerState extends ConsumerState<UpdateHandler> with WidgetsBindi
       }
 
       final context = rootNavigatorKey.currentContext;
-      if (context != null && mounted) {
+      if (context != null && context.mounted) {
         await UpdateDialog.show(context);
       }
     } catch (_) {

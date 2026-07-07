@@ -1,7 +1,5 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../core/theme.dart';
 
 /// Main shell screen with bottom navigation bar
 class ShellScreen extends StatelessWidget {
@@ -17,6 +15,7 @@ class ShellScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final index = _selectedIndex(context);
     final isDesktop = MediaQuery.of(context).size.width >= 800;
 
@@ -26,9 +25,12 @@ class ShellScreen extends StatelessWidget {
           children: [
             // Side Navigation Rail
             Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 border: Border(
-                  right: BorderSide(color: GoPlayTheme.cardBorder, width: 0.5),
+                  right: BorderSide(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.12),
+                    width: 0.5,
+                  ),
                 ),
               ),
               child: NavigationRail(
@@ -46,65 +48,65 @@ class ShellScreen extends StatelessWidget {
                       break;
                   }
                 },
-                backgroundColor: GoPlayTheme.surfaceContainer,
-                indicatorColor: GoPlayTheme.primary.withAlpha(25),
+                backgroundColor: theme.colorScheme.surface,
+                indicatorColor: theme.colorScheme.primary.withValues(alpha: 0.1),
                 labelType: NavigationRailLabelType.all,
                 destinations: [
                   NavigationRailDestination(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.home_outlined,
-                      color: GoPlayTheme.onSurfaceVariant,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
-                    selectedIcon: const Icon(
+                    selectedIcon: Icon(
                       Icons.home_rounded,
-                      color: GoPlayTheme.primary,
+                      color: theme.colorScheme.primary,
                     ),
                     label: Text(
                       'Home',
                       style: TextStyle(
                         color: index == 0
-                            ? GoPlayTheme.primary
-                            : GoPlayTheme.onSurfaceVariant,
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurfaceVariant,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                   NavigationRailDestination(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.live_tv_outlined,
-                      color: GoPlayTheme.onSurfaceVariant,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
-                    selectedIcon: const Icon(
+                    selectedIcon: Icon(
                       Icons.live_tv_rounded,
-                      color: GoPlayTheme.primary,
+                      color: theme.colorScheme.primary,
                     ),
                     label: Text(
                       'Channels',
                       style: TextStyle(
                         color: index == 1
-                            ? GoPlayTheme.primary
-                            : GoPlayTheme.onSurfaceVariant,
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurfaceVariant,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                   NavigationRailDestination(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.schedule_outlined,
-                      color: GoPlayTheme.onSurfaceVariant,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
-                    selectedIcon: const Icon(
+                    selectedIcon: Icon(
                       Icons.schedule_rounded,
-                      color: GoPlayTheme.primary,
+                      color: theme.colorScheme.primary,
                     ),
                     label: Text(
                       'Upcoming',
                       style: TextStyle(
                         color: index == 2
-                            ? GoPlayTheme.primary
-                            : GoPlayTheme.onSurfaceVariant,
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurfaceVariant,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -129,51 +131,46 @@ class ShellScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      extendBody: true,
+      extendBody: false, // Solid bottom nav doesn't require transparent overlay
       body: child,
-      bottomNavigationBar: ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-          child: Container(
-            height: 64 + MediaQuery.of(context).padding.bottom,
-            decoration: const BoxDecoration(
-              color: Color(0xCC17181C),
-              border: Border(
-                top: BorderSide(
-                  color: GoPlayTheme.cardBorder,
-                  width: 0.8,
-                ),
-              ),
-            ),
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).padding.bottom,
-            ),
-            child: Row(
-              children: [
-                _NavItem(
-                  icon: Icons.home_outlined,
-                  selectedIcon: Icons.home_rounded,
-                  label: 'Home',
-                  isSelected: index == 0,
-                  onTap: () => context.go('/home'),
-                ),
-                _NavItem(
-                  icon: Icons.live_tv_outlined,
-                  selectedIcon: Icons.live_tv_rounded,
-                  label: 'Channels',
-                  isSelected: index == 1,
-                  onTap: () => context.go('/channels'),
-                ),
-                _NavItem(
-                  icon: Icons.schedule_outlined,
-                  selectedIcon: Icons.schedule_rounded,
-                  label: 'Upcoming',
-                  isSelected: index == 2,
-                  onTap: () => context.go('/upcoming'),
-                ),
-              ],
+      bottomNavigationBar: Container(
+        height: 64 + MediaQuery.of(context).padding.bottom,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          border: Border(
+            top: BorderSide(
+              color: theme.colorScheme.outline.withValues(alpha: 0.12),
+              width: 0.8,
             ),
           ),
+        ),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).padding.bottom,
+        ),
+        child: Row(
+          children: [
+            _NavItem(
+              icon: Icons.home_outlined,
+              selectedIcon: Icons.home_rounded,
+              label: 'Home',
+              isSelected: index == 0,
+              onTap: () => context.go('/home'),
+            ),
+            _NavItem(
+              icon: Icons.live_tv_outlined,
+              selectedIcon: Icons.live_tv_rounded,
+              label: 'Channels',
+              isSelected: index == 1,
+              onTap: () => context.go('/channels'),
+            ),
+            _NavItem(
+              icon: Icons.schedule_outlined,
+              selectedIcon: Icons.schedule_rounded,
+              label: 'Upcoming',
+              isSelected: index == 2,
+              onTap: () => context.go('/upcoming'),
+            ),
+          ],
         ),
       ),
     );
@@ -197,6 +194,7 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Expanded(
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -212,8 +210,8 @@ class _NavItem extends StatelessWidget {
               child: Icon(
                 isSelected ? selectedIcon : icon,
                 color: isSelected
-                    ? GoPlayTheme.primary
-                    : GoPlayTheme.onSurfaceVariant,
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurfaceVariant,
                 size: 23,
               ),
             ),
@@ -222,7 +220,7 @@ class _NavItem extends StatelessWidget {
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOutCubic,
               style: TextStyle(
-                color: isSelected ? GoPlayTheme.onSurface : GoPlayTheme.onSurfaceVariant,
+                color: isSelected ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
                 fontSize: 9.5,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
                 letterSpacing: 0.2,

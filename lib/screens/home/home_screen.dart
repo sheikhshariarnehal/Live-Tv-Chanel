@@ -17,12 +17,20 @@ import '../../widgets/team_flag.dart';
 import '../../widgets/channel_avatar.dart';
 import '../../widgets/countdown_timer.dart';
 
-// ─── Cached Text Styles ──────────────────────────────────────
-const TextStyle _titleStyleBase = TextStyle(
+// Pre-cached AppBar title states — eliminates per-scroll-pixel copyWith() allocation.
+const TextStyle _kTitleExpanded = TextStyle(
   fontWeight: FontWeight.w900,
   color: GoPlayTheme.primary,
+  fontSize: 22,
+  letterSpacing: 3,
 );
 
+const TextStyle _kTitleCollapsed = TextStyle(
+  fontWeight: FontWeight.w900,
+  color: GoPlayTheme.primary,
+  fontSize: 20,
+  letterSpacing: 2,
+);
 
 
 class HomeScreen extends ConsumerWidget {
@@ -142,183 +150,188 @@ class HomeScreen extends ConsumerWidget {
                     ((maxHeight - appBarHeight) / (maxHeight - minHeight))
                         .clamp(0.0, 1.0);
 
-                return ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(
-                      sigmaX: 12.0,
-                      sigmaY: 12.0,
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: GoPlayTheme.surface.withOpacity(0.85 + (0.10 * collapseRatio)),
-                        boxShadow: [
-                          if (collapseRatio > 0.05)
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.15 * collapseRatio),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.only(top: statusBarHeight),
-                        child: Stack(
-                          children: [
-                            // Static Title "GOPLAY" at top-left (replacing drawer menu position)
-                            Positioned(
-                              left: 16,
-                              top: 0,
-                              height: kToolbarHeight,
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  'GOPLAY',
-                                  style: _titleStyleBase.copyWith(
-                                    color: GoPlayTheme.primary,
-                                    fontSize: 22 - (2 * collapseRatio),
-                                    letterSpacing: 3 - (1.0 * collapseRatio),
-                                  ),
-                                ),
-                              ),
-                            ),
+                final bool showBlur = collapseRatio > 0.01;
+                final Color themeSurface = Theme.of(context).colorScheme.surface;
+                
+                // Color matches the theme surface dynamically. 
+                // Fully opaque when expanded to blend with Scaffold background,
+                // semi-transparent when collapsed to allow content to show through.
+                final Color headerBgColor = showBlur
+                    ? themeSurface.withValues(alpha: 0.85 + (0.10 * collapseRatio))
+                    : themeSurface;
 
-                            // Search Icon on top-right, fading in on scroll
-                            Positioned(
-                              right: 48,
-                              top: 0,
-                              height: kToolbarHeight,
-                              child: Center(
-                                child: Opacity(
-                                  opacity: collapseRatio,
-                                  child: IgnorePointer(
-                                    ignoring: collapseRatio < 0.5,
-                                    child: IconButton(
-                                      icon: const Icon(
-                                        Icons.search_rounded,
-                                        color: Colors.white,
-                                      ),
-                                      onPressed: () => context.push('/search'),
-                                    ),
-                                  ),
-                                ),
-                              ),
+                final Widget headerContent = Container(
+                  color: headerBgColor,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: statusBarHeight),
+                    child: Stack(
+                      children: [
+                        // Title — snaps between two pre-cached const styles,
+                        // eliminating per-frame TextStyle allocation via copyWith().
+                        Positioned(
+                          left: 16,
+                          top: 0,
+                          height: kToolbarHeight,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'GOPLAY',
+                              style: collapseRatio > 0.5
+                                  ? _kTitleCollapsed
+                                  : _kTitleExpanded,
                             ),
+                          ),
+                        ),
 
-                            // 3-dot Menu Icon on far top-right, always visible
-                            Positioned(
-                              right: 8,
-                              top: 0,
-                              height: kToolbarHeight,
-                              child: Center(
-                                child: PopupMenuButton<String>(
+                        // Search Icon on top-right, fading in on scroll
+                        Positioned(
+                          right: 48,
+                          top: 0,
+                          height: kToolbarHeight,
+                          child: Center(
+                            child: Opacity(
+                              opacity: collapseRatio,
+                              child: IgnorePointer(
+                                ignoring: collapseRatio < 0.5,
+                                child: IconButton(
                                   icon: const Icon(
-                                    Icons.more_vert_rounded,
+                                    Icons.search_rounded,
                                     color: Colors.white,
                                   ),
-                                  color: GoPlayTheme.surfaceContainerHigh,
-                                  elevation: 4,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    side: const BorderSide(
-                                      color: GoPlayTheme.cardBorder,
-                                      width: 0.5,
-                                    ),
-                                  ),
-                                  onSelected: (value) {
-                                    if (value == 'settings') {
-                                      context.push('/settings');
-                                    }
-                                  },
-                                  itemBuilder: (BuildContext context) => [
-                                    PopupMenuItem<String>(
-                                      value: 'settings',
-                                      child: Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.settings_rounded,
-                                            color: Colors.white,
-                                            size: 20,
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Text(
-                                            'App Settings',
-                                            style: GoogleFonts.inter(
-                                              color: Colors.white,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
+                                  onPressed: () => context.push('/search'),
                                 ),
                               ),
                             ),
-
-                            // Search text field below, fading/sliding out on scroll
-                            Positioned(
-                              left: 16,
-                              right: 16,
-                              bottom: 12 * (1.0 - collapseRatio),
-                              height: 44,
-                              child: Opacity(
-                                opacity: (1.0 - collapseRatio * 1.5).clamp(0.0, 1.0),
-                                child: IgnorePointer(
-                                  ignoring: collapseRatio > 0.5,
-                                  child: Theme(
-                                    data: Theme.of(context).copyWith(
-                                      inputDecorationTheme: InputDecorationTheme(
-                                        filled: true,
-                                        fillColor: GoPlayTheme.surfaceContainer,
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                        contentPadding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 8,
-                                        ),
-                                      ),
-                                    ),
-                                    child: TextField(
-                                      readOnly: true,
-                                      onTap: () => context.push('/search'),
-                                      style: GoogleFonts.inter(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                      ),
-                                      decoration: InputDecoration(
-                                        hintText: 'Search channels, events...',
-                                        hintStyle: GoogleFonts.inter(
-                                          color: Colors.white.withOpacity(0.6),
-                                          fontSize: 14,
-                                        ),
-                                        prefixIcon: const Icon(
-                                          Icons.search_rounded,
-                                          color: Colors.white70,
-                                          size: 20,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
+
+                        // 3-dot Menu Icon on far top-right, always visible
+                        Positioned(
+                          right: 8,
+                          top: 0,
+                          height: kToolbarHeight,
+                          child: Center(
+                            child: PopupMenuButton<String>(
+                              icon: const Icon(
+                                Icons.more_vert_rounded,
+                                color: Colors.white,
+                              ),
+                              color: GoPlayTheme.surfaceContainerHigh,
+                              elevation: 4,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: const BorderSide(
+                                  color: GoPlayTheme.cardBorder,
+                                  width: 0.5,
+                                ),
+                              ),
+                              onSelected: (value) {
+                                if (value == 'settings') {
+                                  context.push('/settings');
+                                }
+                              },
+                              itemBuilder: (BuildContext context) => [
+                                PopupMenuItem<String>(
+                                  value: 'settings',
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.settings_rounded,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        'App Settings',
+                                        style: GoogleFonts.inter(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        // Search text field below, fading/sliding out on scroll
+                        Positioned(
+                          left: 16,
+                          right: 16,
+                          bottom: 12 * (1.0 - collapseRatio),
+                          height: 44,
+                          child: Opacity(
+                            opacity: (1.0 - collapseRatio * 1.5).clamp(0.0, 1.0),
+                            child: IgnorePointer(
+                              ignoring: collapseRatio > 0.5,
+                              child: Theme(
+                                data: Theme.of(context).copyWith(
+                                  inputDecorationTheme: InputDecorationTheme(
+                                    filled: true,
+                                    fillColor: GoPlayTheme.surfaceContainer,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                  ),
+                                ),
+                                child: TextField(
+                                  readOnly: true,
+                                  onTap: () => context.push('/search'),
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: 'Search channels, events...',
+                                    hintStyle: GoogleFonts.inter(
+                                      color: Colors.white.withValues(alpha: 0.6),
+                                      fontSize: 14,
+                                    ),
+                                    prefixIcon: const Icon(
+                                      Icons.search_rounded,
+                                      color: Colors.white70,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 );
+
+                if (showBlur) {
+                  return ClipRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(
+                        sigmaX: 12.0,
+                        sigmaY: 12.0,
+                      ),
+                      child: headerContent,
+                    ),
+                  );
+                }
+
+                return headerContent;
               },
             ),
           ),
@@ -541,7 +554,7 @@ class _HeroBannerCard extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.55),
+                          color: Colors.black.withValues(alpha: 0.55),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: const Color(0x20FFFFFF), width: 0.5),
                         ),
