@@ -13,19 +13,19 @@ export const prerender = true;
 <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style is:global>
   :root {
-    --pitch: #0a1310;
-    --turf: #0f1f16;
-    --turf-2: #132a1d;
-    --card: #0f1f16;
-    --line: rgba(61, 255, 138, 0.15);
-    --signal: #3dff8a;
-    --signal-glow: rgba(61, 255, 138, 0.3);
-    --signal-dim: #008f39;
+    --pitch: #17181c;
+    --turf: #222326;
+    --turf-2: #2c2d31;
+    --card: #222326;
+    --line: rgba(113, 118, 142, 0.15);
+    --signal: #00adb5;
+    --signal-glow: rgba(0, 173, 181, 0.3);
+    --signal-dim: #008a91;
     --amber: #ffb020;
-    --chalk: #eef3ee;
-    --chalk-dim: #9db3a8;
+    --chalk: #f3f4f6;
+    --chalk-dim: #71768e;
     --shadow: 0 30px 60px rgba(0,0,0,0.6);
-    --gradient-glow: radial-gradient(circle, rgba(61,255,138,0.12) 0%, rgba(255,176,32,0.06) 50%, transparent 100%);
+    --gradient-glow: radial-gradient(circle, rgba(0, 173, 181, 0.12) 0%, rgba(113, 118, 142, 0.06) 50%, transparent 100%);
     --container-padding: 24px;
     --max-content-width: 1280px;
   }
@@ -116,8 +116,8 @@ export const prerender = true;
     pointer-events: none;
     z-index: 0;
     background-image:
-      repeating-linear-gradient(0deg, transparent, transparent 159px, rgba(0, 255, 102, 0.015) 160px),
-      radial-gradient(circle at 50% 20%, rgba(0, 255, 102, 0.04), transparent 70%);
+      repeating-linear-gradient(0deg, transparent, transparent 159px, rgba(0, 173, 181, 0.015) 160px),
+      radial-gradient(circle at 50% 20%, rgba(0, 173, 181, 0.03), transparent 70%);
     opacity: 0.7;
   }
 
@@ -126,7 +126,7 @@ export const prerender = true;
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(4, 9, 7, 0.7);
+    background: rgba(23, 24, 28, 0.7);
     -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--line);
@@ -206,19 +206,19 @@ export const prerender = true;
   }
   
   .nav-cta {
-    background: linear-gradient(135deg, var(--signal) 0%, #00d9b2 100%);
-    color: #020704;
+    background: linear-gradient(135deg, var(--signal) 0%, var(--signal-dim) 100%);
+    color: var(--pitch);
     padding: 10px 22px;
     border-radius: 8px;
     font-weight: 700;
     font-size: 14px;
-    box-shadow: 0 4px 15px rgba(0, 255, 102, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 173, 181, 0.2);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
   
   .nav-cta:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 255, 102, 0.4);
+    box-shadow: 0 6px 20px rgba(0, 173, 181, 0.4);
   }
 
   @media(max-width:768px) {
@@ -368,53 +368,125 @@ export const prerender = true;
   }
   
   .btn-primary {
-    background: linear-gradient(135deg, var(--signal) 0%, #00e0a3 100%);
-    color: #020704;
-    padding: 16px 30px;
+    position: relative;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(23, 24, 28, 0.7);
+    border: 1px solid rgba(0, 173, 181, 0.35);
+    color: var(--chalk);
+    padding: 16px 32px;
     border-radius: 12px;
-    font-weight: 800;
+    font-weight: 600;
     font-size: 15px;
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    box-shadow: 0 10px 25px rgba(0, 255, 102, 0.25);
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
+    gap: 12px;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.15),
+      0 4px 12px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(0, 0, 0, 0.8),
+      0 0 25px rgba(0, 173, 181, 0.1);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn-primary svg {
+    color: var(--signal);
+    transition: transform 0.3s ease;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    transform: skewX(-20deg);
+    transition: left 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+    z-index: 1;
   }
   
   .btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 30px rgba(0, 255, 102, 0.4);
+    transform: translateY(-2px);
+    border-color: rgba(0, 173, 181, 0.6);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%), rgba(34, 35, 38, 0.85);
+    box-shadow: 
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.25),
+      0 8px 24px rgba(0, 0, 0, 0.6),
+      0 0 0 1px rgba(0, 0, 0, 0.8),
+      0 0 35px rgba(0, 173, 181, 0.2);
+  }
+
+  .btn-primary:hover svg {
+    transform: translateY(1px);
+  }
+
+  .btn-primary:hover::before {
+    left: 150%;
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.1),
+      0 2px 8px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(0, 0, 0, 0.8),
+      0 0 15px rgba(0, 173, 181, 0.15);
   }
   
   .btn-secondary {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--line);
-    color: var(--chalk);
-    padding: 16px 30px;
+    position: relative;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%), rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--chalk-dim);
+    padding: 16px 32px;
     border-radius: 12px;
-    font-weight: 700;
+    font-weight: 500;
     font-size: 15px;
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
-    transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.05),
+      0 4px 12px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
   
   .btn-secondary:hover {
-    border-color: var(--signal);
-    background: rgba(0, 255, 102, 0.05);
     transform: translateY(-2px);
+    color: var(--chalk);
+    border-color: rgba(255, 255, 255, 0.2);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%), rgba(255, 255, 255, 0.04);
+    box-shadow: 
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.1),
+      0 8px 24px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(0, 0, 0, 0.5);
+  }
+
+  .btn-secondary:active {
+    transform: translateY(0);
+    box-shadow: 
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.03),
+      0 2px 8px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(0, 0, 0, 0.5);
   }
 
   .trust-row {
     display: flex;
-    gap: 28px;
-    margin-top: 44px;
+    gap: 12px;
+    margin-top: 48px;
     flex-wrap: wrap;
-    color: var(--chalk-dim);
-    font-size: 14px;
   }
   
   @media(max-width:992px) {
@@ -426,17 +498,37 @@ export const prerender = true;
       display: none;
     }
   }
-  
-  .trust-row div {
+
+  .trust-badge {
     display: flex;
     align-items: center;
     gap: 8px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--chalk-dim);
+    font-size: 13px;
+    font-weight: 500;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.03), 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .trust-row b {
+  .trust-badge:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(0, 173, 181, 0.15);
+    color: var(--chalk);
+    transform: translateY(-1px);
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05), 0 8px 16px rgba(0, 0, 0, 0.25);
+  }
+
+  .trust-badge b {
     color: var(--signal);
     font-family: 'Space Mono', monospace;
-    font-size: 16px;
+    font-size: 14px;
+    text-shadow: 0 0 8px rgba(0, 173, 181, 0.3);
   }
 
   /* ---------- interactive slider mockup ---------- */
@@ -457,7 +549,7 @@ export const prerender = true;
   .marquee-section {
     border-top: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
-    background: rgba(8, 18, 13, 0.4);
+    background: rgba(34, 35, 38, 0.4);
     -webkit-backdrop-filter: blur(5px);
     backdrop-filter: blur(5px);
     padding: 20px 0;
@@ -543,7 +635,7 @@ export const prerender = true;
   .feature-card {
     padding: 40px 32px;
     position: relative;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 50%, rgba(255, 255, 255, 0) 100%), rgba(10, 14, 12, 0.65);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 50%, rgba(255, 255, 255, 0) 100%), rgba(23, 24, 28, 0.65);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
     -webkit-backdrop-filter: blur(20px);
@@ -555,9 +647,9 @@ export const prerender = true;
 
   .feature-card:hover {
     transform: translateY(-6px);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0) 100%), rgba(14, 22, 17, 0.75);
-    border-color: rgba(61, 255, 138, 0.45);
-    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2), 0 0 30px rgba(61, 255, 138, 0.12), 0 25px 50px rgba(0,0,0,0.6);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0) 100%), rgba(34, 35, 38, 0.75);
+    border-color: rgba(0, 173, 181, 0.45);
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2), 0 0 30px rgba(0, 173, 181, 0.12), 0 25px 50px rgba(0,0,0,0.6);
   }
 
   @media(max-width:950px) {
@@ -579,10 +671,10 @@ export const prerender = true;
     font-size: 13px;
     margin-bottom: 24px;
     display: inline-block;
-    border: 1px solid rgba(0, 255, 102, 0.2);
+    border: 1px solid rgba(0, 173, 181, 0.2);
     padding: 2px 8px;
     border-radius: 4px;
-    background: rgba(0, 255, 102, 0.02);
+    background: rgba(0, 173, 181, 0.02);
   }
   
   .feature-card h3 {
@@ -647,7 +739,7 @@ export const prerender = true;
   .phone-stack-container.state-0 .phone-schedule {
     transform: scale(1) translateZ(50px);
     z-index: 3;
-    filter: drop-shadow(0 35px 50px rgba(0,0,0,0.7)) drop-shadow(0 0 20px rgba(0,255,102,0.05));
+    filter: drop-shadow(0 35px 50px rgba(0,0,0,0.7)) drop-shadow(0 0 20px rgba(0,173,181,0.05));
   }
   .phone-stack-container.state-0 .phone-home {
     transform: translateX(130px) rotate(10deg) scale(0.85);
@@ -669,7 +761,7 @@ export const prerender = true;
   .phone-stack-container.state-1 .phone-home {
     transform: scale(1) translateZ(50px);
     z-index: 3;
-    filter: drop-shadow(0 35px 50px rgba(0,0,0,0.7)) drop-shadow(0 0 20px rgba(0,255,102,0.05));
+    filter: drop-shadow(0 35px 50px rgba(0,0,0,0.7)) drop-shadow(0 0 20px rgba(0,173,181,0.05));
   }
   .phone-stack-container.state-1 .phone-stream {
     transform: translateX(130px) rotate(10deg) scale(0.85);
@@ -691,7 +783,7 @@ export const prerender = true;
   .phone-stack-container.state-2 .phone-stream {
     transform: scale(1) translateZ(50px);
     z-index: 3;
-    filter: drop-shadow(0 35px 50px rgba(0,0,0,0.7)) drop-shadow(0 0 20px rgba(0,255,102,0.05));
+    filter: drop-shadow(0 35px 50px rgba(0,0,0,0.7)) drop-shadow(0 0 20px rgba(0,173,181,0.05));
   }
 
   @media(max-width: 520px) {
@@ -782,21 +874,21 @@ export const prerender = true;
   }
 
   .check-item:hover {
-    background: rgba(0, 255, 102, 0.02);
-    border-color: rgba(0, 255, 102, 0.1);
+    background: rgba(0, 173, 181, 0.02);
+    border-color: rgba(0, 173, 181, 0.1);
     transform: translateX(6px);
   }
 
   .check-item.active {
-    background: rgba(0, 255, 102, 0.04);
-    border-color: rgba(0, 255, 102, 0.2);
-    box-shadow: 0 8px 30px rgba(0, 255, 102, 0.02);
+    background: rgba(0, 173, 181, 0.04);
+    border-color: rgba(0, 173, 181, 0.2);
+    box-shadow: 0 8px 30px rgba(0, 173, 181, 0.02);
   }
 
   .check-item.active .check-mark {
     background: var(--signal);
-    color: #020704;
-    box-shadow: 0 0 12px rgba(0, 255, 102, 0.4);
+    color: var(--pitch);
+    box-shadow: 0 0 12px rgba(0, 173, 181, 0.4);
     border-color: var(--signal);
   }
   
@@ -805,14 +897,14 @@ export const prerender = true;
     height: 24px;
     flex: none;
     border-radius: 8px;
-    background: rgba(0, 255, 102, 0.08);
+    background: rgba(0, 173, 181, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--signal);
     font-size: 12px;
     font-weight: 800;
-    border: 1px solid rgba(0, 255, 102, 0.25);
+    border: 1px solid rgba(0, 173, 181, 0.25);
   }
   
   .check-item p {
@@ -840,7 +932,7 @@ export const prerender = true;
   .stat-cell {
     padding: 44px 24px;
     text-align: center;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 50%, rgba(255, 255, 255, 0) 100%), rgba(10, 14, 12, 0.65);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 50%, rgba(255, 255, 255, 0) 100%), rgba(23, 24, 28, 0.65);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
     -webkit-backdrop-filter: blur(20px);
@@ -852,9 +944,9 @@ export const prerender = true;
 
   .stat-cell:hover {
     transform: translateY(-6px);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0) 100%), rgba(14, 22, 17, 0.75);
-    border-color: rgba(61, 255, 138, 0.45);
-    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2), 0 0 30px rgba(61, 255, 138, 0.12), 0 25px 50px rgba(0,0,0,0.6);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0) 100%), rgba(34, 35, 38, 0.75);
+    border-color: rgba(0, 173, 181, 0.45);
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2), 0 0 30px rgba(0, 173, 181, 0.12), 0 25px 50px rgba(0,0,0,0.6);
   }
 
   @media(max-width:950px) {
@@ -875,7 +967,7 @@ export const prerender = true;
     font-size: 64px;
     color: var(--signal);
     letter-spacing: 1px;
-    text-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+    text-shadow: 0 0 15px rgba(0, 173, 181, 0.2);
   }
   
   .stat-label {
@@ -891,7 +983,7 @@ export const prerender = true;
   .cta-block {
     text-align: center;
     padding: 80px 32px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 50%, rgba(255, 255, 255, 0) 100%), rgba(10, 14, 12, 0.65);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 50%, rgba(255, 255, 255, 0) 100%), rgba(23, 24, 28, 0.65);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
     box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), 0 30px 60px rgba(0, 0, 0, 0.5);
@@ -909,7 +1001,7 @@ export const prerender = true;
     left: -50%;
     right: -50%;
     bottom: -50%;
-    background: radial-gradient(circle at 50% 50%, rgba(61, 255, 138, 0.06), transparent 50%);
+    background: radial-gradient(circle at 50% 50%, rgba(0, 173, 181, 0.06), transparent 50%);
     pointer-events: none;
     z-index: -1;
   }
@@ -951,10 +1043,10 @@ export const prerender = true;
   }
   
   .store-badge:hover {
-    border-color: rgba(61, 255, 138, 0.5);
-    background: rgba(61, 255, 138, 0.08);
+    border-color: rgba(0, 173, 181, 0.5);
+    background: rgba(0, 173, 181, 0.08);
     transform: translateY(-2px);
-    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), 0 10px 20px rgba(0, 255, 102, 0.05), 0 6px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), 0 10px 20px rgba(0, 173, 181, 0.05), 0 6px 15px rgba(0, 0, 0, 0.3);
   }
 
   .store-badge svg {
@@ -986,7 +1078,7 @@ export const prerender = true;
     padding: 60px 0 40px;
     position: relative;
     z-index: 10;
-    background: rgba(4, 9, 7, 0.8);
+    background: rgba(23, 24, 28, 0.8);
     content-visibility: auto;
     contain-intrinsic-size: auto 420px;
   }
@@ -1169,9 +1261,9 @@ export const prerender = true;
       <a href="#app" class="btn-secondary">Explore the app</a>
     </div>
     <div class="trust-row">
-      <div><b>40+</b> leagues</div>
-      <div><b>100%</b> Free to watch</div>
-      <div><b>No</b> registration required</div>
+      <div class="trust-badge"><b>40+</b> leagues</div>
+      <div class="trust-badge"><b>100%</b> Free to watch</div>
+      <div class="trust-badge"><b>No</b> registration required</div>
     </div>
   </div>
 
@@ -1182,7 +1274,7 @@ export const prerender = true;
           <img src="https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Goplay%20Screen%204.webp" alt="Schedule Screen" decoding="async" fetchpriority="high" />
         </div>
         <div class="phone-stack-item phone-home">
-          <img src="https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Goplay%20Screen1.webp" alt="Home Dashboard Screen" decoding="async" fetchpriority="high" />
+          <img src="https://cdn.ntechbd.app/App%20Screen/Goplay%20Screen%201.webp" alt="Home Dashboard Screen" decoding="async" fetchpriority="high" />
         </div>
         <div class="phone-stack-item phone-stream">
           <img id="hero-stream-img" src="https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Goplay%20Screen%203.webp" alt="Live Stream Player Screen" decoding="async" fetchpriority="high" />
@@ -1246,7 +1338,7 @@ export const prerender = true;
         <img src="https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Goplay%20Screen%204.webp" alt="Schedule Screen" loading="lazy" decoding="async" />
       </div>
       <div class="phone-stack-item phone-home">
-        <img src="https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Goplay%20Screen1.webp" alt="Home Dashboard Screen" loading="lazy" decoding="async" />
+        <img src="https://cdn.ntechbd.app/App%20Screen/Goplay%20Screen%201.webp" alt="Home Dashboard Screen" loading="lazy" decoding="async" />
       </div>
       <div class="phone-stack-item phone-stream">
         <img src="https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Goplay%20Screen%203.webp" alt="Live Stream Player Screen" loading="lazy" decoding="async" />
