@@ -1,6 +1,6 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../core/theme.dart';
 import '../providers/update_notifier.dart';
@@ -26,69 +26,104 @@ class UpdateDialog extends ConsumerWidget {
     return PopScope(
       canPop: !isForce,
       child: Dialog(
-        backgroundColor: GoPlayTheme.surfaceContainer,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: GoPlayTheme.cardBorder, width: 1),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Header
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: GoPlayTheme.primary.withAlpha(25),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.system_update_rounded,
-                      color: GoPlayTheme.primary,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xE617181C), // Translucent Carbon Black (90%)
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.08),
+                  width: 1.0,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Header
+                    Row(
                       children: [
-                        Text(
-                          isForce ? 'CRITICAL UPDATE' : 'UPDATE AVAILABLE',
-                          style: GoogleFonts.orbitron(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w900,
-                            color: isForce ? GoPlayTheme.error : GoPlayTheme.primary,
-                            letterSpacing: 1,
+                        Container(
+                          padding: const EdgeInsets.all(11),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14), // Premium Telegram-style Adaptive Icon Squircle
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: isForce
+                                  ? [
+                                      const Color(0xFFFF5A5F), // Bright soft red
+                                      GoPlayTheme.error,       // iOS dark red
+                                    ]
+                                  : [
+                                      const Color(0xFF33C2C8), // Lighter Cyan
+                                      GoPlayTheme.primary,     // Cyan primary
+                                    ],
+                            ),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.2),
+                              width: 1,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.system_update_rounded,
+                            color: Colors.white,
+                            size: 22,
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          isForce ? 'You must update to continue' : 'A new version is ready',
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: GoPlayTheme.onSurfaceVariant,
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                isForce ? 'CRITICAL UPDATE' : 'UPDATE AVAILABLE',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w900,
+                                  color: isForce ? GoPlayTheme.error : GoPlayTheme.primary,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                isForce ? 'You must update to continue' : 'A new version is ready',
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: GoPlayTheme.onSurfaceVariant.withOpacity(0.7),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
+                    
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 20),
+                      height: 1,
+                      color: Colors.white.withOpacity(0.06),
+                    ),
+
+                    // Dynamic Body based on download/check status
+                    _buildDialogBody(context, updateState),
+
+                    const SizedBox(height: 24),
+
+                    // Action Buttons
+                    _buildActionButtons(context, updateState, notifier),
+                  ],
+                ),
               ),
-              const Divider(color: GoPlayTheme.cardBorder, height: 32),
-
-              // Dynamic Body based on download/check status
-              _buildDialogBody(context, updateState),
-
-              const SizedBox(height: 24),
-
-              // Action Buttons
-              _buildActionButtons(context, updateState, notifier),
-            ],
+            ),
           ),
         ),
       ),
@@ -102,35 +137,39 @@ class UpdateDialog extends ConsumerWidget {
           children: [
             Text(
               'Downloading update package...',
-              style: GoogleFonts.inter(fontSize: 14, color: Colors.white),
+              style: TextStyle(
+                fontSize: 13, 
+                fontWeight: FontWeight.w500,
+                color: Colors.white.withOpacity(0.9)
+              ),
             ),
             const SizedBox(height: 16),
             ClipRRect(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(6),
               child: LinearProgressIndicator(
                 value: state.downloadProgress,
-                backgroundColor: GoPlayTheme.surfaceContainerHigh,
+                backgroundColor: Colors.white.withOpacity(0.05),
                 valueColor: const AlwaysStoppedAnimation<Color>(GoPlayTheme.primary),
-                minHeight: 8,
+                minHeight: 6,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   '${(state.downloadProgress * 100).toStringAsFixed(0)}%',
-                  style: GoogleFonts.orbitron(
+                  style: const TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                     color: GoPlayTheme.primary,
                   ),
                 ),
                 Text(
                   'Please keep the app open',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 11,
-                    color: GoPlayTheme.onSurfaceVariant,
+                    color: GoPlayTheme.onSurfaceVariant.withOpacity(0.7),
                   ),
                 ),
               ],
@@ -139,21 +178,25 @@ class UpdateDialog extends ConsumerWidget {
         );
 
       case UpdateStatus.installing:
-        return const Column(
+        return Column(
           children: [
-            SizedBox(
-              height: 40,
-              width: 40,
+            const SizedBox(
+              height: 36,
+              width: 36,
               child: CircularProgressIndicator(
                 color: GoPlayTheme.primary,
                 strokeWidth: 3,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               'Launching package installer...',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white, fontSize: 14),
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.9), 
+                fontSize: 13,
+                fontWeight: FontWeight.w500
+              ),
             ),
           ],
         );
@@ -166,28 +209,31 @@ class UpdateDialog extends ConsumerWidget {
               children: [
                 const Icon(Icons.error_outline_rounded, color: GoPlayTheme.error, size: 20),
                 const SizedBox(width: 8),
-                Text(
+                const Text(
                   'Download Failed',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     color: GoPlayTheme.error,
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontSize: 13,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 10),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: const Color(0x12FF453A),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: GoPlayTheme.error.withAlpha(50), width: 0.5),
+                color: GoPlayTheme.error.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: GoPlayTheme.error.withOpacity(0.15),
+                  width: 1,
+                ),
               ),
               child: Text(
                 state.errorMessage ?? 'An unexpected network error occurred while downloading the APK file. Please check your connection.',
-                style: GoogleFonts.inter(
-                  color: GoPlayTheme.onSurfaceVariant,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.85),
                   fontSize: 12,
                   height: 1.4,
                 ),
@@ -221,7 +267,7 @@ class UpdateDialog extends ConsumerWidget {
             // Release Notes Header
             Text(
               'WHAT\'S NEW',
-              style: GoogleFonts.orbitron(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
                 color: GoPlayTheme.onSurfaceVariant,
@@ -232,7 +278,7 @@ class UpdateDialog extends ConsumerWidget {
 
             // Release Notes list
             ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 150),
+              constraints: const BoxConstraints(maxHeight: 130),
               child: Scrollbar(
                 thumbVisibility: true,
                 child: SingleChildScrollView(
@@ -256,7 +302,7 @@ class UpdateDialog extends ConsumerWidget {
                             Expanded(
                               child: Text(
                                 note,
-                                style: GoogleFonts.inter(
+                                style: TextStyle(
                                   fontSize: 13,
                                   color: Colors.white.withOpacity(0.9),
                                   height: 1.4,
@@ -282,7 +328,7 @@ class UpdateDialog extends ConsumerWidget {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 9,
             fontWeight: FontWeight.w800,
             color: GoPlayTheme.onSurfaceVariant,
@@ -292,7 +338,7 @@ class UpdateDialog extends ConsumerWidget {
         const SizedBox(height: 4),
         Text(
           value,
-          style: GoogleFonts.orbitron(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w900,
             color: isHighlight ? GoPlayTheme.primary : Colors.white,
@@ -314,8 +360,14 @@ class UpdateDialog extends ConsumerWidget {
         label: const Text('CANCEL DOWNLOAD'),
         style: TextButton.styleFrom(
           foregroundColor: GoPlayTheme.error,
+          backgroundColor: GoPlayTheme.error.withOpacity(0.08),
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          textStyle: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.5,
+          ),
         ),
       );
     }
@@ -335,7 +387,8 @@ class UpdateDialog extends ConsumerWidget {
                   Navigator.of(context).pop();
                 },
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: GoPlayTheme.cardBorder),
+                  side: BorderSide(color: Colors.white.withOpacity(0.08)),
+                  backgroundColor: Colors.white.withOpacity(0.02),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
@@ -350,8 +403,16 @@ class UpdateDialog extends ConsumerWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: GoPlayTheme.primary,
-                foregroundColor: const Color(0xFF003300),
+                foregroundColor: const Color(0xFF071F21),
+                elevation: 0,
+                shadowColor: Colors.transparent,
                 padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                textStyle: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
+                ),
               ),
               child: const Text('RETRY DOWNLOAD'),
             ),
@@ -367,7 +428,7 @@ class UpdateDialog extends ConsumerWidget {
           if (state.errorMessage != null) ...[
             Text(
               state.errorMessage!,
-              style: GoogleFonts.inter(color: GoPlayTheme.error, fontSize: 11),
+              style: const TextStyle(color: GoPlayTheme.error, fontSize: 11),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 10),
@@ -382,7 +443,8 @@ class UpdateDialog extends ConsumerWidget {
                       Navigator.of(context).pop();
                     },
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: GoPlayTheme.cardBorder),
+                      side: BorderSide(color: Colors.white.withOpacity(0.08)),
+                      backgroundColor: Colors.white.withOpacity(0.02),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
@@ -397,8 +459,16 @@ class UpdateDialog extends ConsumerWidget {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: GoPlayTheme.primary,
-                    foregroundColor: const Color(0xFF003300),
+                    foregroundColor: const Color(0xFF071F21),
+                    elevation: 0,
+                    shadowColor: Colors.transparent,
                     padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    textStyle: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                   child: const Text('INSTALL NOW'),
                 ),
@@ -419,7 +489,8 @@ class UpdateDialog extends ConsumerWidget {
                 Navigator.of(context).pop();
               },
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: GoPlayTheme.cardBorder),
+                side: BorderSide(color: Colors.white.withOpacity(0.08)),
+                backgroundColor: Colors.white.withOpacity(0.02),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
@@ -440,8 +511,16 @@ class UpdateDialog extends ConsumerWidget {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: GoPlayTheme.primary,
-              foregroundColor: const Color(0xFF003300),
+              foregroundColor: const Color(0xFF071F21),
+              elevation: 0,
+              shadowColor: Colors.transparent,
               padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              textStyle: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.5,
+              ),
             ),
             child: const Text('UPDATE NOW'),
           ),

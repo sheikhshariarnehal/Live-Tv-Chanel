@@ -113,7 +113,7 @@ class GoPlayTheme {
         backgroundColor: darkSurface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        titleTextStyle: GoogleFonts.orbitron(
+        titleTextStyle: const TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.w900,
           color: primary,
@@ -223,7 +223,7 @@ class GoPlayTheme {
         backgroundColor: lightSurface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        titleTextStyle: GoogleFonts.orbitron(
+        titleTextStyle: const TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.w900,
           color: primaryDark,

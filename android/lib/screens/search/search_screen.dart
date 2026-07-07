@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
 import '../../models/channel.dart';
@@ -105,13 +104,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           autofocus: true,
                           onChanged: (value) => setState(() => _query = value),
                           cursorColor: Colors.white,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             color: Colors.white,
                             fontSize: 14,
                           ),
                           decoration: InputDecoration(
                             hintText: 'Search channels, teams, sports...',
-                            hintStyle: GoogleFonts.inter(
+                            hintStyle: TextStyle(
                               color: Colors.white.withOpacity(0.5),
                               fontSize: 14,
                             ),
@@ -190,7 +189,7 @@ class _EmptySearchState extends StatelessWidget {
         // Section: Popular Tags
         Text(
           'POPULAR SEARCHES',
-          style: GoogleFonts.inter(
+          style: TextStyle(
             color: GoPlayTheme.onSurfaceVariant.withOpacity(0.5),
             fontSize: 11,
             fontWeight: FontWeight.w800,
@@ -218,7 +217,7 @@ class _EmptySearchState extends StatelessWidget {
                 ),
                 child: Text(
                   tag,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     color: GoPlayTheme.onSurface,
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
@@ -233,7 +232,7 @@ class _EmptySearchState extends StatelessWidget {
         // Section: Recommendations
         Text(
           'RECOMMENDED CHANNELS',
-          style: GoogleFonts.inter(
+          style: TextStyle(
             color: GoPlayTheme.onSurfaceVariant.withOpacity(0.5),
             fontSize: 11,
             fontWeight: FontWeight.w800,
@@ -251,7 +250,7 @@ class _EmptySearchState extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
                     'No channels available right now.',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       color: GoPlayTheme.onSurfaceVariant,
                       fontSize: 13,
                     ),
@@ -342,7 +341,7 @@ class _EmptySearchState extends StatelessWidget {
                 children: [
                   Text(
                     ch.name,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       color: GoPlayTheme.onSurface,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -351,7 +350,7 @@ class _EmptySearchState extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     '${ch.category ?? 'General'} • ${ch.country ?? 'Global'}',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       color: GoPlayTheme.onSurfaceVariant,
                       fontSize: 12,
                     ),
@@ -384,7 +383,7 @@ class _EmptySearchState extends StatelessWidget {
                     const SizedBox(width: 5),
                     Text(
                       'LIVE',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         color: GoPlayTheme.liveBadge,
                         fontSize: 9,
                         fontWeight: FontWeight.w800,
@@ -439,7 +438,7 @@ class _SearchResults extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Text(
                     'CHANNELS',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       color: GoPlayTheme.onSurfaceVariant.withOpacity(0.5),
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
@@ -480,7 +479,7 @@ class _SearchResults extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Text(
                     'LIVE EVENTS',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       color: GoPlayTheme.onSurfaceVariant.withOpacity(0.5),
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
@@ -564,7 +563,7 @@ class _SearchResults extends StatelessWidget {
                 children: [
                   Text(
                     ch.name,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       color: GoPlayTheme.onSurface,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -573,7 +572,7 @@ class _SearchResults extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     '${ch.category ?? 'General'} • ${ch.country ?? 'Global'}',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       color: GoPlayTheme.onSurfaceVariant,
                       fontSize: 12,
                     ),
@@ -606,7 +605,7 @@ class _SearchResults extends StatelessWidget {
                     const SizedBox(width: 5),
                     Text(
                       'LIVE',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         color: GoPlayTheme.liveBadge,
                         fontSize: 9,
                         fontWeight: FontWeight.w800,
@@ -677,7 +676,7 @@ class _SearchResults extends StatelessWidget {
                 children: [
                   Text(
                     '${event.homeTeam.name} vs ${event.awayTeam.name}',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       color: GoPlayTheme.onSurface,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -686,7 +685,7 @@ class _SearchResults extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     '${event.league} • ${event.sport}',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       color: GoPlayTheme.onSurfaceVariant,
                       fontSize: 12,
                     ),
@@ -719,7 +718,7 @@ class _SearchResults extends StatelessWidget {
                     const SizedBox(width: 5),
                     Text(
                       'LIVE',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         color: GoPlayTheme.liveBadge,
                         fontSize: 9,
                         fontWeight: FontWeight.w800,

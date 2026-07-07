@@ -63,9 +63,9 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
     );
     final favorites = ref.watch(favoriteChannelIdsProvider);
 
-    final titleStyle = GoogleFonts.orbitron(
+    final titleStyle = TextStyle(
       fontSize: 20,
-      fontWeight: FontWeight.w300,
+      fontWeight: FontWeight.w900,
       color: theme.colorScheme.primary,
       letterSpacing: 3,
     );
@@ -160,7 +160,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
                               const SizedBox(width: 12),
                               Text(
                                 'App Settings',
-                                style: GoogleFonts.inter(
+                                style: TextStyle(
                                   color: theme.colorScheme.onSurface,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
