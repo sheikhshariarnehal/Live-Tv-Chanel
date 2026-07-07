@@ -52,6 +52,19 @@
           "logo": "https://carboncredits.com/wp-content/uploads/2025/09/shutterstock_2306088965-e1757112807302-1068x749.jpg"
         },
         {
+          "id": "tsn4-sports-fhd",
+          "name": "TSN4 SPORTS FHD",
+          "url": "https://live-stream-proxy.sheikhshariarnehal.workers.dev/?url=https%3A%2F%2Fotte.cache.aiv-cdn.net%2Fbom-nitro%2Flive%2Fclients%2Fdash%2Fenc%2Fihys8nw4wv%2Fout%2Fv1%2Ffde190f369484bc6b6117cc16cd82a9f%2Fcenc.mpd",
+          "logo": "https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe",
+          "resolution": "HD",
+          "proxy": false,
+          "drmSystem": "clearkey",
+          "drm": {
+            "kid": "abc5b2883121012850ebda05b528c5ec",
+            "key": "e5250924f4b738905f7163a0134587a7"
+          }
+        },
+        {
           "id": "fifa-2026-live-server-4K",
           "name": "FIFA 2026 Live Server 4K",
           "url": "https://live-stream-proxy.sheikhshariarnehal.workers.dev/?url=https%3A%2F%2Finproviszon.st%2Ffussballtv1uhd-de.m3u8%3F&referer=https%3A%2F%2Fvileembeds.pages.dev%2F",
