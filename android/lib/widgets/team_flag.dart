@@ -56,6 +56,8 @@ class TeamFlagWidget extends StatelessWidget {
               : Image.network(
                   trimmed,
                   fit: BoxFit.cover,
+                  cacheWidth: (size * 1.2 * 2).toInt(),
+                  cacheHeight: (size * 1.2 * 2).toInt(),
                   errorBuilder: (context, error, stackTrace) => _buildFallback(),
                 ),
         ),

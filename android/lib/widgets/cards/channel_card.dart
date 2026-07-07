@@ -41,10 +41,10 @@ const _hd4kDeco = BoxDecoration(
 );
 
 const _hdDeco = BoxDecoration(
-  color: Color(0x1900E676), // primary @ 10%
+  color: Color(0x1900ADB5), // primary @ 10%
   borderRadius: BorderRadius.all(Radius.circular(4)),
   border: Border.fromBorderSide(
-    BorderSide(color: Color(0x2800E676), width: 0.5), // primary @ 16%
+    BorderSide(color: Color(0x2800ADB5), width: 0.5), // primary @ 16%
   ),
 );
 
