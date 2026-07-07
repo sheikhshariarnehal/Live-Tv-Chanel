@@ -14,17 +14,7 @@ import '../../widgets/player/channel_video_player.dart';
 
 // ─── Pre-cached top-level constants — zero per-frame allocations ─
 
-const _kScreenBg = BoxDecoration(
-  color: GoPlayTheme.surface,
-);
-
-const _kInfoCardDeco = BoxDecoration(
-  color: GoPlayTheme.surfaceContainer,
-  borderRadius: BorderRadius.all(Radius.circular(20)),
-  border: Border.fromBorderSide(
-    BorderSide(color: GoPlayTheme.cardBorder, width: 0.8),
-  ),
-);
+const _kScreenBg = BoxDecoration(color: GoPlayTheme.surface);
 
 const _kSidePanelDeco = BoxDecoration(
   color: GoPlayTheme.surfaceContainerLow,
@@ -80,7 +70,9 @@ const _kBackBtnDeco = BoxDecoration(
 const _kPlayingTagDeco = BoxDecoration(
   color: Color(0x1A00E676),
   borderRadius: BorderRadius.all(Radius.circular(12)),
-  border: Border.fromBorderSide(BorderSide(color: Color(0x3200E676), width: 0.5)),
+  border: Border.fromBorderSide(
+    BorderSide(color: Color(0x3200E676), width: 0.5),
+  ),
 );
 const _kPlayingTagStyle = TextStyle(
   color: GoPlayTheme.primary,
@@ -100,9 +92,7 @@ const _kChipDecoActive = BoxDecoration(
 const _kChipDecoInactive = BoxDecoration(
   color: Colors.transparent,
   borderRadius: BorderRadius.all(Radius.circular(20)),
-  border: Border.fromBorderSide(
-    BorderSide(color: Colors.white30, width: 1.0),
-  ),
+  border: Border.fromBorderSide(BorderSide(color: Colors.white30, width: 1.0)),
 );
 
 // Avatar decoration
@@ -114,43 +104,6 @@ const _kAvatarDeco = BoxDecoration(
   ),
 );
 
-// Pill decorations (pre-cached for each variant)
-const _kPillDecoHd = BoxDecoration(
-  color: Color(0x1E3B82F6),
-  borderRadius: BorderRadius.all(Radius.circular(6)),
-  border: Border.fromBorderSide(
-    BorderSide(color: Color(0x323B82F6), width: 0.5),
-  ),
-);
-const _kPillDecoSd = BoxDecoration(
-  color: Color(0x1E00E676),
-  borderRadius: BorderRadius.all(Radius.circular(6)),
-  border: Border.fromBorderSide(
-    BorderSide(color: Color(0x3200E676), width: 0.5),
-  ),
-);
-const _kPillDecoNeutral = BoxDecoration(
-  color: Color(0x0CFFFFFF),
-  borderRadius: BorderRadius.all(Radius.circular(6)),
-  border: Border.fromBorderSide(
-    BorderSide(color: Color(0x10FFFFFF), width: 0.5),
-  ),
-);
-const _kPillDecoDrm = BoxDecoration(
-  color: Color(0x1EFF9800),
-  borderRadius: BorderRadius.all(Radius.circular(6)),
-  border: Border.fromBorderSide(
-    BorderSide(color: Color(0x32FF9800), width: 0.5),
-  ),
-);
-
-// Text styles (pre-cached Google Fonts — allocated once at startup)
-final _kTitleStyle = GoogleFonts.outfit(
-  color: Colors.white,
-  fontSize: 16,
-  fontWeight: FontWeight.w700,
-  letterSpacing: 0.1,
-);
 final _kSectionLabelStyle = GoogleFonts.outfit(
   color: Colors.white60,
   fontSize: 12,
@@ -171,31 +124,10 @@ final _kTileNameNormalStyle = GoogleFonts.outfit(
   letterSpacing: 0.1,
 );
 
-const _kPillStyleHd = TextStyle(
-  color: Color(0xFF60A5FA),
-  fontSize: 9,
-  fontWeight: FontWeight.w700,
-  letterSpacing: 0.5,
+const _kTileMetaActiveStyle = TextStyle(
+  color: Color(0xCC00E676),
+  fontSize: 10.5,
 );
-const _kPillStyleSd = TextStyle(
-  color: GoPlayTheme.primary,
-  fontSize: 9,
-  fontWeight: FontWeight.w700,
-  letterSpacing: 0.5,
-);
-const _kPillStyleNeutral = TextStyle(
-  color: Colors.white60,
-  fontSize: 9,
-  fontWeight: FontWeight.w700,
-  letterSpacing: 0.5,
-);
-const _kPillStyleDrm = TextStyle(
-  color: Color(0xFFFFB74D),
-  fontSize: 9,
-  fontWeight: FontWeight.w700,
-  letterSpacing: 0.5,
-);
-const _kTileMetaActiveStyle = TextStyle(color: Color(0xCC00E676), fontSize: 10.5);
 const _kTileMetaNormalStyle = TextStyle(color: Colors.white38, fontSize: 10.5);
 const _kChipActiveStyle = TextStyle(
   color: Colors.white,
@@ -378,33 +310,45 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
               // Find related channels to enable prev/next buttons
               final relatedChannels = widget.eventChannels != null
                   ? widget.eventChannels!
-                      .map((id) {
-                        final match = channels.where((c) => c.id == id);
-                        return match.isNotEmpty ? match.first : null;
-                      })
-                      .whereType<Channel>()
-                      .toList()
-                  : channels.where((c) => c.category == channel.category).toList();
+                        .map((id) {
+                          final match = channels.where((c) => c.id == id);
+                          return match.isNotEmpty ? match.first : null;
+                        })
+                        .whereType<Channel>()
+                        .toList()
+                  : channels
+                        .where((c) => c.category == channel.category)
+                        .toList();
 
-              final currentIndex = relatedChannels.indexWhere((c) => c.id == channel.id);
-              final prevChannel = (currentIndex > 0) ? relatedChannels[currentIndex - 1] : null;
-              final nextChannel = (currentIndex != -1 && currentIndex < relatedChannels.length - 1)
+              final currentIndex = relatedChannels.indexWhere(
+                (c) => c.id == channel.id,
+              );
+              final prevChannel = (currentIndex > 0)
+                  ? relatedChannels[currentIndex - 1]
+                  : null;
+              final nextChannel =
+                  (currentIndex != -1 &&
+                      currentIndex < relatedChannels.length - 1)
                   ? relatedChannels[currentIndex + 1]
                   : null;
 
-              final onPrev = prevChannel != null ? () {
-                setState(() {
-                  _currentChannelId = prevChannel.id;
-                });
-                _startControlsTimer();
-              } : null;
+              final onPrev = prevChannel != null
+                  ? () {
+                      setState(() {
+                        _currentChannelId = prevChannel.id;
+                      });
+                      _startControlsTimer();
+                    }
+                  : null;
 
-              final onNext = nextChannel != null ? () {
-                setState(() {
-                  _currentChannelId = nextChannel.id;
-                });
-                _startControlsTimer();
-              } : null;
+              final onNext = nextChannel != null
+                  ? () {
+                      setState(() {
+                        _currentChannelId = nextChannel.id;
+                      });
+                      _startControlsTimer();
+                    }
+                  : null;
 
               // DESKTOP LAYOUT
               if (isDesktop && !isFullscreen) {
@@ -437,14 +381,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _ChannelInfoBar(channel: channel),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 16),
-                                child: Divider(
-                                  color: Color(0x0FFFFFFF),
-                                  height: 1,
-                                ),
-                              ),
                               const _SectionLabel(text: 'SWITCH CHANNEL'),
                               Expanded(
                                 child: _RelatedChannelsList(
@@ -477,7 +413,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                       offstage: isFullscreen,
                       child: Column(
                         children: [
-                          const SizedBox(height: 240), // Placeholder for the player
+                          const SizedBox(
+                            height: 240,
+                          ), // Placeholder for the player
                           Expanded(
                             child: SafeArea(
                               top: false,
@@ -486,7 +424,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                                 padding: EdgeInsets.zero,
                                 physics: const BouncingScrollPhysics(),
                                 children: [
-                                  _ChannelInfoBar(channel: channel),
                                   const _SectionLabel(text: 'SWITCH CHANNEL'),
                                   _RelatedChannelsList(
                                     category: channel.category ?? '',
@@ -675,99 +612,6 @@ class _BackButton extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-// ─── Channel Info Bar (premium glass card) ──────────────────────
-
-class _ChannelInfoBar extends StatelessWidget {
-  final Channel channel;
-  const _ChannelInfoBar({required this.channel});
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: _kInfoCardDeco,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-        child: Row(
-          children: [
-            _ChannelAvatar(name: channel.name, logo: channel.logo, size: 44),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    channel.name,
-                    style: _kTitleStyle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-                  _MetadataRow(channel: channel),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Metadata pills row ─────────────────────────────────────────
-
-class _MetadataRow extends StatelessWidget {
-  final Channel channel;
-  const _MetadataRow({required this.channel});
-
-  @override
-  Widget build(BuildContext context) {
-    final categoryName = channel.category?.toUpperCase() ?? '';
-
-    return Wrap(
-      spacing: 6,
-      runSpacing: 4,
-      children: [
-        if (channel.quality != null)
-          DecoratedBox(
-            decoration: channel.quality == '4K' ? _kPillDecoHd : _kPillDecoSd,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
-              child: Text(
-                channel.quality!,
-                style: channel.quality == '4K' ? _kPillStyleHd : _kPillStyleSd,
-              ),
-            ),
-          ),
-        if (categoryName.isNotEmpty)
-          DecoratedBox(
-            decoration: _kPillDecoNeutral,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
-              child: Text(categoryName, style: _kPillStyleNeutral),
-            ),
-          ),
-        if (channel.country != null && channel.country!.isNotEmpty)
-          DecoratedBox(
-            decoration: _kPillDecoNeutral,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
-              child: Text(channel.country!, style: _kPillStyleNeutral),
-            ),
-          ),
-        if (channel.hasDrm)
-          DecoratedBox(
-            decoration: _kPillDecoDrm,
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
-              child: Text('DRM', style: _kPillStyleDrm),
-            ),
-          ),
-      ],
     );
   }
 }
@@ -1011,10 +855,6 @@ class _ChannelTileState extends State<_ChannelTile> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            if (isCurrent) ...[
-                              const SizedBox(width: 8),
-                              const _EqualizerBars(),
-                            ],
                           ],
                         ),
                         const SizedBox(height: 3),
@@ -1077,73 +917,7 @@ class _LiveDot extends StatelessWidget {
 
 // ─── Equalizer Bars (CustomPainter — zero widget rebuilds) ──────
 
-class _EqualizerBars extends StatefulWidget {
-  const _EqualizerBars();
-  @override
-  State<_EqualizerBars> createState() => _EqualizerBarsState();
-}
 
-class _EqualizerBarsState extends State<_EqualizerBars>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: CustomPaint(
-        size: const Size(11, 10),
-        painter: _EqualizerPainter(_ctrl),
-      ),
-    );
-  }
-}
-
-class _EqualizerPainter extends CustomPainter {
-  final Animation<double> animation;
-  _EqualizerPainter(this.animation) : super(repaint: animation);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = GoPlayTheme.primary;
-    const barW = 2.5;
-    const gap = (11.0 - 3 * barW) / 2;
-
-    for (int i = 0; i < 3; i++) {
-      final phase = i * (2 / 3 * math.pi);
-      final h =
-          2 +
-          8 *
-              (0.5 + 0.5 * math.sin(animation.value * 2 * math.pi + phase))
-                  .abs();
-      final x = i * (barW + gap);
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromLTWH(x, size.height - h, barW, h),
-          const Radius.circular(1.5),
-        ),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(_EqualizerPainter old) => false;
-}
 
 // ─── Fullscreen Top Bar ─────────────────────────────────────────
 
@@ -1181,12 +955,13 @@ class _FullscreenTopBar extends ConsumerWidget {
                 onTap: onBackPressed,
                 behavior: HitTestBehavior.opaque,
                 child: const Padding(
-                  padding: EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 12),
-                  child: Icon(
-                    Icons.arrow_back,
-                    color: Colors.white,
-                    size: 24,
+                  padding: EdgeInsets.only(
+                    left: 12,
+                    right: 12,
+                    top: 12,
+                    bottom: 12,
                   ),
+                  child: Icon(Icons.arrow_back, color: Colors.white, size: 24),
                 ),
               ),
               Expanded(

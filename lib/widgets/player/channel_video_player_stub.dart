@@ -696,6 +696,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                     duration: _duration,
                     bufferedPosition: _bufferedPosition,
                     onSeek: _seekTo,
+                    isFullscreen: widget.isFullscreen,
                   ),
                 ),
 
@@ -824,26 +825,33 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                 : (_volume < 0.5 ? Icons.volume_down : Icons.volume_up),
             color: Colors.white,
           ),
-          iconSize: 24,
+          iconSize: 20,
+          padding: const EdgeInsets.all(4),
+          constraints: const BoxConstraints(),
         ),
+        const SizedBox(width: 8),
         // Settings Button
         GestureDetector(
           onTapDown: (details) => _showQualityMenu(details),
           child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10),
+            padding: EdgeInsets.all(4),
             child: Icon(
               Icons.settings,
               color: Colors.white,
-              size: 24,
+              size: 20,
             ),
           ),
         ),
+        const SizedBox(width: 8),
         // PiP Button
         IconButton(
           onPressed: _enterPiP,
           icon: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
-          iconSize: 24,
+          iconSize: 20,
+          padding: const EdgeInsets.all(4),
+          constraints: const BoxConstraints(),
         ),
+        const SizedBox(width: 8),
         // Fullscreen Toggle Button
         if (widget.onFullscreenToggle != null)
           IconButton(
@@ -852,7 +860,9 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
               widget.isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
               color: Colors.white,
             ),
-            iconSize: 26,
+            iconSize: 22,
+            padding: const EdgeInsets.all(4),
+            constraints: const BoxConstraints(),
           ),
       ],
     );
@@ -930,65 +940,78 @@ class _CentralControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double iconSize = isFullscreen ? 34 : 24;
+    final double playSize = isFullscreen ? 60 : 44;
+    final double playIconSize = isFullscreen ? 38 : 26;
+    final double spacing = isFullscreen ? 20 : 12;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         IconButton(
           onPressed: onPrev,
+          padding: const EdgeInsets.all(4),
+          constraints: const BoxConstraints(),
           icon: Icon(
             Icons.skip_previous_rounded,
             color: onPrev != null ? Colors.white : Colors.white24,
           ),
-          iconSize: 34,
+          iconSize: iconSize,
         ),
-        const SizedBox(width: 20),
+        SizedBox(width: spacing),
         IconButton(
           onPressed: onRewind,
+          padding: const EdgeInsets.all(4),
+          constraints: const BoxConstraints(),
           icon: const Icon(Icons.replay_10_rounded, color: Colors.white),
-          iconSize: 34,
+          iconSize: iconSize,
         ),
-        const SizedBox(width: 20),
+        SizedBox(width: spacing),
         GestureDetector(
           onTap: onPlayPause,
           child: Container(
-            width: 60,
-            height: 60,
+            width: playSize,
+            height: playSize,
             decoration: const BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
             ),
             child: Center(
               child: isBuffering
-                  ? const SizedBox(
-                      width: 28,
-                      height: 28,
+                  ? SizedBox(
+                      width: playSize * 0.45,
+                      height: playSize * 0.45,
                       child: CircularProgressIndicator(
                         color: Colors.black,
-                        strokeWidth: 2.5,
+                        strokeWidth: isFullscreen ? 2.5 : 2.0,
                       ),
                     )
                   : Icon(
                       isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
                       color: Colors.black,
-                      size: 38,
+                      size: playIconSize,
                     ),
             ),
           ),
         ),
-        const SizedBox(width: 20),
+        SizedBox(width: spacing),
         IconButton(
           onPressed: onForward,
+          padding: const EdgeInsets.all(4),
+          constraints: const BoxConstraints(),
           icon: const Icon(Icons.forward_10_rounded, color: Colors.white),
-          iconSize: 34,
+          iconSize: iconSize,
         ),
-        const SizedBox(width: 20),
+        SizedBox(width: spacing),
         IconButton(
           onPressed: onNext,
+          padding: const EdgeInsets.all(4),
+          constraints: const BoxConstraints(),
           icon: Icon(
             Icons.skip_next_rounded,
             color: onNext != null ? Colors.white : Colors.white24,
           ),
-          iconSize: 34,
+          iconSize: iconSize,
         ),
       ],
     );
@@ -1001,6 +1024,7 @@ class PlayerProgressBar extends StatelessWidget {
   final Duration duration;
   final Duration bufferedPosition;
   final ValueChanged<Duration> onSeek;
+  final bool isFullscreen;
 
   const PlayerProgressBar({
     super.key,
@@ -1008,6 +1032,7 @@ class PlayerProgressBar extends StatelessWidget {
     required this.duration,
     required this.bufferedPosition,
     required this.onSeek,
+    required this.isFullscreen,
   });
 
   @override
@@ -1025,7 +1050,7 @@ class PlayerProgressBar extends StatelessWidget {
         _handleDrag(context, details.localPosition.dx);
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: EdgeInsets.symmetric(vertical: isFullscreen ? 8.0 : 4.0),
         child: SizedBox(
           height: 12,
           width: double.infinity,

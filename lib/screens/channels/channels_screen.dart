@@ -302,28 +302,26 @@ class _SearchField extends StatelessWidget {
       data: theme.copyWith(
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: isDark
-              ? Colors.white.withOpacity(0.08)
-              : Colors.black.withOpacity(0.05),
+          fillColor: const Color(0xFF222326),
           contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.08),
+              color: Colors.white.withOpacity(0.08),
               width: 0.8,
             ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.08),
+              color: Colors.white.withOpacity(0.08),
               width: 0.8,
             ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: theme.colorScheme.primary,
+              color: Colors.white.withOpacity(0.25),
               width: 1.0,
             ),
           ),
@@ -335,26 +333,27 @@ class _SearchField extends StatelessWidget {
           controller: controller,
           autofocus: true,
           onChanged: onChanged,
-          style: TextStyle(
-            color: theme.colorScheme.onSurface,
+          cursorColor: Colors.white,
+          style: const TextStyle(
+            color: Colors.white,
             fontSize: 14,
           ),
           decoration: InputDecoration(
             hintText: 'Search channels by name, country...',
             hintStyle: TextStyle(
-              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.6),
+              color: Colors.white.withOpacity(0.6),
               fontSize: 14,
             ),
             isDense: true,
-            prefixIcon: Icon(
+            prefixIcon: const Icon(
               Icons.search_rounded,
-              color: theme.colorScheme.primary,
+              color: Colors.white70,
               size: 20,
             ),
             suffixIcon: IconButton(
-              icon: Icon(
+              icon: const Icon(
                 Icons.close_rounded,
-                color: theme.colorScheme.onSurfaceVariant,
+                color: Colors.white70,
                 size: 18,
               ),
               onPressed: onClose,
@@ -627,13 +626,6 @@ class _CategoryChipState extends State<_CategoryChip> {
       border: Border.fromBorderSide(
         BorderSide(color: primaryColor.withOpacity(0.47), width: 0.8),
       ),
-      boxShadow: [
-        BoxShadow(
-          color: primaryColor.withOpacity(0.16),
-          blurRadius: 8,
-          offset: const Offset(0, 2),
-        ),
-      ],
     );
 
     final unselectedDeco = BoxDecoration(
