@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
@@ -71,7 +70,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
     );
 
     final appBarGlassDeco = BoxDecoration(
-      color: theme.colorScheme.surface.withOpacity(0.8),
+      color: theme.colorScheme.surface.withValues(alpha: 0.8),
     );
 
     return Scaffold(
@@ -296,7 +295,6 @@ class _SearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Theme(
       data: theme.copyWith(
@@ -307,21 +305,21 @@ class _SearchField extends StatelessWidget {
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: Colors.white.withOpacity(0.08),
+              color: Colors.white.withValues(alpha: 0.08),
               width: 0.8,
             ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: Colors.white.withOpacity(0.08),
+              color: Colors.white.withValues(alpha: 0.08),
               width: 0.8,
             ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: Colors.white.withOpacity(0.25),
+              color: Colors.white.withValues(alpha: 0.25),
               width: 1.0,
             ),
           ),
@@ -341,7 +339,7 @@ class _SearchField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: 'Search channels by name, country...',
             hintStyle: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: 0.6),
               fontSize: 14,
             ),
             isDense: true,
@@ -621,35 +619,35 @@ class _CategoryChipState extends State<_CategoryChip> {
     final isDark = theme.brightness == Brightness.dark;
 
     final selectedDeco = BoxDecoration(
-      color: primaryColor.withOpacity(0.12),
+      color: primaryColor.withValues(alpha: 0.12),
       borderRadius: const BorderRadius.all(Radius.circular(20)),
       border: Border.fromBorderSide(
-        BorderSide(color: primaryColor.withOpacity(0.47), width: 0.8),
+        BorderSide(color: primaryColor.withValues(alpha: 0.47), width: 0.8),
       ),
     );
 
     final unselectedDeco = BoxDecoration(
       color: _isHovered
-          ? (isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.08))
-          : (isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.04)),
+          ? (isDark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08))
+          : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.04)),
       borderRadius: const BorderRadius.all(Radius.circular(20)),
       border: Border.fromBorderSide(
         BorderSide(
           color: _isHovered
-              ? (isDark ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.15))
-              : (isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.06)),
+              ? (isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.15))
+              : (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06)),
           width: 0.8,
         ),
       ),
     );
 
     final countSelectedDeco = BoxDecoration(
-      color: primaryColor.withOpacity(0.24),
+      color: primaryColor.withValues(alpha: 0.24),
       borderRadius: const BorderRadius.all(Radius.circular(10)),
     );
 
     final countUnselectedDeco = BoxDecoration(
-      color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.08),
+      color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.08),
       borderRadius: const BorderRadius.all(Radius.circular(10)),
     );
 
@@ -673,7 +671,7 @@ class _CategoryChipState extends State<_CategoryChip> {
                 style: TextStyle(
                   color: widget.isSelected
                       ? primaryColor
-                      : theme.colorScheme.onSurface.withOpacity(0.7),
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   fontSize: 12,
                   fontWeight: widget.isSelected ? FontWeight.w700 : FontWeight.w500,
                   letterSpacing: 0.2,
@@ -690,7 +688,7 @@ class _CategoryChipState extends State<_CategoryChip> {
                   style: TextStyle(
                     color: widget.isSelected
                         ? primaryColor
-                        : theme.colorScheme.onSurface.withOpacity(0.5),
+                        : theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                   ),

@@ -2,247 +2,1016 @@
 #EXTINF:-1 tvg-logo="https://i.imgur.com/v8tT9Yf.png" group-title="Sponsored", 📢 All In One Reborn - Telegram
 https://raw.githubusercontent.com/aiorbd-video/video/refs/heads/main/Allinonesocialvid/output.m3u8
 #EXTINF:-1 tvg-logo="" group-title="Sponsored", 🌐 টেলিগ্রাম (t.me/allonebd) থেকে আপডেট নিন
-https://raw.githubusercontent.com/aiorbd-video/video/refs/heads/main/test1/output.m3u8
- x-tvg-url=""
-# Premium playlists by All in one reborn
-# Join telegram t.me/allonebd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", FOX ONE - AQ
+https://raw.githubusercontent.com/aiorbd-video/video/refs/heads/main/Premium playlists by All in one reborn
+# Join telegram t.me/allonebd1/output.m3u8
+
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co.com/M6sxvYN/eulabel.png",Tipik 1 🇧🇪
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=adca25b8779e4168a0cd710f59f61ccf:be5383ed3cd8079f4ffe78ad067f476a
+https://c9851ec-rbm-hilv-fsly.cdn.redbee.live/L26/6b640fa2/a765d074.isml/.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://mimipipi22.github.io/logo/png/tsn1.png", TSN 1 🇨🇦
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=14eeabf30c14b7fbf3008c03099ce011:17d2ac8dbc5429bd70af3433aa12158d
+https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/w0rehjjrwe/out/v1/69a2a7041395406b970598f61680e7cf/cenc.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://mimipipi22.github.io/logo/png/tsn2.png", TSN 2 🇨🇦
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/140.0
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=daa8ea92553fd16cd6bfae2b8c582715:4042e041b5639b79b69ae07a872eef9b
+https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/3n6slkgh54/out/v1/8977baf175da4b94873194613dd3fe55/cenc.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",ITV 1
+https://tmaxapp.site/itv1.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",ISCREEN BD - AQ
+https://m3u-tvb.pages.dev/ics.m3u8|referer=https://iscreen.com.bd/
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",TELEMUNDO HD
+https://instreams.pro/US/NFLHD3/tracks-v1a1/mono.m3u8?|referer=https://instream.click/&origin=https://instream.click
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",T SPORTS - HD
+https://trs1.aynaott.com/tsports/index.m3u8
+
+
+
+#EXTINF:-1 tvg-id="Unite8Sports1" tvg-name="Unite8 Sports 1 HD AQ" tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSacQQMAkiDOnmSYsfhVh-9a2f2bHyigVKYNIKm4jbTw8uhGYuS5tAmijxV&s=10" group-title="Unite8 Sports",Unite8 Sports 1 HD AQ
+https://zati5.hasanhabibmottakin.workers.dev/0-9-zeecafehd/index.m3u8
+
+#EXTINF:-1 tvg-id="Unite8Sports1" tvg-name="Unite8 Sports S2" tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSacQQMAkiDOnmSYsfhVh-9a2f2bHyigVKYNIKm4jbTw8uhGYuS5tAmijxV&s=10" group-title="Unite8 Sports",Unite8 Sports S2
+http://starhub.pro/live/farhat-3379/67897-913379/741567.ts
+
+#EXTINF:-1 tvg-id="Unite8Sports1" tvg-name="Unite8 Sports 1 FHD" tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSacQQMAkiDOnmSYsfhVh-9a2f2bHyigVKYNIKm4jbTw8uhGYuS5tAmijxV&s=10" group-title="Unite8 Sports",Unite8 Sports 1 FHD
+#EXTVLCOPT:http-user-agent=andriod
+https://ads-27727.icu/un.php?id=373312
+
+#EXTINF:-1 tvg-id="Unite8Sports2" tvg-name="Unite8 Sports 2 HD AQ" tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSacQQMAkiDOnmSYsfhVh-9a2f2bHyigVKYNIKm4jbTw8uhGYuS5tAmijxV&s=10" group-title="Unite8 Sports",Unite8 Sports 2 HD AQ
+https://zati5.hasanhabibmottakin.workers.dev/0-9-channel_2105335046/index.m3u8
+
+#EXTINF:-1 tvg-id="Unite8Sports2" tvg-name="Unite8 Sports 2 HD" tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSacQQMAkiDOnmSYsfhVh-9a2f2bHyigVKYNIKm4jbTw8uhGYuS5tAmijxV&s=10" group-title="Unite8 Sports",Unite8 Sports 2 HD
+#EXTVLCOPT:http-user-agent=andriod
+https://ads-27727.icu/un.php?id=373343
+
+#EXTINF:-1 tvg-id="Unite8Sports1" tvg-name="Unite8 Sports 1 S2" tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSacQQMAkiDOnmSYsfhVh-9a2f2bHyigVKYNIKm4jbTw8uhGYuS5tAmijxV&s=10" group-title="Unite8 Sports",Unite8 Sports 1 S2
+#EXTVLCOPT:http-user-agent=andriod
+https://ads-27727.icu/un.php?id=372989
+
+#EXTINF:-1 tvg-id="Unite8Sports2" tvg-name="Unite8 Sports 2 FHD S2" tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSacQQMAkiDOnmSYsfhVh-9a2f2bHyigVKYNIKm4jbTw8uhGYuS5tAmijxV&s=10" group-title="Unite8 Sports",Unite8 Sports 2 FHD S2
+http://starhub.pro/live/farhat-3379/67897-913379/98841.ts
+
+#EXTINF:-1 tvg-id="Unite8Sports1" tvg-name="Unite8 Sports 1 FHD (Backup)" tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSacQQMAkiDOnmSYsfhVh-9a2f2bHyigVKYNIKm4jbTw8uhGYuS5tAmijxV&s=10" group-title="Unite8 Sports",Unite8 Sports 1 FHD (Backup)
+http://datahub11.com:8080/live/Jen12345/Jen54321/741567.ts
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://mimipipi22.github.io/logo/png/tsn3.png", TSN 3 🇨🇦
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/140.0
+https://raw.githubusercontent.com/hnnyo/lgi/refs/heads/main/tsn3.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://mimipipi22.github.io/logo/png/tsn4.png", TSN 4 🇨🇦
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/140.0
+https://raw.githubusercontent.com/hnnyo/lgi/refs/heads/main/tsn4.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://mimipipi22.github.io/logo/png/tsn5.png", TSN 5 🇨🇦
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/140.0
+https://raw.githubusercontent.com/hnnyo/lgi/refs/heads/main/tsn5.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://ivTZ8fjF/wc26nw.png", IRIB 4K
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0
+https://ncdn.telewebion.ir/faratar/live/playlist.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", NPO 1 HD [NL]
+https://ads-27727.icu/fxc.php?id=1745078.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", NPO 2 HD [NL]
+https://ads-27727.icu/fxc.php?id=1745079.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", NPO 3 HD [NL]
+https://ads-27727.icu/fxc.php?id=1745080.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", VRT 1 HD [BE]
+https://ads-27727.icu/fxc.php?id=1745081.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", TIPIK HD [BE]
+https://ads-27727.icu/fxc.php?id=1745082.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", DAS ERSTE HD [DE]
+https://ads-27727.icu/fxc.php?id=1745090.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", ZDF HD [DE]
+https://ads-27727.icu/fxc.php?id=1745091.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", SERVUS TV HD [AT]
+https://ads-27727.icu/fxc.php?id=1745098.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", FUSSBALL.TV 1 HD [DE]
+https://ads-27727.icu/fxc.php?id=1745092.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", FUSSBALL.TV 2 HD [DE]
+https://ads-27727.icu/fxc.php?id=1745093.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", FUSSBALL.TV 3 HD [DE]
+https://ads-27727.icu/fxc.php?id=1745094.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", FUSSBALL.TV 1 UHD [DE]
+https://ads-27727.icu/fxc.php?id=1745095.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", FUSSBALL.TV 2 UHD [DE]
+https://ads-27727.icu/fxc.php?id=1745096.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", FUSSBALL.TV 3 UHD [DE]
+https://ads-27727.icu/fxc.php?id=1745097.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", BEIN SPORTS MAX 1 HD [AR]
+https://ads-27727.icu/fxc.php?id=1745083.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", BEIN SPORTS MAX 2 HD [AR]
+https://ads-27727.icu/fxc.php?id=1745084.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", BEIN SPORTS MAX 3 HD [EN]
+https://ads-27727.icu/fxc.php?id=1745085.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", BEIN SPORTS MAX 4 HD [EN]
+https://ads-27727.icu/fxc.php?id=1745086.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", BEIN SPORTS MAX 5 HD [FR]
+https://ads-27727.icu/fxc.php?id=1745087.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", BEIN SPORTS MAX 6 HD [FR]
+https://ads-27727.icu/fxc.php?id=1745088.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", M6 HD [FR]
+https://ads-27727.icu/fxc.php?id=1745089.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", BBC 1 HD [UK]
+https://ads-27727.icu/fxc.php?id=1745114.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", ITV 1 HD [UK]
+https://ads-27727.icu/fxc.php?id=1745115.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", EPT 1 HD [GR]
+https://ads-27727.icu/fxc.php?id=1745107.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", TRT 1 HD [TR]
+https://ads-27727.icu/fxc.php?id=1745100.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", TABII SPOR HD [TR]
+https://ads-27727.icu/fxc.php?id=1745101.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", RTK 1 HD [AL]
+https://ads-27727.icu/fxc.php?id=1745102.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", KLAN TV HD [AL]
+https://ads-27727.icu/fxc.php?id=1745103.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", RAI 1 HD [IT]
+https://ads-27727.icu/fxc.php?id=1745099.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", DAZN MUNDIAL 1 HD [ES]
+https://ads-27727.icu/fxc.php?id=1745110.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", DAZN MUNDIAL 2 HD [ES]
+https://ads-27727.icu/fxc.php?id=1745111.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", DAZN MUNDIAL 3 HD [ES]
+https://ads-27727.icu/fxc.php?id=1745112.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", DAZN MUNDIAL 4 HD [ES]
+https://ads-27727.icu/fxc.php?id=1745113.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", TVP 1 HD [PL]
+https://ads-27727.icu/fxc.php?id=1745105.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", TVP 2 HD [PL]
+https://ads-27727.icu/fxc.php?id=1745106.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", TVP SPORT HD [PL]
+https://ads-27727.icu/fxc.php?id=1745104.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", SPORT TV+ HD [PT]
+https://ads-27727.icu/fxc.php?id=1745116.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", SPORT TV 1 HD [PT]
+https://ads-27727.icu/fxc.php?id=1745117.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", SPORT TV 2 HD [PT]
+https://ads-27727.icu/fxc.php?id=1745118.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", SPORT TV 3 HD [PT]
+https://ads-27727.icu/fxc.php?id=1745119.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", SPORT TV 4 HD [PT]
+https://ads-27727.icu/fxc.php?id=1745120.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", FOX SPORTS 1 HD [USA]
+https://ads-27727.icu/fxc.php?id=1745108.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png", FOX SPORTS 2 HD [USA]
+https://ads-27727.icu/fxc.php?id=1745109.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co/GfMp5MTJ/Chat-GPT-Image-Jun-5-2026-07-28-11-PM.png", SUPER SPORTS FIFA
+http://starhub.pro:80/live/farhat-3379/67897-913379/741566.ts
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co/GfMp5MTJ/Chat-GPT-Image-Jun-5-2026-07-28-11-PM.png", Unite8 Sports 1 HD
+http://starhub.pro:80/live/farhat-3379/67897-913379/741567.ts
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co/GfMp5MTJ/Chat-GPT-Image-Jun-5-2026-07-28-11-PM.png", SS World Cup Central
+http://starhub.pro:80/live/farhat-3379/67897-913379/745149.ts
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co/GfMp5MTJ/Chat-GPT-Image-Jun-5-2026-07-28-11-PM.png", SS World Cup Pass
+http://starhub.pro:80/live/farhat-3379/67897-913379/745195.ts
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co/GfMp5MTJ/Chat-GPT-Image-Jun-5-2026-07-28-11-PM.png", Unite8 Sports 2 HD
+http://starhub.pro:80/live/farhat-3379/67897-913379/745202.ts
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co/fzbsY6CP/Chat-GPT-Image-Jun-11-2026-11-41-22-PM.png",(DE) Fussball.TV1 (UHD/4K)
+http://starhub.pro:80/live/farhat-3379/67897-913379/745269.ts
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co/fzbsY6CP/Chat-GPT-Image-Jun-11-2026-11-41-22-PM.png",(HK) Now Sports 616 (UHD/4K)
+http://starhub.pro:80/live/farhat-3379/67897-913379/745270.ts
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co/fzbsY6CP/Chat-GPT-Image-Jun-11-2026-11-41-22-PM.png",BEIN SPORT MAX 4K
+http://starhub.pro:80/live/farhat-3379/67897-913379/747283.ts
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co/GfMp5MTJ/Chat-GPT-Image-Jun-5-2026-07-28-11-PM.png",TSN 1
+http://starhub.pro:80/live/farhat-3379/67897-913379/748388.ts
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co/GfMp5MTJ/Chat-GPT-Image-Jun-5-2026-07-28-11-PM.png",Fox Sports 1 (FS1) [English]
+http://starhub.pro:80/live/farhat-3379/67897-913379/751354.ts
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co/GfMp5MTJ/Chat-GPT-Image-Jun-5-2026-07-28-11-PM.png",Fox Sports 2 (FS2) [English]
+http://starhub.pro:80/live/farhat-3379/67897-913379/751355.ts
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="",TELEMUNDO DEPORTES
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:149.0) Gecko/20100101 Firefox/149.0
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=ce7ab3022e753307997f58afe001bac4:72d631a66e635c60829a0fe7705516c1
+https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s-v2/Live/channel(kvea)/master.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCOzchAkDiIxwY9tbX-GXVS5UFx_lCeUeFTJ3_9iYG04syYmryQRY7XnhjXqEPIYF0rldOjyOJ3yBQgDkuRdjU3TtiFS8W_DyyvlkQHQ6pQvCTlLeRyBj2x5iVXZpywuiD2y5H7DeCiVdsgwSCUn_OWULmgMuK9-jp69aEYwxSTSsAWZczvcMcgg-epIkB/s700/CAZE%20TV.png",CAZE TV 1
+https://dfr80qz435crc.cloudfront.net/MNOP/Amagi/Caze/Caze_TV_BR/Caze_TV.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCOzchAkDiIxwY9tbX-GXVS5UFx_lCeUeFTJ3_9iYG04syYmryQRY7XnhjXqEPIYF0rldOjyOJ3yBQgDkuRdjU3TtiFS8W_DyyvlkQHQ6pQvCTlLeRyBj2x5iVXZpywuiD2y5H7DeCiVdsgwSCUn_OWULmgMuK9-jp69aEYwxSTSsAWZczvcMcgg-epIkB/s700/CAZE%20TV.png",CAZE TV 2
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=34475edab991ad5e92548aebd710410a:501b209cccd323ac00bf5ac15b406cb4
+https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash/enc/3ynrpdanq2/out/v1/81fd4c26584044d2b1a1cc5b32fa9af0/cenc.mpd?amznDtid=AOAGZA014O5RE&encoding=segmentBase
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCOzchAkDiIxwY9tbX-GXVS5UFx_lCeUeFTJ3_9iYG04syYmryQRY7XnhjXqEPIYF0rldOjyOJ3yBQgDkuRdjU3TtiFS8W_DyyvlkQHQ6pQvCTlLeRyBj2x5iVXZpywuiD2y5H7DeCiVdsgwSCUn_OWULmgMuK9-jp69aEYwxSTSsAWZczvcMcgg-epIkB/s700/CAZE%20TV.png",CAZE TV 3
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=0a29e3b7dc26ced80114da99266ea636:9f1e4034545fed90b5ce7a8f8925e621
+https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash-sd/enc/iy79zu8tb9/out/v1/e86df8b45c0f452daf49ca6e3d27103e/cenc-sd.mpd?amznDtid=AOAGZA014O5RE&encoding=segmentBase
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co.com/GvTZ8fjF/wc26nw.png", FUSSBALL TV 1 🇩🇪
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=1f09d5788fbbb03a053d03cc731f31a9:d493d5a70c793362324638f61d1726ac
+https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_uhd/DASH/index.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co.com/GvTZ8fjF/wc26nw.png", FUSSBALL TV 2 🇩🇪
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=1b98a0f2de7784c6e132942385a089f3:546eae09a8d81c498dfd08532dcd68a5
+https://svc45.main.sl.t-online.de/bpk-tv/KID01064_FUSSBALLTV2_uhd/DASH/index.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://static.promediateknologi.id/crop/0x0:0x0/1200x0/webp/photo/p1/04/2026/06/10/Piala-Dunia-2026-akan-menjadi-edisi-pertama-3193264271.jpeg", 616 HK NOW 4K
+#EXTVLCOPT:http-referrer=https://www.indihometv.com/
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=91ba752a446148c68400d78374b178b4:a01d7dc4edf582496b7e73d67e9e6899
+https://nowp.wasabih.net/channel/616/master.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://static.promediateknologi.id/crop/0x0:0x0/1200x0/webp/photo/p1/04/2026/06/10/Piala-Dunia-2026-akan-menjadi-edisi-pertama-3193264271.jpeg", 618 HK NOW
+#EXTVLCOPT:http-referrer=https://www.indihometv.com/
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=91ba752a446148c68400d78374b178b4:a01d7dc4edf582496b7e73d67e9e6899
+https://nowp.wasabih.net/channel/618/master.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co.com/M6sxvYN/eulabel.png",Tipik 2 🇧🇪
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=3c736e5c8f5a4d1a8eb8af1e63aa2005:d1729111efdfb7727ee3e6fcbc7586e1
+https://daiconnect.com/live/dash/rtbf/tipik-56dfkkh-0epa3m40q/.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/SporTV_logo_2011.png/800px-SporTV_logo_2011.png", SPORTV BRA 1 
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=4bbcff3289d457b4dd5dbdd21221de9a:c4906b9a9f8dda3c0725bddb8c497733
+https://a123aivottepl-a.akamaihd.net/gru-nitro/live/clients/dash/enc/m7duvnk2bu/out/v1/d1ad69118b5647309b1eb7213affdb3d/cenc.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/SporTV_2_2017_logo.svg/250px-SporTV_2_2017_logo.svg.png", SPORTV BRA 2
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=9009b7189e3e68cc09d17811f2beb55a:dd3f96a94c909da48ff40c92aabf8cf3
+https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash-sd/enc/4yiko4it8k/out/v1/b77dd424c745443aba2f3f88d418f797/cenc-sd.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/SporTV_3_logo_2011.png/800px-SporTV_3_logo_2011.png", SPORTV BRA 3
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=902e5ec0e3d05e665daa32fc23f4f59e:7b2322a273843921a43e2c61dac7cae3
+https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash/enc/6otiglnptp/out/v1/add7499679b0422cb6791f7701f95ecc/cenc.mpd?amznDtid=AOAGZA014O5RE&encoding=segmentBase
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://object-streamo.emonaja.com/img/beinsports.png", beIN Sports 1 (France)
+#KODIPROP:inputstream.adaptive.manifest_type=dash
+#KODIPROP:inputstream.adaptive.license_type=org.w3.clearkey
+#KODIPROP:inputstream.adaptive.license_key={"3acea01244785a6363fc04b25d696392": "f0b8f84dbd93407af6ab0b41fc774249", "9d8b1b819cfdcff845625b86cc4968f3": "480b03fe4476bc187c6a9d43ba85b9db", "3cf686dc4246f19bc4419c54da0f90bc": "b40f599266c8a262ccf4a384dadce08a", "b6362975ca29d0685b7cac721b6faa26": "da04d180e9028af27482b6a37c81e020", "6ca2f2c822444ff76d9570741dec7b2b": "9fc3d71ab30e8d33f09ee29e5e453608"}
+https://api-proxad.dc2.oqee.net/playlist/v1/live/966/1/live.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://object-streamo.emonaja.com/img/beinsports2.png", beIN Sports 2 (France)
+#KODIPROP:inputstream.adaptive.manifest_type=dash
+#KODIPROP:inputstream.adaptive.license_type=org.w3.clearkey
+#KODIPROP:inputstream.adaptive.license_key={"85ac9362e89354ef5341fe4dbee0dd6a": "e556276599c55bdee169f39eab8e56bc", "71fcdcfd58c608662db317fcf4411c19": "eaf76e97b969a7d124a720a109acda61", "6c976caa628fde89aacedbd47059967e": "0d1e54565950c1e2f58d45c561a47187", "7a62a516c5d980553f497c6bfc469b19": "a0eeb97b4d14d6bb7a5c39755dd7c41c", "f81df5cf72bd43c3da84d04dc8691fcb": "4a60e4e009560c40766a0fa38770ef4e"}
+https://api-proxad.dc2.oqee.net/playlist/v1/live/970/1/live.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://object-streamo.emonaja.com/img/beinsports3.png", beIN Sports 3 (France)
+#KODIPROP:inputstream.adaptive.manifest_type=dash
+#KODIPROP:inputstream.adaptive.license_type=org.w3.clearkey
+#KODIPROP:inputstream.adaptive.license_key={"4281ee112555097325058cb7355035b4": "1a88899547f7fd4a5c22ee8150d89208", "b4023d3a71316ed3cd06af7e43988d31": "91a96d592dd6e946b0f0074d15ac1168", "441100b7de65d7c582a9c71140e46f79": "ef37dadc14bdade17224ef4bc9f87ce6", "43faba2da98eeeeb42481dca873d3460": "f8b58939398e5a5574c18408d304d44e", "92e8cc9527c7f56a10777278cb801027": "4ce3f3e2234f00b21ba77006f197832a"}
+https://api-proxad.dc2.oqee.net/playlist/v1/live/971/1/live.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Mediacorp_Channel_5_2023.svg/960px-Mediacorp_Channel_5_2023.svg.png", Channel 5
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/90.0
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=org.w3.clearkey
+#KODIPROP:inputstream.adaptive.license_key=cc3767ece98a4bdeb39b9ad6b7b8d2fe:769e78dc02d8f73811c97e0f9d5f12fe
+https://tglmp02.akamaized.net/out/v1/a32e566460eb41ce9295b9c45fe25825/manifest.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.imgur.com/oT5CAvd.png", TUDN (Mexico)
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=1710ac2bbfcd3032d0f6533850968f47:d2548dacc8efcd1cd0af0373060c82dc
+https://otte.live.fly.ww.aiv-cdn.net/iad-nitro/live/clients/dash/enc/8u9cregwlt/out/v1/687f6b2a559943549be271504a948ffd/cenc.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co.com/GvTZ8fjF/wc26nw.png", Tv J 🇯🇲
+https://vod2live.univtec.com/manifest/a99a1804-dc83-411f-8c1c-b62f08cdfa59.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co.com/GvTZ8fjF/wc26nw.png", D SPORTS 🇦🇷
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=4f4c3a9912ea752e88f4497864a1bc8b:278128004fe8c6ffb2cd2a0c154a241a
+https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/x0srg3jjpz/out/v1/f779c49314394d61886d63f58d9d52e4/cenc.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co.com/GvTZ8fjF/wc26nw.png", D SPORTS 2 🇦🇷
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=18044a84b7e6c1bbf852591797e53a2c:38b3b6f8810917d89636927bddb79294
+https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash-sd/enc/hufm7lgnhx/out/v1/5045630288d44123ba85427b2c36f29f/cenc-sd.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co.com/GvTZ8fjF/wc26nw.png", D SPORTS+ 🇦🇷
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=8afa490e1640be969729fb459182e4ec:6f129820cdd5b6978a98c604c72cf05b
+https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash-sd/enc/kp7qfx2tly/out/v1/bbfb730b45b74d4ea875d75786ea3f13/cenc-sd.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="httpss/0bdffa47-d6.png", FS1 4K
+#KODIPROP:inputstream.adaptive.manifest_type=dash
+#KODIPROP:inputstream.adaptive.license_type=com.widevine.alpha
+#KODIPROP:inputstream.adaptive.license_key=a6164ea0967b4bbbb51fdd6c4f83a64f:b431d9ed821ca93df596168601ae5b00
+https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/ype1m7rkkf/out/v1/4ef90d78cd004a668bc0377f3884575b/cenc.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https:/w.png", FOX 4K
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=1f68713028d439ec03be07f56c1d6213:20093db6455160fffed4c394def3193d
+https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/znlxmhkktl/out/v1/fc40f22f10374517a2784e1d97cb23f4/cenc.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.imghippo.com/files/KPD6826YGk.jpg", Canal 5
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=d695093ea3e66d75a4d213a3e2cbf360:01be3f645e89a067d2786c295f68dde4
+https://live-pv-ta.amazon.fastly-edge.com/iad-nitro/live/clients/dash/enc/ntkdl68eob/out/v1/bd5dfb7676994383881bc6e71877d29d/cenc.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="ht8fjF/wc26nw.png", RTV SPORT
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36
+#KODIPROP:inputstream.adaptive.manifest_type=dash
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=11223344556677889900112233445566:4b80724d0ef86bcb2c21f7999d67739d
+https://dash2.antik.sk/stream/nvidia_rtvs_sport/playlist_cenc.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="ht8fjF/wc26nw.png", CT SPORT
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36
+#KODIPROP:inputstream.adaptive.manifest_type=dash
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=11223344556677889900112233445566:4b80724d0ef86bcb2c21f7999d67739d
+https://dash2.antik.sk/stream/nvidia_ct_sport/playlist_cenc.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://static.promediateknologi.id/crop/0x0:0x06264271.jpeg", PTV SPORT
+https://raw.githubusercontent.com/hnnyo/nsed/refs/heads/main/ptvs.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://static.promediateknologi.id/crop/0x0:0x0/1200x0/webp/photo/p1/04/2026/06264271.jpeg", TVRI SPORTS WORLD CUP
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=618880fd141330378cf6aff5d48a252c:835e5fc97bfec870d8ac7e3d145e14ad
+https://tencent-css.byteplaycdn.com/0b3ac0d9e956a77cb058d9e2f780ccf5/6A2E46AB/Content/DASH_ENC2/Live/channel(tselwc2)/master.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://static.promediateknologi.id/crop/0x0:0x0/1200x0/webp/photo/p1/04/2026/06/10/Piala-Dunia-2026-akan-menjadi-edisi-pertama-3193264271.jpeg", FOX SPORTS 4K
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=1f68713028d439ec03be07f56c1d6213:20093db6455160fffed4c394def3193d
+https://otte-tim.live.pv-cdn.net/pdx-nitro/live/clients/dash/enc/ifz2pnwgbv/out/v1/31d30c91fc65458789b84209d3fa22e4/cenc.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhnHtM20QGYDSezSI9xCQzo6-G5Zo0cNSPasC9gVLq7TMH7G7jurfiI9vXlpsjcSVp5s3UCQ7WCpTL9qXPVghiAHoezld19CXUDTos4vFlrdLUPksQN3OAYsCN7sXnSRZTPD_fj9pNrV5kw8KvCC_QNTAp0NNgBCu2mEQ3qVXEuGtAWLwdzWj396LBzBdol/s700/TVRI%20SPORT.png", TVRI SPORTS WC
+http://103.148.44.38:8000/play/a05u/index.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhnHtM20QGYDSezSI9xCQzo6-G5Zo0cNSPasC9gVLq7TMH7G7jurfiI9vXlpsjcSVp5s3UCQ7WCpTL9qXPVghiAHoezld19CXUDTos4vFlrdLUPksQN3OAYsCN7sXnSRZTPD_fj9pNrV5kw8KvCC_QNTAp0NNgBCu2mEQ3qVXEuGtAWLwdzWj396LBzBdol/s700/TVRI%20SPORT.png", TVRI NASIONAL WC
+http://103.148.44.38:8000/play/a03t/index.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co.com/7tFY7tC/rtbaneka.png", RTB ANEKA 🇧🇳
+#EXTVLCOPT:http-referrer=https://www.rtbgo.bn/
+#EXTVLCOPT:http-user-agent=RTBGo/2.0.21 (Linux;Android 15.0.0;) ExoPlayerLib/2.19.1
+https://cors-everywhere-wc8b4.ondigitalocean.app/https://d1211whpimeups.cloudfront.net/smil:rtb2/chunklist.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://static.promediateknologi.id/crop/0x0:0x0/1200x0/webp/photo/p1/04/2026/06/10/Piala-Dunia-2026-akan-menjadi-edisi-pertama-3193264271.jpeg", ITV 1
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=b6c1c527303bc577b85eb849cbab75d2:ec533d484c550a892ff162e4a5f4dbc3
+https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/enc/slc1dkcymj/out/v1/dd17af8835fe4bd087d1a4e359b635d7/cenc.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co.com/GvTZ8fjF/wc26nw.png", RTB GO LIVE
+#EXTVLCOPT:http-referrer=https://www.rtbgo.bn/
+#EXTVLCOPT:http-user-agent=RTBGo/2.0.21 (Linux;Android 15.0.0;) ExoPlayerLib/2.19.1
+https://cors-everywhere-wc8b4.ondigitalocean.app/https://d1211whpimeups.cloudfront.net/smil:rtbgo/chunklist.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co.com/GvTZ8fjF/wc26nw.png", World Cup 2026 1 🇵🇭
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=2c338a117d434ce4bbe3569231af90f1:a9633d901ee8a3f4f58ac314b5c5f4fb
+https://qp-pldt-live-bpk-ucd-prod.akamaized.net/bpk-tv/fifa_ppv1/default/index.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co.com/GvTZ8fjF/wc26nw.png", World Cup 2026 2 🇵🇭
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=4fef00332d7e4fbc8f7005dfbf851a59:a6368c181358f3e527411a6c452c6a1a
+https://qp-pldt-live-bpk-02-prod.akamaized.net/bpk-tv/pp_ch2_pri/default/index.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://static.promediateknologi.id/crop/0x0:0x0/1200x0/webp/photo/p1/04/2026/06/10/Piala-Dunia-2026-akan-menjadi-edisi-pertama-3193264271.jpeg", BBC
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=7dc3abc5027b234af5af237d9ba1fb16:2542140d96078c87eca2a2b2fd7529aa
+https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash/enc/dxhd2i96mn/out/v1/c622abb40a8143d08135f5d8a5fccdc9/cenc.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://static.promediateknologi.id/crop/0x0:0x0/1200x0/webp/photo/p1/04/2026/06/10/Piala-Dunia-2026-akan-menjadi-edisi-pertama-3193264271.jpeg", M6
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=433ffba670963e70857859a9dff4be04:51ede3a821229fe81e71282c8eff80e3
+https://origin-m6web.live.6cloud.fr/out/v1/6play/6play-m6/cmaf_cenc00/dash-short-hd.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://raisely-images.imgix.net/uploads/ca-5-be-4-b-0-33-d-7-47-e-8-8-af-8-35-f-7-c-419-cbec-png-099577.png?fm=jpg", NDTV ENGLIS
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) MPF.Players/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36
+https://ndtv24x7elemarchana.akamaized.net/hls/live/2003678/ndtv24x7/master.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https:///b/R29vZ2xl/AVvXsEhwoNz6L9nDGTphcEIYSC7A4olw4XaV5IeH4KV5vKOAVFUosU1pJ0bD4Bq/s700/FIFA%20WC%202026%201.gif", VIX MUNDIAL 90
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=75074a0cbd83f5b72fb3e5c1495252a9:a4a0df04b2d28f2160cead2ecdeb7203
+https://vod-cua-orbit2-s2.izzigo.tv/out/u/startover/dash/VIX-MUNDIAL-90-HD/default.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.imgur.com/g5ShxZ7.png", Las Estrellas (Mexico)
+https://channel01-onlymex.akamaized.net/hls/live/2022749/event01/index.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://rtm-images.glueapi.io/320x0/system/SukanDolby.png", RTM SUKAN+
+#EXTVLCOPT:http-user-agent=ExoPlayerDemo/2.15.1 (Linux; Android 12) ExoPlayerLib/2.15.1 
+https://bintangstreaming.my.id/1kds/kds_tes.php/.m3u8?id=rtm-sports-hd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://rtm-images.glueapi.io/320x0/system/OkeyDolby.png", RTM Okey
+https://d25tgymtnqzu8s.cloudfront.net/live/media0/okey/DASH/okey.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co.com/GvTZ8fjF/wc26nw.png", TV AZTECA 🇲🇽
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=55b8f0b9ea3b5cd21cd1859cc82b16f3:d3b260e8628214b49394801d75c88e8e
+https://live1-ott.izzigo.tv/14/out/u/dash/AZTECA-7-HD/default.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co.com/GvTZ8fjF/wc26nw.png", TUDN 2 🇲🇽
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=79737d20a3eaa862f8cb77c61cb3b58c:41df11a0be44fd7272538728cec38bc6
+https://live-pv-ta.amazon.fastly-edge.com/iad-nitro/live/clients/dash/enc/skz7pgjdyp/out/v1/8e7377f4d3154738b7f48baa996b35a5/cenc.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co.com/GvTZ8fjng", FS1 WC 2026
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=5466ebd70704bdeb657f0abf3c5ca4ef:bdd79b72d8e48ed483aa623cc38a8a16
+https://cors-everywhere-wc8b4.ondigitalocean.app/https://otte.live.fly.ww.aiv-cdn.net/iad-nitro/live/clients/dash/enc/tmpzbbdj9y/out/v1/962736723a534ba294e7592fef49827b/cenc.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.cow.png", FOX 26
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=8ec2e6248abe2e10e16e439c9b85ffd8:f121b015c2a5197828355fb6a874c297
+https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash/enc/worucjnctz/out/v1/20ac5ecdc9b848dc92e7f1188bdf6ff6/cenc.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://www.unontent/u/07/digi-sport.jpg", BBC ONE KILATLIVE
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (iPhone14,6; U; CPU iPhone OS 15_4 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/19E241 Safari/602.1
+#EXTVLCOPT:http-referrer=https://kilat-live.com/
+#EXTVLCOPT:http-origin=https://kilat-live.com
+https://rr4---sn-8pxuuxa-on.googlecdncloudsg.com/UK_BBC_1_TV/index.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.im/GvTZ8fjF/wc26nw.png", SPORZA LIVE
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=893bc63340876605f52886a42e0ccce5:d6c46d2d691056fbd091bf1f01b21a91
+https://live.vrtcdn.be/groupd/live/0761024f-37fe-4254-bc37-e95d7c62b2d1/live.isml/.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://static.promediateknologi.id/crop/0x0njadi-e71.jpeg", FUSSBALL TV 1 UHD
+https://raw.githubusercontent.com/hnnyo/lgi/refs/heads/main/fsb1uhd.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://static.promediateknologi.id/crop/0x0njadi-e71.jpeg", FUSSBALL TV 1 HD
+https://raw.githubusercontent.com/hnnyo/lgi/refs/heads/main/fsb1hd.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://blogger.googleusercontent.com/img/b/R2902026%201.gif", ITV 1 KILATLIVE
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (iPhone14,6; U; CPU iPhone OS 15_4 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/19E241 Safari/602.1
+#EXTVLCOPT:http-referrer=https://kilat-live.com/
+#EXTVLCOPT:http-origin=https://kilat-live.com
+https://rr4---sn-8pxuuxa-on.googlecdncloudsg.com/UK_ITV_1_TV/index.m3u8
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="httpss/0bdffa47-dfb0-4627-85-53177389b930_f8037f07-216.png", TVRI Maxstream Uzbekistan vs Kolombia
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36
+#KODIPROP:inputstream.adaptive.manifest_type=dash
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=https://bintangstreaming.my.id/all_clearkey/clearkey.json
+https://tencent-css.byteplaycdn.com/6c5cb4121e8c5c9191ae7abf87c9819e/6A33E892/Content/DASH_ENC2/Live/channel(tselwc2)/master.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="httpss/0bdffa47-d6.png", Qazsport
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleCoreMedia/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36
+#KODIPROP:inputstream.adaptive.manifest_type=dash
+#KODIPROP:inputstream.adaptive.license_type=com.widevine.alpha
+#KODIPROP:inputstream.adaptive.license_key=912bca702ad54daf89839a1d91f0a460:89906fa33624855dd4a6d9395979c5ae
+https://fo03-bkm.beetv.kz/bpk-tv/000003038/tve/index.mpd
+
+#EXTINF:-1 group-title="FIFA WC26 | All in one reborn 1TV" tvg-logo="https://i.ibb.co.26nw.png", QAZAQSTAN
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0
+https://vs137.vcdn.biz/6aa0d03eb8d337c5a12c8275477af53a_megogo/live/hls/b/700_2490_4000/u_sid/0/o/229009131/rsid/15fbd560-a86a-45ca-8058-baf9f5f61c8e/u_uid/0/u_vod/0/u_device/cms_webandroid/u_devicekey/_site_mobile/lip/45.80.208.174*asn/u_srvc/84416/u_did/web_MjE7M10AtBKsWN3CHzhzNBgiG7LkULPx/type.live/playlist.m3u8
+
+#EXTM3U
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026", Toffee 1
+https://cdn-tt.pages.dev/ch1.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026", Toffee 2
+https://cdn-tt.pages.dev/ch2.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026", Toffee 3
+https://cdn-tt.pages.dev/ch3.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026", Toffee 4
+https://cdn-tt.pages.dev/ch4.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026", Toffee 5
+https://cdn-tt.pages.dev/ch5.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026", M Crop
+https://aps11.playlist.ttvnw.net/v1/playlist/CrcEuSZnnRBRmdDIH99aRiIerBFMmQ7uy1VJUkuswKPFGip9KG2tE06JFEe5Axt4jbf5MbaV5bEWLO8aDwlK0_UpobZx_1aN0V3ccJGrvzzlG_O-XxEUfUNJ-MUzHVpqjt_6JTnR5psMMjNDfrQ3eTT6Nwlf3gMXxxj74DACl_yI0TfhfCNE619UgXDIK6SuvXkiE9YdfGNKu4fM_nMO-VHoYmubSR-0fQbXR0RWGhriCn3rXK-f89weHHUPcNO-G-nYruoG5S5EV3W_WM4YVhRnxe0tLqsgZcXozVE7qWqIQNt1sEpmY4o9dl3pScLeKpIKBmTp0VP5xLDM2Qhc0jn8WfdWIQ9HPTWNMLRCCBRCCxPl5k-ejWSxWO9V0VzxM_qWzzplV4AOkHe3oXsoNn7y5NOUmmwjPTnu_Ss7sUAniqzyLFqN9Z7eOJnjRMXa810RwQlOT0vFoUTHLSFM4vCQBt6p10m_nLK3Jt6aOOm0a7P34nUkxOwasIZDgEsvH4PCnvP0KzDIC5F4oR2jMuA6idoL2uUbvgB7talga1mA2ZyxSCXAfmONRHnhMZVsPp4ObzgXkcLviGNrBWvHRJcdmpR_jEi5AhQ4x-K71-K_vuLbieDbqblojLGzROeZZ-a8aNh0YQ4CKDVAbetOh-IlHW-o1i7DTyqDNCCajfL5jN3JYmqaqaT-2kZV_yyGahsg9MNdvpa5O1jAxV7lyzVlo50zaGAqkwOET0y2fiS-DdRYzGWKATt5GgxysCV9aAytSfz9gKIgASoJdXMtd2VzdC0yML0P.m3u8
+
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",FOX FHD
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=f6564ec2aee819046328a0e153be574d:ff46a8a1031eb27ef22576a077c98ab7
-https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/enc/ajfoeddkbz/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", ITV SPORTS FHD
+https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/dcwbm4iztn/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Fox UHD
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=30089c52924f037b225b82c616fee2a5:f55dc8b66ed4fc6753d6035ae7e17144
-https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/0eiyyz8qzm/out/v1/dd17af8835fe4bd087d1a4e359b635d7/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", TSN SPORTS FHD
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_key=1f68713028d439ec03be07f56c1d6213:20093db6455160fffed4c394def3193d
+https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/znlxmhkktl/out/v1/fc40f22f10374517a2784e1d97cb23f4/cenc.mpd
+
+
+
+
+#EXTINF:-1 tvg-id="fissbal1" tvg-logo="https://img.bolatv.my.id/group/fussball.jpg" group-logo="https://image-fifa.bolatv.my.id/magenta.webp" group-title="Magenta FIFA WC 2026",Fussball TV 1 HEVC H.265 dvhe 
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0
+#KODIPROP:inputstreamclass=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=dash
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=14eeabf30c14b7fbf3008c03099ce011:17d2ac8dbc5429bd70af3433aa12158d
-https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/w0rehjjrwe/out/v1/69a2a7041395406b970598f61680e7cf/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", TOFFE BDIX (BD)
-https://prod-cdn01-live.toffeelive.com/live/FIFA-2026/sst/0/master_1500.m3u8?hdntl=Expires=1783268406~_GO=Generated~URLPrefix=aHR0cHM6Ly9wcm9kLWNkbjAxLWxpdmUudG9mZmVlbGl2ZS5jb20~Signature=AeQsclAvHRKUqNKEwsQDWsY6_S5049tqL_sIDG05xsURyNIaA2kFn8Zq5vy54Q4h1_T83oe0S2NimEd6ZhIX-5cioQcI
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", Binge BDIX (BD)
-https://tc-sg.rockstreamer.com/v1/019ed91616121ea540a8171c8e801f/019ed92ac80315fc600b1796d4ad8b/main.m3u8|referer=https://iscreen.com.bd/
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", TIPIK FR FHD
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=adca25b8779e4168a0cd710f59f61ccf:be5383ed3cd8079f4ffe78ad067f476a
-https://c9851ec-rbm-hilv-fsly.cdn.redbee.live/L26/6b640fa2/a765d074.isml/dash/.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", TSN4 SPORTS FHD
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=abc5b2883121012850ebda05b528c5ec:e5250924f4b738905f7163a0134587a7
-https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/ihys8nw4wv/out/v1/fde190f369484bc6b6117cc16cd82a9f/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", CTV SPORTS FHD
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=d185684e2330de5bea436daa094a5e86:014f0116154f5bf0050e03a6b0a23157
-https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/72sjo8hygl/out/v1/3079be34d72a4985852d299a02406a0c/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", WC TV FHD
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=2c338a117d434ce4bbe3569231af90f1:a9633d901ee8a3f4f58ac314b5c5f4fb
-https://qp-pldt-live-bpk-ucd-prod.akamaized.net/bpk-tv/fifa_ppv1/default/index.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", RTE SPORTS FHD
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=d816287e21496989eae1312925a423c5:00da00f13180e7e6cd5ce87d1c974e8d
-https://dai.google.com/linear/dash/pa/event/oPeAYQs9T9yTHS98aR1EjQ/stream/530f2af5-e363-41cd-b42d-ca3abb273fce:GRQ/manifest.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", FOX SPORTS 4K
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=48afc63fa0ecccc3a71f46d3fda20249:c7cd8801e238a263fe4349a95682b83b
-https://a31live-pv-ta-amazon.akamaized.net/pdx-nitro/live/clients/dash/enc/rgmw19qjux/out/v1/c6ac7e638a9d4998891ae85aba377c59/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", DSports FHD
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=f836853d8eac19446ed9535f5fc568b1:b3bc5ef00602b29abac7e482d3d9fbf3
-https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/dash/enc/z5oyxzsxdk/out/v1/7695a0f64a0e424b973d5b09a2a3eb91/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", CAZE TV FHD
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=1223d5105392cabf1bb9c2c1fdf6539a:340b409f4b8f78a343e0363a7938df38
-https://otte.cache.aiv-cdn.net/gru-nitro/live/clients/dash/enc/iayg0kyrof/out/v1/91dc04907f56415b897faccfa9d252da/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", SporTV BR FHD
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=51c0ef23b17297e5c01cd7f36dd0a6ce:8823f713ba6fdb9bbe0a2ad82d309a4b
-https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/w8kwdfmlgs/out/v1/3aa321e477504937a439b602e078eb18/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", CT SPORTS CZ
+#KODIPROP:inputstream.adaptive.license_key=1f09d5788fbbb03a053d03cc731f31a9:d493d5a70c793362324638f61d1726ac
+https://svc.flyins.my.id/bpk-tv/KID01037_FUSSBALLTV1_uhd/DASH/index.mpd
+
+
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",CT SPORTS - AQ
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=11223344556677889900112233445566:4b80724d0ef86bcb2c21f7999d67739d
 https://dash2.antik.sk/stream/nvidia_ct_sport/playlist_cenc.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", GOLTV VIVO
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",TSN SPORTS - AQ
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=1c6bfd8d1cdd4df69ea5fc4dd2f025bb:b6fd90027dac7a94a9461f8b2638cbb4
-https://dmbgaz4xf6jyh.cloudfront.net/live-stream-dai/69690cfcce0dc031830e7c1a/123a264b71764485bd49eca2d552cf33/d97743de3620a865848fff7a9de14dda1bf2409d/manifest.mpd?aid=688aae6d61c87d6274c05065&dnt=true&access_token=63ey9SOpQeHBRfWJYQLXQjelQc0QM1HXmlHp4iZrH8UCOCM8QtGIGg1sEEPJH0R0yXktUEXdLeB&uid=Knx65GY6UbaWSADZybEvf6m5MvqNIuNs&sid=bwRy9BgSc4RFeVhYh52hVIY8uPsJ4v4d&pid=A0xT1VnepBvKKqyeyRNtNkZBmHBrNNZM&ref=ditu.caracoltv.com&ext_pb=0&es=dmbgaz4xf6jyh.cloudfront.net&proto=https&pz=us&xr=us-east-2&manifestfilter=video_height:480-1080
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", beIN MAX FHD
-https://85cup.s3.eu-north-1.amazonaws.com/max3/max3_1080p/index.m3u8?|Referer=https://kora.depoooo.com/
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", FOX ONE HD
+#KODIPROP:inputstream.adaptive.license_key=85b277daf5aae05833fe43a68f587968:d52d7e9bc0bcd98787efd547ac91eca0
+https://otte-qw.live.pv-cdn.net/pdx-nitro/live/clients/dash/enc/cjglydxghe/out/v1/8977baf175da4b94873194613dd3fe55/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",TOFFE BDIX (BD)
+https://cdn-tt.pages.dev/ch6.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",CTV ENGLISH - AQ
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=0cc2f872759c96de70237e6fa6de03d0:a879b1d38ed002d4018bce96f9219b8d
-https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/zpfs5hlgya/out/v1/84b1d591a23640178a8e8aa43c6e59a7/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", TELEMUNDO HD
-https://chatgpt.hereisman.net/playlist/52907/load-playlist?|Referer=https://gooz.aapmains.net
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", ITV SPORTS HD
-https://chatgpt.hereisman.net/playlist/52904/load-playlist?|Referer=https://gooz.aapmains.net
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", NPO1 DUTCH FHD
+#KODIPROP:inputstream.adaptive.license_key=d185684e2330de5bea436daa094a5e86:014f0116154f5bf0050e03a6b0a23157
+https://otte.cache.aiv-cdn.net/lhr-nitro/live/clients/dash/enc/72sjo8hygl/out/v1/3079be34d72a4985852d299a02406a0c/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",CAZE TV FHD
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=8d3c85fa30730fdc39efc09de476415f:8fdccd948bb2cc6d99d5305ccffebcb7
-https://npo-nl-ams-p30-am5.cdn.streamgate.nl/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODI4NTAxNDYsInVyaSI6IlwvbGl2ZVwvbnBvXC91XzNfNFwvbnBvcGx1c1wvZHJtXC9kYXNoX2NlbmNcL25wby0xXC8wXC8wXC8wXC9ucG8tMS5pc21sIiwidmlld2VyIjoidmlld2VyIiwicmlkIjoiN2FmNjY2MSJ9.duQUETqbOlZDaRwZyqdKtH5iDl2oWPe9auG3gtbpm94/live/npo/u_3_4/npoplus/drm/dash_cenc/npo-1/0/0/0/npo-1.isml/stream.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", UNITE8 HINDI HD
-http://fastshare1.com/live/112233/445566/741567.ts
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", beIN MAX FHD
-https://85cup.s3.eu-north-1.amazonaws.com/max1/master.m3u8?|referer=https://kora.depoooo.com/
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", FAST SERVER
-https://pul-tenm.nbs3g.com/live/hd-en-1-4459801.m3u8?txSecret=26f69c006d07da638d3d14753e524b53&txTime=6A4A8700
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", TELEMUNDO HD
-https://instreams.pro/US/NFLHD2/tracks-v1a1/mono.m3u8?|referer=https://instream.click/&origin=https://instream.click
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", TSN SPORTS FHD
+#KODIPROP:inputstream.adaptive.license_key=1223d5105392cabf1bb9c2c1fdf6539a:340b409f4b8f78a343e0363a7938df38
+https://otte-qw.live.pv-cdn.net/gru-nitro/live/clients/dash/enc/iayg0kyrof/out/v1/91dc04907f56415b897faccfa9d252da/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",TVE La1 SPANISH
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=14eeabf30c14b7fbf3008c03099ce011:17d2ac8dbc5429bd70af3433aa12158d
-https://abeqnpaaaaaaaaamkm25dx7jyzllj.ta.bia-cf.live.pv-cdn.net/iad-nitro/live/dash/enc/w0rehjjrwe/out/v1/69a2a7041395406b970598f61680e7cf/cenc.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", FOX ONE FHD
+#KODIPROP:inputstream.adaptive.license_key=745cd6ec34a58f2f7ac2af35dc3da6d2:ae008f1e47e6567fe4201a6ff8f1ae54
+https://otte-qw.live.pv-cdn.net/fra-nitro/live/clients/dash/enc/c7di7zkdor/out/v1/f7d5b356e048494a8325563e8916d50b/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",CANAL5 FHD
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=f6564ec2aee819046328a0e153be574d:ff46a8a1031eb27ef22576a077c98ab7
-https://abeqnpaaaaaaaaamkm25dx7jyzllj.ta.bia-cf.live.pv-cdn.net/iad-nitro/live/dash/enc/ajfoeddkbz/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", FOX 4K [ALT]
+#KODIPROP:inputstream.adaptive.license_key=d695093ea3e66d75a4d213a3e2cbf360:01be3f645e89a067d2786c295f68dde4
+https://otte-qw.live.pv-cdn.net/lhr-nitro/live/clients/dash/enc/ntkdl68eob/out/v1/bd5dfb7676994383881bc6e71877d29d/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",M6 FRANCE FHD
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=1f68713028d439ec03be07f56c1d6213:20093db6455160fffed4c394def3193d
-https://abeqnpaaaaaaaaamkm25dx7jyzllj.ta.bia-cf.live.pv-cdn.net/iad-nitro/live/clients/enc/xyqyiuevpp/out/v1/fc40f22f10374517a2784e1d97cb23f4/cenc.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", TSN SPORTS [ALT]
+#KODIPROP:inputstream.adaptive.license_key=1c285ebc98483383b938f2aac331410c:10accd30d969402cf0bb0fb99ad09283
+https://edge-fastly-m6web.live.6cloud.fr/out/v1/6play/6play-m6/cmaf_cenc00/dash-short-hd.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",TIPIK FR FHD
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=14eeabf30c14b7fbf3008c03099ce011:17d2ac8dbc5429bd70af3433aa12158d
-https://abgh3fbaaaaaaaambylpff72g6up6.ta.bia-cf.live.pv-cdn.net/iad-nitro/live/dash/enc/w0rehjjrwe/out/v1/69a2a7041395406b970598f61680e7cf/cenc.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", FOX SPORTS [ALT]
+#KODIPROP:inputstream.adaptive.license_key=adca25b8779e4168a0cd710f59f61ccf:be5383ed3cd8079f4ffe78ad067f476a
+https://c9851ec-rbm-hilv-fsly.cdn.redbee.live/L26/6b640fa2/a765d074.isml/dash/.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",SporTV - AQ
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=f6564ec2aee819046328a0e153be574d:ff46a8a1031eb27ef22576a077c98ab7
-https://abgh3fbaaaaaaaambylpff72g6up6.ta.bia-cf.live.pv-cdn.net/iad-nitro/live/dash/enc/ajfoeddkbz/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", ITV SPORTS [ALT]
+#KODIPROP:inputstream.adaptive.license_key=3de028eafb3b2caffec03be1c1c818b3:8fbdd8a9ae6748696bb13e547bb093fc
+https://otte.cache.aiv-cdn.net/lhr-nitro/live/clients/dash/enc/dsa3hwuhd1/out/v1/631b48c8d9ea437e8309d1a4b55acef5/cenc.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",TOFFE BDIX (BD) Alt
+https://cdn-tt.pages.dev/ch4.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",HD STREAM
+https://instreams.pro/EU/HDWC3/index.m3u8|Referer=https://instream.click/jwp-eu.php?stream=HDWC3&Origin=https://instream.click/jwp-eu.php?stream=HDWC3&User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",DSports - AQ
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=30089c52924f037b225b82c616fee2a5:f55dc8b66ed4fc6753d6035ae7e17144
-https://abemgapaaaaaaaamjqcglddgof6nb.ta.bia-cf.live.pv-cdn.net/pdx-nitro/live/dash/enc/0eiyyz8qzm/out/v1/dd17af8835fe4bd087d1a4e359b635d7/cenc.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", PEACOCK FHD [ALT]
-ok
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", TELEMUNDO [USA]
+#KODIPROP:inputstream.adaptive.license_key=03f12d6a3dbfd3a6fa7dd7f6417e0c11:ea07b87acdf2e45be824cde4a1cf3504
+https://otte-qw.live.pv-cdn.net/bom-nitro/live/clients/dash/enc/rgilyeubta/out/v1/09a67027b18f4fd78aaa3794a2aacfe8/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",FOX SPORT HD
+https://chatgpt.hereisman.net/playlist/52579/load-playlist?|Referer=https://gooz.aapmains.net
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",ITV SPORTS FHD
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=7d6bb9f86e133e4cb33440b493b6b672:584ad285dcb9e7d42cf3e93f1cc3fe11
-https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s/Live/channel(WSNS)/master.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", FUSSBALL TV 4K
+#KODIPROP:inputstream.adaptive.license_key=ea178e28af00ed57e7101255f977c222:f29602a280f41950d1935f0c6816dc12
+https://otte-qw.live.pv-cdn.net/pdx-nitro/live/clients/dash/enc/ffwqzsa0zr/out/v1/752ac25588ff4607b45f3876a8e89223/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",FOX SPORTS HD
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=d7d78ea2021a29541136bd5dc8352fe7:6425ac4c0cdf906fe0cce5cf40dc8933
+https://otte-qw.live.pv-cdn.net/gru-nitro/live/clients/dash/enc/cizlveblk4/out/v1/e5c36c41621e4384b80427d87199433a/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",TVP SPORTS HD
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=95620bdd974041409d4674ab629e22d4:c6c226ca1689f528a6f91e86da618f64
+https://estreams.tv.nej.cz/dash/CH_TVP_SPORT_Portable.ism/playlist.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",BINGE+ BD - AQ
+https://tc-sg.rockstreamer.com/v1/019ed91616121ea540a8171c8e801f/019ed92ac80315fc600b1796d4ad8b/main.m3u8|referer=https://iscreen.com.bd/
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",IRIB 4K
+https://ncdn.telewebion.ir/faratar/live/playlist.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",VIX MUNDIAL FHD
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=36a78e9664836d8d1b882c7772ef2119:4911f93d4a347873b3c2f187793dffb0
+https://cun-live1-ott.izzigo.tv/11/out/u/dash/VIX-MUNDIAL-91-HD/default.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",FUSSBALL TV 4K
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=4f558eae1b005126b2ac6e9eb1a7849e:17aea325d91b5e66f06a8c574f2f0b03
 https://da-50f11b292a028381000001120000000000000009.id.vx.tentcdn.eu/wp/at-live-7.tentcdn.eu/bpk-tv/WM_TV_1_UHD/default/index.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", FUSSBALL TV2 4K
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",FUSSBALL TV2 4K
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=ccdf9f3d9bbf5c508adf04f81918a285:66cf0524fcc2eb0c7dab8bbbf8829827
 https://da-50f11b292a028381000001120000000000000009.id.vx.tentcdn.eu/wp/at-live-7.tentcdn.eu/bpk-tv/WM_TV_2_UHD/default/index.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", IRIB 4K
-https://ncdn.telewebion.ir/faratar/live/playlist.m3u8
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", TSN SPORTS HD
-https://chatgpt.hereisman.net/playlist/52903/load-playlist?|Referer=https://gooz.aapmains.net
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", FOX SPORTS HD
-https://chatgpt.hereisman.net/playlist/52905/load-playlist?|Referer=https://gooz.aapmains.net
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", All in one reborn 4 Live
-https://instreams.pro/US/NFLHD1/tracks-v1a1/mono.m3u8?|referer=https://instream.click/&origin=https://instream.click
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", TYC SPORTS HD
-https://1nyaler.streamhostingcdn.top/stream/84/index.m3u8
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", DAZN SPANISH
-https://1nyaler.streamhostingcdn.top/stream/94/index.m3u8
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", Match Football FHD
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",TSN SPORTS HD
+https://lb.xyzcloud3.xyz/tsn2/index.m3u8?|referer=https://xyzstreams.st/
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",FAST SERVER
+https://pulltx.jdnzrgm.com/live/hd-en-6MvZ6BDgdks5QcZSYn.m3u8?txSecret=0d7bd0c3dd1da49b68b0f0e75f3e1735&txTime=6A3F3530
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",FOX SPORTS 4K
+https://lb.xyzcloud3.xyz/fs14k/index.m3u8?|referer=https://xyzstreams.st/
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",ARABIC LIVE HD
+https://lb.xyzcloud3.xyz/bein2/index.m3u8?|referer=https://xyzstreams.st/
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",RTE ENGLISH - AQ
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=d816287e21496989eae1312925a423c5:00da00f13180e7e6cd5ce87d1c974e8d
+https://dai.google.com/linear/dash/pa/event/antwa0EiQm2PoHtx4rBtVw/stream/9217f1b8-7d77-4590-8a52-4917bcfaeed2:GRQ/manifest.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",TSN ENGLISH - AQ
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=14eeabf30c14b7fbf3008c03099ce011:17d2ac8dbc5429bd70af3433aa12158d
+https://otte-qw.live.pv-cdn.net/bom-nitro/live/clients/dash/enc/w0rehjjrwe/out/v1/69a2a7041395406b970598f61680e7cf/cenc.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",TV4 SWEDEN - AQ
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=b09d157d18ab51b9923a3d5abdeefd52:5a29bb3c705edea6941a5b1d575ac316
+https://director.streaming.telia.com/tvm-packager-prod/group2/61a4859b79019af4abf1009d/manifest.mpd?adap=default
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",ITV ENGLISH - AQ
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=30089c52924f037b225b82c616fee2a5:f55dc8b66ed4fc6753d6035ae7e17144
+https://otte-qw.live.pv-cdn.net/pdx-nitro/live/clients/dash/enc/0eiyyz8qzm/out/v1/dd17af8835fe4bd087d1a4e359b635d7/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",CAZE TV BR - AQ
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=34475edab991ad5e92548aebd710410a:501b209cccd323ac00bf5ac15b406cb4
+https://otte-qw.live.pv-cdn.net/pdx-nitro/live/clients/dash/enc/3ynrpdanq2/out/v1/81fd4c26584044d2b1a1cc5b32fa9af0/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",D SPORTS - AQ [ES]
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=4f4c3a9912ea752e88f4497864a1bc8b:278128004fe8c6ffb2cd2a0c154a241a
+https://otte-qw.live.pv-cdn.net/iad-nitro/live/clients/dash/enc/x0srg3jjpz/out/v1/f779c49314394d61886d63f58d9d52e4/cenc.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",FOX ENGLISH - AQ
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=f6564ec2aee819046328a0e153be574d:ff46a8a1031eb27ef22576a077c98ab7
+https://otte-qw.live.pv-cdn.net/pdx-nitro/live/clients/dash/enc/ajfoeddkbz/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",ISCREEN BD - AQ
+https://m3u-tvb.pages.dev/ics.m3u8|referer=https://iscreen.com.bd/
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",TELEMUNDO HD
+https://instreams.pro/US/NFLHD3/tracks-v1a1/mono.m3u8?|referer=https://instream.click/&origin=https://instream.click
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",T SPORTS - HD
+https://trs1.aynaott.com/tsports/index.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",TELEMUNDO FHD
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=1efe4add8fdf327c5f8d2a1c195e5c71:4f50e6f011e60ca01ee561f27187e78f
+https://cun-live1-ott.izzigo.tv/out/u/dash/NOG1/TELEMUNDO-ARIZONA-USA-TCS-HD/default.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",FOOTBOLL RUSSIA
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=9145a6e0f778e61866f573d4944dd533:d02173d40515fea5c83944f21d0f3114
 https://video.beeline.tv/live/d/channel319.isml/manifest-stb.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", HD SERVER ENG
-https://mainstreams.pro/hls/24SDAZFcsqnj24.m3u8?|Referer=https://streamscenter.online/&Origin=https://streamscenter.online
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", HD SERVER AR
-https://edge2caster.pro/hls/eJmauBDCIf.m3u8?|Referer=https://streamscenter.online/&Origin=https://streamscenter.online
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", HD SERVER ES
-https://edgestreams.pro/hls/b0h5fNwDKH.m3u8?|Referer=https://streamscenter.online/&Origin=https://streamscenter.online
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", TELEMUNDO [ALT]
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Match TV HD
+https://bl.video.matchtv.ru/media/playlist/free_d46d0cf1712c0542ec7fd4f0808f600a_hd/17_89756005/1080/e6bef86de8a133cd7b27deb040758a00/4796141934.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",TELEMUNDO ES USA
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=ce7ab3022e753307997f58afe001bac4:72d631a66e635c60829a0fe7705516c1
-https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s-v2/Live/channel(kvea)/master.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", FUSSBALL 4K [GER]
+#KODIPROP:inputstream.adaptive.license_key=7d6bb9f86e133e4cb33440b493b6b672:584ad285dcb9e7d42cf3e93f1cc3fe11
+https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s/Live/channel(WSNS)/master.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",FOX PRIME ENG [USA VPN]
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=1f09d5788fbbb03a053d03cc731f31a9:d493d5a70c793362324638f61d1726ac
-https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_uhd/DASH/index.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", FUSSBALL2 4K [GER]
+#KODIPROP:inputstream.adaptive.license_key=f6564ec2aee819046328a0e153be574d:ff46a8a1031eb27ef22576a077c98ab7
+https://otte-azion.live.pv-cdn.net/iad-nitro/live/clients/enc/pp9fyo4pdg/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",FOX SPORTS 4k [USA VPN]
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=1b98a0f2de7784c6e132942385a089f3:546eae09a8d81c498dfd08532dcd68a5
-https://svc45.main.sl.t-online.de/bpk-tv/KID01064_FUSSBALLTV2_uhd/DASH/index.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", FUSSBALL TV FHD
+#KODIPROP:inputstream.adaptive.license_key=1f68713028d439ec03be07f56c1d6213:20093db6455160fffed4c394def3193d
+https://otte.live.fly.ww.aiv-cdn.net/bom-nitro/live/clients/dash/enc/buf9inoetu/out/v1/31d30c91fc65458789b84209d3fa22e4/cenc.mpd
+
+
+
+
+
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Fox 4K HDR 1
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=1cb20afcd9d979c833cfd208c7d3eeb2:fef0c15b4a523370892edd5e4133c269
-https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_hd/DASH/index.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", FUSSBALL2 TV FHD
+#KODIPROP:inputstream.adaptive.license_key=1f68713028d439ec03be07f56c1d6213:20093db6455160fffed4c394def3193d
+https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/wjottsmv62/out/v1/31d30c91fc65458789b84209d3fa22e4/cenc.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Fox 4K HDR 2
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=1889c6c8cdf57aa3bc90bb976ca6cbdc:48ef3649d9076965b70e79e58b0028ef
-https://svc45.main.sl.t-online.de/bpk-tv/KID01064_FUSSBALLTV2_hd/DASH/index.mpd
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", SD SERVER [ENG]
-http://193.47.62.42/hls/cdTHXCZzsss.m3u8?|Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", ENG SD SERVER
-http://193.47.62.59/hls/cdTHXCZzsssQ.m3u8?|Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", SD SERVER [SWE]
-http://193.47.62.59/hls/cdTHXCZckkkqq.m3u8?|Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", beiN SPORTS FR
-http://193.47.62.59/hls/cdTHXCZckkkq.m3u8?|Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", ESPANOL SD
-http://193.47.62.55/hls/cdTHXCZckkkqqq.m3u8?|Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", BTV BDIX HD
-http://198.195.239.50:8095/btv/tracks-v1a1/mono.m3u8
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", TSports HD
-http://198.195.239.50:8095/tsports/tracks-v1a1/mono.m3u8
-#EXTINF:-1 tvg-id="0-1-6z5974927" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974927/list/1920x1080list44ef4aaf548249eda3ee05e6524d4710ea6be11fec24408ab02b100412c52431" group-title="FIFA 2026 - All in one reborn 4", SOMOY TV HD
-http://198.195.239.50:8095/somoyTv/tracks-v1a1/mono.m3u8
+#KODIPROP:inputstream.adaptive.license_key=a6164ea0967b4bbbb51fdd6c4f83a64f:b431d9ed821ca93df596168601ae5b00
+https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/za6vgrmhmb/out/v1/4ef90d78cd004a668bc0377f3884575b/cenc.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Fox 4K HDR 3
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=1f68713028d439ec03be07f56c1d6213:20093db6455160fffed4c394def3193d
+https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/ss5dhni9dm/out/v1/fc40f22f10374517a2784e1d97cb23f4/cenc.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Fox HD 1
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=f6564ec2aee819046328a0e153be574d:ff46a8a1031eb27ef22576a077c98ab7
+https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/ng45k16ryt/out/v1/9e895e2c1c894a75ac6d21a4deddd5d3/cenc.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Fox HD 2
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=996d39be9ee1c8e65d94d7bb973bdf0f:5306cdc1e410bc6ddb2530608c42b11b
+https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/z3tqtb02pl/out/v1/79e41681b80248788032c6880a06e7d3/cenc.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Fox HD 3
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=996d39be9ee1c8e65d94d7bb973bdf0f:5306cdc1e410bc6ddb2530608c42b11b
+https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/sqre7hvpl8/out/v1/e8f0a2204c5c4490b338a9c2165dd92a/cenc.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Fox HD 4
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=f6564ec2aee819046328a0e153be574d:ff46a8a1031eb27ef22576a077c98ab7
+https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/jkib0oinbi/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",BBC 1
+https://tmaxapp.site/bbc1.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",BBC 2
+https://tmaxapp.site/bbc2.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",BBC 3
+https://tmaxapp.site/bbc3.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",BBC 4
+https://tmaxapp.site/bbc4.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Bein Max 1
+https://tmaxapp.site/beinmax1.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Bein Max 2
+https://tmaxapp.site/beinmax2.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Bein Sports FR 1
+https://tmaxapp.site/beinsportsfr1.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Bein Sports FR 2
+https://tmaxapp.site/beinsportsfr2.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Bein Xtra
+https://tmaxapp.site/beinxtra.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",DAZN 2 DE
+https://tmaxapp.site/dazn2de.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",DAZN LaLiga
+https://tmaxapp.site/daznlaliga.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Eleven 2
+https://tmaxapp.site/eleven2.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Eleven 3
+https://tmaxapp.site/eleven3.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",ESPN 1 NL
+https://tmaxapp.site/espn1nl.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",ESPN 2 NL
+https://tmaxapp.site/espn2nl.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",ESPN 3 NL
+https://tmaxapp.site/espn3nl.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",ESPN 4 NL
+https://tmaxapp.site/espn4nl.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",ESPN U
+https://tmaxapp.site/espnu.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Fox Soccer Plus
+https://tmaxapp.site/foxsoccerplus.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",ITV 1
+https://tmaxapp.site/itv1.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",ITV 2
+https://tmaxapp.site/itv2.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",ITV 3
+https://tmaxapp.site/itv3.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",ITV 4
+https://tmaxapp.site/itv4.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",NBA
+https://tmaxapp.site/nba.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Nova Sports 1
+https://tmaxapp.site/novasports1.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Nova Sports 2
+https://tmaxapp.site/novasports2.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Nova Sports 3
+https://tmaxapp.site/novasports3.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Nova Sports 4
+https://tmaxapp.site/novasports4.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Nova Sports 5
+https://tmaxapp.site/novasports5.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Nova Sports 6
+https://tmaxapp.site/novasports6.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",RDS
+https://tmaxapp.site/rds.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",RDS 2
+https://tmaxapp.site/rds2.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",RTL DE
+https://tmaxapp.site/rtlde.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Sky Action
+https://tmaxapp.site/skyaction.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Sky Mix
+https://tmaxapp.site/skymix.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Sky News
+https://tmaxapp.site/skynews.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Sky Top Event
+https://tmaxapp.site/skytopevent.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Sony Ten 1
+https://tmaxapp.site/sonyten1.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Sportsnet 360
+https://tmaxapp.site/sportsnet360.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Sportsnet West
+https://tmaxapp.site/sportsnetwest.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Sport TV 2
+https://tmaxapp.site/sporttv2.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",Sport TV 3
+https://tmaxapp.site/sporttv3.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",TNT Sports 1
+https://tmaxapp.site/tntsports1.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",TNT Sports 2
+https://tmaxapp.site/tntsports2.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",TNT Sports 3
+https://tmaxapp.site/tntsports3.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",TNT Sports 4
+https://tmaxapp.site/tntsports4.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",TNT Sports 5
+https://tmaxapp.site/tntsports5.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",TVA Sports
+https://tmaxapp.site/tvasports.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png" group-title="FIFA WC 2026",USA Network
+https://tmaxapp.site/usanetwork.m3u8

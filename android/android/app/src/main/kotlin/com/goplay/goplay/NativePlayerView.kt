@@ -11,6 +11,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.TrackSelectionParameters
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
@@ -61,6 +62,7 @@ class NativePlayerView(
     private val playerView: PlayerView = PlayerView(context)
     private var player: ExoPlayer? = null
     private val methodChannel: MethodChannel
+    private var fallbackStage = 0
 
     init {
         // Setup PlayerView
@@ -271,9 +273,6 @@ class NativePlayerView(
      *   - "drm_license_headers": Map<String, String> for license requests
      */
     private fun initializePlayer(config: Map<String, Any?>) {
-        // Release any existing player
-        player?.release()
-
         val url = config["url"] as? String ?: return
         Log.d(TAG, "Initializing player with config: $config")
 
@@ -306,32 +305,8 @@ class NativePlayerView(
             else -> null
         }
 
-        // --- Build LoadControl ---
-        val loadControl = DefaultLoadControl.Builder()
-            .setBufferDurationsMs(
-                15_000, // minBufferMs: Minimum duration of media that the player will attempt to keep buffered (Default: 50,000)
-                50_000, // maxBufferMs: Maximum duration of media that the player will buffer (Default: 50,000)
-                1_500,  // bufferForPlaybackMs: Duration of media that must be buffered before starting playback (Default: 2,500)
-                2_000   // bufferForPlaybackAfterRebufferMs: Duration of media that must be buffered to resume after rebuffer (Default: 5,000)
-            )
-            .setPrioritizeTimeOverSizeThresholds(true)
-            .build()
-
-        // --- Build ExoPlayer ---
-        val playerBuilder = ExoPlayer.Builder(context)
-            .setLoadControl(loadControl)
-
-        if (drmSessionManager != null) {
-            val mediaSourceFactory = DefaultMediaSourceFactory(httpFactory)
-            mediaSourceFactory.setDrmSessionManagerProvider { drmSessionManager }
-            playerBuilder.setMediaSourceFactory(mediaSourceFactory)
-        } else {
-            playerBuilder.setMediaSourceFactory(DefaultMediaSourceFactory(httpFactory))
-        }
-
-        val exoPlayer = playerBuilder.build()
-        player = exoPlayer
-        playerView.player = exoPlayer
+        // Reset DRM fallback state for this playback session
+        fallbackStage = 0
 
         // --- Build MediaItem ---
         val uri = Uri.parse(url)
@@ -353,9 +328,6 @@ class NativePlayerView(
             }
             if (drmUuid != null) {
                 val drmConfig = MediaItem.DrmConfiguration.Builder(drmUuid)
-                if (drmType == "clearkey") {
-                    // ExoPlayer handles ClearKey via the DrmSessionManager we configured
-                }
                 if (drmType == "widevine") {
                     val licenseUrl = config["drm_license_url"] as? String
                     if (licenseUrl != null) {
@@ -373,100 +345,125 @@ class NativePlayerView(
 
         val mediaItem = mediaItemBuilder.build()
 
-        // --- Add error listener ---
-        exoPlayer.addListener(object : Player.Listener {
-            private var fallbackStage = 0 // Stages: 0 = none, 1 = audio disabled, 2 = video size SD, 3 = audio disabled + video size SD
+        // --- Create MediaSource from factory ---
+        val mediaSourceFactory = if (drmSessionManager != null) {
+            DefaultMediaSourceFactory(httpFactory).setDrmSessionManagerProvider { drmSessionManager }
+        } else {
+            DefaultMediaSourceFactory(httpFactory)
+        }
+        val mediaSource = mediaSourceFactory.createMediaSource(mediaItem)
 
-            override fun onPlayerError(error: PlaybackException) {
-                Log.e(TAG, "Playback error: ${error.errorCodeName} - ${error.message}", error)
-                
-                val errorMsg = error.message ?: ""
-                val causeMsg = error.cause?.message ?: ""
-                val isDrmError = (error.errorCode in 6000..6999) ||
-                                 error.errorCodeName.startsWith("ERROR_CODE_DRM") ||
-                                 errorMsg.contains("DRM", ignoreCase = true) ||
-                                 errorMsg.contains("decrypt", ignoreCase = true) ||
-                                 causeMsg.contains("decryption", ignoreCase = true) ||
-                                 causeMsg.contains("crypto", ignoreCase = true)
-                
-                if (isDrmError && fallbackStage < 3) {
-                    val isAudioFailing = errorMsg.contains("audio", ignoreCase = true) || 
-                                         error.errorCodeName.contains("AUDIO")
-                    val isVideoFailing = errorMsg.contains("video", ignoreCase = true) || 
-                                         error.errorCodeName.contains("VIDEO")
+        // --- Setup / Reuse ExoPlayer ---
+        var exoPlayer = player
+        if (exoPlayer == null) {
+            val loadControl = DefaultLoadControl.Builder()
+                .setBufferDurationsMs(15_000, 50_000, 1_500, 2_000)
+                .setPrioritizeTimeOverSizeThresholds(true)
+                .build()
 
-                    try {
-                        val currentParameters = exoPlayer.trackSelectionParameters
-                        val builder = currentParameters.buildUpon()
+            exoPlayer = ExoPlayer.Builder(context)
+                .setLoadControl(loadControl)
+                .build()
+            player = exoPlayer
+            playerView.player = exoPlayer
 
-                        if (fallbackStage == 0) {
-                            if (isAudioFailing) {
-                                Log.w(TAG, "DRM audio error. Stage 1 fallback: Disabling audio track.")
+            // Add player listeners
+            exoPlayer.addListener(object : Player.Listener {
+                override fun onPlayerError(error: PlaybackException) {
+                    Log.e(TAG, "Playback error: ${error.errorCodeName} - ${error.message}", error)
+                    
+                    val errorMsg = error.message ?: ""
+                    val causeMsg = error.cause?.message ?: ""
+                    val isDrmError = (error.errorCode in 6000..6999) ||
+                                     error.errorCodeName.startsWith("ERROR_CODE_DRM") ||
+                                     errorMsg.contains("DRM", ignoreCase = true) ||
+                                     errorMsg.contains("decrypt", ignoreCase = true) ||
+                                     causeMsg.contains("decryption", ignoreCase = true) ||
+                                     causeMsg.contains("crypto", ignoreCase = true)
+                    
+                    if (isDrmError && fallbackStage < 3) {
+                        val isAudioFailing = errorMsg.contains("audio", ignoreCase = true) || 
+                                             error.errorCodeName.contains("AUDIO")
+                        val isVideoFailing = errorMsg.contains("video", ignoreCase = true) || 
+                                             error.errorCodeName.contains("VIDEO")
+
+                        try {
+                            val currentParameters = exoPlayer.trackSelectionParameters
+                            val builder = currentParameters.buildUpon()
+
+                            if (fallbackStage == 0) {
+                                if (isAudioFailing) {
+                                    Log.w(TAG, "DRM audio error. Stage 1 fallback: Disabling audio track.")
+                                    builder.setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, true)
+                                    fallbackStage = 1
+                                } else if (isVideoFailing) {
+                                    Log.w(TAG, "DRM video error. Stage 2 fallback: Restricting video to SD.")
+                                    builder.setMaxVideoSizeSd()
+                                    fallbackStage = 2
+                                } else {
+                                    Log.w(TAG, "General DRM error. Stage 2 fallback: Restricting video to SD first.")
+                                    builder.setMaxVideoSizeSd()
+                                    fallbackStage = 2
+                                }
+                            } else if (fallbackStage == 1) {
+                                Log.w(TAG, "DRM error persists. Stage 3 fallback: Disabling audio and restricting video to SD.")
                                 builder.setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, true)
-                                fallbackStage = 1
-                            } else if (isVideoFailing) {
-                                Log.w(TAG, "DRM video error. Stage 2 fallback: Restricting video to SD.")
                                 builder.setMaxVideoSizeSd()
-                                fallbackStage = 2
-                            } else {
-                                Log.w(TAG, "General DRM error. Stage 2 fallback: Restricting video to SD first.")
+                                fallbackStage = 3
+                            } else if (fallbackStage == 2) {
+                                Log.w(TAG, "DRM error persists. Stage 3 fallback: Disabling audio and restricting video to SD.")
+                                builder.setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, true)
                                 builder.setMaxVideoSizeSd()
-                                fallbackStage = 2
+                                fallbackStage = 3
                             }
-                        } else if (fallbackStage == 1) {
-                            // Audio was disabled, but still got error, so video must also be failing
-                            Log.w(TAG, "DRM error persists. Stage 3 fallback: Disabling audio and restricting video to SD.")
-                            builder.setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, true)
-                            builder.setMaxVideoSizeSd()
-                            fallbackStage = 3
-                        } else if (fallbackStage == 2) {
-                            // Video size was restricted to SD, but still got error, so audio must also be failing
-                            Log.w(TAG, "DRM error persists. Stage 3 fallback: Disabling audio and restricting video to SD.")
-                            builder.setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, true)
-                            builder.setMaxVideoSizeSd()
-                            fallbackStage = 3
+
+                            exoPlayer.trackSelectionParameters = builder.build()
+                            exoPlayer.prepare()
+                            exoPlayer.play()
+                            return
+                        } catch (fallbackEx: Exception) {
+                            Log.e(TAG, "Failed to apply DRM fallback stage $fallbackStage", fallbackEx)
                         }
-
-                        exoPlayer.trackSelectionParameters = builder.build()
-                        exoPlayer.prepare()
-                        exoPlayer.play()
-                        return
-                    } catch (fallbackEx: Exception) {
-                        Log.e(TAG, "Failed to apply DRM fallback stage $fallbackStage", fallbackEx)
                     }
+
+                    methodChannel.invokeMethod("onError", mapOf(
+                        "code" to error.errorCode,
+                        "message" to (error.message ?: "Unknown playback error")
+                    ))
                 }
 
-                methodChannel.invokeMethod("onError", mapOf(
-                    "code" to error.errorCode,
-                    "message" to (error.message ?: "Unknown playback error")
-                ))
-            }
-
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                val stateName = when (playbackState) {
-                    Player.STATE_IDLE -> "idle"
-                    Player.STATE_BUFFERING -> "buffering"
-                    Player.STATE_READY -> "ready"
-                    Player.STATE_ENDED -> "ended"
-                    else -> "unknown"
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    val stateName = when (playbackState) {
+                        Player.STATE_IDLE -> "idle"
+                        Player.STATE_BUFFERING -> "buffering"
+                        Player.STATE_READY -> if (exoPlayer.playWhenReady) "ready" else "paused"
+                        Player.STATE_ENDED -> "ended"
+                        else -> "unknown"
+                    }
+                    Log.d(TAG, "Playback state changed: $stateName")
+                    sendPlayerState()
                 }
-                Log.d(TAG, "Playback state changed: $stateName")
-                sendPlayerState()
-            }
 
-            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
-                Log.d(TAG, "playWhenReady changed: $playWhenReady, reason: $reason")
-                sendPlayerState()
-            }
+                override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                    Log.d(TAG, "playWhenReady changed: $playWhenReady, reason: $reason")
+                    sendPlayerState()
+                }
 
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                Log.d(TAG, "isPlaying changed: $isPlaying")
-                sendPlayerState()
-            }
-        })
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    Log.d(TAG, "isPlaying changed: $isPlaying")
+                    sendPlayerState()
+                }
+            })
+        } else {
+            // Stop and reset for new media source
+            exoPlayer.stop()
+            exoPlayer.clearMediaItems()
+            // Reset track selection parameters to default (so previous DRM fallbacks/SD restrictions don't carry over)
+            exoPlayer.trackSelectionParameters = TrackSelectionParameters.Builder().build()
+        }
 
         // --- Start playback ---
-        exoPlayer.setMediaItem(mediaItem)
+        exoPlayer.setMediaSource(mediaSource)
         exoPlayer.prepare()
         exoPlayer.playWhenReady = true
         Log.d(TAG, "Player prepared and starting playback")

@@ -56,8 +56,10 @@ class TeamFlagWidget extends StatelessWidget {
               : Image.network(
                   trimmed,
                   fit: BoxFit.cover,
-                  cacheWidth: (size * 1.2 * 2).toInt(),
-                  cacheHeight: (size * 1.2 * 2).toInt(),
+                  // Cap decode size to 96 px (covers up to 40 dp at 3× DPR).
+                  // Prevents the raster thread from decoding oversized network images.
+                  cacheWidth: ((size * 1.2 * 2).toInt()).clamp(0, 96),
+                  cacheHeight: ((size * 1.2 * 2).toInt()).clamp(0, 96),
                   errorBuilder: (context, error, stackTrace) => _buildFallback(),
                 ),
         ),

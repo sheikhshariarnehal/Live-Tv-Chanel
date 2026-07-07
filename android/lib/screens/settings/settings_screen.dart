@@ -31,7 +31,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             SliverAppBar(
               floating: false,
               pinned: true,
-              backgroundColor: GoPlayTheme.surface.withOpacity(0.95),
+              backgroundColor: GoPlayTheme.surface.withValues(alpha: 0.95),
               elevation: 0,
               automaticallyImplyLeading: false,
               systemOverlayStyle: const SystemUiOverlayStyle(
@@ -118,7 +118,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             borderRadius: BorderRadius.circular(4),
                             child: LinearProgressIndicator(
                               value: updateState.downloadProgress,
-                              backgroundColor: Colors.white.withOpacity(0.05),
+                              backgroundColor: Colors.white.withValues(alpha: 0.05),
                               valueColor: const AlwaysStoppedAnimation<Color>(GoPlayTheme.primary),
                               minHeight: 6,
                             ),
@@ -224,7 +224,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
-                            color: GoPlayTheme.onSurfaceVariant.withOpacity(0.5),
+                            color: GoPlayTheme.onSurfaceVariant.withValues(alpha: 0.5),
                             letterSpacing: 1.5,
                           ),
                         ),
@@ -234,7 +234,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 10,
-                            color: GoPlayTheme.onSurfaceVariant.withOpacity(0.3),
+                            color: GoPlayTheme.onSurfaceVariant.withValues(alpha: 0.3),
                             height: 1.4,
                           ),
                         ),
@@ -277,7 +277,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: GoPlayTheme.surfaceContainer.withOpacity(0.3),
+            color: GoPlayTheme.surfaceContainer.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: GoPlayTheme.cardBorder,
@@ -302,10 +302,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: iconGlowColor.withOpacity(0.08),
+            color: iconGlowColor.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: iconGlowColor.withOpacity(0.15),
+              color: iconGlowColor.withValues(alpha: 0.15),
               width: 1.0,
             ),
           ),
@@ -372,9 +372,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: GoPlayTheme.error.withOpacity(0.06),
+          color: GoPlayTheme.error.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: GoPlayTheme.error.withOpacity(0.2), width: 1.0),
+          border: Border.all(color: GoPlayTheme.error.withValues(alpha: 0.2), width: 1.0),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -446,9 +446,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       colors: [GoPlayTheme.primary, GoPlayTheme.primaryDark],
                     )
                   : null,
-              color: value ? null : Colors.white.withOpacity(0.08),
+              color: value ? null : Colors.white.withValues(alpha: 0.08),
               border: Border.all(
-                color: value ? Colors.transparent : Colors.white.withOpacity(0.12),
+                color: value ? Colors.transparent : Colors.white.withValues(alpha: 0.12),
                 width: 1.0,
               ),
             ),
@@ -561,7 +561,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ],
                 ),
-                backgroundColor: GoPlayTheme.surfaceContainerHigh.withOpacity(0.95),
+                backgroundColor: GoPlayTheme.surfaceContainerHigh.withValues(alpha: 0.95),
                 behavior: SnackBarBehavior.floating,
                 duration: const Duration(seconds: 2),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

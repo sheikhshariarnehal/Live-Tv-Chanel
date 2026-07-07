@@ -38,7 +38,7 @@ class UpdateDialog extends ConsumerWidget {
                 color: const Color(0xE617181C), // Translucent Carbon Black (90%)
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.08),
+                  color: Colors.white.withValues(alpha: 0.08),
                   width: 1.0,
                 ),
               ),
@@ -69,7 +69,7 @@ class UpdateDialog extends ConsumerWidget {
                                     ],
                             ),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               width: 1,
                             ),
                           ),
@@ -98,7 +98,7 @@ class UpdateDialog extends ConsumerWidget {
                                 isForce ? 'You must update to continue' : 'A new version is ready',
                                 style: TextStyle(
                                   fontSize: 11.5,
-                                  color: GoPlayTheme.onSurfaceVariant.withOpacity(0.7),
+                                  color: GoPlayTheme.onSurfaceVariant.withValues(alpha: 0.7),
                                 ),
                               ),
                             ],
@@ -110,7 +110,7 @@ class UpdateDialog extends ConsumerWidget {
                     Container(
                       margin: const EdgeInsets.symmetric(vertical: 20),
                       height: 1,
-                      color: Colors.white.withOpacity(0.06),
+                      color: Colors.white.withValues(alpha: 0.06),
                     ),
 
                     // Dynamic Body based on download/check status
@@ -140,7 +140,7 @@ class UpdateDialog extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 13, 
                 fontWeight: FontWeight.w500,
-                color: Colors.white.withOpacity(0.9)
+                color: Colors.white.withValues(alpha: 0.9)
               ),
             ),
             const SizedBox(height: 16),
@@ -148,7 +148,7 @@ class UpdateDialog extends ConsumerWidget {
               borderRadius: BorderRadius.circular(6),
               child: LinearProgressIndicator(
                 value: state.downloadProgress,
-                backgroundColor: Colors.white.withOpacity(0.05),
+                backgroundColor: Colors.white.withValues(alpha: 0.05),
                 valueColor: const AlwaysStoppedAnimation<Color>(GoPlayTheme.primary),
                 minHeight: 6,
               ),
@@ -169,7 +169,7 @@ class UpdateDialog extends ConsumerWidget {
                   'Please keep the app open',
                   style: TextStyle(
                     fontSize: 11,
-                    color: GoPlayTheme.onSurfaceVariant.withOpacity(0.7),
+                    color: GoPlayTheme.onSurfaceVariant.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -193,7 +193,7 @@ class UpdateDialog extends ConsumerWidget {
               'Launching package installer...',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.9), 
+                color: Colors.white.withValues(alpha: 0.9), 
                 fontSize: 13,
                 fontWeight: FontWeight.w500
               ),
@@ -223,17 +223,17 @@ class UpdateDialog extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: GoPlayTheme.error.withOpacity(0.06),
+                color: GoPlayTheme.error.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: GoPlayTheme.error.withOpacity(0.15),
+                  color: GoPlayTheme.error.withValues(alpha: 0.15),
                   width: 1,
                 ),
               ),
               child: Text(
                 state.errorMessage ?? 'An unexpected network error occurred while downloading the APK file. Please check your connection.',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.85),
+                  color: Colors.white.withValues(alpha: 0.85),
                   fontSize: 12,
                   height: 1.4,
                 ),
@@ -304,7 +304,7 @@ class UpdateDialog extends ConsumerWidget {
                                 note,
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: Colors.white.withOpacity(0.9),
+                                  color: Colors.white.withValues(alpha: 0.9),
                                   height: 1.4,
                                 ),
                               ),
@@ -360,7 +360,7 @@ class UpdateDialog extends ConsumerWidget {
         label: const Text('CANCEL DOWNLOAD'),
         style: TextButton.styleFrom(
           foregroundColor: GoPlayTheme.error,
-          backgroundColor: GoPlayTheme.error.withOpacity(0.08),
+          backgroundColor: GoPlayTheme.error.withValues(alpha: 0.08),
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           textStyle: const TextStyle(
@@ -387,8 +387,8 @@ class UpdateDialog extends ConsumerWidget {
                   Navigator.of(context).pop();
                 },
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: Colors.white.withOpacity(0.08)),
-                  backgroundColor: Colors.white.withOpacity(0.02),
+                  side: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+                  backgroundColor: Colors.white.withValues(alpha: 0.02),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
@@ -443,8 +443,8 @@ class UpdateDialog extends ConsumerWidget {
                       Navigator.of(context).pop();
                     },
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Colors.white.withOpacity(0.08)),
-                      backgroundColor: Colors.white.withOpacity(0.02),
+                      side: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+                      backgroundColor: Colors.white.withValues(alpha: 0.02),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
@@ -489,8 +489,8 @@ class UpdateDialog extends ConsumerWidget {
                 Navigator.of(context).pop();
               },
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: Colors.white.withOpacity(0.08)),
-                backgroundColor: Colors.white.withOpacity(0.02),
+                side: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+                backgroundColor: Colors.white.withValues(alpha: 0.02),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),

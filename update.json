@@ -1,10 +1,12 @@
 {
-    "latestVersion": "1.2.7",
+    "latestVersion": "1.2.8",
     "minimumVersion": "1.0.0",
     "forceUpdate": false,
-    "apkUrl": "https://cdn.ntechbd.app/goplay-1.2.7.apk",
+    "apkUrl": "https://cdn.ntechbd.app/goplay-1.2.8.apk",
     "releaseNotes": [
-        "added new icon"
+        "Enhanced bottom navigation menu design",
+        "Performance optimizations",
+        "Bug fixes and visual improvements"
     ],
-    "publishedAt": "2026-07-07T12:30:00+06:00"
+    "publishedAt": "2026-07-07T18:50:00+06:00"
 }

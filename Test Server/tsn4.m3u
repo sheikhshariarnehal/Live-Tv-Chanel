@@ -1,0 +1,20 @@
+#EXTM3U
+
+# ----------------- OPTION 1: PLAY DIRECTLY THROUGH CLOUDFLARE WORKER (RECOMMENDED) -----------------
+# Replace "your-worker.workers.dev" with your actual deployed worker domain.
+# Since the worker handles headers and proxying, this will be extremely stable and fast.
+#EXTINF:-1 tvg-id="tsn4-sports-fhd" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe" group-title="Sports", TSN4 SPORTS FHD (Worker Proxy)
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=abc5b2883121012850ebda05b528c5ec:e5250924f4b738905f7163a0134587a7
+https://tsn4-proxy-worker.sheikhshariarnehal.workers.dev/manifest.mpd
+
+# ----------------- OPTION 2: PLAY DIRECTLY USING ORIGINAL STREAM URL -----------------
+# Use this option if you want to bypass the worker, but you must pass the exact User-Agent header.
+#EXTINF:-1 tvg-id="tsn4-sports-fhd" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_1013,h_570,c_scale,f_webp,q_auto:eco/resources/0-1-6z5974942/list/1920x1080list0ce1240f590c42e5a0e83f278b2d1529ee8eb0fddfda4bb78445105c231d6efe" group-title="Sports", TSN4 SPORTS FHD (Direct Stream)
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=abc5b2883121012850ebda05b528c5ec:e5250924f4b738905f7163a0134587a7
+https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/ihys8nw4wv/out/v1/fde190f369484bc6b6117cc16cd82a9f/cenc.mpd|user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36

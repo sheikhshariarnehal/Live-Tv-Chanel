@@ -180,151 +180,155 @@ class _EventListTileState extends ConsumerState<EventListTile>
     final event = widget.event;
     final isLive = event.isLive;
 
-    return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) {
-        _controller.reverse();
-        widget.onTap?.call();
-      },
-      onTapCancel: () => _controller.reverse(),
-      child: ScaleTransition(
-        scale: _scale,
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: DecoratedBox(
-            decoration: isLive
-                ? _kLiveCardDecoration
-                : _kUpcomingCardDecoration,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header Row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              width: 4,
-                              height: 12,
-                              child: DecoratedBox(
-                                decoration: isLive
-                                    ? _kLiveAccentDecoration
-                                    : _kUpcomingAccentDecoration,
+    // RepaintBoundary isolates the ScaleTransition to its own composited layer,
+    // preventing the full list from repainting on every tap animation frame.
+    return RepaintBoundary(
+      child: GestureDetector(
+        onTapDown: (_) => _controller.forward(),
+        onTapUp: (_) {
+          _controller.reverse();
+          widget.onTap?.call();
+        },
+        onTapCancel: () => _controller.reverse(),
+        child: ScaleTransition(
+          scale: _scale,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: DecoratedBox(
+              decoration: isLive
+                  ? _kLiveCardDecoration
+                  : _kUpcomingCardDecoration,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Header Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 4,
+                                height: 12,
+                                child: DecoratedBox(
+                                  decoration: isLive
+                                      ? _kLiveAccentDecoration
+                                      : _kUpcomingAccentDecoration,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                event.league.toUpperCase(),
-                                style: _kLeagueStyle,
-                                overflow: TextOverflow.ellipsis,
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  event.league.toUpperCase(),
+                                  style: _kLeagueStyle,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      if (isLive)
-                        const LiveBadge(
-                          fontSize: 8,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
+                            ],
                           ),
-                        )
-                      else
-                        const DecoratedBox(
-                          decoration: _kUpcomingBadgeDecoration,
-                          child: Padding(
+                        ),
+                        const SizedBox(width: 8),
+                        if (isLive)
+                          const LiveBadge(
+                            fontSize: 8,
                             padding: EdgeInsets.symmetric(
                               horizontal: 8,
                               vertical: 3,
                             ),
-                            child: Text('UPCOMING', style: _kBadgeStyle),
+                          )
+                        else
+                          const DecoratedBox(
+                            decoration: _kUpcomingBadgeDecoration,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
+                              child: Text('UPCOMING', style: _kBadgeStyle),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    // Teams & time row
+                    Row(
+                      children: [
+                        // Home team
+                        Expanded(
+                          flex: 3,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TeamFlagWidget(flag: event.homeTeam.flag, size: 28),
+                              const SizedBox(height: 6),
+                              Text(
+                                _homeAbbr,
+                                style: _kTeamNameStyle,
+                                maxLines: 1,
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
                         ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  // Teams & time row
-                  Row(
-                    children: [
-                      // Home team
-                      Expanded(
-                        flex: 3,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TeamFlagWidget(flag: event.homeTeam.flag, size: 28),
-                            const SizedBox(height: 6),
-                            Text(
-                              _homeAbbr,
-                              style: _kTeamNameStyle,
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
 
-                      // Centre: score / time / countdown
-                      Expanded(
-                        flex: 4,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              isLive ? 'VS' : _timeLabel,
-                              style: isLive
-                                  ? _kLiveTimeStyle
-                                  : _kUpcomingTimeStyle,
-                            ),
-                            const SizedBox(height: 4),
-                            if (event.isUpcoming && _isToday)
-                              CountdownTimerWidget(
-                                startTime: event.startTime,
-                                onTimerFinished: () {
-                                  ref.read(syncServiceProvider).sync();
-                                  ref.invalidate(eventsProvider);
-                                },
-                                style: _kCountdownStyle,
-                              )
-                            else
+                        // Centre: score / time / countdown
+                        Expanded(
+                          flex: 4,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
                               Text(
-                                _formatTimeInfo(event),
-                                style: _kTimeInfoStyle,
+                                isLive ? 'VS' : _timeLabel,
+                                style: isLive
+                                    ? _kLiveTimeStyle
+                                    : _kUpcomingTimeStyle,
                               ),
-                          ],
+                              const SizedBox(height: 4),
+                              if (event.isUpcoming && _isToday)
+                                CountdownTimerWidget(
+                                  startTime: event.startTime,
+                                  onTimerFinished: () {
+                                    ref.read(syncServiceProvider).sync();
+                                    ref.invalidate(eventsProvider);
+                                  },
+                                  style: _kCountdownStyle,
+                                )
+                              else
+                                Text(
+                                  _formatTimeInfo(event),
+                                  style: _kTimeInfoStyle,
+                                ),
+                            ],
+                          ),
                         ),
-                      ),
 
-                      // Away team
-                      Expanded(
-                        flex: 3,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TeamFlagWidget(flag: event.awayTeam.flag, size: 28),
-                            const SizedBox(height: 6),
-                            Text(
-                              _awayAbbr,
-                              style: _kTeamNameStyle,
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+                        // Away team
+                        Expanded(
+                          flex: 3,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TeamFlagWidget(flag: event.awayTeam.flag, size: 28),
+                              const SizedBox(height: 6),
+                              Text(
+                                _awayAbbr,
+                                style: _kTeamNameStyle,
+                                maxLines: 1,
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

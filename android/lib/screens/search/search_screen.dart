@@ -49,10 +49,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             Container(
               padding: const EdgeInsets.fromLTRB(8, 8, 16, 16),
               decoration: BoxDecoration(
-                color: GoPlayTheme.surface.withOpacity(0.8),
+                color: GoPlayTheme.surface.withValues(alpha: 0.8),
                 border: Border(
                   bottom: BorderSide(
-                    color: GoPlayTheme.cardBorder.withOpacity(0.15),
+                    color: GoPlayTheme.cardBorder.withValues(alpha: 0.15),
                     width: 0.8,
                   ),
                 ),
@@ -77,21 +77,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                              color: Colors.white.withOpacity(0.08),
+                              color: Colors.white.withValues(alpha: 0.08),
                               width: 1,
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                              color: Colors.white.withOpacity(0.08),
+                              color: Colors.white.withValues(alpha: 0.08),
                               width: 1,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                              color: Colors.white.withOpacity(0.25),
+                              color: Colors.white.withValues(alpha: 0.25),
                               width: 1.0,
                             ),
                           ),
@@ -111,7 +111,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           decoration: InputDecoration(
                             hintText: 'Search channels, teams, sports...',
                             hintStyle: TextStyle(
-                              color: Colors.white.withOpacity(0.5),
+                              color: Colors.white.withValues(alpha: 0.5),
                               fontSize: 14,
                             ),
                             isDense: true,
@@ -190,7 +190,7 @@ class _EmptySearchState extends StatelessWidget {
         Text(
           'POPULAR SEARCHES',
           style: TextStyle(
-            color: GoPlayTheme.onSurfaceVariant.withOpacity(0.5),
+            color: GoPlayTheme.onSurfaceVariant.withValues(alpha: 0.5),
             fontSize: 11,
             fontWeight: FontWeight.w800,
             letterSpacing: 1.5,
@@ -208,10 +208,10 @@ class _EmptySearchState extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
-                  color: GoPlayTheme.surfaceContainer.withOpacity(0.5),
+                  color: GoPlayTheme.surfaceContainer.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.04),
+                    color: Colors.white.withValues(alpha: 0.04),
                     width: 1,
                   ),
                 ),
@@ -233,7 +233,7 @@ class _EmptySearchState extends StatelessWidget {
         Text(
           'RECOMMENDED CHANNELS',
           style: TextStyle(
-            color: GoPlayTheme.onSurfaceVariant.withOpacity(0.5),
+            color: GoPlayTheme.onSurfaceVariant.withValues(alpha: 0.5),
             fontSize: 11,
             fontWeight: FontWeight.w800,
             letterSpacing: 1.5,
@@ -284,10 +284,10 @@ class _EmptySearchState extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: GoPlayTheme.surfaceContainer.withOpacity(0.4),
+          color: GoPlayTheme.surfaceContainer.withValues(alpha: 0.4),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.white.withOpacity(0.04),
+            color: Colors.white.withValues(alpha: 0.04),
             width: 1,
           ),
         ),
@@ -300,7 +300,7 @@ class _EmptySearchState extends StatelessWidget {
                 color: GoPlayTheme.surfaceContainerHigh,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.08),
+                  color: Colors.white.withValues(alpha: 0.08),
                   width: 1,
                 ),
               ),
@@ -362,10 +362,10 @@ class _EmptySearchState extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: GoPlayTheme.liveBadge.withOpacity(0.12),
+                  color: GoPlayTheme.liveBadge.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: GoPlayTheme.liveBadge.withOpacity(0.3),
+                    color: GoPlayTheme.liveBadge.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -439,7 +439,7 @@ class _SearchResults extends StatelessWidget {
                   child: Text(
                     'CHANNELS',
                     style: TextStyle(
-                      color: GoPlayTheme.onSurfaceVariant.withOpacity(0.5),
+                      color: GoPlayTheme.onSurfaceVariant.withValues(alpha: 0.5),
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.5,
@@ -480,7 +480,7 @@ class _SearchResults extends StatelessWidget {
                   child: Text(
                     'LIVE EVENTS',
                     style: TextStyle(
-                      color: GoPlayTheme.onSurfaceVariant.withOpacity(0.5),
+                      color: GoPlayTheme.onSurfaceVariant.withValues(alpha: 0.5),
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.5,
@@ -506,10 +506,10 @@ class _SearchResults extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: GoPlayTheme.surfaceContainer.withOpacity(0.4),
+          color: GoPlayTheme.surfaceContainer.withValues(alpha: 0.4),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.white.withOpacity(0.04),
+            color: Colors.white.withValues(alpha: 0.04),
             width: 1,
           ),
         ),
@@ -522,7 +522,7 @@ class _SearchResults extends StatelessWidget {
                 color: GoPlayTheme.surfaceContainerHigh,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.08),
+                  color: Colors.white.withValues(alpha: 0.08),
                   width: 1,
                 ),
               ),
@@ -584,10 +584,10 @@ class _SearchResults extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: GoPlayTheme.liveBadge.withOpacity(0.12),
+                  color: GoPlayTheme.liveBadge.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: GoPlayTheme.liveBadge.withOpacity(0.3),
+                    color: GoPlayTheme.liveBadge.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -645,10 +645,10 @@ class _SearchResults extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: GoPlayTheme.surfaceContainer.withOpacity(0.4),
+          color: GoPlayTheme.surfaceContainer.withValues(alpha: 0.4),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.white.withOpacity(0.04),
+            color: Colors.white.withValues(alpha: 0.04),
             width: 1,
           ),
         ),
@@ -657,10 +657,10 @@ class _SearchResults extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: GoPlayTheme.surfaceContainerHigh.withOpacity(0.6),
+                color: GoPlayTheme.surfaceContainerHigh.withValues(alpha: 0.6),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.06),
+                  color: Colors.white.withValues(alpha: 0.06),
                   width: 1,
                 ),
               ),
@@ -697,10 +697,10 @@ class _SearchResults extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: GoPlayTheme.liveBadge.withOpacity(0.12),
+                  color: GoPlayTheme.liveBadge.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: GoPlayTheme.liveBadge.withOpacity(0.3),
+                    color: GoPlayTheme.liveBadge.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),

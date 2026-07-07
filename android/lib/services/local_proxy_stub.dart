@@ -5,6 +5,10 @@ import 'dart:async';
 HttpServer? _server;
 int _port = 0;
 
+final HttpClient _sharedHttpClient = HttpClient()
+  ..autoUncompress = true
+  ..connectionTimeout = const Duration(seconds: 10);
+
 DateTime? _lastKkx4AuthTime;
 bool _isAuthorizingKkx4 = false;
 Timer? _kkx4AuthTimer;
@@ -136,8 +140,7 @@ Future<void> startProxy() async {
           }
         }
 
-        final client = HttpClient();
-        client.autoUncompress = true;
+        final client = _sharedHttpClient;
 
         final clientRequest = await client.openUrl(request.method, targetUrl);
 
