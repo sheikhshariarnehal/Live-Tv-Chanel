@@ -38,7 +38,7 @@ const _kTileDecoActive = BoxDecoration(
     BorderSide(color: GoPlayTheme.primary, width: 1.0),
   ),
   boxShadow: [
-    BoxShadow(color: Color(0x1F00E676), blurRadius: 8, offset: Offset(0, 2)),
+    BoxShadow(color: Color(0x1F00ADB5), blurRadius: 8, offset: Offset(0, 2)),
   ],
 );
 // Tile decorations — hovered / normal
@@ -68,10 +68,10 @@ const _kBackBtnDeco = BoxDecoration(
 
 // Playing tag
 const _kPlayingTagDeco = BoxDecoration(
-  color: Color(0x1A00E676),
+  color: Color(0x1A00ADB5),
   borderRadius: BorderRadius.all(Radius.circular(12)),
   border: Border.fromBorderSide(
-    BorderSide(color: Color(0x3200E676), width: 0.5),
+    BorderSide(color: Color(0x3200ADB5), width: 0.5),
   ),
 );
 const _kPlayingTagStyle = TextStyle(
@@ -125,7 +125,7 @@ final _kTileNameNormalStyle = GoogleFonts.outfit(
 );
 
 const _kTileMetaActiveStyle = TextStyle(
-  color: Color(0xCC00E676),
+  color: Color(0xCC00ADB5),
   fontSize: 10.5,
 );
 const _kTileMetaNormalStyle = TextStyle(color: Colors.white38, fontSize: 10.5);

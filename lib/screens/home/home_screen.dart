@@ -145,8 +145,8 @@ class HomeScreen extends ConsumerWidget {
                 return ClipRect(
                   child: BackdropFilter(
                     filter: ImageFilter.blur(
-                      sigmaX: 16 * collapseRatio,
-                      sigmaY: 16 * collapseRatio,
+                      sigmaX: 12.0,
+                      sigmaY: 12.0,
                     ),
                     child: Container(
                       decoration: BoxDecoration(
@@ -350,9 +350,7 @@ class HomeScreen extends ConsumerWidget {
               onAction: () => context.go('/upcoming'),
             ),
           ),
-          const SliverToBoxAdapter(
-            child: RepaintBoundary(child: _TodaySchedule()),
-          ),
+          const _TodaySchedule(),
 
           // Recently Watched
           const SliverToBoxAdapter(child: SizedBox(height: 20)),
@@ -437,7 +435,7 @@ class _HeroBannerState extends ConsumerState<_HeroBanner> {
                           ),
                           color: active
                               ? GoPlayTheme.primary
-                              : const Color(0x5000E676),
+                              : const Color(0x5000ADB5),
                         ),
                       );
                     }),
@@ -703,7 +701,7 @@ class _HeroBannerCard extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(8),
                             boxShadow: const [
                               BoxShadow(
-                                color: Color(0x2000E676),
+                                color: Color(0x2000ADB5),
                                 blurRadius: 6,
                                 offset: Offset(0, 2),
                               ),
@@ -754,50 +752,52 @@ class _TodaySchedule extends ConsumerWidget {
     return eventsAsync.when(
       data: (todayEvents) {
         if (todayEvents.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            child: Text(
-              'No events scheduled for today',
-              style: TextStyle(color: GoPlayTheme.onSurfaceVariant),
+          return const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              child: Text(
+                'No events scheduled for today',
+                style: TextStyle(color: GoPlayTheme.onSurfaceVariant),
+              ),
             ),
           );
         }
 
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+        return SliverList.builder(
           itemCount: todayEvents.length,
-          addAutomaticKeepAlives: false,
-          addRepaintBoundaries: false,
           itemBuilder: (context, index) {
             final event = todayEvents[index];
-            return EventListTile(
-              event: event,
-              onTap: () {
-                if (event.channels.isNotEmpty) {
-                  context.push(
-                    '/player/${event.channels.first}',
-                    extra: {
-                      'eventChannels': event.channels,
-                      'forceFullscreen': true,
-                    },
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('No channels available for this event.'),
-                      backgroundColor: GoPlayTheme.error,
-                    ),
-                  );
-                }
-              },
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: RepaintBoundary(
+                child: EventListTile(
+                  event: event,
+                  onTap: () {
+                    if (event.channels.isNotEmpty) {
+                      context.push(
+                        '/player/${event.channels.first}',
+                        extra: {
+                          'eventChannels': event.channels,
+                          'forceFullscreen': true,
+                        },
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('No channels available for this event.'),
+                          backgroundColor: GoPlayTheme.error,
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ),
             );
           },
         );
       },
-      loading: () => const SizedBox.shrink(),
-      error: (err, stack) => const SizedBox.shrink(),
+      loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
+      error: (err, stack) => const SliverToBoxAdapter(child: SizedBox.shrink()),
     );
   }
 }
@@ -945,10 +945,10 @@ class _UpcomingBadge extends StatelessWidget {
   const _UpcomingBadge();
 
   static const _decoration = BoxDecoration(
-    color: Color(0x1E00E676),
+    color: Color(0x1E00ADB5),
     borderRadius: BorderRadius.all(Radius.circular(12)),
     border: Border.fromBorderSide(
-      BorderSide(color: Color(0x5000E676), width: 0.5),
+      BorderSide(color: Color(0x5000ADB5), width: 0.5),
     ),
   );
 
