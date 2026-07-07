@@ -18,8 +18,8 @@ import '../../widgets/channel_avatar.dart';
 import '../../widgets/countdown_timer.dart';
 
 // ─── Cached Text Styles ──────────────────────────────────────
-final TextStyle _orbitronTitleBase = GoogleFonts.orbitron(
-  fontWeight: FontWeight.w300,
+const TextStyle _titleStyleBase = TextStyle(
+  fontWeight: FontWeight.w900,
   color: GoPlayTheme.primary,
 );
 
@@ -61,9 +61,9 @@ class HomeScreen extends ConsumerWidget {
                     color: GoPlayTheme.error,
                   ),
                   const SizedBox(height: 20),
-                  Text(
+                  const Text(
                     'CONNECTION ERROR',
-                    style: GoogleFonts.orbitron(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
@@ -173,7 +173,7 @@ class HomeScreen extends ConsumerWidget {
                                 alignment: Alignment.centerLeft,
                                 child: Text(
                                   'GOPLAY',
-                                  style: _orbitronTitleBase.copyWith(
+                                  style: _titleStyleBase.copyWith(
                                     color: GoPlayTheme.primary,
                                     fontSize: 22 - (2 * collapseRatio),
                                     letterSpacing: 3 - (1.0 * collapseRatio),

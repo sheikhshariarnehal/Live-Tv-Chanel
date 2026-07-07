@@ -104,20 +104,20 @@ const _kAvatarDeco = BoxDecoration(
   ),
 );
 
-final _kSectionLabelStyle = GoogleFonts.outfit(
+const _kSectionLabelStyle = TextStyle(
   color: Colors.white60,
   fontSize: 12,
   fontWeight: FontWeight.w700,
   letterSpacing: 1.5,
 );
 
-final _kTileNameActiveStyle = GoogleFonts.outfit(
+const _kTileNameActiveStyle = TextStyle(
   color: GoPlayTheme.primary,
   fontSize: 13.5,
   fontWeight: FontWeight.w700,
   letterSpacing: 0.1,
 );
-final _kTileNameNormalStyle = GoogleFonts.outfit(
+const _kTileNameNormalStyle = TextStyle(
   color: Colors.white,
   fontSize: 13.5,
   fontWeight: FontWeight.w600,

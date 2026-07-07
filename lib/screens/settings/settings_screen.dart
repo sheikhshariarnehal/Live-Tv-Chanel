@@ -2,7 +2,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme.dart';
 import '../../providers/update_notifier.dart';
@@ -46,7 +45,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
               title: Text(
                 'SETTINGS',
-                style: GoogleFonts.orbitron(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
                   color: GoPlayTheme.primary,
@@ -130,7 +129,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             children: [
                               Text(
                                 'Downloading: ${(updateState.downloadProgress * 100).toStringAsFixed(0)}%',
-                                style: GoogleFonts.orbitron(
+                                style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
                                   color: GoPlayTheme.primary,
@@ -144,9 +143,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   minimumSize: const Size(0, 0),
                                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                 ),
-                                child: Text(
+                                child: const Text(
                                   'CANCEL',
-                                  style: GoogleFonts.orbitron(fontSize: 12, fontWeight: FontWeight.w700, color: GoPlayTheme.error),
+                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: GoPlayTheme.error),
                                 ),
                               ),
                             ],
@@ -167,9 +166,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              Text(
+                              const Text(
                                 'Launching installer...',
-                                style: GoogleFonts.inter(color: GoPlayTheme.onSurfaceVariant, fontSize: 13),
+                                style: TextStyle(color: GoPlayTheme.onSurfaceVariant, fontSize: 13),
                               ),
                             ],
                           ),
@@ -222,7 +221,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       children: [
                         Text(
                           'GoPlay TV app',
-                          style: GoogleFonts.orbitron(
+                          style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
                             color: GoPlayTheme.onSurfaceVariant.withOpacity(0.5),
@@ -233,7 +232,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         Text(
                           'Designed with Premium Apple Aesthetic\nBuild v${updateState.currentVersion}',
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 10,
                             color: GoPlayTheme.onSurfaceVariant.withOpacity(0.3),
                             height: 1.4,
@@ -259,7 +258,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       padding: const EdgeInsets.only(left: 4.0),
       child: Text(
         title,
-        style: GoogleFonts.orbitron(
+        style: const TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w800,
           color: GoPlayTheme.onSurfaceVariant,
@@ -323,7 +322,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             children: [
               Text(
                 title,
-                style: GoogleFonts.inter(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -332,7 +331,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: GoogleFonts.inter(
+                style: const TextStyle(
                   fontSize: 11,
                   color: GoPlayTheme.onSurfaceVariant,
                 ),
@@ -350,14 +349,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
+          style: const TextStyle(
             fontSize: 13,
             color: GoPlayTheme.onSurfaceVariant,
           ),
         ),
         Text(
           value,
-          style: GoogleFonts.orbitron(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
             color: isHighlight ? GoPlayTheme.primary : Colors.white,
@@ -385,8 +384,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             Expanded(
               child: Text(
                 error,
-                style: GoogleFonts.inter(
-                  color: const Color(0xFFFCA5A5),
+                style: const TextStyle(
+                  color: Color(0xFFFCA5A5),
                   fontSize: 12,
                   height: 1.3,
                 ),
@@ -414,7 +413,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             children: [
               Text(
                 title,
-                style: GoogleFonts.inter(
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: Colors.white,
@@ -423,7 +422,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SizedBox(height: 4),
               Text(
                 subtitle,
-                style: GoogleFonts.inter(
+                style: const TextStyle(
                   fontSize: 11,
                   color: GoPlayTheme.onSurfaceVariant,
                 ),
@@ -497,7 +496,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SizedBox(width: 12),
               Text(
                 'CHECKING FOR UPDATES...',
-                style: GoogleFonts.orbitron(
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: GoPlayTheme.onSurfaceVariant,
@@ -558,7 +557,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     const SizedBox(width: 10),
                     Text(
                       'App is already up to date!',
-                      style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: Colors.white),
+                      style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
                     ),
                   ],
                 ),

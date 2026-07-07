@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/theme.dart';
 import '../../main.dart' show appInitFuture;
 
 class SplashScreen extends StatefulWidget {
@@ -25,10 +26,10 @@ class _SplashScreenState extends State<SplashScreen>
   // Cached static decorations — not recreated per-frame
   static final _pulseRingDecoration = BoxDecoration(
     shape: BoxShape.circle,
-    border: Border.all(color: const Color(0xFF10B981), width: 3),
+    border: Border.all(color: GoPlayTheme.primary, width: 3),
     boxShadow: [
       BoxShadow(
-        color: const Color(0xFF10B981).withAlpha(76),
+        color: GoPlayTheme.primary.withAlpha(76),
         blurRadius: 20,
         spreadRadius: 2,
       ),
@@ -38,13 +39,13 @@ class _SplashScreenState extends State<SplashScreen>
   static final _innerCircleDecoration = BoxDecoration(
     shape: BoxShape.circle,
     gradient: const LinearGradient(
-      colors: [Color(0xFF10B981), Color(0xFF059669)],
+      colors: [GoPlayTheme.primary, GoPlayTheme.primaryDark],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
     ),
     boxShadow: [
       BoxShadow(
-        color: const Color(0xFF10B981).withAlpha(128),
+        color: GoPlayTheme.primary.withAlpha(128),
         blurRadius: 30,
       ),
     ],
@@ -184,13 +185,13 @@ class _SplashScreenState extends State<SplashScreen>
                     children: [
                       ShaderMask(
                         shaderCallback: (bounds) => const LinearGradient(
-                          colors: [Color(0xFFFFFFFF), Color(0xFF10B981)],
+                          colors: [Color(0xFFFFFFFF), GoPlayTheme.primary],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ).createShader(bounds),
-                        child: Text(
+                        child: const Text(
                           'GoPlay',
-                          style: GoogleFonts.orbitron(
+                          style: TextStyle(
                             fontSize: 36,
                             fontWeight: FontWeight.w900,
                             color: Colors.white,
@@ -199,12 +200,12 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
+                      const Text(
                         'LIVE SPORTS STREAMING',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF71768E), // Alabaster Grey
+                          color: Color(0xFF71768E), // Alabaster Grey
                           letterSpacing: 6.0,
                         ),
                       ),

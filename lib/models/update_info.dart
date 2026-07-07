@@ -66,6 +66,20 @@ class VersionUtils {
       if (val1 > val2) return 1;
       if (val1 < val2) return -1;
     }
+
+    // If main semantic versions are identical, compare build codes (suffixes after '+')
+    final hasBuild1 = version1.contains('+');
+    final hasBuild2 = version2.contains('+');
+    if (hasBuild1 || hasBuild2) {
+      final build1Str = hasBuild1 ? version1.split('+').last.split('-').first : '';
+      final build2Str = hasBuild2 ? version2.split('+').last.split('-').first : '';
+      final build1 = int.tryParse(build1Str) ?? 0;
+      final build2 = int.tryParse(build2Str) ?? 0;
+      
+      if (build1 > build2) return 1;
+      if (build1 < build2) return -1;
+    }
+
     return 0;
   }
 }
