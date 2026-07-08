@@ -94,6 +94,30 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
 
   static const _pipChannel = MethodChannel('com.goplay/pip');
 
+  // Pre-cached gradient decorations — allocated once, not per build().
+  static final _kGradientOverlayFS = BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.bottomCenter,
+      end: Alignment.topCenter,
+      colors: [
+        Colors.black.withAlpha(200),
+        Colors.transparent,
+        Colors.transparent,
+      ],
+    ),
+  );
+  static final _kGradientOverlayPortrait = BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.bottomCenter,
+      end: Alignment.topCenter,
+      colors: [
+        Colors.black.withAlpha(200),
+        Colors.transparent,
+        Colors.black.withAlpha(160),
+      ],
+    ),
+  );
+
   Map<String, dynamic> _getCreationParams() {
     if (_cachedParams != null && _cachedChannelId == widget.channel.id) {
       return _cachedParams!;
@@ -630,23 +654,15 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
   Widget _buildUnlockedControls() {
     return Stack(
       children: [
-        // Dark gradient overlay top and bottom
+        // Dark gradient overlay — pre-cached decorations (avoid Color.withAlpha per build)
         Positioned.fill(
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: widget.onTap,
             child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [
-                    Colors.black.withAlpha(200),
-                    Colors.transparent,
-                    widget.isFullscreen ? Colors.transparent : Colors.black.withAlpha(160),
-                  ],
-                ),
-              ),
+              decoration: widget.isFullscreen
+                  ? _kGradientOverlayFS
+                  : _kGradientOverlayPortrait,
             ),
           ),
         ),

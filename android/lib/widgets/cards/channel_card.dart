@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme.dart';
 import '../../models/channel.dart';
 
@@ -160,14 +161,17 @@ class _ChannelCardState extends State<ChannelCard> {
                             child: ClipOval(
                               child:
                                   channel.logo != null && channel.logo!.isNotEmpty
-                                  ? Image.network(
-                                      channel.logo!,
+                                  ? CachedNetworkImage(
+                                      imageUrl: channel.logo!,
                                       fit: BoxFit.cover,
                                       width: 54,
                                       height: 54,
-                                      cacheWidth: 108,
-                                      cacheHeight: 108,
-                                      errorBuilder: (_, err, st) =>
+                                      memCacheWidth: 108,
+                                      memCacheHeight: 108,
+                                      fadeInDuration: const Duration(milliseconds: 150),
+                                      placeholder: (context, url) =>
+                                          _buildInitials(),
+                                      errorWidget: (context, url, err) =>
                                           _buildInitials(),
                                     )
                                   : _buildInitials(),
