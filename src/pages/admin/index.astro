@@ -1,0 +1,400 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { supabase } from '../../lib/supabase';
+
+// Fetch statistics
+const { count: channelCount } = await supabase
+  .from('channels')
+  .select('*', { count: 'exact', head: true });
+
+const { count: categoryCount } = await supabase
+  .from('channel_categories')
+  .select('*', { count: 'exact', head: true });
+
+const { count: matchCount } = await supabase
+  .from('matches')
+  .select('*', { count: 'exact', head: true });
+
+// Fetch latest channels
+const { data: latestChannels } = await supabase
+  .from('channels')
+  .select('*')
+  .order('created_at', { ascending: false })
+  .limit(5);
+
+// Fetch upcoming matches
+const { data: upcomingMatches } = await supabase
+  .from('matches')
+  .select('*')
+  .order('match_date', { ascending: true })
+  .limit(5);
+
+// Format date helper
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+---
+
+<AdminLayout title="Admin Dashboard | Vibestream" activeTab="dashboard">
+  <div class="page-title-section">
+    <h1 class="page-title">Dashboard Overview</h1>
+    <p class="page-subtitle">Real-time statistics and management shortcuts for Vibestream TV.</p>
+  </div>
+
+  <!-- Statistics Grid -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon channel-icon">📺</div>
+      <div class="stat-info">
+        <span class="stat-label">Total Channels</span>
+        <span class="stat-value">{channelCount || 0}</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon category-icon">📁</div>
+      <div class="stat-info">
+        <span class="stat-label">Categories</span>
+        <span class="stat-value">{categoryCount || 0}</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon match-icon">⚽</div>
+      <div class="stat-info">
+        <span class="stat-label">Total Matches</span>
+        <span class="stat-value">{matchCount || 0}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Split Layout -->
+  <div class="dashboard-split">
+    <!-- Quick Actions -->
+    <div class="card quick-actions-card">
+      <h2 class="section-title">Quick Actions</h2>
+      <div class="actions-grid">
+        <a href="/admin/channels?action=new" class="action-btn">
+          <span class="action-icon">➕📺</span>
+          <span class="action-text">Add New Channel</span>
+        </a>
+        <a href="/admin/categories?action=new" class="action-btn">
+          <span class="action-icon">➕📁</span>
+          <span class="action-text">Add Category</span>
+        </a>
+        <a href="/admin/matches?action=new" class="action-btn">
+          <span class="action-icon">➕⚽</span>
+          <span class="action-text">Schedule Match</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Latest Channels -->
+    <div class="card list-card">
+      <h2 class="section-title">Recent Channels</h2>
+      <div class="list-container">
+        {latestChannels && latestChannels.length > 0 ? (
+          latestChannels.map(ch => (
+            <div class="list-item">
+              {ch.logo ? (
+                <img src={ch.logo} alt={ch.name} class="item-logo" onerror="this.src='/assets/logo.webp'" />
+              ) : (
+                <div class="item-logo-placeholder">📺</div>
+              )}
+              <div class="item-details">
+                <span class="item-name">{ch.name}</span>
+                <span class="item-sub">{ch.category} • {ch.quality}</span>
+              </div>
+              <a href={`/admin/channels?edit=${ch.id}`} class="btn btn-secondary btn-sm">Edit</a>
+            </div>
+          ))
+        ) : (
+          <p class="empty-text">No channels found. Add your first one above!</p>
+        )}
+      </div>
+    </div>
+
+    <!-- Upcoming Matches -->
+    <div class="card list-card upcoming-matches-card">
+      <h2 class="section-title">Upcoming Scheduled Matches</h2>
+      <div class="list-container">
+        {upcomingMatches && upcomingMatches.length > 0 ? (
+          upcomingMatches.map(match => (
+            <div class="list-item">
+              <div class="match-teams">
+                <span class="team-name">{match.home}</span>
+                <span class="vs">vs</span>
+                <span class="team-name">{match.away}</span>
+              </div>
+              <div class="match-time-details">
+                <span class="match-date">{formatDate(match.match_date)}</span>
+                <span class="match-stage">{match.stage} • {match.venue}</span>
+              </div>
+              <a href={`/admin/matches?edit=${match.id}`} class="btn btn-secondary btn-sm">Edit</a>
+            </div>
+          ))
+        ) : (
+          <p class="empty-text">No matches scheduled.</p>
+        )}
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<style>
+  /* Stats Cards Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .stat-card {
+    background: var(--panel-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(99, 102, 241, 0.25);
+  }
+
+  .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .channel-icon {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.2) 100%);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+  }
+
+  .category-icon {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.2) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+
+  .match-icon {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.2) 100%);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+  }
+
+  .stat-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stat-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .stat-value {
+    font-family: var(--font-outfit);
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.1;
+  }
+
+  /* Content Split Layout */
+  .dashboard-split {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    align-items: start;
+  }
+
+  @media (min-width: 1200px) {
+    .dashboard-split {
+      grid-template-columns: 1fr 1fr;
+    }
+    .upcoming-matches-card {
+      grid-column: span 2;
+    }
+  }
+
+  .section-title {
+    font-family: var(--font-outfit);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #fff;
+    border-left: 3px solid var(--primary);
+    padding-left: 0.75rem;
+  }
+
+  /* Quick Actions Buttons */
+  .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+  }
+
+  .action-btn {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.2s ease;
+  }
+
+  .action-btn:hover {
+    background: var(--primary-glow);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+  }
+
+  .action-icon {
+    font-size: 1.75rem;
+  }
+
+  .action-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  /* Lists Container */
+  .list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .list-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    transition: background 0.2s ease;
+  }
+
+  .list-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .item-logo {
+    width: 48px;
+    height: 32px;
+    object-fit: contain;
+    background: #000;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .item-logo-placeholder {
+    width: 48px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+
+  .item-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .item-name {
+    font-weight: 600;
+    color: #fff;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .item-sub {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .btn-sm {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+  }
+
+  /* Matches Specific Styles */
+  .match-teams {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+  }
+
+  .team-name {
+    color: #fff;
+    font-size: 0.95rem;
+  }
+
+  .vs {
+    color: var(--primary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .match-time-details {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .match-date {
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 0.85rem;
+  }
+
+  .match-stage {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .empty-text {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 2rem;
+    font-size: 0.9rem;
+  }
+</style>

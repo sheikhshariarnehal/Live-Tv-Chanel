@@ -1,0 +1,296 @@
+---
+const adminPassword = process.env.ADMIN_PASSWORD || import.meta.env.ADMIN_PASSWORD || 'admin123';
+let errorMsg = '';
+
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const password = data.get('password');
+    
+    if (password === adminPassword) {
+      Astro.cookies.set('admin_session', adminPassword, {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+        httpOnly: false,
+        secure: false
+      });
+      return Astro.redirect('/admin');
+    } else {
+      errorMsg = 'Incorrect admin password. Please try again.';
+    }
+  } catch (e) {
+    errorMsg = 'An error occurred. Please try again.';
+  }
+}
+
+const session = Astro.cookies.get('admin_session')?.value;
+if (session === adminPassword) {
+  return Astro.redirect('/admin');
+}
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login | Vibestream</title>
+  <link rel="icon" type="image/webp" href="/assets/logo.webp" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #050508;
+      --panel-dark: rgba(13, 13, 22, 0.7);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-glow: rgba(99, 102, 241, 0.2);
+      --danger: #ef4444;
+      --font-outfit: 'Outfit', sans-serif;
+      --font-jakarta: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-jakarta);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Ambient Background Glows */
+    .glow {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(0,0,0,0) 70%);
+      filter: blur(40px);
+      z-index: -1;
+    }
+    .glow-1 {
+      top: -10%;
+      left: -10%;
+    }
+    .glow-2 {
+      bottom: -10%;
+      right: -10%;
+    }
+
+    .login-wrapper {
+      width: 100%;
+      max-width: 420px;
+      animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .login-card {
+      background: var(--panel-dark);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(16px);
+      border-radius: 24px;
+      padding: 2.5rem 2.25rem;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      text-align: center;
+    }
+
+    .logo-container {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo-img {
+      width: 36px;
+      height: 36px;
+    }
+
+    .login-title {
+      font-family: var(--font-outfit);
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.5px;
+    }
+
+    .login-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    .error-box {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-align: left;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      animation: shake 0.4s ease;
+    }
+
+    .form-group {
+      text-align: left;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.875rem 1.25rem;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.25s ease;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-glow);
+      background: rgba(0, 0, 0, 0.45);
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 0.875rem;
+      background: var(--primary);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .btn-login:hover {
+      background: var(--primary-hover);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .btn-login:active {
+      transform: translateY(1px);
+    }
+
+    .back-home {
+      display: inline-block;
+      margin-top: 1.5rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .back-home:hover {
+      color: var(--primary);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="logo-container">
+        <img src="/assets/logo.webp" alt="Vibestream" class="logo-img" />
+      </div>
+      <h1 class="login-title">Admin Access</h1>
+      <p class="login-subtitle">Enter your password to manage channels, categories, and matches.</p>
+
+      {errorMsg && (
+        <div class="error-box">
+          <span>⚠️</span>
+          <span>{errorMsg}</span>
+        </div>
+      )}
+
+      <form method="POST" autocomplete="off">
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <div class="input-wrapper">
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              class="form-control" 
+              placeholder="••••••••••••" 
+              required 
+              autofocus
+            />
+          </div>
+        </div>
+
+        <button type="submit" class="btn-login">Unlock Dashboard</button>
+      </form>
+
+      <a href="/" class="back-home">← Back to channels directory</a>
+    </div>
+  </div>
+</body>
+</html>

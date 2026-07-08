@@ -44,12 +44,12 @@ let currentCategory = '';
 let lastSelectedChannelBtn = null;
 let lastSelectedChannelUrl = null;
 let lastSelectedChannelName = null;
+let consecutiveFailuresCount = 0;
+let failingChannelUrl = null;
+let autoAdvanceTimeoutId = null;
 
 // ===== URL Helper Functions for CORS & Mixed Content/BDIX Routing =====
 function getRawUrl(url) {
-  if (url && typeof url === 'string' && url.startsWith('/proxy?url=')) {
-    return decodeURIComponent(url.substring(11));
-  }
   return url;
 }
 
@@ -65,6 +65,72 @@ function isPrivateIP(url) {
   } catch (e) {
     return false;
   }
+}
+
+const PROXY_DOMAINS = [
+  "https://fifa-proxy.nehaldiu.workers.dev/",
+  "https://live-stream-proxy.nehaldev08.workers.dev/",
+  "https://live-stream-proxy.nehalmahamud-cse.workers.dev/"
+];
+
+function getProxiedUrl(url, channelOrId) {
+  if (!url) return '';
+  if (isPrivateIP(url)) return url;
+  
+  const channel = (channelOrId && typeof channelOrId === 'object') ? channelOrId : null;
+  const channelId = channel ? channel.id : (typeof channelOrId === 'string' ? channelOrId : null);
+  
+  // Clean up any existing proxy domain from the list first to avoid double-proxying
+  let targetUrl = url;
+  for (const p of PROXY_DOMAINS) {
+    if (targetUrl.startsWith(p)) {
+      if (targetUrl.startsWith(p + "?url=")) {
+        try {
+          targetUrl = decodeURIComponent(targetUrl.substring((p + "?url=").length));
+        } catch (e) {
+          targetUrl = targetUrl.substring((p + "?url=").length);
+        }
+      } else {
+        targetUrl = targetUrl.substring(p.length);
+      }
+    }
+  }
+  
+  // Clean up old DigitalOcean proxy if present
+  const oldProxy = "https://cors-everywhere-wc8b4.ondigitalocean.app/";
+  if (targetUrl.startsWith(oldProxy)) {
+    targetUrl = targetUrl.substring(oldProxy.length);
+  }
+  
+  // Select proxy domain deterministically based on channel ID or URL hash to keep load balanced and sticky
+  const key = channelId || targetUrl;
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) {
+    hash = key.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % PROXY_DOMAINS.length;
+  const selectedProxy = PROXY_DOMAINS[index];
+  
+  let proxiedUrl = selectedProxy + "?url=" + encodeURIComponent(targetUrl);
+  
+  if (channel && channel.headers) {
+    const headers = channel.headers;
+    for (const key of Object.keys(headers)) {
+      const lowerKey = key.toLowerCase();
+      const val = headers[key];
+      if (val) {
+        if (lowerKey === 'referer') {
+          proxiedUrl += "&referer=" + encodeURIComponent(val);
+        } else if (lowerKey === 'origin') {
+          proxiedUrl += "&origin=" + encodeURIComponent(val);
+        } else if (lowerKey === 'user-agent' || lowerKey === 'ua') {
+          proxiedUrl += "&ua=" + encodeURIComponent(val);
+        }
+      }
+    }
+  }
+  
+  return proxiedUrl;
 }
 
 // ===== Helper to dynamically load external scripts =====
@@ -108,15 +174,10 @@ function executeOnLoadAndIdle(callback) {
 }
 
 function getLogoUrl(url) {
-  if (!url) return '';
-  const rawUrl = getRawUrl(url);
-  if (window.location.protocol === 'https:' && rawUrl.startsWith('http://') && !isPrivateIP(rawUrl)) {
-    return '/proxy?url=' + encodeURIComponent(rawUrl);
-  }
-  return rawUrl;
+  return url || '';
 }
 
-function getPlaybackStrategy(channel, forceProxy = false) {
+function getPlaybackStrategy(channel) {
   if (!channel || !channel.url) return 'direct';
   const url = channel.url;
 
@@ -161,14 +222,14 @@ async function loadChannelsData() {
   channelGridContainer.innerHTML = '';
 
   try {
-    const response = await fetch('/assets/data/channels.json');
+    const response = await fetch('/api/channels');
     if (response.ok) {
       channelsData = await response.json();
       initializeUI();
       return;
     }
   } catch (error) {
-    console.error('Error loading channels from static JSON:', error);
+    console.error('Error loading channels from API:', error);
   }
 
   categoryTabsContainer.innerHTML = '<p class="loading-text" style="padding: 1rem; color: #ef4444;">Failed to load channels.</p>';
@@ -212,6 +273,7 @@ function findChannelByIdOrSlug(idOrSlug) {
 }
 
 function playChannelById(channelId) {
+  consecutiveFailuresCount = 0;
   const match = findChannelByIdOrSlug(channelId);
   if (!match) return;
 
@@ -405,26 +467,46 @@ function createChannelButton(channel) {
   button.dataset.channelName = channel.name;
   button.title = channel.name;
   
+  const iconContainer = document.createElement('div');
+  iconContainer.className = 'channel-icon-container';
+  
   if (channel.logo) {
     const img = document.createElement('img');
     img.src = getLogoUrl(channel.logo);
     img.alt = channel.name;
     img.className = 'channel-logo';
     img.loading = 'lazy';
-    img.onerror = function() {
-      this.remove();
-      const span = document.createElement('span');
-      span.className = 'channel-name';
-      span.textContent = channel.name;
-      button.appendChild(span);
+    img.style.opacity = '0';
+    img.style.transition = 'opacity 0.2s ease-in';
+    img.onload = function() {
+      this.style.opacity = '1';
     };
-    button.appendChild(img);
+    img.onerror = function() {
+      const parent = this.parentNode;
+      if (parent) {
+        const char = this.alt ? this.alt.charAt(0) : '?';
+        parent.innerHTML = `<div class="channel-avatar">${char}</div>`;
+      }
+    };
+    iconContainer.appendChild(img);
   } else {
-    const span = document.createElement('span');
-    span.className = 'channel-name';
-    span.textContent = channel.name;
-    button.appendChild(span);
+    const avatar = document.createElement('div');
+    avatar.className = 'channel-avatar';
+    avatar.textContent = channel.name ? channel.name.charAt(0) : '?';
+    iconContainer.appendChild(avatar);
   }
+  
+  button.appendChild(iconContainer);
+  
+  const nameSpan = document.createElement('span');
+  nameSpan.className = 'channel-name';
+  nameSpan.textContent = channel.name;
+  button.appendChild(nameSpan);
+  
+  const playIndicator = document.createElement('span');
+  playIndicator.className = 'channel-play-indicator';
+  playIndicator.textContent = '▶';
+  button.appendChild(playIndicator);
   
   return button;
 }
@@ -476,8 +558,41 @@ function showPlayerError(channelName, url) {
   }
 }
 
+// ===== Clean up and stop video player completely =====
+function destroyPlayer() {
+  if (art) {
+    try {
+      if (art.shaka) {
+        art.shaka.destroy().catch(e => console.error('Error destroying Shaka:', e));
+        art.shaka = null;
+      }
+      if (art.mpegtsPlayer) {
+        art.mpegtsPlayer.destroy();
+        art.mpegtsPlayer = null;
+      }
+      art.destroy(false); // Destroy Artplayer but keep the container
+    } catch (e) {
+      console.error('Error destroying player:', e);
+    }
+    art = null;
+  }
+}
+
 // ===== Handle Playback Errors & Fallback =====
 function handlePlaybackError(button, url, channelName, fallbackUrl) {
+  // If the error does not match the channel URL currently being loaded, ignore it (stale/aborted loads)
+  if (url !== lastSelectedChannelUrl && (!fallbackUrl || fallbackUrl !== lastSelectedChannelUrl)) {
+    console.log(`[PLAYBACK] Ignoring error for stale channel: "${channelName}" (${url})`);
+    return;
+  }
+
+  // If we are already handling the failure for this URL, ignore duplicate error triggers
+  if (failingChannelUrl === url) {
+    console.log(`[PLAYBACK] Error for "${channelName}" (${url}) already being handled. Ignoring duplicate.`);
+    return;
+  }
+  failingChannelUrl = url;
+
   const channelId = button ? button.dataset.channelId : null;
   const match = findChannelByIdOrSlug(channelId);
   const channel = match ? match.channel : { url, name: channelName };
@@ -485,22 +600,56 @@ function handlePlaybackError(button, url, channelName, fallbackUrl) {
 
   if (isDrm) {
     console.error(`[DRM] Shaka error / playback failed for: ${channelName}`);
-    if (fallbackUrl && fallbackUrl !== '' && fallbackUrl !== 'null' && fallbackUrl !== 'undefined') {
-      console.log(`[PLAYBACK] DRM direct failed. Trying fallback URL: ${fallbackUrl}`);
-      showError(`Switching to fallback stream for ${channelName}...`);
-      playChannel(button, fallbackUrl, channelName, null);
-    } else {
-      showPlayerError(channelName, url);
-    }
+  } else {
+    console.error(`[PLAYBACK] Playback failed for: ${channelName}`);
+  }
+
+  // If this failed request was for the primary URL, and there is a fallback URL, try the fallback URL first.
+  if (fallbackUrl && fallbackUrl !== url && fallbackUrl !== '' && fallbackUrl !== 'null' && fallbackUrl !== 'undefined') {
+    console.log(`[PLAYBACK] Primary failed. Trying fallback URL: ${fallbackUrl}`);
+    showError(`Switching to fallback stream for ${channelName}...`);
+    playChannel(button, fallbackUrl, channelName, null);
     return;
   }
 
-  // If direct playback failed, try the fallback URL directly
-  if (fallbackUrl && fallbackUrl !== '' && fallbackUrl !== 'null' && fallbackUrl !== 'undefined') {
-    console.log(`[PLAYBACK] Direct failed for ${channelName}. Trying fallback URL: ${fallbackUrl}`);
-    showError(`Switching to fallback stream for ${channelName}...`);
-    playChannel(button, fallbackUrl, channelName, null);
+  // If both primary and fallback failed, or if there is no fallback, try to auto-advance to the next channel in the category
+  const activeCategoryDiv = channelGridContainer.querySelector(`.channel-category[data-category="${currentCategory}"]`);
+  let nextButton = null;
+  if (activeCategoryDiv && button) {
+    const buttons = Array.from(activeCategoryDiv.querySelectorAll('.channel-btn'));
+    const currentIndex = buttons.indexOf(button);
+    if (currentIndex !== -1 && currentIndex + 1 < buttons.length) {
+      nextButton = buttons[currentIndex + 1];
+    }
+  }
+
+  if (nextButton && consecutiveFailuresCount < 5) {
+    consecutiveFailuresCount++;
+    const nextUrl = nextButton.dataset.url;
+    const nextFallbackUrl = nextButton.dataset.fallbackUrl;
+    const nextChannelName = nextButton.dataset.channelName;
+    console.log(`[PLAYBACK] Channel "${channelName}" failed. Auto-advancing to next channel: "${nextChannelName}" (Consecutive failure count: ${consecutiveFailuresCount})`);
+    showError(`Playback failed. Trying next channel: ${nextChannelName}...`);
+    
+    // Update history/active button immediately so the UI is responsive
+    const nextChannelId = nextButton.dataset.channelId;
+    const nextMatch = findChannelByIdOrSlug(nextChannelId);
+    if (nextMatch) {
+      const slug = getChannelSlug(nextMatch.channel);
+      history.replaceState({ channelId: nextChannelId }, '', `/watch/${slug}`);
+    }
+
+    // Delay slightly to give user time to see the toast/message
+    if (autoAdvanceTimeoutId) {
+      clearTimeout(autoAdvanceTimeoutId);
+    }
+    autoAdvanceTimeoutId = setTimeout(() => {
+      playChannel(nextButton, nextUrl, nextChannelName, nextFallbackUrl);
+    }, 1500);
   } else {
+    // If no more channels, or we hit the max consecutive failures limit
+    consecutiveFailuresCount = 0; // Reset
+    destroyPlayer();
     showPlayerError(channelName, url);
   }
 }
@@ -531,6 +680,7 @@ function setupEventListeners() {
     const channelId = button.dataset.channelId;
     
     if (url && url !== '') {
+      consecutiveFailuresCount = 0;
       playChannel(button, url, channelName, fallbackUrl);
       
       // Update browser URL on user click
@@ -560,124 +710,20 @@ function setupEventListeners() {
   });
 }
 
-// ===== HLS & TS Playback Helpers for ArtPlayer =====
-function playM3u8(video, url, artPlayer) {
-  if (Hls.isSupported()) {
-    if (artPlayer.hls) {
-      try {
-        artPlayer.hls.destroy();
-      } catch (e) {
-        console.error('Error destroying HLS instance on playM3u8:', e);
-      }
-      artPlayer.hls = null;
-    }
-    const hls = new Hls({
-      enableWorker: true,
-      lowLatencyMode: false,
-      backBufferLength: 60,
-      maxBufferLength: 30,
-      maxMaxBufferLength: 90,
-      maxBufferSize: 60 * 1000 * 1000,
-      maxBufferHole: 0.5,
-      liveSyncDurationCount: 5,
-      liveSyncOnStallIncrease: 1,
-      liveMaxLatencyDurationCount: 15,
-      highBufferWatchdogPeriod: 2
-    });
-    hls.loadSource(url);
-    hls.attachMedia(video);
-    artPlayer.hls = hls;
-
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      const levels = hls.levels;
-      if (levels && levels.length > 1) {
-        const options = levels.map((level, index) => {
-          const label = level.height ? `${level.height}p` : `${Math.round(level.bitrate / 1000)}kbps`;
-          return {
-            html: label,
-            level: index,
-          };
-        });
-
-        // Add Auto option at the beginning
-        options.unshift({
-          html: 'Auto',
-          level: -1,
-          default: true,
-        });
-
-        // Remove any existing quality setting if it exists
-        try {
-          artPlayer.setting.remove('quality');
-        } catch (e) {
-          // ignore
-        }
-
-        // Add quality selector to ArtPlayer settings
-        artPlayer.setting.add({
-          name: 'quality',
-          html: 'Quality',
-          width: 150,
-          selector: options,
-          onSelect: function (item) {
-            hls.currentLevel = item.level;
-            return item.html;
-          },
-        });
-      }
-    });
-
-    let networkRetryCount = 0;
-    hls.on(Hls.Events.ERROR, (event, data) => {
-      console.error('HLS error inside ArtPlayer:', data);
-      if (data.fatal) {
-        switch (data.type) {
-          case Hls.ErrorTypes.NETWORK_ERROR:
-            networkRetryCount++;
-            if (networkRetryCount > 2) {
-              try {
-                hls.destroy();
-              } catch (e) {
-                console.error('Error destroying HLS in error event:', e);
-              }
-              artPlayer.hls = null;
-              artPlayer.emit('video:error', data);
-            } else {
-              console.log('Network error, trying to recover...');
-              hls.startLoad();
-            }
-            break;
-          case Hls.ErrorTypes.MEDIA_ERROR:
-            console.log('Media error, trying to recover...');
-            hls.recoverMediaError();
-            break;
-          default:
-            try {
-              hls.destroy();
-            } catch (e) {
-              console.error('Error destroying HLS in default error event:', e);
-            }
-            artPlayer.hls = null;
-            artPlayer.emit('video:error', data);
-            break;
-        }
-      }
-    });
-
-    artPlayer.on('destroy', () => {
-      if (artPlayer.hls) {
-        try {
-          artPlayer.hls.destroy();
-        } catch (e) {
-          console.error('Error destroying HLS on player destroy:', e);
-        }
-        artPlayer.hls = null;
-      }
-    });
-  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = url;
+// ===== TS & Shaka (HLS/DASH) Playback Helpers for ArtPlayer =====
+function playShaka(video, url, artPlayer) {
+  if (typeof shaka === 'undefined') {
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/shaka-player.compiled.js')
+      .then(() => {
+        initializeShakaPlayer(video, url, artPlayer);
+      })
+      .catch(err => {
+        console.error('Failed to load Shaka Player script:', err);
+        showError('Your browser does not support Shaka Player streaming.');
+        handlePlaybackError(lastSelectedChannelBtn, url, lastSelectedChannelName, null);
+      });
   } else {
-    showError('Your browser does not support HLS streaming.');
+    initializeShakaPlayer(video, url, artPlayer);
   }
 }
 
@@ -726,28 +772,27 @@ function playTs(video, url, artPlayer) {
   }
 }
 
-function playMpd(video, url, artPlayer) {
-  if (typeof shaka === 'undefined') {
-    loadScript('https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/shaka-player.compiled.js')
-      .then(() => {
-        initializeShakaPlayer(video, url, artPlayer);
-      })
-      .catch(err => {
-        console.error('Failed to load Shaka Player script:', err);
-        showError('Your browser does not support DASH streaming.');
-        handlePlaybackError(lastSelectedChannelBtn, url, lastSelectedChannelName, null);
-      });
-  } else {
-    initializeShakaPlayer(video, url, artPlayer);
-  }
+function getOriginalUrlFromProxied(proxiedUrl) {
+  try {
+    const urlObj = new URL(proxiedUrl);
+    const target = urlObj.searchParams.get('url');
+    if (target) return target;
+  } catch (e) {}
+  return proxiedUrl;
 }
 
 function initializeShakaPlayer(video, url, artPlayer) {
   shaka.polyfill.installAll();
   
   if (!shaka.Player.isBrowserSupported()) {
-    console.error('Browser not supported for Shaka Player.');
-    showError('DASH playback is not supported by your browser.');
+    console.warn('Shaka Player is not natively supported in this browser. Trying native fallback...');
+    if (video.canPlayType('application/vnd.apple.mpegurl') || url.endsWith('.m3u8') || url.includes('.m3u8?')) {
+      video.src = url;
+      console.log('Using native Safari HLS playback fallback');
+    } else {
+      console.error('Browser not supported for Shaka Player and no native HLS fallback available.');
+      showError('Playback is not supported by your browser.');
+    }
     return;
   }
   
@@ -762,11 +807,32 @@ function initializeShakaPlayer(video, url, artPlayer) {
   
   const player = new shaka.Player(video);
   artPlayer.shaka = player;
-  console.log('[DRM] Shaka initialized');
+  console.log('[Shaka] Player initialized');
+
+  // Limit network retry parameters to fail fast and prevent hammering the server/proxy
+  const retryParams = {
+    timeout: 10000,           // 10 seconds timeout
+    stallTimeout: 5000,       // 5 seconds stall timeout
+    connectionTimeout: 10000,  // 10 seconds connection timeout
+    maxAttempts: 2,           // 1 initial request + 1 retry = 2 attempts total
+    baseDelay: 1000,          // 1 second base delay
+    backoffFactor: 2,         // backoff multiplier
+    fuzzFactor: 0.1
+  };
+
+  player.configure({
+    manifest: { retryParameters: retryParams },
+    streaming: {
+      retryParameters: retryParams,
+      bufferingGoal: 30,         // Keep 30 seconds buffered ahead
+      rebufferingGoal: 5,        // Start playing after 5 seconds buffered (faster startup)
+      bufferBehind: 15          // Clean up older segments quickly to save memory
+    },
+    drm: { retryParameters: retryParams }
+  });
   
   player.addEventListener('error', (event) => {
-    console.error('[DRM] Shaka error', event.detail);
-    console.log('[DRM] Shaka error');
+    console.error('[Shaka] Error', event.detail);
     if (event.detail && event.detail.severity === shaka.util.Error.Severity.CRITICAL) {
       artPlayer.emit('video:error', event.detail);
     }
@@ -789,14 +855,85 @@ function initializeShakaPlayer(video, url, artPlayer) {
       console.log('[DRM] ClearKey configured');
     } catch (e) {
       console.error('[DRM] License configuration failed', e);
-      console.log('[DRM] License configuration failed');
     }
+  }
+
+  // Set up network request filter to proxy all segment and relative manifest requests correctly
+  let originalBaseUrl = '';
+  try {
+    const originalUrl = lastSelectedChannelUrl || getOriginalUrlFromProxied(url);
+    originalBaseUrl = originalUrl.substring(0, originalUrl.lastIndexOf('/') + 1);
+  } catch (e) {
+    console.error('Failed to parse original URL for Shaka request filter:', e);
+  }
+
+  if (originalBaseUrl) {
+    player.getNetworkingEngine().registerRequestFilter((type, request) => {
+      const uri = request.uris[0];
+      if (!uri) return;
+
+      // Check if already proxied with the target url parameter
+      let isAlreadyProxied = false;
+      for (const p of PROXY_DOMAINS) {
+        if (uri.startsWith(p) && (uri.includes('?url=') || uri.includes('&url='))) {
+          isAlreadyProxied = true;
+          break;
+        }
+      }
+
+      if (!isAlreadyProxied) {
+        let targetUrl = uri;
+        
+        // Check if it's a relative URL or points to a proxy domain but without the 'url' parameter
+        let isProxiedWithoutUrl = false;
+        let proxyPath = '';
+        for (const p of PROXY_DOMAINS) {
+          if (uri.startsWith(p)) {
+            isProxiedWithoutUrl = true;
+            proxyPath = uri.substring(p.length);
+            break;
+          }
+        }
+
+        if (isProxiedWithoutUrl) {
+          try {
+            targetUrl = new URL(proxyPath, originalBaseUrl).href;
+          } catch (e) {
+            console.error('Failed to resolve proxy path to absolute:', proxyPath, e);
+          }
+        } else if (uri.startsWith('/') || (!uri.startsWith('http://') && !uri.startsWith('https://'))) {
+          try {
+            targetUrl = new URL(uri, originalBaseUrl).href;
+          } catch (e) {
+            console.error('Failed to resolve relative path to absolute:', uri, e);
+          }
+        } else if (uri.startsWith('http://localhost') || uri.startsWith('http://127.0.0.1') || uri.startsWith(window.location.origin)) {
+          try {
+            const urlPath = new URL(uri).pathname;
+            const pageDir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+            let cleanPath = urlPath;
+            if (pageDir && urlPath.startsWith(pageDir)) {
+              cleanPath = urlPath.substring(pageDir.length);
+            } else if (urlPath.startsWith('/')) {
+              cleanPath = urlPath.substring(1);
+            }
+            targetUrl = new URL(cleanPath, originalBaseUrl).href;
+          } catch (e) {
+            console.error('Failed to resolve localhost path to absolute:', uri, e);
+          }
+        }
+
+        // Proxy the resolved target URL
+        const newProxiedUrl = getProxiedUrl(targetUrl, channel);
+        request.uris[0] = newProxiedUrl;
+      }
+    });
   }
   
   player.load(url).then(() => {
-    console.log('[DRM] Manifest loaded');
+    console.log('[Shaka] Manifest loaded successfully');
     video.addEventListener('playing', () => {
-      console.log('[DRM] Playback started');
+      console.log('[Shaka] Playback started');
     }, { once: true });
 
     // Enable quality selection for Shaka Player
@@ -849,8 +986,7 @@ function initializeShakaPlayer(video, url, artPlayer) {
       }
     }
   }).catch((error) => {
-    console.error('[DRM] Manifest load failed', error);
-    console.log('[DRM] Manifest load failed');
+    console.error('[Shaka] Manifest load failed', error);
     artPlayer.emit('video:error', error);
   });
   
@@ -867,8 +1003,14 @@ function initializeShakaPlayer(video, url, artPlayer) {
 }
 
 // ===== Play channel =====
-async function playChannel(button, url, channelName, fallbackUrl = null, forceProxy = false) {
+async function playChannel(button, url, channelName, fallbackUrl = null) {
   errorOverlay.classList.remove('active');
+  
+  if (autoAdvanceTimeoutId) {
+    clearTimeout(autoAdvanceTimeoutId);
+    autoAdvanceTimeoutId = null;
+  }
+  failingChannelUrl = null;
   
   lastSelectedChannelBtn = button;
   lastSelectedChannelUrl = url;
@@ -899,7 +1041,7 @@ async function playChannel(button, url, channelName, fallbackUrl = null, forcePr
   }
 
   // Classify strategy
-  const strategy = getPlaybackStrategy(channel, forceProxy);
+  const strategy = getPlaybackStrategy(channel);
 
   // Log play mode
   const logPrefix = '[PLAYBACK]';
@@ -912,25 +1054,14 @@ async function playChannel(button, url, channelName, fallbackUrl = null, forcePr
   }
 
   // Determine actual playback URL
-  let playbackUrl = url;
+  let playbackUrl = getProxiedUrl(url, channel);
 
   const isTs = (strategy === 'ts');
   const isMpd = (strategy === 'drm') || url.endsWith('.mpd') || url.includes('.mpd?') || (channel && !!channel.drm);
 
   try {
-    // Destroy previous player inside try block safely using destroy(false) to keep container
-    if (art) {
-      try {
-        if (art.shaka) {
-          art.shaka.destroy().catch(e => console.error('Error destroying Shaka:', e));
-          art.shaka = null;
-        }
-        art.destroy(false);
-      } catch (destroyError) {
-        console.error('Failed to destroy previous ArtPlayer instance:', destroyError);
-      }
-      art = null;
-    }
+    // Destroy previous player inside try block safely using destroyPlayer helper
+    destroyPlayer();
 
     // Show visual loading indicator while loading the player engine and dependencies
     const playerEl = document.getElementById('player');
@@ -958,13 +1089,9 @@ async function playChannel(button, url, channelName, fallbackUrl = null, forcePr
       if (typeof mpegts === 'undefined') {
         enginePromises.push(loadScript('https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js'));
       }
-    } else if (isMpd) {
+    } else {
       if (typeof shaka === 'undefined') {
         enginePromises.push(loadScript('https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/shaka-player.compiled.js'));
-      }
-    } else {
-      if (typeof Hls === 'undefined') {
-        enginePromises.push(loadScript('https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js'));
       }
     }
 
@@ -992,9 +1119,9 @@ async function playChannel(button, url, channelName, fallbackUrl = null, forcePr
       autoSize: false,
       autoMini: false,
       customType: {
-        m3u8: playM3u8,
-        ts: playTs,
-        mpd: playMpd
+        m3u8: playShaka,
+        mpd: playShaka,
+        ts: playTs
       }
     });
 
@@ -1154,84 +1281,11 @@ document.addEventListener('click', (e) => {
     mobileNavOverlay.classList.remove('active');
   }
 });
-
-// ===== News Ticker Controller =====
-let newsArticles = [];
-const newsTicker = document.getElementById('newsTicker');
-const marqueeList1 = document.getElementById('marqueeList1');
-const marqueeList2 = document.getElementById('marqueeList2');
-
-async function loadNewsData() {
-  if (!newsTicker || !marqueeList1 || !marqueeList2) return;
-  
-  try {
-    const response = await fetch('/api/news');
-    if (!response.ok) throw new Error('Failed to fetch news');
-    const data = await response.json();
-    newsArticles = data.articles || [];
-    
-    if (newsArticles.length > 0) {
-      renderNewsTicker();
-      // Only display the ticker container if we have news items to show
-      newsTicker.style.display = 'flex';
-    } else {
-      newsTicker.style.display = 'none';
-    }
-  } catch (error) {
-    console.error('Error fetching sports news client-side:', error);
-    newsTicker.style.display = 'none';
-  }
-}
-
-function renderNewsTicker() {
-  marqueeList1.innerHTML = '';
-  marqueeList2.innerHTML = '';
-  
-  const fragment1 = document.createDocumentFragment();
-  const fragment2 = document.createDocumentFragment();
-  
-  newsArticles.forEach((article) => {
-    // Create elements for marquee list 1
-    const link1 = createNewsItemElement(article);
-    fragment1.appendChild(link1);
-    
-    // Create duplicate elements for marquee list 2 (for seamless infinite loop)
-    const link2 = createNewsItemElement(article);
-    fragment2.appendChild(link2);
-  });
-  
-  marqueeList1.appendChild(fragment1);
-  marqueeList2.appendChild(fragment2);
-}
-
-function createNewsItemElement(article) {
-  const link = document.createElement('a');
-  link.href = article.url;
-  link.target = '_blank';
-  link.rel = 'noopener noreferrer';
-  link.className = 'news-item';
-  
-  const bullet = document.createElement('span');
-  bullet.className = 'red-bullet';
-  
-  const textSpan = document.createElement('span');
-  textSpan.className = 'headline-text';
-  textSpan.textContent = article.title;
-  
-  link.appendChild(bullet);
-  link.appendChild(textSpan);
-  
-  return link;
-}
-
 // ===== Initialize the app =====
 const playerContainer = document.getElementById('player');
 if (playerContainer && categoryTabsContainer && channelGridContainer) {
   loadChannelsData();
 }
-executeOnLoadAndIdle(() => {
-  loadNewsData();
-});
 
 // Trigger Artplayer resize on window resize to guarantee responsiveness across dynamic layout changes
 window.addEventListener('resize', () => {

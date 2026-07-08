@@ -14,8 +14,8 @@ Vibestream aims to bridge the gap between traditional IPTV playlists and standar
 
 ### 2.1 Video Player Engine (ArtPlayer)
 *   **Multi-Engine Playback**: Seamless integration of streaming engines:
-    *   **HLS (.m3u8)**: Handled by `hls.js` with adaptive bitrate streaming (ABR) and network recovery mechanisms.
-    *   **DASH (.mpd)**: Handled by Google's `shaka-player` to parse XML manifests.
+    *   **HLS (.m3u8)**: Handled by Google's `shaka-player` with adaptive bitrate streaming (ABR) and fallback to native browser decoding (e.g. Safari).
+    *   **DASH (.mpd)**: Handled by Google's `shaka-player` to parse XML manifests and decrypt DRM streams (ClearKey/Widevine).
     *   **MPEG-TS (.ts)**: Handled by `mpegts.js` for low-latency live streams.
 *   **Autoplay Compliance**: Mute audio initially, with sound automatically enabled on first human interaction (clicks, keypresses, touches).
 *   **Error Recovery Overlay**: Visual error state display explaining the issue (e.g. BDIX local network vs general stream offline) and providing a retry button.
@@ -54,10 +54,9 @@ Vibestream aims to bridge the gap between traditional IPTV playlists and standar
 | Layer | Technology | Rationale |
 | :--- | :--- | :--- |
 | **Framework** | Astro SSR (Node.js Adapter) | Fast static build, flexible server-side routing, and hybrid rendering. |
-| **Routing & SSR** | Astro SSR Standalone Mode (Port 3000) | Standalone Node app to execute the server-side CORS proxy. |
+| **Routing & SSR** | Astro Server Output Mode | High-performance server-side rendering and dynamic routing. |
 | **Player Interface** | ArtPlayer | Modern UI, responsive controls, and highly customizable plugin architecture. |
-| **HLS Engine** | `hls.js` | Industry standard library for browser HLS playback. |
-| **DASH & DRM Engine** | `shaka-player` (v4.7.1) | Premium playback engine with ClearKey DRM support. |
+| **HLS & DASH Engine** | `shaka-player` (v4.7.1) | Google's premium playback engine with HLS, DASH, and DRM (ClearKey/Widevine) support. |
 | **MPEG-TS Engine** | `mpegts.js` (v1.7.3) | Enables FLV/MPEG-TS low-latency decoding over MSE. |
 | **Styling** | Vanilla CSS | Low overhead, optimized performance, clean layout styles. |
 
@@ -77,19 +76,14 @@ graph TD
         Sec -->|Timing/Size Check| Block[DOM Access Blocked Screen]
         Art -->|Play Stream| EngineChooser{Select Engine}
         
-        EngineChooser -->|HLS| HlsEngine[hls.js]
-        EngineChooser -->|DASH| ShakaEngine[shaka-player]
+        EngineChooser -->|HLS / DASH| ShakaEngine[shaka-player]
         EngineChooser -->|MPEG-TS| TsEngine[mpegts.js]
     end
     
-    HlsEngine -->|Fetch Proxied Playlist| ProxyApi[Astro Proxy Endpoint '/proxy']
-    ShakaEngine -->|Fetch Proxied Manifest| ProxyApi
-    TsEngine -->|Stream TS Data| ProxyApi
+    ShakaEngine -->|Direct Stream Fetch| StreamProvider[External IPTV / BDIX Server]
+    TsEngine -->|Direct Stream Fetch| StreamProvider
     
-    ProxyApi -->|HTTP Request| StreamProvider[External IPTV / BDIX Server]
-    StreamProvider -->|M3U8 / MPD / TS| ProxyApi
-    
-    ProxyApi -->|Manifest Rewriting / Cache / Pipe| ClientEngine[Active Client Engine]
+    StreamProvider -->|M3U8 / MPD / TS| ClientEngine[Active Client Engine]
 ```
 
 ---

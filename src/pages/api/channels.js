@@ -1,32 +1,42 @@
 import crypto from 'crypto';
-import localData from '../../../public/assets/data/channels.json';
-
-const serializedData = JSON.stringify(localData);
-const etag = `W/"${crypto.createHash('sha1').update(serializedData).digest('hex')}"`;
+import { getChannelsData } from '../../lib/supabase';
 
 export async function GET({ request }) {
-  const ifNoneMatch = request.headers.get('if-none-match');
+  try {
+    const channelsData = await getChannelsData();
+    const serializedData = JSON.stringify(channelsData);
+    const etag = `W/"${crypto.createHash('sha1').update(serializedData).digest('hex')}"`;
 
-  if (ifNoneMatch === etag) {
-    return new Response(null, {
-      status: 304,
+    const ifNoneMatch = request.headers.get('if-none-match');
+
+    if (ifNoneMatch === etag) {
+      return new Response(null, {
+        status: 304,
+        headers: {
+          'ETag': etag,
+          'Cache-Control': 'public, max-age=2, stale-while-revalidate=60',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
+
+    return new Response(serializedData, {
+      status: 200,
       headers: {
+        'Content-Type': 'application/json',
         'ETag': etag,
-        'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800',
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'public, max-age=2, stale-while-revalidate=60'
+      }
+    });
+  } catch (error) {
+    console.error('Error serving channels from database:', error);
+    return new Response(JSON.stringify({ error: 'Failed to fetch channels' }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
       }
     });
   }
-
-  return new Response(serializedData, {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      'ETag': etag,
-      'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800'
-    }
-  });
 }
-// cache-invalidate: TSN Sports final working URL restored
-

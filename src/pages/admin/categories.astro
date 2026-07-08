@@ -1,0 +1,283 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { supabase } from '../../lib/supabase';
+
+let errorMsg = '';
+let successMsg = '';
+
+// Handle CRUD Operations via POST
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const action = data.get('action');
+
+    if (action === 'create') {
+      const key = data.get('key')?.toString().trim();
+      const name = data.get('name')?.toString().trim();
+      const sort_order = parseInt(data.get('sort_order')?.toString() || '0');
+
+      if (!key || !name) {
+        errorMsg = 'Category key and name are required.';
+      } else {
+        const { error } = await supabase
+          .from('channel_categories')
+          .insert({ key, name, sort_order });
+
+        if (error) {
+          errorMsg = error.message;
+        } else {
+          successMsg = 'Category created successfully!';
+        }
+      }
+    } else if (action === 'update') {
+      const originalKey = data.get('original_key')?.toString().trim();
+      const key = data.get('key')?.toString().trim();
+      const name = data.get('name')?.toString().trim();
+      const sort_order = parseInt(data.get('sort_order')?.toString() || '0');
+
+      if (!key || !name || !originalKey) {
+        errorMsg = 'Category key and name are required.';
+      } else {
+        const { error } = await supabase
+          .from('channel_categories')
+          .update({ key, name, sort_order })
+          .eq('key', originalKey);
+
+        if (error) {
+          errorMsg = error.message;
+        } else {
+          successMsg = 'Category updated successfully!';
+        }
+      }
+    } else if (action === 'delete') {
+      const key = data.get('key')?.toString().trim();
+      if (key) {
+        const { error } = await supabase
+          .from('channel_categories')
+          .delete()
+          .eq('key', key);
+
+        if (error) {
+          errorMsg = error.message;
+        } else {
+          successMsg = 'Category deleted successfully!';
+        }
+      }
+    }
+  } catch (e) {
+    errorMsg = 'An unexpected error occurred.';
+  }
+}
+
+// Fetch all categories
+const { data: categories, error: fetchError } = await supabase
+  .from('channel_categories')
+  .select('*')
+  .order('sort_order', { ascending: true });
+
+// Check if we are editing an existing category
+const editKey = Astro.url.searchParams.get('edit');
+let editCategory = null;
+if (editKey && categories) {
+  editCategory = categories.find(cat => cat.key === editKey);
+}
+
+const isCreating = Astro.url.searchParams.get('action') === 'new' || editCategory;
+---
+
+<AdminLayout title="Manage Categories | Vibestream" activeTab="categories">
+  <div class="page-title-section flex-header">
+    <div>
+      <h1 class="page-title">Channel Categories</h1>
+      <p class="page-subtitle">Add, edit, or remove streaming channel categories.</p>
+    </div>
+    <a href={isCreating ? "/admin/categories" : "/admin/categories?action=new"} class="btn btn-primary">
+      {isCreating ? "View List" : "Add New Category"}
+    </a>
+  </div>
+
+  {errorMsg && (
+    <div class="alert-box alert-danger">
+      <span>⚠️</span> {errorMsg}
+    </div>
+  )}
+
+  {successMsg && (
+    <div class="alert-box alert-success">
+      <span>✅</span> {successMsg}
+    </div>
+  )}
+
+  <div class="categories-layout">
+    {isCreating ? (
+      <!-- Creation/Edit Form -->
+      <div class="card form-card">
+        <h2 class="form-title">{editCategory ? `Edit Category: ${editCategory.name}` : 'Create New Category'}</h2>
+        <form method="POST" autocomplete="off">
+          <input type="hidden" name="action" value={editCategory ? "update" : "create"} />
+          {editCategory && <input type="hidden" name="original_key" value={editCategory.key} />}
+
+          <div class="form-group">
+            <label class="form-label" for="key">Category Key (URL safe slug)</label>
+            <input 
+              type="text" 
+              id="key" 
+              name="key" 
+              class="form-control" 
+              value={editCategory ? editCategory.key : ''} 
+              placeholder="e.g. general-sports" 
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="name">Display Name</label>
+            <input 
+              type="text" 
+              id="name" 
+              name="name" 
+              class="form-control" 
+              value={editCategory ? editCategory.name : ''} 
+              placeholder="e.g. General Sports" 
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="sort_order">Sort Order</label>
+            <input 
+              type="number" 
+              id="sort_order" 
+              name="sort_order" 
+              class="form-control" 
+              value={editCategory ? editCategory.sort_order : '0'} 
+              placeholder="0" 
+            />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+              {editCategory ? "Save Changes" : "Create Category"}
+            </button>
+            <a href="/admin/categories" class="btn btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    ) : (
+      <!-- Categories Table -->
+      <div class="table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Sort Order</th>
+              <th>Category Key</th>
+              <th>Category Name</th>
+              <th style="text-align: right; width: 150px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {categories && categories.length > 0 ? (
+              categories.map(cat => (
+                <tr>
+                  <td><span class="sort-badge">{cat.sort_order}</span></td>
+                  <td><code>{cat.key}</code></td>
+                  <td class="font-bold">{cat.name}</td>
+                  <td style="text-align: right;">
+                    <div class="action-buttons-group">
+                      <a href={`/admin/categories?edit=${cat.key}`} class="btn btn-secondary btn-sm" title="Edit">✏️</a>
+                      <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this category? All channels referencing it will have their category cleared.');">
+                        <input type="hidden" name="action" value="delete" />
+                        <input type="hidden" name="key" value={cat.key} />
+                        <button type="submit" class="btn btn-danger btn-sm" title="Delete">🗑️</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colspan="4" style="text-align: center; padding: 3rem;" class="text-muted">
+                  No categories found. Click 'Add New Category' above to create one.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </div>
+</AdminLayout>
+
+<style>
+  .flex-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .alert-box {
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  .alert-danger {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: var(--danger);
+  }
+
+  .alert-success {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: var(--success);
+  }
+
+  .form-card {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .form-title {
+    font-family: var(--font-outfit);
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #fff;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .sort-badge {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+
+  .font-bold {
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .action-buttons-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .btn-sm {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.85rem;
+    line-height: 1;
+  }
+</style>

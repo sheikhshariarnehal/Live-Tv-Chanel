@@ -1,8 +1,13 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import channelsData from '../../../public/assets/data/channels.json';
+import { supabase } from '../../lib/supabase';
 
-export const prerender = true;
+export const prerender = false;
+
+const { id } = Astro.params;
+
+// Fetch all channels to do slug matching
+const { data: channels } = await supabase.from('channels').select('*');
 
 export function slugify(text) {
   return text
@@ -18,44 +23,14 @@ export function slugify(text) {
 
 export function getChannelSlug(channel) {
   const nameSlug = slugify(channel.name);
-  const id = channel.id;
-  if (id.startsWith(nameSlug) || id.endsWith(nameSlug)) {
-    return id;
+  const chId = channel.id;
+  if (chId.startsWith(nameSlug) || chId.endsWith(nameSlug)) {
+    return chId;
   }
-  return `${nameSlug}-${id}`;
+  return `${nameSlug}-${chId}`;
 }
 
-export function getStaticPaths() {
-  const paths = [];
-  const categories = channelsData.categories;
-  
-  for (const catKey in categories) {
-    const category = categories[catKey];
-    if (category.channels) {
-      category.channels.forEach(channel => {
-        const slug = getChannelSlug(channel);
-        
-        // Add path for the custom slug
-        paths.push({
-          params: { id: slug },
-          props: { channel }
-        });
-        
-        // If the raw channel.id is different from the custom slug, add a path for it too
-        if (channel.id !== slug) {
-          paths.push({
-            params: { id: channel.id },
-            props: { channel }
-          });
-        }
-      });
-    }
-  }
-  
-  return paths;
-}
-
-const { channel } = Astro.props;
+const channel = (channels || []).find(ch => getChannelSlug(ch) === id || ch.id === id);
 
 if (!channel) {
   return Astro.redirect('/');

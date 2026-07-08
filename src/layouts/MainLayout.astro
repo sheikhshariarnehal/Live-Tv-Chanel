@@ -1,12 +1,14 @@
 ---
 import '../styles/css/style.css';
-import channelsData from '../../public/assets/data/channels.json';
+import { getChannelsData } from '../lib/supabase';
 import MobileMenu from '../components/MobileMenu.astro';
 
+const channelsData = await getChannelsData();
 const categories = channelsData.categories;
 const categoryKeys = Object.keys(categories);
 const firstCategoryKey = categoryKeys[0];
 const firstCategoryChannels = firstCategoryKey ? categories[firstCategoryKey].channels.slice(0, 24) : [];
+
 
 function slugify(text) {
   return text
@@ -30,11 +32,7 @@ function getChannelSlug(channel) {
 }
 
 function getPlaybackUrl(url) {
-  if (!url) return '';
-  if (url.startsWith('http://')) {
-    return '/proxy?url=' + encodeURIComponent(url);
-  }
-  return url;
+  return url || '';
 }
 
 interface Props {
@@ -195,23 +193,6 @@ const {
     </div>
   </header>
 
-  <!-- Sports News Ticker Section -->
-  <section class="news-ticker-section" id="newsTicker" style="display: none;">
-    <div class="news-ticker-container">
-      <div class="news-ticker-label">
-        <span class="news-ticker-label-text">NEWS</span>
-      </div>
-      <div class="news-ticker-content">
-        <div class="news-ticker-track" id="newsTickerTrack">
-          <div class="news-marquee-list" id="marqueeList1">
-            <span class="news-ticker-placeholder">সংবাদ লোড হচ্ছে...</span>
-          </div>
-          <div class="news-marquee-list" id="marqueeList2"></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- Main Container -->
   <div class="main-container">
     <div class="container">
@@ -275,21 +256,25 @@ const {
                       data-channel-name={channel.name}
                       title={channel.name}
                     >
-                      {channel.logo ? (
-                        <img 
-                          src={logoSrc} 
-                          alt={channel.name} 
-                          class="channel-logo" 
-                          width="160"
-                          height="90"
-                          loading={loadType}
-                          style="opacity: 0; transition: opacity 0.2s ease-in;"
-                          onload="imgOk(this)"
-                          onerror="imgErr(this)"
-                        />
-                      ) : (
-                        <span class="channel-name">{channel.name}</span>
-                      )}
+                      <div class="channel-icon-container">
+                        {channel.logo ? (
+                          <img 
+                            src={logoSrc} 
+                            alt={channel.name} 
+                            class="channel-logo" 
+                            width="40"
+                            height="40"
+                            loading={loadType}
+                            style="opacity: 0; transition: opacity 0.2s ease-in;"
+                            onload="imgOk(this)"
+                            onerror="imgErr(this)"
+                          />
+                        ) : (
+                          <div class="channel-avatar">{channel.name ? channel.name.charAt(0) : '?'}</div>
+                        )}
+                      </div>
+                      <span class="channel-name">{channel.name}</span>
+                      <span class="channel-play-indicator">▶</span>
                     </button>
                   );
                 })}
@@ -315,7 +300,13 @@ const {
   <!-- Global image handlers — deduplicated from ~30 inline onerror/onload strings (saves ~4KB HTML) -->
   <script is:inline>
     function imgOk(el){el.style.opacity='1'}
-    function imgErr(el){el.remove();var s=document.createElement('span');s.className='channel-name';s.textContent=el.alt;el.parentNode.appendChild(s)}
+    function imgErr(el){
+      var parent = el.parentNode;
+      if (parent) {
+        var char = el.alt ? el.alt.charAt(0) : '?';
+        parent.innerHTML = '<div class="channel-avatar">' + char + '</div>';
+      }
+    }
   </script>
   <script>
     import '../scripts/js/security.js';

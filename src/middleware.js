@@ -1,6 +1,15 @@
-export async function onRequest({ request }, next) {
+export async function onRequest(context, next) {
+  const { request, cookies, redirect, url } = context;
+  const adminPassword = process.env.ADMIN_PASSWORD || import.meta.env.ADMIN_PASSWORD || 'admin123';
+
+  if (url.pathname.startsWith('/admin') && url.pathname !== '/admin/login') {
+    const session = cookies.get('admin_session')?.value;
+    if (session !== adminPassword) {
+      return redirect('/admin/login');
+    }
+  }
+
   const startTime = Date.now();
-  const url = new URL(request.url);
 
   // Execute the request
   const response = await next();

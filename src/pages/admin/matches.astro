@@ -1,0 +1,456 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { supabase } from '../../lib/supabase';
+
+let errorMsg = '';
+let successMsg = '';
+
+// Handle CRUD Operations via POST
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const action = data.get('action');
+
+    const id = data.get('id')?.toString().trim();
+    const home = data.get('home')?.toString().trim();
+    const away = data.get('away')?.toString().trim();
+    const venue = data.get('venue')?.toString().trim();
+    const stage = data.get('stage')?.toString().trim();
+    const group_name = data.get('group_name')?.toString().trim() || null;
+    const sort_order = parseInt(data.get('sort_order')?.toString() || '0');
+    
+    // Parse datetime to ISO String
+    const matchDateLocal = data.get('match_date')?.toString();
+    const match_date = matchDateLocal ? new Date(matchDateLocal).toISOString() : null;
+
+    if (action === 'create') {
+      if (!id || !home || !away || !match_date) {
+        errorMsg = 'Match ID, Teams, and Date are required.';
+      } else {
+        const { error } = await supabase
+          .from('matches')
+          .insert({ id, home, away, venue, stage, group_name, sort_order, match_date });
+
+        if (error) {
+          errorMsg = error.message;
+        } else {
+          successMsg = `Match "${home} vs ${away}" scheduled successfully!`;
+        }
+      }
+    } else if (action === 'update') {
+      const originalId = data.get('original_id')?.toString().trim();
+      if (!id || !home || !away || !originalId || !match_date) {
+        errorMsg = 'Match ID, Teams, and Date are required.';
+      } else {
+        const { error } = await supabase
+          .from('matches')
+          .update({ id, home, away, venue, stage, group_name, sort_order, match_date })
+          .eq('id', originalId);
+
+        if (error) {
+          errorMsg = error.message;
+        } else {
+          successMsg = `Match "${home} vs ${away}" updated successfully!`;
+        }
+      }
+    } else if (action === 'delete') {
+      const deleteId = data.get('id')?.toString().trim();
+      if (deleteId) {
+        const { error } = await supabase
+          .from('matches')
+          .delete()
+          .eq('id', deleteId);
+
+        if (error) {
+          errorMsg = error.message;
+        } else {
+          successMsg = 'Match removed successfully!';
+        }
+      }
+    }
+  } catch (e) {
+    errorMsg = 'An unexpected server error occurred.';
+  }
+}
+
+// Fetch all matches
+const { data: matches } = await supabase
+  .from('matches')
+  .select('*')
+  .order('match_date', { ascending: true });
+
+// Check if editing
+const editId = Astro.url.searchParams.get('edit');
+let editMatch = null;
+if (editId && matches) {
+  editMatch = matches.find(m => m.id === editId);
+}
+
+const isCreating = Astro.url.searchParams.get('action') === 'new' || editMatch;
+
+// Format local datetime string for input field value (YYYY-MM-DDTHH:MM)
+function formatLocalDatetime(isoString) {
+  if (!isoString) return '';
+  const date = new Date(isoString);
+  const tzoffset = date.getTimezoneOffset() * 60000; //offset in milliseconds
+  const localISOTime = (new Date(date.getTime() - tzoffset)).toISOString().slice(0, 16);
+  return localISOTime;
+}
+
+// User-friendly display date
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+---
+
+<AdminLayout title="Manage Matches | Vibestream" activeTab="matches">
+  <div class="page-title-section flex-header">
+    <div>
+      <h1 class="page-title">Match Schedule</h1>
+      <p class="page-subtitle">Schedule, update, and manage game events and coverage.</p>
+    </div>
+    <a href={isCreating ? "/admin/matches" : "/admin/matches?action=new"} class="btn btn-primary">
+      {isCreating ? "View Schedule List" : "Schedule New Match"}
+    </a>
+  </div>
+
+  {errorMsg && (
+    <div class="alert-box alert-danger">
+      <span>⚠️</span> {errorMsg}
+    </div>
+  )}
+
+  {successMsg && (
+    <div class="alert-box alert-success">
+      <span>✅</span> {successMsg}
+    </div>
+  )}
+
+  {isCreating ? (
+    <!-- Form Card -->
+    <div class="card form-card">
+      <h2 class="form-title">{editMatch ? `Edit Match: ${editMatch.home} vs ${editMatch.away}` : 'Schedule New Match'}</h2>
+      <form method="POST" autocomplete="off" id="matchForm">
+        <input type="hidden" name="action" value={editMatch ? "update" : "create"} />
+        {editMatch && <input type="hidden" name="original_id" value={editMatch.id} />}
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="home">Home Team</label>
+            <input 
+              type="text" 
+              id="home" 
+              name="home" 
+              class="form-control" 
+              value={editMatch ? editMatch.home : ''} 
+              placeholder="e.g. Argentina" 
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="away">Away Team</label>
+            <input 
+              type="text" 
+              id="away" 
+              name="away" 
+              class="form-control" 
+              value={editMatch ? editMatch.away : ''} 
+              placeholder="e.g. France" 
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="match_date">Match Date & Time (Local)</label>
+            <input 
+              type="datetime-local" 
+              id="match_date" 
+              name="match_date" 
+              class="form-control" 
+              value={editMatch ? formatLocalDatetime(editMatch.match_date) : ''} 
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="id">Match ID (unique slug)</label>
+            <input 
+              type="text" 
+              id="id" 
+              name="id" 
+              class="form-control" 
+              value={editMatch ? editMatch.id : ''} 
+              placeholder="e.g. argentina-vs-france-2026" 
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="stage">Stage / Tournament Round</label>
+            <input 
+              type="text" 
+              id="stage" 
+              name="stage" 
+              class="form-control" 
+              value={editMatch ? editMatch.stage : ''} 
+              placeholder="e.g. Round of 16, Final" 
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="group_name">Group (Optional)</label>
+            <input 
+              type="text" 
+              id="group_name" 
+              name="group_name" 
+              class="form-control" 
+              value={editMatch ? editMatch.group_name : ''} 
+              placeholder="e.g. Group A" 
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="venue">Venue</label>
+            <input 
+              type="text" 
+              id="venue" 
+              name="venue" 
+              class="form-control" 
+              value={editMatch ? editMatch.venue : ''} 
+              placeholder="e.g. MetLife Stadium, New Jersey" 
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="sort_order">Sort Order</label>
+            <input 
+              type="number" 
+              id="sort_order" 
+              name="sort_order" 
+              class="form-control" 
+              value={editMatch ? editMatch.sort_order : '0'} 
+              placeholder="0"
+            />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">
+            {editMatch ? "Save Changes" : "Schedule Match"}
+          </button>
+          <a href="/admin/matches" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  ) : (
+    <!-- Table List -->
+    <div>
+      <div class="search-bar-container">
+        <input type="text" id="matchSearchInput" class="form-control" placeholder="🔍 Search match fixtures by teams, stage, venue..." />
+      </div>
+
+      <div class="table-container">
+        <table class="admin-table" id="matchesTable">
+          <thead>
+            <tr>
+              <th>Match Teams</th>
+              <th>Date & Time</th>
+              <th>Venue</th>
+              <th>Stage</th>
+              <th>Group</th>
+              <th>Sort Order</th>
+              <th style="text-align: right; width: 150px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {matches && matches.length > 0 ? (
+              matches.map(m => (
+                <tr class="match-row" data-teams={`${m.home.toLowerCase()} ${m.away.toLowerCase()}`} data-venue={m.venue.toLowerCase()} data-stage={m.stage.toLowerCase()} data-group={m.group_name ? m.group_name.toLowerCase() : ''}>
+                  <td class="font-bold">
+                    <span class="home-team">{m.home}</span>
+                    <span class="vs">vs</span>
+                    <span class="away-team">{m.away}</span>
+                  </td>
+                  <td><span class="match-date-badge">{formatDate(m.match_date)}</span></td>
+                  <td>{m.venue}</td>
+                  <td><span class="badge badge-primary">{m.stage}</span></td>
+                  <td><span class="badge badge-secondary">{m.group_name || 'N/A'}</span></td>
+                  <td><span class="sort-badge">{m.sort_order}</span></td>
+                  <td style="text-align: right;">
+                    <div class="action-buttons-group">
+                      <a href={`/admin/matches?edit=${m.id}`} class="btn btn-secondary btn-sm" title="Edit">✏️</a>
+                      <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this match scheduled event?');">
+                        <input type="hidden" name="action" value="delete" />
+                        <input type="hidden" name="id" value={m.id} />
+                        <button type="submit" class="btn btn-danger btn-sm" title="Delete">🗑️</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 4rem;" class="text-muted">
+                  No matches scheduled. Click 'Schedule New Match' above to add one.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )}
+</AdminLayout>
+
+<script>
+  // Dynamic slug generation on home/away team inputs
+  const homeInput = document.getElementById('home') as HTMLInputElement;
+  const awayInput = document.getElementById('away') as HTMLInputElement;
+  const idInput = document.getElementById('id') as HTMLInputElement;
+
+  if (homeInput && awayInput && idInput) {
+    const handleSlugGeneration = () => {
+      const homeText = homeInput.value.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
+      const awayText = awayInput.value.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
+      
+      if (homeText && awayText && (!idInput.value || document.activeElement !== idInput)) {
+        idInput.value = `${homeText}-vs-${awayText}-${new Date().getFullYear()}`;
+      }
+    };
+
+    homeInput.addEventListener('input', handleSlugGeneration);
+    awayInput.addEventListener('input', handleSlugGeneration);
+  }
+
+  // Real-time table search filter
+  const searchInput = document.getElementById('matchSearchInput') as HTMLInputElement;
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const query = (e.target as HTMLInputElement).value.toLowerCase().trim();
+      const rows = document.querySelectorAll('.match-row') as NodeListOf<HTMLTableRowElement>;
+
+      rows.forEach(row => {
+        const teams = row.dataset.teams || '';
+        const venue = row.dataset.venue || '';
+        const stage = row.dataset.stage || '';
+        const group = row.dataset.group || '';
+
+        if (teams.includes(query) || venue.includes(query) || stage.includes(query) || group.includes(query)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    });
+  }
+</script>
+
+<style>
+  .flex-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .alert-box {
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  .alert-danger {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: var(--danger);
+  }
+
+  .alert-success {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: var(--success);
+  }
+
+  .form-card {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .form-title {
+    font-family: var(--font-outfit);
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #fff;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .search-bar-container {
+    margin-bottom: 1.5rem;
+  }
+
+  .font-bold {
+    font-weight: 600;
+    color: #fff;
+    font-size: 0.95rem;
+  }
+
+  .vs {
+    color: var(--primary);
+    margin: 0 0.4rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 800;
+  }
+
+  .match-date-badge {
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    color: #a5b4fc;
+    padding: 0.35rem 0.6rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  .sort-badge {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+
+  .action-buttons-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .btn-sm {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.85rem;
+    line-height: 1;
+  }
+</style>

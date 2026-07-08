@@ -1,8 +1,8 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import channelsData from '../../../public/assets/data/channels.json';
+import { getChannelsData } from '../../lib/supabase';
 
-export const prerender = true;
+export const prerender = false;
 
 // Helper to generate the same slug as in watch/[id].astro
 function slugify(text) {
@@ -26,6 +26,7 @@ function getChannelSlug(channel) {
   return `${nameSlug}-${id}`;
 }
 
+const channelsData = await getChannelsData();
 const categories = channelsData.categories;
 ---
 <MainLayout title="Live TV Channels Directory | Vibestream" showPlayer={false}>
