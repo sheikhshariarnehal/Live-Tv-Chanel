@@ -7,12 +7,16 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Supabase URL or Anon Key is missing. Ensure PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY are set in your environment.');
 }
 
-export const supabase = createClient(
-  supabaseUrl || '',
-  supabaseAnonKey || ''
-);
+export const supabase = (supabaseUrl && supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;
 
 export async function getChannelsData() {
+  if (!supabase) {
+    console.warn('Supabase client not initialized — skipping data fetch.');
+    return { categories: {} };
+  }
+
   const { data: categories, error: catError } = await supabase
     .from('channel_categories')
     .select('*')
