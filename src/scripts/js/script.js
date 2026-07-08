@@ -48,6 +48,12 @@ let consecutiveFailuresCount = 0;
 let failingChannelUrl = null;
 let autoAdvanceTimeoutId = null;
 
+// ===== Playback Loop-Prevention Guards =====
+// Prevents concurrent playChannel calls and stale error-event re-triggering.
+let isPlayerInitializing = false;  // Re-entrancy lock for playChannel
+let currentPlaybackToken = 0;      // Incremented each call; error handlers compare their captured token
+let lastPlaybackErrorTime = 0;     // Timestamp of last handlePlaybackError call for cooldown
+
 // ===== URL Helper Functions for CORS & Mixed Content/BDIX Routing =====
 function getRawUrl(url) {
   return url;
@@ -274,6 +280,10 @@ function findChannelByIdOrSlug(idOrSlug) {
 
 function playChannelById(channelId) {
   consecutiveFailuresCount = 0;
+  // User/system intent to play a specific channel — forcefully reset guards so
+  // a stuck initializing state or recent error cooldown never blocks the switch.
+  isPlayerInitializing = false;
+  lastPlaybackErrorTime = 0;
   const match = findChannelByIdOrSlug(channelId);
   if (!match) return;
 
@@ -586,6 +596,16 @@ function handlePlaybackError(button, url, channelName, fallbackUrl) {
     return;
   }
 
+  // ── Cooldown guard ────────────────────────────────────────────────────────
+  // Prevent rapid-fire error cascades (e.g. from DOM mutations or back-to-back
+  // Shaka retries) from hammering the server with repeated playback attempts.
+  const now = Date.now();
+  if (now - lastPlaybackErrorTime < 2000) {
+    console.log(`[PLAYBACK] handlePlaybackError cooldown active — ignoring rapid repeat for "${channelName}".`);
+    return;
+  }
+  lastPlaybackErrorTime = now;
+
   // If we are already handling the failure for this URL, ignore duplicate error triggers
   if (failingChannelUrl === url) {
     console.log(`[PLAYBACK] Error for "${channelName}" (${url}) already being handled. Ignoring duplicate.`);
@@ -681,6 +701,9 @@ function setupEventListeners() {
     
     if (url && url !== '') {
       consecutiveFailuresCount = 0;
+      // User explicitly clicked a channel — clear guards so the click always wins
+      isPlayerInitializing = false;
+      lastPlaybackErrorTime = 0;
       playChannel(button, url, channelName, fallbackUrl);
       
       // Update browser URL on user click
@@ -1004,8 +1027,22 @@ function initializeShakaPlayer(video, url, artPlayer) {
 
 // ===== Play channel =====
 async function playChannel(button, url, channelName, fallbackUrl = null) {
+  // ── Re-entrancy guard ────────────────────────────────────────────────────
+  // Prevent a second playChannel call from starting while one is already
+  // loading CDN scripts or constructing the Artplayer instance.
+  if (isPlayerInitializing) {
+    console.warn(`[PLAYBACK] playChannel("${channelName}") blocked — already initializing.`);
+    return;
+  }
+  isPlayerInitializing = true;
+
+  // Invalidate every error handler that was registered by a previous call.
+  // Any video:error event that fires after this point for a *dead* player
+  // instance will see a stale token and exit silently.
+  const myToken = ++currentPlaybackToken;
+
   errorOverlay.classList.remove('active');
-  
+
   if (autoAdvanceTimeoutId) {
     clearTimeout(autoAdvanceTimeoutId);
     autoAdvanceTimeoutId = null;
@@ -1126,14 +1163,28 @@ async function playChannel(button, url, channelName, fallbackUrl = null) {
     });
 
     // 4. Hook lifecycle events for our overlays and error handling
+    // Capture myToken in the closure so that if this player is later destroyed
+    // and a NEW playChannel call runs (incrementing currentPlaybackToken),
+    // any error events that arrive late from this dead instance are ignored.
+    const capturedToken = myToken;
     art.on('video:error', (e) => {
+      if (capturedToken !== currentPlaybackToken) {
+        console.log('[PLAYBACK] Ignoring stale video:error from previous player instance.');
+        return;
+      }
       console.error('Artplayer video error:', e);
       handlePlaybackError(button, url, channelName, fallbackUrl);
     });
 
   } catch (error) {
     console.error('Failed to load player engine script or initialize player:', error);
-    handlePlaybackError(button, url, channelName, fallbackUrl);
+    // Only handle if this call is still the active one
+    if (myToken === currentPlaybackToken) {
+      handlePlaybackError(button, url, channelName, fallbackUrl);
+    }
+  } finally {
+    // Always release the lock so the next user-initiated playChannel can proceed
+    isPlayerInitializing = false;
   }
 }
 
