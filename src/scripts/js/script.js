@@ -1302,6 +1302,7 @@ window.addEventListener('resize', () => {
 // This custom implementation watches the channel grid scroll container and fires
 // a page reload when the user pulls down at the top — matching the native UX.
 (function initPullToRefresh() {
+  if (!document.body.classList.contains('player-layout')) return;
   const PULL_THRESHOLD = 72;   // px to trigger reload
   const MAX_VISUAL    = 110;   // max visual travel of the indicator (px)
   const HIDE_Y        = -80;   // resting off-screen Y position (px)

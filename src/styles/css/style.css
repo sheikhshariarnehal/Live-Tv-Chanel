@@ -30,6 +30,7 @@ body {
   color: var(--text-primary);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
   min-height: 100vh;
+  min-height: 100dvh;
   overflow: hidden;
   /* Prevent the browser's pull-to-refresh from misfiring on the root */
   overscroll-behavior-y: none;
@@ -46,6 +47,7 @@ body.portal-layout {
 body.portal-layout .main-container {
   height: auto;
   min-height: calc(100vh - var(--header-height));
+  min-height: calc(100dvh - var(--header-height));
   overflow: visible;
   margin-top: 0;
 }
@@ -58,6 +60,7 @@ body.portal-layout .container {
 @media (max-width: 640px) {
   body.portal-layout .main-container {
     min-height: calc(100vh - var(--header-height));
+    min-height: calc(100dvh - var(--header-height));
   }
 }
 
@@ -66,6 +69,7 @@ body.player-layout {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   /* Disable pull-to-refresh on the player page — scrollable areas handle their own overscroll */
   overscroll-behavior-y: none;
@@ -429,6 +433,7 @@ body.player-layout .container {
 .main-container {
   margin-top: 0;
   height: calc(100vh - var(--header-height));
+  height: calc(100dvh - var(--header-height));
   overflow: hidden;
 }
 
@@ -445,6 +450,7 @@ body.player-layout .container {
 /* ===== Video Section ===== */
 .video-section {
   --available-height: calc(100vh - var(--header-height) - var(--container-padding));
+  --available-height: calc(100dvh - var(--header-height) - var(--container-padding));
   width: min(calc(100% - var(--sidebar-width) - 1.5rem), calc(var(--available-height) * 16 / 9));
   aspect-ratio: 16 / 9;
   height: auto;
@@ -864,6 +870,7 @@ body.player-layout .container {
   .main-container {
     margin-top: 0;
     height: calc(100vh - var(--header-height));
+    height: calc(100dvh - var(--header-height));
   }
 
   .header-content {
@@ -887,6 +894,7 @@ body.player-layout .container {
 
   .video-section {
     --available-height: calc(100vh - var(--header-height) - var(--container-padding) - 220px);
+    --available-height: calc(100dvh - var(--header-height) - var(--container-padding) - 220px);
     /* reserve 220px for controls */
     width: min(100%, calc(var(--available-height) * 16 / 9));
     aspect-ratio: 16 / 9;
@@ -926,6 +934,7 @@ body.player-layout .container {
   body.player-layout {
     overflow: hidden;
     height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     overscroll-behavior-y: none;
@@ -976,14 +985,14 @@ body.player-layout .container {
   }
 
   .video-section {
-    --available-height: calc(100vh - var(--header-height) - var(--container-padding));
-    width: min(100%, calc(var(--available-height) * 16 / 9));
+    width: 100%;
     aspect-ratio: 16 / 9;
     height: auto;
-    max-height: min(var(--available-height), 400px);
+    max-height: none;
     align-self: center;
     border-radius: 12px;
     flex: none;
+    position: relative;
   }
 
   .category-tabs {
@@ -1085,17 +1094,16 @@ body.player-layout .container {
   }
 
   .video-section {
-    --available-height: calc(100vh - var(--header-height));
-    width: min(100%, calc(var(--available-height) * 16 / 9));
+    width: 100%;
     aspect-ratio: 16 / 9;
     height: auto;
-    max-height: min(var(--available-height), 350px);
+    max-height: none;
     min-height: unset;
     border-radius: 0;
     align-self: center;
     flex-shrink: 0;
     flex: none;
-    position: static;
+    position: relative;
   }
 
   .channel-info {
@@ -1162,11 +1170,10 @@ body.player-layout .container {
 /* Small Mobile */
 @media (max-width: 480px) {
   .video-section {
-    --available-height: calc(100vh - var(--header-height));
-    width: min(100%, calc(var(--available-height) * 16 / 9));
+    width: 100%;
     aspect-ratio: 16 / 9;
     height: auto;
-    max-height: min(var(--available-height), 280px);
+    max-height: none;
   }
 
   .channel-category {
@@ -1440,11 +1447,13 @@ body.player-layout .container {
   body.player-layout {
     overflow: hidden;
     height: 100vh;
+    height: 100dvh;
     overscroll-behavior-y: none;
   }
 
   body.player-layout .main-container {
     height: calc(100vh - var(--header-height));
+    height: calc(100dvh - var(--header-height));
     overflow: hidden;
   }
 
@@ -1460,6 +1469,7 @@ body.player-layout .container {
 
   .video-section {
     --available-height: calc(100vh - var(--header-height) - var(--container-padding));
+    --available-height: calc(100dvh - var(--header-height) - var(--container-padding));
     width: min(100%, calc(var(--available-height) * 16 / 9));
     aspect-ratio: 16 / 9;
     height: auto;
