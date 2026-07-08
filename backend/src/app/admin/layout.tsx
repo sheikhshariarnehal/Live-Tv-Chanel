@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '../../providers/auth-provider';
 import {
   Layers, Tv, Calendar, Bell, Shield, LogOut,
-  ChevronRight, Activity, Menu, X, Search, Sparkles,
+  ChevronRight, Activity, Menu, X, Search, Sparkles, Users,
 } from 'lucide-react';
 
 const navItems = [
@@ -16,6 +16,7 @@ const navItems = [
   { label: 'Sports Matches', href: '/dashboard/events', icon: Calendar },
   { label: 'Announcements', href: '/dashboard/announcements', icon: Bell },
   { label: 'Channel Monitor', href: '/admin/channel-monitor', icon: Shield },
+  { label: 'User Analytics', href: '/admin/analytics', icon: Users },
 ] as const;
 
 function getTabLabel(pathname: string): string {

@@ -1,17 +1,19 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../main.dart' show appInitFuture;
+import '../../providers/app_providers.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _SplashScreenState extends ConsumerState<SplashScreen>
     with TickerProviderStateMixin {
   late final AnimationController _pulseController;
   late final AnimationController _bounceController;
@@ -98,8 +100,10 @@ class _SplashScreenState extends State<SplashScreen>
       Future.delayed(const Duration(milliseconds: 900)),
     ]).then((_) {
       if (!mounted) return;
-      // Kick off background sync NOW that Supabase is ready
-      // (providers will self-init when HomeScreen is first built)
+      
+      // Initialize analytics service
+      ref.read(analyticsServiceProvider).initialize();
+      
       context.go('/home');
     });
   }
