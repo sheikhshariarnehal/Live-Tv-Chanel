@@ -100,9 +100,12 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      _formatDuration(_timeRemaining),
-      style: widget.style,
+    // RepaintBoundary isolates per-second timer repaints from parent list tiles.
+    return RepaintBoundary(
+      child: Text(
+        _formatDuration(_timeRemaining),
+        style: widget.style,
+      ),
     );
   }
 }

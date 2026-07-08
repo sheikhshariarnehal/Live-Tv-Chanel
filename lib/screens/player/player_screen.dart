@@ -933,6 +933,16 @@ class _FullscreenTopBar extends ConsumerWidget {
     this.eventChannels,
   });
 
+  // Pre-cached back button decoration — avoids per-build allocation.
+  static final _kBackButtonDeco = BoxDecoration(
+    color: Colors.white.withValues(alpha: 0.25),
+    shape: BoxShape.circle,
+    border: Border.all(
+      color: Colors.white.withValues(alpha: 0.5),
+      width: 0.8,
+    ),
+  );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final channelsAsync = ref.watch(channelsProvider);
@@ -950,64 +960,48 @@ class _FullscreenTopBar extends ConsumerWidget {
             height: 52,
             child: Stack(
               children: [
-                // 1. Horizontal Channels list with a left-side fading ShaderMask
+                // 1. Horizontal Channels list (no ShaderMask — eliminated saveLayer)
                 Positioned.fill(
-                  child: ShaderMask(
-                    shaderCallback: (Rect bounds) {
-                      final double width = bounds.width;
-                      final double fadeStart = 20.0 / width;
-                      final double fadeEnd = 54.0 / width;
-                      return LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: const [
-                          Colors.transparent,
-                          Colors.black,
-                        ],
-                        stops: [fadeStart, fadeEnd],
-                      ).createShader(bounds);
+                  child: channelsAsync.when(
+                    data: (channels) {
+                      final List<Channel> related;
+                      if (eventChannels != null) {
+                        related = eventChannels!
+                            .map((id) {
+                              final match = channels.where((c) => c.id == id);
+                              return match.isNotEmpty ? match.first : null;
+                            })
+                            .whereType<Channel>()
+                            .toList();
+                      } else {
+                        related = channels
+                            .where((c) => c.category == category)
+                            .toList();
+                      }
+                      if (related.isEmpty) return const SizedBox.shrink();
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.only(left: 64, right: 16),
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: related.length,
+                        itemBuilder: (context, index) {
+                          final ch = related[index];
+                          final isCurrent = ch.id == currentChannelId;
+                          return _ServerChip(
+                            label: ch.name,
+                            isCurrent: isCurrent,
+                            onTap: () => onChannelSelected(ch.id),
+                          );
+                        },
+                      );
                     },
-                    blendMode: BlendMode.dstIn,
-                    child: channelsAsync.when(
-                      data: (channels) {
-                        final List<Channel> related;
-                        if (eventChannels != null) {
-                          related = eventChannels!
-                              .map((id) {
-                                final match = channels.where((c) => c.id == id);
-                                return match.isNotEmpty ? match.first : null;
-                              })
-                              .whereType<Channel>()
-                              .toList();
-                        } else {
-                          related = channels
-                              .where((c) => c.category == category)
-                              .toList();
-                        }
-                        if (related.isEmpty) return const SizedBox.shrink();
-                        return ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.only(left: 64, right: 16),
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: related.length,
-                          itemBuilder: (context, index) {
-                            final ch = related[index];
-                            final isCurrent = ch.id == currentChannelId;
-                            return _ServerChip(
-                              label: ch.name,
-                              isCurrent: isCurrent,
-                              onTap: () => onChannelSelected(ch.id),
-                            );
-                          },
-                        );
-                      },
-                      loading: () => const SizedBox.shrink(),
-                      error: (e, s) => const SizedBox.shrink(),
-                    ),
+                    loading: () => const SizedBox.shrink(),
+                    error: (e, s) => const SizedBox.shrink(),
                   ),
                 ),
 
-                // 2. Overlaid Back button
+
+                // 3. Overlaid Back button
                 Positioned(
                   left: 0,
                   top: 0,
@@ -1018,20 +1012,15 @@ class _FullscreenTopBar extends ConsumerWidget {
                       behavior: HitTestBehavior.opaque,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.06),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.12),
-                              width: 0.8,
+                        child: DecoratedBox(
+                          decoration: _kBackButtonDeco,
+                          child: const Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              color: Colors.white,
+                              size: 14,
                             ),
-                          ),
-                          child: const Icon(
-                            Icons.arrow_back_ios_new_rounded,
-                            color: Colors.white,
-                            size: 14,
                           ),
                         ),
                       ),
