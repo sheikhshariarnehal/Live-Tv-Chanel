@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/supabase_service.dart';
 import '../services/cache_service.dart';
 import '../services/sync_service.dart';
+import '../services/analytics_service.dart';
 import '../models/channel.dart';
 import '../models/event.dart';
 import '../models/category.dart';
@@ -19,6 +20,14 @@ final cacheServiceProvider = Provider<CacheService>((ref) {
 
 final syncServiceProvider = Provider<SyncService>((ref) {
   return SyncService(ref);
+});
+
+final analyticsServiceProvider = Provider<AnalyticsService>((ref) {
+  final service = AnalyticsService();
+  ref.onDispose(() {
+    service.dispose();
+  });
+  return service;
 });
 
 /// Startup provider to trigger the background synchronization process

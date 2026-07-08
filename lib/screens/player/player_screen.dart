@@ -254,6 +254,10 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     WakelockPlus.disable();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    
+    // Stop tracking active channel
+    ref.read(analyticsServiceProvider).stopWatching();
+    
     super.dispose();
   }
 
@@ -263,6 +267,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           ref.read(watchHistoryProvider.notifier).addChannel(channel);
+          // Track active channel playback
+          ref.read(analyticsServiceProvider).startWatching(channel.id, channel.name);
         }
       });
     }
