@@ -96,6 +96,11 @@ const {
   <link rel="apple-touch-icon" href="/assets/logo.webp" />
   <link rel="manifest" href="/manifest.json" />
 
+  <!-- Preload player engines for faster player ready times (lowers TTI) -->
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/artplayer/dist/artplayer.js" as="script" />
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/shaka-player.compiled.js" as="script" />
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js" as="script" />
+
   <!-- Fonts — async-loaded to avoid render-blocking (saves 200-600ms FCP) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -200,7 +205,12 @@ const {
         <!-- Video Player Section -->
         <div class="video-section">
           <div class="video-wrapper">
-            <div id="player"></div>
+            <div id="player">
+              <div class="player-skeleton">
+                <div class="skeleton-spinner"></div>
+                <div class="skeleton-text">Loading Player...</div>
+              </div>
+            </div>
             <!-- Dynamic Error Overlay -->
             <div class="error-overlay" id="errorOverlay">
               <div class="error-card">
@@ -307,6 +317,9 @@ const {
         parent.innerHTML = '<div class="channel-avatar">' + char + '</div>';
       }
     }
+  </script>
+  <script define:vars={{ channelsData }} is:inline>
+    window.initialChannelsData = channelsData;
   </script>
   <script>
     import '../scripts/js/security.js';

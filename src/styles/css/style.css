@@ -523,6 +523,44 @@ body.player-layout .container {
   font-size: 0.875rem;
 }
 
+/* ===== Player Skeleton Loader ===== */
+.player-skeleton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  background: radial-gradient(circle at center, #111115 0%, #000000 100%);
+  color: #fff;
+  font-family: inherit;
+}
+
+.skeleton-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3.5px solid rgba(255, 255, 255, 0.05);
+  border-top: 3.5px solid var(--primary-color);
+  border-right: 3.5px solid var(--secondary-color);
+  border-radius: 50%;
+  animation: spin 0.8s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  margin-bottom: 1rem;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+}
+
+.skeleton-text {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  animation: pulse-opacity 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-opacity {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
 /* ===== Sidebar ===== */
 .sidebar {
   width: var(--sidebar-width);

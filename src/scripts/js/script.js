@@ -358,6 +358,11 @@ function initializeUI() {
     
     executeOnLoadAndIdle(() => {
       playChannelById(match.channel.id);
+      // Fully render the current category if it was only partially pre-rendered
+      const categoryDiv = channelGridContainer.querySelector(`.channel-category[data-category="${currentCategory}"]`);
+      if (categoryDiv && categoryDiv.dataset.fullyRendered !== "true") {
+        renderChannelsForCategory(currentCategory);
+      }
     });
   } else {
     const categoryKeys = Object.keys(channelsData.categories);
@@ -382,6 +387,11 @@ function initializeUI() {
           const slug = getChannelSlug(chanMatch.channel);
           history.replaceState({ channelId }, '', `/watch/${slug}`);
         }
+      }
+      // Fully render the current category if it was only partially pre-rendered
+      const categoryDiv = channelGridContainer.querySelector(`.channel-category[data-category="${currentCategory}"]`);
+      if (categoryDiv && categoryDiv.dataset.fullyRendered !== "true") {
+        renderChannelsForCategory(currentCategory);
       }
     });
   }
@@ -1104,15 +1114,10 @@ async function playChannel(button, url, channelName, fallbackUrl = null) {
     const playerEl = document.getElementById('player');
     if (playerEl) {
       playerEl.innerHTML = `
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; background: #000; color: #fff; font-family: 'Inter', sans-serif;">
-          <div style="width: 40px; height: 40px; border: 3px solid rgba(255, 255, 255, 0.1); border-top-color: #6366f1; border-radius: 50%; animation: spin-loader 1s linear infinite; margin-bottom: 12px;"></div>
-          <div style="font-size: 0.875rem; color: #a1a1aa; font-weight: 500;">Loading Player Engines...</div>
+        <div class="player-skeleton">
+          <div class="skeleton-spinner"></div>
+          <div class="skeleton-text">Loading Player Engines...</div>
         </div>
-        <style>
-          @keyframes spin-loader {
-            to { transform: rotate(360deg); }
-          }
-        </style>
       `;
     }
 
