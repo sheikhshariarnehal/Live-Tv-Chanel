@@ -170,9 +170,9 @@ class AnalyticsService with WidgetsBindingObserver {
       final client = Supabase.instance.client;
       if (sync) {
         // Run un-awaited to execute quickly during app exit/pause
-        unawaited(client.from('user_presence').upsert(presenceData).then((_) {}).catchError((_){}));
+        unawaited(client.from('user_presence').upsert(presenceData, onConflict: 'device_id').then((_) {}).catchError((_){}));
       } else {
-        await client.from('user_presence').upsert(presenceData);
+        await client.from('user_presence').upsert(presenceData, onConflict: 'device_id');
       }
     } catch (e) {
       debugPrint('Failed to send presence heartbeat: $e');
