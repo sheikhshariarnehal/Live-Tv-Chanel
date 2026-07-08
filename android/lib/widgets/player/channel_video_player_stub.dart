@@ -685,52 +685,71 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
           right: 0,
           bottom: 0,
           child: RepaintBoundary(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Seek Bar / Timeline — isolated from time-text repaints
-                RepaintBoundary(
-                  child: PlayerProgressBar(
-                    position: _position,
-                    duration: _duration,
-                    bufferedPosition: _bufferedPosition,
-                    onSeek: _seekTo,
-                    isFullscreen: widget.isFullscreen,
-                  ),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [
+                    Colors.black.withAlpha(217),
+                    Colors.black.withAlpha(140),
+                    Colors.black.withAlpha(51),
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.45, 0.8, 1.0],
                 ),
-
-                // Bottom Buttons row
-                Padding(
-                  padding: EdgeInsets.only(
-                    left: widget.isFullscreen ? 24.0 : 12.0,
-                    right: widget.isFullscreen ? 24.0 : 12.0,
-                    bottom: widget.isFullscreen ? 20.0 : 8.0,
-                    top: widget.isFullscreen ? 4.0 : 2.0,
+              ),
+              padding: EdgeInsets.only(
+                top: widget.isFullscreen ? 16.0 : 8.0,
+                bottom: widget.isFullscreen ? 8.0 : 4.0,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Seek Bar / Timeline — isolated from time-text repaints
+                  RepaintBoundary(
+                    child: PlayerProgressBar(
+                      position: _position,
+                      duration: _duration,
+                      bufferedPosition: _bufferedPosition,
+                      onSeek: _seekTo,
+                      isFullscreen: widget.isFullscreen,
+                    ),
                   ),
-                  child: Row(
-                    children: [
-                      // Time text
-                      Text(
-                        '${_formatDuration(_position)} · ${_formatDuration(_duration)}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
+
+                  // Bottom Buttons row
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: widget.isFullscreen ? 24.0 : 12.0,
+                      right: widget.isFullscreen ? 24.0 : 12.0,
+                      bottom: widget.isFullscreen ? 12.0 : 4.0,
+                      top: 0.0,
+                    ),
+                    child: Row(
+                      children: [
+                        // Time text
+                        Text(
+                          '${_formatDuration(_position)} · ${_formatDuration(_duration)}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
-                      ),
 
-                      const Spacer(),
+                        const Spacer(),
 
-                      // Lock and right controls
-                      if (widget.isFullscreen)
-                        _buildFullscreenRightControls()
-                      else
-                        _buildPortraitRightControls(),
-                    ],
+                        // Lock and right controls
+                        if (widget.isFullscreen)
+                          _buildFullscreenRightControls()
+                        else
+                          _buildPortraitRightControls(),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -741,12 +760,13 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
   Widget _buildFullscreenRightControls() {
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // 2. Aspect Ratio Button
         IconButton(
           onPressed: _toggleAspectRatio,
           icon: const Icon(Icons.fit_screen, color: Colors.white),
-          iconSize: 24,
+          iconSize: 28,
           padding: const EdgeInsets.symmetric(horizontal: 6),
           constraints: const BoxConstraints(),
           tooltip: _aspectLabels[_aspectRatioIndex],
@@ -760,7 +780,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                 : (_volume < 0.5 ? Icons.volume_down : Icons.volume_up),
             color: Colors.white,
           ),
-          iconSize: 24,
+          iconSize: 28,
           padding: const EdgeInsets.symmetric(horizontal: 6),
           constraints: const BoxConstraints(),
         ),
@@ -772,7 +792,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
             });
           },
           icon: const Icon(Icons.lock_open, color: Colors.white),
-          iconSize: 24,
+          iconSize: 28,
           padding: const EdgeInsets.symmetric(horizontal: 6),
           constraints: const BoxConstraints(),
         ),
@@ -780,7 +800,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
         IconButton(
           onPressed: _enterPiP,
           icon: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
-          iconSize: 24,
+          iconSize: 28,
           padding: const EdgeInsets.symmetric(horizontal: 6),
           constraints: const BoxConstraints(),
         ),
@@ -788,11 +808,11 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
         GestureDetector(
           onTapDown: (details) => _showQualityMenu(details),
           child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10),
+            padding: EdgeInsets.symmetric(horizontal: 6),
             child: Icon(
               Icons.settings,
               color: Colors.white,
-              size: 24,
+              size: 28,
             ),
           ),
         ),
@@ -804,7 +824,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
               widget.isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
               color: Colors.white,
             ),
-            iconSize: 26,
+            iconSize: 28,
             padding: const EdgeInsets.symmetric(horizontal: 6),
             constraints: const BoxConstraints(),
           ),
@@ -815,6 +835,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
   Widget _buildPortraitRightControls() {
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // Volume Button
         IconButton(
@@ -825,33 +846,30 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                 : (_volume < 0.5 ? Icons.volume_down : Icons.volume_up),
             color: Colors.white,
           ),
-          iconSize: 20,
-          padding: const EdgeInsets.all(4),
+          iconSize: 24,
+          padding: const EdgeInsets.symmetric(horizontal: 6),
           constraints: const BoxConstraints(),
         ),
-        const SizedBox(width: 8),
         // Settings Button
         GestureDetector(
           onTapDown: (details) => _showQualityMenu(details),
           child: const Padding(
-            padding: EdgeInsets.all(4),
+            padding: EdgeInsets.symmetric(horizontal: 6),
             child: Icon(
               Icons.settings,
               color: Colors.white,
-              size: 20,
+              size: 24,
             ),
           ),
         ),
-        const SizedBox(width: 8),
         // PiP Button
         IconButton(
           onPressed: _enterPiP,
           icon: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
-          iconSize: 20,
-          padding: const EdgeInsets.all(4),
+          iconSize: 24,
+          padding: const EdgeInsets.symmetric(horizontal: 6),
           constraints: const BoxConstraints(),
         ),
-        const SizedBox(width: 8),
         // Fullscreen Toggle Button
         if (widget.onFullscreenToggle != null)
           IconButton(
@@ -860,8 +878,8 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
               widget.isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
               color: Colors.white,
             ),
-            iconSize: 22,
-            padding: const EdgeInsets.all(4),
+            iconSize: 24,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
             constraints: const BoxConstraints(),
           ),
       ],
@@ -1041,27 +1059,34 @@ class PlayerProgressBar extends StatelessWidget {
       return const SizedBox(height: 12);
     }
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onHorizontalDragUpdate: (details) {
-        _handleDrag(context, details.localPosition.dx);
-      },
-      onTapDown: (details) {
-        _handleDrag(context, details.localPosition.dx);
-      },
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: isFullscreen ? 8.0 : 4.0),
-        child: SizedBox(
-          height: 12,
-          width: double.infinity,
-          child: CustomPaint(
-            painter: _ProgressBarPainter(
-              position: position,
-              duration: duration,
-              bufferedPosition: bufferedPosition,
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: 0.0,
+        vertical: isFullscreen ? 2.0 : 0.0,
+      ),
+      child: Builder(
+        builder: (innerContext) {
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onHorizontalDragUpdate: (details) {
+              _handleDrag(innerContext, details.localPosition.dx);
+            },
+            onTapDown: (details) {
+              _handleDrag(innerContext, details.localPosition.dx);
+            },
+            child: SizedBox(
+              height: 10,
+              width: double.infinity,
+              child: CustomPaint(
+                painter: _ProgressBarPainter(
+                  position: position,
+                  duration: duration,
+                  bufferedPosition: bufferedPosition,
+                ),
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
