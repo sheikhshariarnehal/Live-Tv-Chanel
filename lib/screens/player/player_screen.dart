@@ -55,15 +55,6 @@ const _kTileDecoNormal = BoxDecoration(
   ),
 );
 
-// Back-button decoration
-const _kBackBtnDeco = BoxDecoration(
-  color: Color(0x78000000),
-  shape: BoxShape.circle,
-  border: Border.fromBorderSide(
-    BorderSide(color: Color(0x2BFFFFFF), width: 0.8),
-  ),
-);
-
 // Playing tag
 const _kPlayingTagDeco = BoxDecoration(
   color: Color(0x1A00ADB5),
@@ -80,17 +71,26 @@ const _kPlayingTagStyle = TextStyle(
 );
 
 // Server chip decorations
-const _kChipDecoActive = BoxDecoration(
-  color: Color(0x1F2196F3),
-  borderRadius: BorderRadius.all(Radius.circular(20)),
+final _kChipDecoActive = BoxDecoration(
+  gradient: const LinearGradient(
+    colors: [
+      Color(0xFF00E5EE), // Bright cyan/teal gloss top
+      Color(0xFF00ADB5), // Brand teal base
+    ],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  ),
+  borderRadius: const BorderRadius.all(Radius.circular(20)),
   border: Border.fromBorderSide(
-    BorderSide(color: Color(0xFF2196F3), width: 1.2),
+    BorderSide(color: Colors.white.withValues(alpha: 0.35), width: 1.0),
   ),
 );
-const _kChipDecoInactive = BoxDecoration(
-  color: Colors.transparent,
-  borderRadius: BorderRadius.all(Radius.circular(20)),
-  border: Border.fromBorderSide(BorderSide(color: Colors.white30, width: 1.0)),
+final _kChipDecoInactive = BoxDecoration(
+  color: Colors.white.withValues(alpha: 0.08), // Translucent glossy capsule
+  borderRadius: const BorderRadius.all(Radius.circular(20)),
+  border: Border.fromBorderSide(
+    BorderSide(color: Colors.white.withValues(alpha: 0.12), width: 0.8),
+  ),
 );
 
 // Avatar decoration
@@ -128,14 +128,16 @@ const _kTileMetaActiveStyle = TextStyle(
 );
 const _kTileMetaNormalStyle = TextStyle(color: Colors.white38, fontSize: 10.5);
 const _kChipActiveStyle = TextStyle(
-  color: Colors.white,
-  fontSize: 11,
-  fontWeight: FontWeight.w600,
+  color: Colors.black,
+  fontSize: 11.5,
+  fontWeight: FontWeight.w700,
+  letterSpacing: 0.1,
 );
 const _kChipInactiveStyle = TextStyle(
   color: Colors.white70,
-  fontSize: 11,
-  fontWeight: FontWeight.w500,
+  fontSize: 11.5,
+  fontWeight: FontWeight.w600,
+  letterSpacing: 0.1,
 );
 
 // Cached identity matrix — never reallocated
@@ -598,16 +600,13 @@ class _BackButton extends StatelessWidget {
     return GestureDetector(
       onTap: () => Navigator.of(context).pop(),
       behavior: HitTestBehavior.opaque,
-      child: SizedBox(
+      child: const SizedBox(
         width: 34,
         height: 34,
-        child: DecoratedBox(
-          decoration: _kBackBtnDeco,
-          child: const Icon(
-            Icons.arrow_back_rounded,
-            color: Colors.white,
-            size: 18,
-          ),
+        child: Icon(
+          Icons.arrow_back_rounded,
+          color: Colors.white,
+          size: 24,
         ),
       ),
     );
@@ -945,62 +944,102 @@ class _FullscreenTopBar extends ConsumerWidget {
         bottom: false,
         left: false,
         right: true,
-        child: SizedBox(
-          height: 52,
-          child: Row(
-            children: [
-              GestureDetector(
-                onTap: onBackPressed,
-                behavior: HitTestBehavior.opaque,
-                child: const Padding(
-                  padding: EdgeInsets.only(
-                    left: 12,
-                    right: 12,
-                    top: 12,
-                    bottom: 12,
-                  ),
-                  child: Icon(Icons.arrow_back, color: Colors.white, size: 24),
-                ),
-              ),
-              Expanded(
-                child: channelsAsync.when(
-                  data: (channels) {
-                    final List<Channel> related;
-                    if (eventChannels != null) {
-                      related = eventChannels!
-                          .map((id) {
-                            final match = channels.where((c) => c.id == id);
-                            return match.isNotEmpty ? match.first : null;
-                          })
-                          .whereType<Channel>()
-                          .toList();
-                    } else {
-                      related = channels
-                          .where((c) => c.category == category)
-                          .toList();
-                    }
-                    if (related.isEmpty) return const SizedBox.shrink();
-                    return ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.only(right: 16),
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: related.length,
-                      itemBuilder: (context, index) {
-                        final ch = related[index];
-                        final isCurrent = ch.id == currentChannelId;
-                        return _ServerChip(
-                          label: ch.name,
-                          isCurrent: isCurrent,
-                          onTap: () => onChannelSelected(ch.id),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 10.0, bottom: 6.0),
+          child: SizedBox(
+            height: 52,
+            child: Stack(
+              children: [
+                // 1. Horizontal Channels list with a left-side fading ShaderMask
+                Positioned.fill(
+                  child: ShaderMask(
+                    shaderCallback: (Rect bounds) {
+                      final double width = bounds.width;
+                      final double fadeStart = 20.0 / width;
+                      final double fadeEnd = 54.0 / width;
+                      return LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: const [
+                          Colors.transparent,
+                          Colors.black,
+                        ],
+                        stops: [fadeStart, fadeEnd],
+                      ).createShader(bounds);
+                    },
+                    blendMode: BlendMode.dstIn,
+                    child: channelsAsync.when(
+                      data: (channels) {
+                        final List<Channel> related;
+                        if (eventChannels != null) {
+                          related = eventChannels!
+                              .map((id) {
+                                final match = channels.where((c) => c.id == id);
+                                return match.isNotEmpty ? match.first : null;
+                              })
+                              .whereType<Channel>()
+                              .toList();
+                        } else {
+                          related = channels
+                              .where((c) => c.category == category)
+                              .toList();
+                        }
+                        if (related.isEmpty) return const SizedBox.shrink();
+                        return ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.only(left: 64, right: 16),
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: related.length,
+                          itemBuilder: (context, index) {
+                            final ch = related[index];
+                            final isCurrent = ch.id == currentChannelId;
+                            return _ServerChip(
+                              label: ch.name,
+                              isCurrent: isCurrent,
+                              onTap: () => onChannelSelected(ch.id),
+                            );
+                          },
                         );
                       },
-                    );
-                  },
-                  loading: () => const SizedBox.shrink(),
-                  error: (e, s) => const SizedBox.shrink(),
+                      loading: () => const SizedBox.shrink(),
+                      error: (e, s) => const SizedBox.shrink(),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+
+                // 2. Overlaid Back button
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: GestureDetector(
+                      onTap: onBackPressed,
+                      behavior: HitTestBehavior.opaque,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.06),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.12),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -1008,7 +1047,7 @@ class _FullscreenTopBar extends ConsumerWidget {
   }
 }
 
-class _ServerChip extends StatelessWidget {
+class _ServerChip extends StatefulWidget {
   final String label;
   final bool isCurrent;
   final VoidCallback onTap;
@@ -1020,19 +1059,36 @@ class _ServerChip extends StatelessWidget {
   });
 
   @override
+  State<_ServerChip> createState() => _ServerChipState();
+}
+
+class _ServerChipState extends State<_ServerChip> {
+  bool _isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 5),
         child: GestureDetector(
-          onTap: isCurrent ? null : onTap,
-          child: DecoratedBox(
-            decoration: isCurrent ? _kChipDecoActive : _kChipDecoInactive,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              child: Text(
-                label,
-                style: isCurrent ? _kChipActiveStyle : _kChipInactiveStyle,
+          onTapDown: (_) => setState(() => _isPressed = true),
+          onTapUp: (_) => setState(() => _isPressed = false),
+          onTapCancel: () => setState(() => _isPressed = false),
+          onTap: widget.isCurrent ? null : widget.onTap,
+          child: AnimatedScale(
+            scale: _isPressed ? 0.95 : 1.0,
+            duration: const Duration(milliseconds: 100),
+            curve: Curves.easeOut,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
+              decoration: widget.isCurrent ? _kChipDecoActive : _kChipDecoInactive,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+                child: Text(
+                  widget.label,
+                  style: widget.isCurrent ? _kChipActiveStyle : _kChipInactiveStyle,
+                ),
               ),
             ),
           ),
