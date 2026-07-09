@@ -155,6 +155,7 @@ Future<void> startProxy() async {
           'accept-language',
           'authorization',
           'origin',
+          'cookie',
         };
 
         request.headers.forEach((name, values) {
@@ -246,7 +247,7 @@ Future<void> startProxy() async {
         });
 
         // Check if the response is an M3U8 playlist
-        final contentType = clientResponse.headers.value(HttpHeaders.contentTypeHeader) ?? '';
+        final contentType = (clientResponse.headers.value(HttpHeaders.contentTypeHeader) ?? '').toLowerCase();
         final isM3u8 = contentType.contains('mpegurl') ||
             contentType.contains('m3u8') ||
             targetUrl.path.toLowerCase().endsWith('.m3u8');
@@ -255,7 +256,14 @@ Future<void> startProxy() async {
           final bytes = await clientResponse.fold<List<int>>([], (p, e) => p..addAll(e));
           final content = utf8.decode(bytes, allowMalformed: true);
 
-          final rewrittenContent = _rewriteM3u8(content, targetUrlStr, customHeaders);
+          // Use the final URL after any redirects as the base for resolving relative URLs.
+          // This is critical for servers that redirect to a different host (e.g., line.tvdsz.cc
+          // redirects to 43.250.x.x), so that relative .ts paths resolve against the correct host.
+          final finalUrl = clientResponse.redirects.isNotEmpty
+              ? clientResponse.redirects.last.location.toString()
+              : targetUrlStr;
+
+          final rewrittenContent = _rewriteM3u8(content, finalUrl, customHeaders);
           request.response.headers.set(HttpHeaders.contentLengthHeader, utf8.encode(rewrittenContent).length.toString());
           request.response.write(rewrittenContent);
           await request.response.close();
