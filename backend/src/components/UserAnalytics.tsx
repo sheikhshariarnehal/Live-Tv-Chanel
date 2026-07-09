@@ -62,6 +62,26 @@ export default function UserAnalytics() {
   const [isLoading, setIsLoading] = useState(true);
   const [realtimeStatus, setRealtimeStatus] = useState<'connecting' | 'connected' | 'error'>('connecting');
   const [nowTime, setNowTime] = useState(new Date());
+  const [clockOffset, setClockOffset] = useState(0);
+
+  // Sync clock offset with server on mount
+  useEffect(() => {
+    const syncClock = async () => {
+      try {
+        const start = Date.now();
+        const res = await fetch('/', { method: 'HEAD' });
+        const latency = (Date.now() - start) / 2;
+        const serverDateHeader = res.headers.get('Date');
+        if (serverDateHeader) {
+          const serverTime = new Date(serverDateHeader).getTime() + latency;
+          setClockOffset(serverTime - Date.now());
+        }
+      } catch (e) {
+        console.error('Failed to sync clock offset:', e);
+      }
+    };
+    syncClock();
+  }, []);
 
   // Force component re-renders to update elapsed active times and check for timeouts
   useEffect(() => {
@@ -129,8 +149,8 @@ export default function UserAnalytics() {
                 return [newRow, ...updated];
               }
             } else if (eventType === 'DELETE') {
-              const devId = oldRow.device_id;
-              return updated.filter((u) => u.device_id !== devId);
+              const id = payload.old.id;
+              return updated.filter((u) => u.id !== id);
             }
             return prev;
           });
@@ -178,14 +198,15 @@ export default function UserAnalytics() {
     }
   };
 
-  // Determine if a session is "Active" right now (sent heartbeat in last 60 seconds and is not offline)
+  // Determine if a session is "Active" right now (sent heartbeat in last 120 seconds and is not offline)
   const isSessionActive = (user: UserPresenceRow) => {
     if (user.status === 'offline') return false;
-    const diffMs = nowTime.getTime() - new Date(user.last_active_at).getTime();
-    return diffMs <= 60000; // 60 seconds heartbeat tolerance
+    const correctedNow = new Date(nowTime.getTime() + clockOffset);
+    const diffMs = correctedNow.getTime() - new Date(user.last_active_at).getTime();
+    return diffMs <= 120000; // 120 seconds heartbeat tolerance (more robust against network lag)
   };
 
-  // Filter users active in last 60s
+  // Filter users active in last 120s
   const activeUsers = users.filter((u) => isSessionActive(u));
   
   // Browsing users (online but not watching)
@@ -197,7 +218,8 @@ export default function UserAnalytics() {
 
   // Unique devices in last 24 hours
   const uniqueDevicesToday = users.filter((u) => {
-    const diffMs = nowTime.getTime() - new Date(u.last_active_at).getTime();
+    const correctedNow = new Date(nowTime.getTime() + clockOffset);
+    const diffMs = correctedNow.getTime() - new Date(u.last_active_at).getTime();
     return diffMs <= 86400000; // 24 hours
   }).length;
 
@@ -238,7 +260,9 @@ export default function UserAnalytics() {
 
   // Format elapsed time string
   const getElapsedString = (isoString: string) => {
-    const diffSec = Math.floor((nowTime.getTime() - new Date(isoString).getTime()) / 1000);
+    const correctedNow = new Date(nowTime.getTime() + clockOffset);
+    const diffSec = Math.floor((correctedNow.getTime() - new Date(isoString).getTime()) / 1000);
+    if (diffSec < -5) return 'Just now'; // Handle minor negative offsets
     if (diffSec < 10) return 'Just now';
     if (diffSec < 60) return `${diffSec}s ago`;
     const diffMin = Math.floor(diffSec / 60);
