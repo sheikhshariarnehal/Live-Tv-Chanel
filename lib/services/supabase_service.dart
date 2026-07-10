@@ -30,30 +30,73 @@ class SupabaseService {
   static const String _listColumns =
       'id, name, logo, category, country, language, is_live, is_trending, quality, sort_order, added_at, proxy, drm';
 
+  /// Fetches ALL channels using pagination to bypass the 1000-row PostgREST limit.
   Future<List<Channel>> getChannels() async {
-    final response = await _client
-        .from('channels')
-        .select()
-        .order('sort_order', ascending: true);
-    return (response as List).map((e) => Channel.fromJson(e)).toList();
+    const int batchSize = 1000;
+    int offset = 0;
+    final List<Channel> allChannels = [];
+
+    while (true) {
+      final response = await _client
+          .from('channels')
+          .select()
+          .order('sort_order', ascending: true)
+          .range(offset, offset + batchSize - 1);
+
+      final batch = (response as List).map((e) => Channel.fromJson(e)).toList();
+      allChannels.addAll(batch);
+
+      if (batch.length < batchSize) break; // Last page reached
+      offset += batchSize;
+    }
+
+    return allChannels;
   }
 
   Future<List<Channel>> getTrendingChannels() async {
-    final response = await _client
-        .from('channels')
-        .select(_listColumns)
-        .eq('is_trending', true)
-        .order('sort_order', ascending: true);
-    return (response as List).map((e) => Channel.fromJson(e)).toList();
+    const int batchSize = 1000;
+    int offset = 0;
+    final List<Channel> allChannels = [];
+
+    while (true) {
+      final response = await _client
+          .from('channels')
+          .select(_listColumns)
+          .eq('is_trending', true)
+          .order('sort_order', ascending: true)
+          .range(offset, offset + batchSize - 1);
+
+      final batch = (response as List).map((e) => Channel.fromJson(e)).toList();
+      allChannels.addAll(batch);
+
+      if (batch.length < batchSize) break;
+      offset += batchSize;
+    }
+
+    return allChannels;
   }
 
   Future<List<Channel>> getChannelsByCategory(String categoryId) async {
-    final response = await _client
-        .from('channels')
-        .select(_listColumns)
-        .eq('category', categoryId)
-        .order('sort_order', ascending: true);
-    return (response as List).map((e) => Channel.fromJson(e)).toList();
+    const int batchSize = 1000;
+    int offset = 0;
+    final List<Channel> allChannels = [];
+
+    while (true) {
+      final response = await _client
+          .from('channels')
+          .select(_listColumns)
+          .eq('category', categoryId)
+          .order('sort_order', ascending: true)
+          .range(offset, offset + batchSize - 1);
+
+      final batch = (response as List).map((e) => Channel.fromJson(e)).toList();
+      allChannels.addAll(batch);
+
+      if (batch.length < batchSize) break;
+      offset += batchSize;
+    }
+
+    return allChannels;
   }
 
   Future<Channel?> getChannel(String id) async {
