@@ -8,7 +8,9 @@ interface Category {
   id: string;
   name: string;
   icon: string | null;
+  icon_url: string | null;
   sort_order: number;
+  active: boolean;
 }
 
 interface CategoryManagerProps {
@@ -31,7 +33,9 @@ export default function CategoryManager({ adminToken, onRefreshStats }: Category
     id: '',
     name: '',
     icon: '',
-    sort_order: 0
+    icon_url: '',
+    sort_order: 0,
+    active: true
   });
 
   const [showAddForm, setShowAddForm] = useState(false);
@@ -76,14 +80,16 @@ export default function CategoryManager({ adminToken, onRefreshStats }: Category
       id: category.id,
       name: category.name,
       icon: category.icon || '',
-      sort_order: category.sort_order
+      icon_url: category.icon_url || '',
+      sort_order: category.sort_order,
+      active: category.active !== false
     });
     setShowAddForm(false);
   };
 
   const handleCancel = () => {
     setEditingId(null);
-    setFormData({ id: '', name: '', icon: '', sort_order: 0 });
+    setFormData({ id: '', name: '', icon: '', icon_url: '', sort_order: 0, active: true });
   };
 
   const handleSave = async (id: string) => {
@@ -98,7 +104,9 @@ export default function CategoryManager({ adminToken, onRefreshStats }: Category
         .update({
           name: formData.name,
           icon: formData.icon || null,
-          sort_order: Number(formData.sort_order)
+          icon_url: formData.icon_url || null,
+          sort_order: Number(formData.sort_order),
+          active: formData.active
         })
         .eq('id', id);
 
@@ -140,13 +148,15 @@ export default function CategoryManager({ adminToken, onRefreshStats }: Category
           id: cleanId,
           name: formData.name.trim(),
           icon: formData.icon.trim() || null,
-          sort_order: Number(formData.sort_order) || categories.length + 1
+          icon_url: formData.icon_url.trim() || null,
+          sort_order: Number(formData.sort_order) || categories.length + 1,
+          active: formData.active
         });
 
       if (insertErr) throw insertErr;
 
       showNotification('success', 'Category added successfully');
-      setFormData({ id: '', name: '', icon: '', sort_order: 0 });
+      setFormData({ id: '', name: '', icon: '', icon_url: '', sort_order: 0, active: true });
       setShowAddForm(false);
       fetchCategories();
       onRefreshStats();
@@ -265,6 +275,29 @@ export default function CategoryManager({ adminToken, onRefreshStats }: Category
                 className="w-full p-2.5 rounded-xl glass-input text-sm"
               />
             </div>
+            <div className="space-y-1 md:col-span-2">
+              <label className="text-xs font-semibold text-zinc-400">Icon Image URL</label>
+              <input
+                type="url"
+                placeholder="e.g. https://example.com/icons/sports.png"
+                value={formData.icon_url}
+                onChange={e => setFormData({ ...formData, icon_url: e.target.value })}
+                className="w-full p-2.5 rounded-xl glass-input text-sm"
+              />
+              <p className="text-[10px] text-zinc-500">Optional URL for category icon image (PNG, SVG, JPG).</p>
+            </div>
+            <div className="space-y-1 flex items-center gap-3 pt-5">
+              <input
+                type="checkbox"
+                id="active"
+                checked={formData.active}
+                onChange={e => setFormData({ ...formData, active: e.target.checked })}
+                className="w-4 h-4 rounded border-zinc-700 text-purple-600 focus:ring-purple-500 bg-zinc-900"
+              />
+              <label htmlFor="active" className="text-xs font-semibold text-zinc-400 cursor-pointer">
+                Is Active (Show in App)
+              </label>
+            </div>
           </div>
           <button
             type="submit"
@@ -304,6 +337,8 @@ export default function CategoryManager({ adminToken, onRefreshStats }: Category
                     <th className="py-3 px-4">ID/Slug</th>
                     <th className="py-3 px-4">Name</th>
                     <th className="py-3 px-4">Icon Identifier</th>
+                    <th className="py-3 px-4">Icon URL</th>
+                    <th className="py-3 px-4">Status</th>
                     <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -351,6 +386,39 @@ export default function CategoryManager({ adminToken, onRefreshStats }: Category
                             />
                           ) : (
                             <span className="text-zinc-500 font-mono text-xs">{category.icon || '—'}</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4">
+                          {isEditing ? (
+                            <input
+                              type="text"
+                              value={formData.icon_url}
+                              onChange={e => setFormData({ ...formData, icon_url: e.target.value })}
+                              className="w-full max-w-xs p-1.5 rounded bg-zinc-950 border border-zinc-800 text-xs text-white"
+                              placeholder="Image URL"
+                            />
+                          ) : (
+                            <span className="text-zinc-500 font-mono text-xs truncate max-w-[150px] block" title={category.icon_url || ''}>
+                              {category.icon_url || '—'}
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4">
+                          {isEditing ? (
+                            <input
+                              type="checkbox"
+                              checked={formData.active}
+                              onChange={e => setFormData({ ...formData, active: e.target.checked })}
+                              className="w-4 h-4 rounded border-zinc-700 text-purple-600 focus:ring-purple-500 bg-zinc-900"
+                            />
+                          ) : (
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
+                              category.active !== false 
+                                ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-900/50' 
+                                : 'bg-zinc-850 text-zinc-500 border border-zinc-700'
+                            }`}>
+                              {category.active !== false ? 'Active' : 'Inactive'}
+                            </span>
                           )}
                         </td>
                         <td className="py-3 px-4 text-right">
@@ -470,6 +538,41 @@ export default function CategoryManager({ adminToken, onRefreshStats }: Category
                           />
                         ) : (
                           <span className="font-mono text-zinc-400 bg-zinc-950/50 px-1.5 py-0.5 rounded border border-zinc-850">{category.icon || '—'}</span>
+                        )}
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <span className="text-zinc-500">Icon URL</span>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={formData.icon_url}
+                            onChange={e => setFormData({ ...formData, icon_url: e.target.value })}
+                            className="p-1.5 rounded bg-zinc-950 border border-zinc-800 text-xs text-white w-44"
+                            placeholder="Image URL"
+                          />
+                        ) : (
+                          <span className="font-mono text-zinc-400 bg-zinc-950/50 px-1.5 py-0.5 rounded border border-zinc-850 truncate max-w-[150px]" title={category.icon_url || ''}>{category.icon_url || '—'}</span>
+                        )}
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <span className="text-zinc-500">Status</span>
+                        {isEditing ? (
+                          <input
+                            type="checkbox"
+                            checked={formData.active}
+                            onChange={e => setFormData({ ...formData, active: e.target.checked })}
+                            className="w-4 h-4 rounded border-zinc-700 text-purple-600 bg-zinc-900"
+                          />
+                        ) : (
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
+                            category.active !== false 
+                              ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-900/50' 
+                              : 'bg-zinc-850 text-zinc-500 border border-zinc-700'
+                          }`}>
+                            {category.active !== false ? 'Active' : 'Inactive'}
+                          </span>
                         )}
                       </div>
 

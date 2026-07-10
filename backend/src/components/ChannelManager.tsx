@@ -33,6 +33,7 @@ interface Channel {
 interface Category {
   id: string;
   name: string;
+  active?: boolean;
 }
 
 interface ChannelManagerProps {
@@ -95,7 +96,7 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
       // Fetch Categories
       const { data: catData, error: catErr } = await supabaseAdmin
         .from('categories')
-        .select('id, name')
+        .select('id, name, active')
         .order('sort_order', { ascending: true });
 
       if (catErr) throw catErr;
@@ -523,7 +524,9 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
             >
               <option value="all">All Categories</option>
               {categories.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
+                <option key={c.id} value={c.id}>
+                  {c.name}{c.active === false ? ' (Inactive)' : ''}
+                </option>
               ))}
             </select>
           </div>
@@ -950,7 +953,9 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
                       >
                         <option value="">-- No Category --</option>
                         {categories.map(c => (
-                          <option key={c.id} value={c.id}>{c.name}</option>
+                          <option key={c.id} value={c.id}>
+                            {c.name}{c.active === false ? ' (Inactive)' : ''}
+                          </option>
                         ))}
                       </select>
                     </div>

@@ -147,6 +147,7 @@ class SupabaseService {
     final response = await _client
         .from('categories')
         .select()
+        .eq('active', true)
         .order('sort_order', ascending: true);
     return (response as List).map((e) => Category.fromJson(e)).toList();
   }
