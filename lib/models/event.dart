@@ -42,11 +42,20 @@ class SportEvent {
   });
 
   bool get isLive =>
-      status == 'live' ||
-      (status == 'upcoming' && DateTime.now().isAfter(startTime));
+      status.toLowerCase() == 'live' ||
+      ((status.toLowerCase() == 'upcoming' ||
+              status.toLowerCase().contains('upcoming')) &&
+          DateTime.now().isAfter(startTime));
   bool get isUpcoming =>
-      status == 'upcoming' && DateTime.now().isBefore(startTime);
-  bool get isFinished => status == 'finished';
+      (status.toLowerCase() == 'upcoming' ||
+          status.toLowerCase().contains('upcoming') ||
+          (status.toLowerCase() != 'live' &&
+              status.toLowerCase() != 'finished' &&
+              status.toLowerCase() != 'completed')) &&
+      DateTime.now().isBefore(startTime);
+  bool get isFinished =>
+      status.toLowerCase() == 'finished' ||
+      status.toLowerCase() == 'completed';
 
   Duration get timeUntilStart => startTime.difference(DateTime.now());
   Duration get elapsedTime => DateTime.now().difference(startTime);
