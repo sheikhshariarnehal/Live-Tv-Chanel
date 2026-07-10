@@ -146,19 +146,19 @@ async function fetchArticles() {
     {
       title: 'শরিফুলের ৬ উইকেটের পরও হোয়াইটওয়াশ থেকে বাঁচল অজিরা',
       url: '#',
-      sourceName: 'Vibestream Sports',
+      sourceName: 'GoPlay Sports',
       publishedAt: new Date().toISOString()
     },
     {
       title: 'জয় দিয়ে বিশ্বকাপ শুরু বাঘিনীদের',
       url: '#',
-      sourceName: 'Vibestream Sports',
+      sourceName: 'GoPlay Sports',
       publishedAt: new Date().toISOString()
     },
     {
       title: 'নাটকীয়ভাবে ম্যাচে ফিরেও অস্ট্রেলিয়াকে ধবলধোলাই করা হলো না বাংলাদেশের',
       url: '#',
-      sourceName: 'Vibestream Sports',
+      sourceName: 'GoPlay Sports',
       publishedAt: new Date().toISOString()
     }
   ];

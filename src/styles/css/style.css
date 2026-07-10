@@ -32,8 +32,15 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   overflow: hidden;
-  /* Prevent the browser's pull-to-refresh from misfiring on the root */
+  /* Prevent the browser's pull-to-refresh from misfiring on desktop */
   overscroll-behavior-y: none;
+}
+
+/* Re-enable native browser pull-to-refresh on mobile */
+@media (max-width: 768px) {
+  body {
+    overscroll-behavior-y: auto;
+  }
 }
 
 /* ===== Portal Page (Directory) Layout ===== */
@@ -71,8 +78,15 @@ body.player-layout {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  /* Disable pull-to-refresh on the player page — scrollable areas handle their own overscroll */
+  /* Disable pull-to-refresh on desktop player page */
   overscroll-behavior-y: none;
+}
+
+/* Re-enable native browser pull-to-refresh on mobile for player layout */
+@media (max-width: 768px) {
+  body.player-layout {
+    overscroll-behavior-y: auto;
+  }
 }
 
 body.player-layout .main-container {

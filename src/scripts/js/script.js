@@ -1081,8 +1081,8 @@ async function playChannel(button, url, channelName, fallbackUrl = null) {
     const nameLower = channel.name.toLowerCase();
     const hasLiveWord = nameLower.endsWith('live') || nameLower.includes(' live ') || nameLower.includes(' live(') || nameLower.includes(' live');
     const defaultSeoTitle = hasLiveWord 
-      ? `Watch ${channel.name} | Vibestream` 
-      : `Watch ${channel.name} Live | Vibestream`;
+      ? `Watch ${channel.name} | GoPlay` 
+      : `Watch ${channel.name} Live | GoPlay`;
     const seoTitle = channel.seo?.title || defaultSeoTitle;
     document.title = seoTitle;
   }

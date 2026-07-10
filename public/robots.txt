@@ -1,4 +1,6 @@
 User-agent: *
+Disallow: /admin/
+Disallow: /api/
 Allow: /
 
-Sitemap: https://vibestream.app/sitemap.xml
+Sitemap: http://goplay.pro.bd/sitemap.xml

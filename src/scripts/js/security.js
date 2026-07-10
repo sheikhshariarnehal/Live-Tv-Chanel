@@ -1,5 +1,5 @@
 /**
- * Vibestream Client-Side Security Script
+ * GoPlay Client-Side Security Script
  * Restricts access to Developer Tools (DevTools) in production environments
  * to protect streaming content and application logic.
  */
@@ -23,11 +23,11 @@
   const shouldRestrict = (isProd && !isLocal) || testSecurity;
 
   if (!shouldRestrict) {
-    console.log('[Vibestream Security] Development mode: Security restrictions disabled.');
+    console.log('[GoPlay Security] Development mode: Security restrictions disabled.');
     return;
   }
 
-  console.log('[Vibestream Security] Production mode: Security restrictions active.');
+  console.log('[GoPlay Security] Production mode: Security restrictions active.');
 
   // 2. Prevent Right-Click Context Menu
   document.addEventListener('contextmenu', (e) => {
@@ -85,7 +85,7 @@
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Access Denied | Vibestream Security</title>
+        <title>Access Denied | GoPlay Security</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
