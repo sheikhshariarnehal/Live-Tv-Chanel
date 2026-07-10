@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/cards/channel_card.dart';
@@ -467,6 +469,7 @@ class _CategoryFilterBar extends ConsumerWidget {
                   label: cat.name,
                   count: catCounts[cat.id] ?? 0,
                   isSelected: selectedCategory == cat.id,
+                  iconUrl: cat.iconUrl,
                   onTap: () {
                     ref.read(selectedCategoryProvider.notifier).select(cat.id);
                     onCategorySelected();
@@ -592,12 +595,14 @@ class _CategoryChip extends StatefulWidget {
   final int count;
   final bool isSelected;
   final VoidCallback onTap;
+  final String? iconUrl;
 
   const _CategoryChip({
     required this.label,
     required this.count,
     required this.isSelected,
     required this.onTap,
+    this.iconUrl,
   });
 
   @override
@@ -715,6 +720,44 @@ class _CategoryChipState extends State<_CategoryChip> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (widget.iconUrl != null && widget.iconUrl!.isNotEmpty) ...[
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: widget.iconUrl!.toLowerCase().endsWith('.svg')
+                        ? SvgPicture.network(
+                            widget.iconUrl!,
+                            width: 16,
+                            height: 16,
+                            fit: BoxFit.contain,
+                            placeholderBuilder: (context) => Container(
+                              width: 16,
+                              height: 16,
+                              color: Colors.white10,
+                            ),
+                          )
+                        : CachedNetworkImage(
+                            imageUrl: widget.iconUrl!,
+                            width: 16,
+                            height: 16,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              width: 16,
+                              height: 16,
+                              color: Colors.white10,
+                            ),
+                            errorWidget: (context, url, error) => const Icon(
+                              Icons.category_outlined,
+                              size: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+              ],
               Text(
                 widget.label,
                 style: widget.isSelected
