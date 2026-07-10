@@ -1,12 +1,10 @@
 {
-    "latestVersion": "1.3.1",
+    "latestVersion": "1.3.3",
     "minimumVersion": "1.0.0",
     "forceUpdate": false,
-    "apkUrl": "https://cdn.ntechbd.app/goplay-1.3.1.apk",
+    "apkUrl": "https://cdn.ntechbd.app/goplay-1.3.3.apk",
     "releaseNotes": [
-        "Updated Player UI",
-        "Performance optimizations",
-        "Bug fixes and visual improvements"
+        "Update to watch new live tv channels"
     ],
-    "publishedAt": "2026-07-09T19:25:00+06:00"
+    "publishedAt": "2026-07-09 15:15:00+06:00"
 }

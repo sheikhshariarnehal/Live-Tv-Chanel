@@ -680,14 +680,27 @@ export async function runChannelScan(): Promise<{
   try {
     console.log('Starting full channel health monitoring scan...');
 
-    // Fetch all active channels
-    const { data: channels, error: chErr } = await supabaseAdmin
-      .from('channels')
-      .select('*')
-      .order('sort_order', { ascending: true });
+    // Fetch all active channels using pagination (bypass 1000-row PostgREST limit)
+    const BATCH_SIZE = 1000;
+    let offset = 0;
+    const channels: any[] = [];
 
-    if (chErr) throw chErr;
-    if (!channels || channels.length === 0) {
+    while (true) {
+      const { data: batch, error: chErr } = await supabaseAdmin
+        .from('channels')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .range(offset, offset + BATCH_SIZE - 1);
+
+      if (chErr) throw chErr;
+      if (!batch || batch.length === 0) break;
+      channels.push(...batch);
+
+      if (batch.length < BATCH_SIZE) break;
+      offset += BATCH_SIZE;
+    }
+
+    if (channels.length === 0) {
       console.log('No channels found to scan.');
       global.isScanningNow = false;
       return { success: true, total: 0, working: 0, offline: 0, slow: 0, durationMs: 0 };

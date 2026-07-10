@@ -57,14 +57,27 @@ export default function PlaylistManager({ adminToken, onRefreshStats }: Playlist
       if (plErr) throw plErr;
       setPlaylists(plData || []);
 
-      // Fetch all Channels
-      const { data: chData, error: chErr } = await supabaseAdmin
-        .from('channels')
-        .select('id, name')
-        .order('name', { ascending: true });
+      // Fetch all Channels using pagination (bypass 1000-row PostgREST limit)
+      const BATCH_SIZE = 1000;
+      let offset = 0;
+      const allChannels: any[] = [];
 
-      if (chErr) throw chErr;
-      setChannels(chData || []);
+      while (true) {
+        const { data: batch, error: chErr } = await supabaseAdmin
+          .from('channels')
+          .select('id, name')
+          .order('name', { ascending: true })
+          .range(offset, offset + BATCH_SIZE - 1);
+
+        if (chErr) throw chErr;
+        if (!batch || batch.length === 0) break;
+        allChannels.push(...batch);
+
+        if (batch.length < BATCH_SIZE) break;
+        offset += BATCH_SIZE;
+      }
+
+      setChannels(allChannels);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch playlists data');
     } finally {

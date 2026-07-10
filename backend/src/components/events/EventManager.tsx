@@ -53,18 +53,36 @@ export default function EventManager({ adminToken, onRefreshStats }: EventManage
       setLoading(true);
       setError(null);
 
-      const [evRes, chRes, plRes] = await Promise.all([
+      const [evRes, plRes] = await Promise.all([
         supabaseAdmin.from('events').select('*').order('start_time', { ascending: true }),
-        supabaseAdmin.from('channels').select('id, name, category').order('name', { ascending: true }),
         supabaseAdmin.from('playlists').select('*').order('name', { ascending: true }),
       ]);
 
       if (evRes.error) throw evRes.error;
-      if (chRes.error) throw chRes.error;
       if (plRes.error) throw plRes.error;
 
+      // Fetch all Channels using pagination (bypass 1000-row PostgREST limit)
+      const BATCH_SIZE = 1000;
+      let offset = 0;
+      const allChannels: any[] = [];
+
+      while (true) {
+        const { data: batch, error: chErr } = await supabaseAdmin
+          .from('channels')
+          .select('id, name, category')
+          .order('name', { ascending: true })
+          .range(offset, offset + BATCH_SIZE - 1);
+
+        if (chErr) throw chErr;
+        if (!batch || batch.length === 0) break;
+        allChannels.push(...batch);
+
+        if (batch.length < BATCH_SIZE) break;
+        offset += BATCH_SIZE;
+      }
+
       setEvents(evRes.data || []);
-      setChannels(chRes.data || []);
+      setChannels(allChannels);
       setPlaylists(plRes.data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch data');

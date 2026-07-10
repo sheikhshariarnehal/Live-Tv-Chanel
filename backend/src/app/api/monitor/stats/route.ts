@@ -19,13 +19,25 @@ export async function GET(request: Request) {
       await initializeScheduler();
     }
 
-    // 1. Fetch channel list
-    const { data: channels, error: chErr } = await supabaseAdmin
-      .from('channels')
-      .select('*')
-      .order('sort_order', { ascending: true });
-    
-    if (chErr) throw chErr;
+    // 1. Fetch all channels using pagination (bypass 1000-row PostgREST limit)
+    const BATCH_SIZE = 1000;
+    let offset = 0;
+    const channels: any[] = [];
+
+    while (true) {
+      const { data: batch, error: chErr } = await supabaseAdmin
+        .from('channels')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .range(offset, offset + BATCH_SIZE - 1);
+
+      if (chErr) throw chErr;
+      if (!batch || batch.length === 0) break;
+      channels.push(...batch);
+
+      if (batch.length < BATCH_SIZE) break;
+      offset += BATCH_SIZE;
+    }
 
     // 2. Fetch categories
     const { data: categories, error: catErr } = await supabaseAdmin

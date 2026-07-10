@@ -101,20 +101,34 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
       if (catErr) throw catErr;
       setCategories(catData || []);
 
-      // Fetch Channels
-      const { data: chData, error: chErr } = await supabaseAdmin
-        .from('channels')
-        .select('*')
-        .order('sort_order', { ascending: true });
+      // Fetch ALL Channels using pagination (bypass 1000-row PostgREST limit)
+      const BATCH_SIZE = 1000;
+      let offset = 0;
+      const allChannels: Channel[] = [];
 
-      if (chErr) throw chErr;
-      setChannels(chData || []);
+      while (true) {
+        const { data: chData, error: chErr } = await supabaseAdmin
+          .from('channels')
+          .select('*')
+          .order('sort_order', { ascending: true })
+          .range(offset, offset + BATCH_SIZE - 1);
+
+        if (chErr) throw chErr;
+        const batch = chData || [];
+        allChannels.push(...batch);
+
+        if (batch.length < BATCH_SIZE) break; // Last page reached
+        offset += BATCH_SIZE;
+      }
+
+      setChannels(allChannels);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch channels data');
     } finally {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     fetchData();
