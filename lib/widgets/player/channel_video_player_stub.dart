@@ -94,7 +94,21 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
 
   static const _pipChannel = MethodChannel('com.goplay/pip');
 
-  // Pre-cached gradient decorations — allocated once, not per build().
+  // ─── Auto-skip & watchdog state ────────────────────────────────
+
+  /// Buffering watchdog: if stuck in buffering for this long with no
+  /// position progress, we treat it as a stalled stream.
+  static const Duration _bufferingWatchdogTimeout = Duration(seconds: 15);
+
+  Timer? _bufferingWatchdog;
+
+  /// Animated status message shown at bottom of player ("Switching channel…").
+  String _autoStatusMessage = '';
+  bool _showAutoStatus = false;
+  Timer? _statusHideTimer;
+
+  // ─── Pre-cached gradient decorations — allocated once, not per build() ──
+
   static final _kGradientOverlayFS = BoxDecoration(
     gradient: LinearGradient(
       begin: Alignment.bottomCenter,
@@ -117,6 +131,8 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
       ],
     ),
   );
+
+  // ─── Creation params ─────────────────────────────────────────────
 
   Map<String, dynamic> _getCreationParams() {
     if (_cachedParams != null && _cachedChannelId == widget.channel.id) {
@@ -142,7 +158,6 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
       'headers': headers,
     };
 
-    // Add DRM configuration if present
     if (widget.channel.hasDrm) {
       final drm = widget.channel.drm!;
       params['drm_type'] = drm.type.name;
@@ -150,9 +165,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
       if (drm.isClearKey) {
         if (drm.kid != null) params['drm_kid'] = drm.kid;
         if (drm.key != null) params['drm_key'] = drm.key;
-        if (drm.clearKeys != null) {
-          params['drm_clearkeys'] = drm.clearKeys;
-        }
+        if (drm.clearKeys != null) params['drm_clearkeys'] = drm.clearKeys;
       } else if (drm.isWidevine) {
         if (drm.licenseUrl != null) params['drm_license_url'] = drm.licenseUrl;
         if (drm.licenseHeaders != null) params['drm_license_headers'] = drm.licenseHeaders;
@@ -162,15 +175,18 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
     return params;
   }
 
+  // ─── Platform view lifecycle ─────────────────────────────────────
+
   void _onPlatformViewCreated(int id) {
     _methodChannel = MethodChannel('com.goplay/native_player_$id');
     _methodChannel!.setMethodCallHandler(_handleMethodCall);
 
-    // Trigger Toffee IP authorization if needed
     if (widget.channel.streamUrl.contains('otte.cache.aiv-cdn.net')) {
       LocalProxy.startKkx4Auth();
     }
   }
+
+  // ─── Method call handler ─────────────────────────────────────────
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
     if (!mounted) return;
@@ -183,7 +199,14 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
         final nowBuffering = state == 'buffering';
         final isReady = state == 'ready' || state == 'playing';
 
-        // Only rebuild if state actually changed
+        if (nowBuffering && !_isBuffering) {
+          // Buffering just started — start watchdog timer
+          _startBufferingWatchdog();
+        } else if (!nowBuffering) {
+          // Playback resumed or ready — cancel watchdog
+          _cancelBufferingWatchdog();
+        }
+
         if (_isPlaying != isPlaying || _isBuffering != nowBuffering ||
             (isReady && (_hasError || _errorMessage != null))) {
           setState(() {
@@ -198,6 +221,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
 
         if (isPlaying) {
           _startProgressTimer();
+          _hideAutoStatus();
         } else {
           _stopProgressTimer();
         }
@@ -208,20 +232,94 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
         final args = Map<String, dynamic>.from(call.arguments as Map);
         final message = args['message'] as String? ?? 'Unknown playback error';
         debugPrint('NativePlayer error: $message');
-
-        setState(() {
-          _hasError = true;
-          _errorMessage = message;
-          _isBuffering = false;
-        });
         _stopProgressTimer();
+        _cancelBufferingWatchdog();
+        _handleStreamFailure(message);
         break;
     }
   }
 
+  // ─── Auto-skip logic ─────────────────────────────────────────────
+
+  /// Central handler called when a stream fails (error or stall watchdog).
+  void _handleStreamFailure(String? reason) {
+    if (!mounted) return;
+    _cancelBufferingWatchdog();
+    _attemptAutoSkip(reason);
+  }
+
+  /// Tries next channel, falls back to previous, or shows static error.
+  void _attemptAutoSkip(String? reason) {
+    if (!mounted) return;
+
+    final hasNext = widget.onNextChannel != null;
+    final hasPrev = widget.onPreviousChannel != null;
+
+    if (hasNext || hasPrev) {
+      _showAutoStatusMessage('Switching to next channel…');
+      _hideAutoStatus();
+      if (hasNext) {
+        widget.onNextChannel!();
+      } else {
+        widget.onPreviousChannel!();
+      }
+    } else {
+      // No adjacent channels — show static error
+      _hideAutoStatus();
+      setState(() {
+        _hasError = true;
+        _errorMessage = reason ?? 'Unable to play this stream';
+        _isBuffering = false;
+      });
+    }
+  }
+
+  // ─── Buffering watchdog ──────────────────────────────────────────
+
+  void _startBufferingWatchdog() {
+    _bufferingWatchdog?.cancel();
+    _bufferingWatchdog = Timer(_bufferingWatchdogTimeout, () {
+      if (!mounted) return;
+      // Only trigger if we're still stuck buffering with no progress
+      if (_isBuffering && !_isPlaying) {
+        debugPrint(
+          'NativePlayer watchdog: stream stalled after '
+          '${_bufferingWatchdogTimeout.inSeconds}s — triggering recovery',
+        );
+        _handleStreamFailure('Stream stalled (no data received)');
+      }
+    });
+  }
+
+  void _cancelBufferingWatchdog() {
+    _bufferingWatchdog?.cancel();
+    _bufferingWatchdog = null;
+  }
+
+  // ─── Auto-status message overlay ────────────────────────────────
+
+  void _showAutoStatusMessage(String message) {
+    _statusHideTimer?.cancel();
+    if (!mounted) return;
+    setState(() {
+      _autoStatusMessage = message;
+      _showAutoStatus = true;
+    });
+    // Auto-hide after 5s if not replaced
+    _statusHideTimer = Timer(const Duration(seconds: 5), _hideAutoStatus);
+  }
+
+  void _hideAutoStatus() {
+    _statusHideTimer?.cancel();
+    if (mounted && _showAutoStatus) {
+      setState(() => _showAutoStatus = false);
+    }
+  }
+
+  // ─── Progress timer ──────────────────────────────────────────────
+
   void _startProgressTimer() {
     _progressTimer?.cancel();
-    // 500 ms is sufficient for IPTV/live streams and halves MethodChannel overhead
     _progressTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
       if (mounted && _isPlaying) {
         _updateProgress();
@@ -244,12 +342,10 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
         final newBuf = Duration(milliseconds: (state['bufferedPosition'] as int? ?? 0));
 
         // Skip rebuild when controls are hidden AND position delta is <2s
-        // (the seek bar is invisible, so no visual update needed)
         if (!widget.showControls &&
             newPlaying == _isPlaying &&
             (newPos - _position).abs() < const Duration(seconds: 2) &&
             newDur == _duration) {
-          // Still update internal state for when controls reappear
           _isPlaying = newPlaying;
           _position = newPos;
           _duration = newDur;
@@ -275,6 +371,29 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
     } catch (e) {
       debugPrint('Error getting player state: $e');
     }
+  }
+
+  // ─── Playback controls ───────────────────────────────────────────
+
+  void _retryPlaybackInternal() {
+    _cachedParams = null;
+    if (!mounted) return;
+    setState(() {
+      _hasError = false;
+      _errorMessage = null;
+      _isBuffering = true;
+      _position = Duration.zero;
+      _duration = Duration.zero;
+      _bufferedPosition = Duration.zero;
+    });
+    _methodChannel?.invokeMethod('play', _getCreationParams());
+  }
+
+  /// Manual retry.
+  void _retryPlayback() {
+    _cancelBufferingWatchdog();
+    _hideAutoStatus();
+    _retryPlaybackInternal();
   }
 
   void _seekTo(Duration position) {
@@ -359,7 +478,9 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
       if (lang != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(lang == "Default" || lang == "None" ? 'Audio Track: Default' : 'Audio Track Language: $lang'),
+            content: Text(lang == "Default" || lang == "None"
+                ? 'Audio Track: Default'
+                : 'Audio Track Language: $lang'),
             duration: const Duration(milliseconds: 800),
           ),
         );
@@ -395,8 +516,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
 
   void _showQualityMenu(TapDownDetails details) async {
     final position = details.globalPosition;
-    
-    // Fetch dynamic qualities from ExoPlayer
+
     List<int> qualities = [];
     try {
       if (_methodChannel != null) {
@@ -409,7 +529,6 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
       debugPrint('Error getting video qualities: $e');
     }
 
-    // Fallback list of default qualities if none are auto-detected (e.g. static HLS metadata or single stream)
     if (qualities.isEmpty) {
       qualities = [1080, 720, 480, 360];
     }
@@ -458,7 +577,6 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
       }),
     ];
 
-    // Capture scaffold messenger before showMenu future resolves
     final messenger = ScaffoldMessenger.of(context);
 
     final selected = await showMenu<String>(
@@ -503,18 +621,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
     return '${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
   }
 
-  void _retryPlayback() {
-    _cachedParams = null; // Invalidate cache on retry
-    setState(() {
-      _hasError = false;
-      _errorMessage = null;
-      _isBuffering = true;
-      _position = Duration.zero;
-      _duration = Duration.zero;
-      _bufferedPosition = Duration.zero;
-    });
-    _methodChannel?.invokeMethod('play', _getCreationParams());
-  }
+  // ─── Widget lifecycle ────────────────────────────────────────────
 
   @override
   void didUpdateWidget(ChannelVideoPlayerNative oldWidget) {
@@ -525,12 +632,14 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
       if (oldWidget.channel.streamUrl.contains('otte.cache.aiv-cdn.net')) {
         LocalProxy.stopKkx4Auth();
       }
-      // Start new Toffee auth timer if needed
       if (widget.channel.streamUrl.contains('otte.cache.aiv-cdn.net')) {
         LocalProxy.startKkx4Auth();
       }
 
-      _cachedParams = null; // Invalidate on channel switch
+      // Reset ALL recovery state for the new channel
+      _cancelBufferingWatchdog();
+      _hideAutoStatus();
+      _cachedParams = null;
 
       setState(() {
         _hasError = false;
@@ -548,12 +657,16 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
   @override
   void dispose() {
     _stopProgressTimer();
+    _cancelBufferingWatchdog();
+    _statusHideTimer?.cancel();
     if (widget.channel.streamUrl.contains('otte.cache.aiv-cdn.net')) {
       LocalProxy.stopKkx4Auth();
     }
     _methodChannel?.setMethodCallHandler(null);
     super.dispose();
   }
+
+  // ─── Build ───────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -572,7 +685,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
               onPlatformViewCreated: _onPlatformViewCreated,
             ),
 
-            // Buffering indicator (isolated/standalone - when controls are hidden)
+            // Buffering indicator (isolated — when controls are hidden)
             if (_isBuffering && !widget.showControls)
               const Center(
                 child: RepaintBoundary(
@@ -607,9 +720,28 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                   child: AnimatedOpacity(
                     opacity: widget.showControls ? 1.0 : 0.0,
                     duration: const Duration(milliseconds: 200),
-                    child: _isLocked 
-                        ? _buildLockedControls() 
+                    child: _isLocked
+                        ? _buildLockedControls()
                         : _buildUnlockedControls(),
+                  ),
+                ),
+              ),
+            ),
+
+            // ── Auto-status overlay (retry / channel-skip feedback) ──
+            // Rendered outside the IgnorePointer so it's always visible.
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: widget.isFullscreen ? 80 : 56,
+              child: IgnorePointer(
+                child: Center(
+                  child: AnimatedOpacity(
+                    opacity: _showAutoStatus ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 300),
+                    child: _showAutoStatus
+                        ? _AutoStatusPill(message: _autoStatusMessage)
+                        : const SizedBox.shrink(),
                   ),
                 ),
               ),
@@ -619,6 +751,8 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
       ),
     );
   }
+
+  // ─── Locked controls ─────────────────────────────────────────────
 
   Widget _buildLockedControls() {
     return Stack(
@@ -637,7 +771,9 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
               decoration: const BoxDecoration(
                 color: Colors.black54,
                 shape: BoxShape.circle,
-                border: Border.fromBorderSide(BorderSide(color: Colors.white30, width: 1.0)),
+                border: Border.fromBorderSide(
+                  BorderSide(color: Colors.white30, width: 1.0),
+                ),
               ),
               child: const Icon(
                 Icons.lock_outline,
@@ -651,10 +787,12 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
     );
   }
 
+  // ─── Unlocked controls ───────────────────────────────────────────
+
   Widget _buildUnlockedControls() {
     return Stack(
       children: [
-        // Dark gradient overlay — pre-cached decorations (avoid Color.withAlpha per build)
+        // Dark gradient overlay — pre-cached decorations
         Positioned.fill(
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
@@ -723,7 +861,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Seek Bar / Timeline — isolated from time-text repaints
+                  // Seek Bar / Timeline
                   RepaintBoundary(
                     child: PlayerProgressBar(
                       position: _position,
@@ -756,7 +894,6 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
 
                         const Spacer(),
 
-                        // Lock and right controls
                         if (widget.isFullscreen)
                           _buildFullscreenRightControls()
                         else
@@ -778,7 +915,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // 2. Aspect Ratio Button
+        // Aspect Ratio Button
         IconButton(
           onPressed: _toggleAspectRatio,
           icon: const Icon(Icons.fit_screen, color: Colors.white),
@@ -787,7 +924,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
           constraints: const BoxConstraints(),
           tooltip: _aspectLabels[_aspectRatioIndex],
         ),
-        // 4. Volume Button
+        // Volume Button
         IconButton(
           onPressed: _toggleMute,
           icon: Icon(
@@ -800,7 +937,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
           padding: const EdgeInsets.symmetric(horizontal: 6),
           constraints: const BoxConstraints(),
         ),
-        // 5. Lock Button
+        // Lock Button
         IconButton(
           onPressed: () {
             setState(() {
@@ -812,7 +949,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
           padding: const EdgeInsets.symmetric(horizontal: 6),
           constraints: const BoxConstraints(),
         ),
-        // 7. PiP Button
+        // PiP Button
         IconButton(
           onPressed: _enterPiP,
           icon: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
@@ -820,7 +957,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
           padding: const EdgeInsets.symmetric(horizontal: 6),
           constraints: const BoxConstraints(),
         ),
-        // 9. Settings / Quality Button
+        // Settings / Quality Button
         GestureDetector(
           onTapDown: (details) => _showQualityMenu(details),
           child: const Padding(
@@ -832,7 +969,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
             ),
           ),
         ),
-        // 11. Fullscreen Toggle Button
+        // Fullscreen Toggle Button
         if (widget.onFullscreenToggle != null)
           IconButton(
             onPressed: widget.onFullscreenToggle,
@@ -902,8 +1039,13 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
     );
   }
 
+  // ─── Error widget (upgraded with Next Channel button) ───────────
+
   Widget _buildErrorWidget() {
     final isDrm = widget.channel.hasDrm;
+    final hasNext = widget.onNextChannel != null;
+    final hasPrev = widget.onPreviousChannel != null;
+
     return ColoredBox(
       color: Colors.black,
       child: SizedBox.expand(
@@ -912,35 +1054,74 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                isDrm ? Icons.lock_outline : Icons.error_outline,
+                isDrm ? Icons.lock_outline : Icons.signal_wifi_statusbar_connected_no_internet_4_rounded,
                 color: isDrm ? Colors.orange : Colors.redAccent,
-                size: 44,
+                size: 48,
               ),
               const SizedBox(height: 14),
               Text(
-                isDrm ? 'DRM Protected Content' : 'Playback Error',
-                style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+                isDrm ? 'DRM Protected Content' : 'Stream Unavailable',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 4),
+              Text(
+                widget.channel.name,
+                style: const TextStyle(
+                  color: Colors.white38,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              const SizedBox(height: 8),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Text(
                   _errorMessage ?? 'Unable to play this stream',
-                  style: const TextStyle(color: Colors.white60, fontSize: 12),
+                  style: const TextStyle(color: Colors.white54, fontSize: 12),
                   textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(height: 14),
-              TextButton.icon(
-                onPressed: _retryPlayback,
-                icon: const Icon(Icons.refresh, size: 16),
-                label: const Text('Retry'),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.orange.shade800,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
+              const SizedBox(height: 20),
+              // Action buttons row
+              Wrap(
+                spacing: 10,
+                runSpacing: 8,
+                alignment: WrapAlignment.center,
+                children: [
+                  // Retry button
+                  _ErrorActionButton(
+                    icon: Icons.refresh_rounded,
+                    label: 'Retry',
+                    onTap: _retryPlayback,
+                    isPrimary: true,
+                  ),
+                  // Next Channel button
+                  if (hasNext)
+                    _ErrorActionButton(
+                      icon: Icons.skip_next_rounded,
+                      label: 'Next Channel',
+                      onTap: () {
+                        widget.onNextChannel!();
+                      },
+                      isPrimary: false,
+                    ),
+                  // Previous Channel button (fallback if no next)
+                  if (!hasNext && hasPrev)
+                    _ErrorActionButton(
+                      icon: Icons.skip_previous_rounded,
+                      label: 'Prev Channel',
+                      onTap: () {
+                        widget.onPreviousChannel!();
+                      },
+                      isPrimary: false,
+                    ),
+                ],
               ),
             ],
           ),
@@ -949,6 +1130,88 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
     );
   }
 }
+
+// ─── Auto Status Pill ────────────────────────────────────────────
+
+/// Animated pill toast shown when auto-retry or auto-skip is in progress.
+class _AutoStatusPill extends StatelessWidget {
+  final String message;
+  const _AutoStatusPill({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.black.withAlpha(200),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white24, width: 0.8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(
+            width: 12,
+            height: 12,
+            child: CircularProgressIndicator(
+              color: Colors.orangeAccent,
+              strokeWidth: 1.5,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            message,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Error Action Button ─────────────────────────────────────────
+
+class _ErrorActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool isPrimary;
+
+  const _ErrorActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    required this.isPrimary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: onTap,
+      icon: Icon(icon, size: 16),
+      label: Text(label),
+      style: TextButton.styleFrom(
+        foregroundColor: isPrimary ? Colors.white : Colors.white70,
+        backgroundColor: isPrimary
+            ? Colors.orange.shade800
+            : Colors.white.withAlpha(25),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: isPrimary
+              ? BorderSide.none
+              : const BorderSide(color: Colors.white24, width: 0.8),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Central Playback Controls ────────────────────────────────────
 
 /// Extracted central playback controls (prev, rewind, play/pause, forward, next)
 class _CentralControls extends StatelessWidget {
@@ -1051,6 +1314,8 @@ class _CentralControls extends StatelessWidget {
     );
   }
 }
+
+// ─── Progress Bar ─────────────────────────────────────────────────
 
 /// Custom Seek Bar ProgressBar with Buffer Indicator
 class PlayerProgressBar extends StatelessWidget {
@@ -1161,7 +1426,8 @@ class _ProgressBarPainter extends CustomPainter {
     // Buffered track
     if (_bufPct > 0) {
       canvas.drawRRect(
-        RRect.fromRectAndRadius(Rect.fromLTWH(0, y - h / 2, size.width * _bufPct, h), r),
+        RRect.fromRectAndRadius(
+            Rect.fromLTWH(0, y - h / 2, size.width * _bufPct, h), r),
         _paintBuf,
       );
     }
@@ -1169,7 +1435,8 @@ class _ProgressBarPainter extends CustomPainter {
     // Played track
     if (_posPct > 0) {
       canvas.drawRRect(
-        RRect.fromRectAndRadius(Rect.fromLTWH(0, y - h / 2, size.width * _posPct, h), r),
+        RRect.fromRectAndRadius(
+            Rect.fromLTWH(0, y - h / 2, size.width * _posPct, h), r),
         _paintAct,
       );
     }
