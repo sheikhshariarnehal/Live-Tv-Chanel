@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../models/channel.dart';
 import '../../services/local_proxy.dart';
+import '../../services/playback/playback_state.dart';
+import '../../services/playback/playback_state_machine.dart';
+import '../../services/playback/connectivity_service.dart';
+import '../../services/playback/playback_telemetry.dart';
 import 'channel_video_player.dart';
 
 Widget getChannelVideoPlayer({
@@ -94,18 +98,10 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
 
   static const _pipChannel = MethodChannel('com.goplay/pip');
 
-  // ─── Auto-skip & watchdog state ────────────────────────────────
+  // ─── Playback State Machine ────────────────────────────────────
 
-  /// Buffering watchdog: if stuck in buffering for this long with no
-  /// position progress, we treat it as a stalled stream.
-  static const Duration _bufferingWatchdogTimeout = Duration(seconds: 15);
-
-  Timer? _bufferingWatchdog;
-
-  /// Animated status message shown at bottom of player ("Switching channel…").
-  String _autoStatusMessage = '';
-  bool _showAutoStatus = false;
-  Timer? _statusHideTimer;
+  late final PlaybackStateMachine _stateMachine;
+  late final ConnectivityService _connectivityService;
 
   // ─── Pre-cached gradient decorations — allocated once, not per build() ──
 
@@ -199,14 +195,10 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
         final nowBuffering = state == 'buffering';
         final isReady = state == 'ready' || state == 'playing';
 
-        if (nowBuffering && !_isBuffering) {
-          // Buffering just started — start watchdog timer
-          _startBufferingWatchdog();
-        } else if (!nowBuffering) {
-          // Playback resumed or ready — cancel watchdog
-          _cancelBufferingWatchdog();
-        }
+        // Delegate to state machine for recovery logic
+        _stateMachine.handleNativeStateEvent(args);
 
+        // Update local UI state for controls rendering
         if (_isPlaying != isPlaying || _isBuffering != nowBuffering ||
             (isReady && (_hasError || _errorMessage != null))) {
           setState(() {
@@ -221,7 +213,6 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
 
         if (isPlaying) {
           _startProgressTimer();
-          _hideAutoStatus();
         } else {
           _stopProgressTimer();
         }
@@ -233,86 +224,70 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
         final message = args['message'] as String? ?? 'Unknown playback error';
         debugPrint('NativePlayer error: $message');
         _stopProgressTimer();
-        _cancelBufferingWatchdog();
-        _handleStreamFailure(message);
+
+        // Delegate to state machine — it will classify, retry, or skip
+        _stateMachine.handleError(args);
         break;
     }
   }
 
-  // ─── Auto-skip logic ─────────────────────────────────────────────
+  // ─── State Machine Listener ──────────────────────────────────────
 
-  /// Central handler called when a stream fails (error or stall watchdog).
-  void _handleStreamFailure(String? reason) {
+  void _onStateMachineChanged() {
     if (!mounted) return;
-    _cancelBufferingWatchdog();
-    _attemptAutoSkip(reason);
-  }
+    final smState = _stateMachine.state;
 
-  /// Tries next channel, falls back to previous, or shows static error.
-  void _attemptAutoSkip(String? reason) {
-    if (!mounted) return;
+    // Sync error state from state machine into widget state
+    switch (smState.phase) {
+      case PlaybackPhase.failed:
+        setState(() {
+          _hasError = true;
+          _errorMessage = smState.error?.userMessage ?? 'Unable to play this stream';
+          _isBuffering = false;
+        });
+        break;
 
-    final hasNext = widget.onNextChannel != null;
-    final hasPrev = widget.onPreviousChannel != null;
+      case PlaybackPhase.waitingForInternet:
+        setState(() {
+          _hasError = true;
+          _errorMessage = smState.error?.userMessage ?? 'No internet connection';
+          _isBuffering = false;
+        });
+        break;
 
-    if (hasNext || hasPrev) {
-      _showAutoStatusMessage('Switching to next channel…');
-      _hideAutoStatus();
-      if (hasNext) {
-        widget.onNextChannel!();
-      } else {
-        widget.onPreviousChannel!();
-      }
-    } else {
-      // No adjacent channels — show static error
-      _hideAutoStatus();
-      setState(() {
-        _hasError = true;
-        _errorMessage = reason ?? 'Unable to play this stream';
-        _isBuffering = false;
-      });
-    }
-  }
+      case PlaybackPhase.retrying:
+        // Show retrying state — not a hard error
+        setState(() {
+          _hasError = false;
+          _isBuffering = true;
+        });
+        break;
 
-  // ─── Buffering watchdog ──────────────────────────────────────────
+      case PlaybackPhase.skipping:
+        // Show skipping countdown — not a hard error
+        setState(() {
+          _hasError = false;
+          _isBuffering = false;
+        });
+        break;
 
-  void _startBufferingWatchdog() {
-    _bufferingWatchdog?.cancel();
-    _bufferingWatchdog = Timer(_bufferingWatchdogTimeout, () {
-      if (!mounted) return;
-      // Only trigger if we're still stuck buffering with no progress
-      if (_isBuffering && !_isPlaying) {
-        debugPrint(
-          'NativePlayer watchdog: stream stalled after '
-          '${_bufferingWatchdogTimeout.inSeconds}s — triggering recovery',
-        );
-        _handleStreamFailure('Stream stalled (no data received)');
-      }
-    });
-  }
+      case PlaybackPhase.preparing:
+        setState(() {
+          _hasError = false;
+          _errorMessage = null;
+          _isBuffering = true;
+        });
+        break;
 
-  void _cancelBufferingWatchdog() {
-    _bufferingWatchdog?.cancel();
-    _bufferingWatchdog = null;
-  }
+      case PlaybackPhase.playing:
+        setState(() {
+          _hasError = false;
+          _errorMessage = null;
+        });
+        break;
 
-  // ─── Auto-status message overlay ────────────────────────────────
-
-  void _showAutoStatusMessage(String message) {
-    _statusHideTimer?.cancel();
-    if (!mounted) return;
-    setState(() {
-      _autoStatusMessage = message;
-      _showAutoStatus = true;
-    });
-    // Auto-hide after 5s if not replaced
-    _statusHideTimer = Timer(const Duration(seconds: 5), _hideAutoStatus);
-  }
-
-  void _hideAutoStatus() {
-    _statusHideTimer?.cancel();
-    if (mounted && _showAutoStatus) {
-      setState(() => _showAutoStatus = false);
+      default:
+        break;
     }
   }
 
@@ -391,9 +366,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
 
   /// Manual retry.
   void _retryPlayback() {
-    _cancelBufferingWatchdog();
-    _hideAutoStatus();
-    _retryPlaybackInternal();
+    _stateMachine.manualRetry();
   }
 
   void _seekTo(Duration position) {
@@ -624,6 +597,51 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
   // ─── Widget lifecycle ────────────────────────────────────────────
 
   @override
+  void initState() {
+    super.initState();
+
+    // Initialize the connectivity service and state machine
+    _connectivityService = ConnectivityService();
+    _connectivityService.initialize();
+
+    _stateMachine = PlaybackStateMachine(
+      connectivityService: _connectivityService,
+      telemetry: PlaybackTelemetry(),
+    );
+
+    // Wire state machine callbacks
+    _stateMachine.onRetryPlayback = _retryPlaybackInternal;
+    _stateMachine.onSwitchChannel = (channelId) {
+      if (widget.onNextChannel != null || widget.onPreviousChannel != null) {
+        widget.onNextChannel?.call();
+      }
+    };
+    _stateMachine.onSkipRequest = () {
+      if (widget.onNextChannel != null) {
+        debugPrint('PlayerWidget: skipping to next channel (immediate skip)');
+        widget.onNextChannel!();
+      } else if (widget.onPreviousChannel != null) {
+        debugPrint('PlayerWidget: skipping to previous channel (immediate skip)');
+        widget.onPreviousChannel!();
+      } else {
+        debugPrint('PlayerWidget: no next/prev channel to skip to — showing error screen');
+        _stateMachine.forceFail(const ClassifiedError(
+          type: ErrorType.unknown,
+          strategy: RecoveryStrategy.showError,
+          rawMessage: 'No adjacent channels available to skip to.',
+          isRecoverable: false,
+        ));
+      }
+    };
+
+    // Listen for state machine changes
+    _stateMachine.addListener(_onStateMachineChanged);
+
+    // Tell the state machine about the initial channel
+    _stateMachine.playChannel(widget.channel);
+  }
+
+  @override
   void didUpdateWidget(ChannelVideoPlayerNative oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.channel.id != widget.channel.id ||
@@ -636,9 +654,9 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
         LocalProxy.startKkx4Auth();
       }
 
-      // Reset ALL recovery state for the new channel
-      _cancelBufferingWatchdog();
-      _hideAutoStatus();
+      // Tell state machine about the new channel
+      _stateMachine.playChannel(widget.channel);
+
       _cachedParams = null;
 
       setState(() {
@@ -657,8 +675,9 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
   @override
   void dispose() {
     _stopProgressTimer();
-    _cancelBufferingWatchdog();
-    _statusHideTimer?.cancel();
+    _stateMachine.removeListener(_onStateMachineChanged);
+    _stateMachine.dispose();
+    _connectivityService.dispose();
     if (widget.channel.streamUrl.contains('otte.cache.aiv-cdn.net')) {
       LocalProxy.stopKkx4Auth();
     }
@@ -728,22 +747,14 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
               ),
             ),
 
-            // ── Auto-status overlay (retry / channel-skip feedback) ──
+            // ── State machine status overlay (retrying / skipping / waiting) ──
             // Rendered outside the IgnorePointer so it's always visible.
             Positioned(
               left: 0,
               right: 0,
               bottom: widget.isFullscreen ? 80 : 56,
-              child: IgnorePointer(
-                child: Center(
-                  child: AnimatedOpacity(
-                    opacity: _showAutoStatus ? 1.0 : 0.0,
-                    duration: const Duration(milliseconds: 300),
-                    child: _showAutoStatus
-                        ? _AutoStatusPill(message: _autoStatusMessage)
-                        : const SizedBox.shrink(),
-                  ),
-                ),
+              child: Center(
+                child: _StateMachineOverlay(stateMachine: _stateMachine),
               ),
             ),
           ],
@@ -1039,12 +1050,40 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
     );
   }
 
-  // ─── Error widget (upgraded with Next Channel button) ───────────
+  // ─── Error widget (state-machine aware) ───────────────────────────
 
   Widget _buildErrorWidget() {
-    final isDrm = widget.channel.hasDrm;
+    final smState = _stateMachine.state;
+    final errorType = smState.error?.type;
+    final isDrm = errorType == ErrorType.drmFailure || widget.channel.hasDrm;
+    final isNoInternet = errorType == ErrorType.noInternet ||
+        smState.phase == PlaybackPhase.waitingForInternet;
+    final isGeoBlock = errorType == ErrorType.geoBlock;
     final hasNext = widget.onNextChannel != null;
     final hasPrev = widget.onPreviousChannel != null;
+
+    // Choose icon based on error type
+    IconData errorIcon;
+    Color iconColor;
+    String errorTitle;
+
+    if (isNoInternet) {
+      errorIcon = Icons.wifi_off_rounded;
+      iconColor = Colors.orange;
+      errorTitle = 'No Internet Connection';
+    } else if (isDrm) {
+      errorIcon = Icons.lock_outline;
+      iconColor = Colors.orange;
+      errorTitle = 'DRM Protected Content';
+    } else if (isGeoBlock) {
+      errorIcon = Icons.shield_outlined;
+      iconColor = Colors.redAccent;
+      errorTitle = 'Content Not Available';
+    } else {
+      errorIcon = Icons.signal_wifi_statusbar_connected_no_internet_4_rounded;
+      iconColor = Colors.redAccent;
+      errorTitle = 'Stream Unavailable';
+    }
 
     return ColoredBox(
       color: Colors.black,
@@ -1053,14 +1092,10 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                isDrm ? Icons.lock_outline : Icons.signal_wifi_statusbar_connected_no_internet_4_rounded,
-                color: isDrm ? Colors.orange : Colors.redAccent,
-                size: 48,
-              ),
+              Icon(errorIcon, color: iconColor, size: 48),
               const SizedBox(height: 14),
               Text(
-                isDrm ? 'DRM Protected Content' : 'Stream Unavailable',
+                errorTitle,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -1097,7 +1132,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                   // Retry button
                   _ErrorActionButton(
                     icon: Icons.refresh_rounded,
-                    label: 'Retry',
+                    label: isNoInternet ? 'Check Connection' : 'Retry',
                     onTap: _retryPlayback,
                     isPrimary: true,
                   ),
@@ -1131,47 +1166,6 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
   }
 }
 
-// ─── Auto Status Pill ────────────────────────────────────────────
-
-/// Animated pill toast shown when auto-retry or auto-skip is in progress.
-class _AutoStatusPill extends StatelessWidget {
-  final String message;
-  const _AutoStatusPill({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.black.withAlpha(200),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white24, width: 0.8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(
-            width: 12,
-            height: 12,
-            child: CircularProgressIndicator(
-              color: Colors.orangeAccent,
-              strokeWidth: 1.5,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            message,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12.5,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // ─── Error Action Button ─────────────────────────────────────────
 
@@ -1210,6 +1204,194 @@ class _ErrorActionButton extends StatelessWidget {
     );
   }
 }
+
+// ─── State Machine Status Overlay ─────────────────────────────────
+
+/// Shows contextual overlays based on the [PlaybackStateMachine] state:
+/// - Retrying: "Retrying (2/3)..."
+/// - Skipping: "Skipping in 5s... [Cancel] [Skip Now]"
+/// - Waiting for Internet: "Waiting for internet..."
+class _StateMachineOverlay extends StatelessWidget {
+  final PlaybackStateMachine stateMachine;
+
+  const _StateMachineOverlay({required this.stateMachine});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: stateMachine,
+      builder: (context, _) {
+        final state = stateMachine.state;
+
+        switch (state.phase) {
+          case PlaybackPhase.retrying:
+            return _StatusPill(
+              icon: Icons.refresh_rounded,
+              iconColor: Colors.orangeAccent,
+              message: 'Retrying (${state.retryAttempt}/${state.maxRetries})…',
+              showSpinner: true,
+            );
+
+          case PlaybackPhase.skipping:
+            return _SkipCountdownPill(
+              secondsRemaining: state.skipCountdown ?? 0,
+              onCancel: () => stateMachine.cancelSkip(),
+              onSkipNow: () => stateMachine.skipNow(),
+            );
+
+          case PlaybackPhase.waitingForInternet:
+            return const _StatusPill(
+              icon: Icons.wifi_off_rounded,
+              iconColor: Colors.orange,
+              message: 'Waiting for internet…',
+              showSpinner: true,
+            );
+
+          default:
+            return const SizedBox.shrink();
+        }
+      },
+    );
+  }
+}
+
+/// Simple status pill with icon/spinner + message.
+class _StatusPill extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String message;
+  final bool showSpinner;
+
+  const _StatusPill({
+    required this.icon,
+    required this.iconColor,
+    required this.message,
+    this.showSpinner = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.black.withAlpha(200),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white24, width: 0.8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (showSpinner)
+            const SizedBox(
+              width: 12,
+              height: 12,
+              child: CircularProgressIndicator(
+                color: Colors.orangeAccent,
+                strokeWidth: 1.5,
+              ),
+            )
+          else
+            Icon(icon, color: iconColor, size: 14),
+          const SizedBox(width: 8),
+          Text(
+            message,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Skip countdown pill with [Cancel] and [Skip Now] buttons.
+class _SkipCountdownPill extends StatelessWidget {
+  final int secondsRemaining;
+  final VoidCallback onCancel;
+  final VoidCallback onSkipNow;
+
+  const _SkipCountdownPill({
+    required this.secondsRemaining,
+    required this.onCancel,
+    required this.onSkipNow,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.black.withAlpha(210),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.orange.withAlpha(100), width: 0.8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(
+            width: 12,
+            height: 12,
+            child: CircularProgressIndicator(
+              color: Colors.orangeAccent,
+              strokeWidth: 1.5,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'Skipping in ${secondsRemaining}s',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(width: 12),
+          GestureDetector(
+            onTap: onCancel,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white38, width: 0.8),
+              ),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          GestureDetector(
+            onTap: onSkipNow,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade800,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Text(
+                'Skip Now',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 
 // ─── Central Playback Controls ────────────────────────────────────
 

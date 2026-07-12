@@ -489,7 +489,12 @@ class NativePlayerView(
 
                     methodChannel.invokeMethod("onError", mapOf(
                         "code" to error.errorCode,
-                        "message" to (error.message ?: "Unknown playback error")
+                        "message" to (error.message ?: "Unknown playback error"),
+                        "errorCodeName" to error.errorCodeName,
+                        "httpStatus" to extractHttpStatus(error),
+                        "isDrmError" to isDrmError,
+                        "causeName" to (error.cause?.javaClass?.simpleName ?: ""),
+                        "causeMessage" to (error.cause?.message ?: "")
                     ))
                 }
 
@@ -545,7 +550,10 @@ class NativePlayerView(
 
         methodChannel.invokeMethod("onStateChanged", mapOf(
             "state" to stateName,
-            "isPlaying" to playWhenReady
+            "isPlaying" to playWhenReady,
+            "bufferedPosition" to (exoPlayer.bufferedPosition),
+            "position" to (exoPlayer.currentPosition),
+            "duration" to (if (exoPlayer.duration == C.TIME_UNSET) 0L else exoPlayer.duration)
         ))
     }
 
@@ -662,6 +670,20 @@ class NativePlayerView(
         return ByteArray(cleanHex.length / 2) { i ->
             cleanHex.substring(i * 2, i * 2 + 2).toInt(16).toByte()
         }
+    }
+
+    /**
+     * Walk the cause chain to extract an HTTP response code if present.
+     */
+    private fun extractHttpStatus(error: PlaybackException): Int? {
+        var cause: Throwable? = error.cause
+        while (cause != null) {
+            if (cause is androidx.media3.datasource.HttpDataSource.InvalidResponseCodeException) {
+                return cause.responseCode
+            }
+            cause = cause.cause
+        }
+        return null
     }
 }
 
