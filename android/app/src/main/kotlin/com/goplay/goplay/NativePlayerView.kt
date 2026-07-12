@@ -1,6 +1,11 @@
 package com.goplay.goplay
 
 import android.content.Context
+import android.content.ContextWrapper
+import android.app.Activity
+import android.app.Application
+import android.os.Build
+import android.os.Bundle
 import android.net.Uri
 import android.util.Base64
 import android.util.Log
@@ -63,6 +68,7 @@ class NativePlayerView(
     private var player: ExoPlayer? = null
     private val methodChannel: MethodChannel
     private var fallbackStage = 0
+    private var lifecycleCallbacks: Application.ActivityLifecycleCallbacks? = null
 
     init {
         // Setup PlayerView
@@ -78,6 +84,47 @@ class NativePlayerView(
         methodChannel = MethodChannel(messenger, "$CHANNEL_PREFIX$viewId")
         methodChannel.setMethodCallHandler(this)
 
+        // Setup Activity Lifecycle monitoring to handle PiP dismissals / app background pause
+        val activity = getActivity(context)
+        if (activity != null) {
+            val app = activity.application
+            val callbacks = object : Application.ActivityLifecycleCallbacks {
+                override fun onActivityPaused(act: Activity) {
+                    if (act === activity) {
+                        // Pause player if app goes to background/paused AND is not in PiP mode
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            if (!act.isInPictureInPictureMode) {
+                                player?.pause()
+                            }
+                        } else {
+                            player?.pause()
+                        }
+                    }
+                }
+
+                override fun onActivityStopped(act: Activity) {
+                    if (act === activity) {
+                        // Pause player immediately on activity stop (which includes PiP close/dismissal)
+                        player?.pause()
+                    }
+                }
+
+                override fun onActivityDestroyed(act: Activity) {
+                    if (act === activity) {
+                        player?.release()
+                        player = null
+                    }
+                }
+
+                override fun onActivityCreated(act: Activity, savedInstanceState: Bundle?) {}
+                override fun onActivityStarted(act: Activity) {}
+                override fun onActivityResumed(act: Activity) {}
+                override fun onActivitySaveInstanceState(act: Activity, outState: Bundle) {}
+            }
+            lifecycleCallbacks = callbacks
+            app.registerActivityLifecycleCallbacks(callbacks)
+        }
+
         // If creation params were provided, initialize immediately
         if (creationParams != null) {
             val url = creationParams["url"] as? String
@@ -87,10 +134,24 @@ class NativePlayerView(
         }
     }
 
+    private fun getActivity(context: Context): Activity? {
+        var ctx = context
+        while (ctx is ContextWrapper) {
+            if (ctx is Activity) {
+                return ctx
+            }
+            ctx = ctx.baseContext
+        }
+        return null
+    }
+
     override fun getView(): View = container
 
     override fun dispose() {
         Log.d(TAG, "Disposing NativePlayerView $viewId")
+        lifecycleCallbacks?.let {
+            getActivity(context)?.application?.unregisterActivityLifecycleCallbacks(it)
+        }
         methodChannel.setMethodCallHandler(null)
         player?.release()
         player = null
