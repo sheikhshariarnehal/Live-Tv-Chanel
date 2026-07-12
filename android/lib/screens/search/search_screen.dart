@@ -6,6 +6,7 @@ import '../../providers/app_providers.dart';
 import '../../models/channel.dart';
 import '../../models/event.dart';
 import '../../widgets/team_flag.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -304,25 +305,22 @@ class _EmptySearchState extends StatelessWidget {
                   width: 1,
                 ),
               ),
-              child: ClipOval(
-                child: ch.logo != null && ch.logo!.isNotEmpty
-                    ? Image.network(
-                        ch.logo!,
-                        fit: BoxFit.cover,
-                        cacheWidth: 88,
-                        cacheHeight: 88,
-                        errorBuilder: (context, error, stackTrace) => Center(
-                          child: Text(
-                            ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
-                            style: const TextStyle(
-                              color: GoPlayTheme.primary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                            ),
+              child: ch.logo != null && ch.logo!.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: ch.logo!,
+                      fit: BoxFit.cover,
+                      memCacheWidth: 88,
+                      memCacheHeight: 88,
+                      imageBuilder: (context, imageProvider) => Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            image: imageProvider,
+                            fit: BoxFit.cover,
                           ),
                         ),
-                      )
-                    : Center(
+                      ),
+                      placeholder: (context, url) => Center(
                         child: Text(
                           ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
                           style: const TextStyle(
@@ -332,7 +330,27 @@ class _EmptySearchState extends StatelessWidget {
                           ),
                         ),
                       ),
-              ),
+                      errorWidget: (context, url, error) => Center(
+                        child: Text(
+                          ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
+                          style: const TextStyle(
+                            color: GoPlayTheme.primary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    )
+                  : Center(
+                      child: Text(
+                        ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
+                        style: const TextStyle(
+                          color: GoPlayTheme.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -526,25 +544,22 @@ class _SearchResults extends StatelessWidget {
                   width: 1,
                 ),
               ),
-              child: ClipOval(
-                child: ch.logo != null && ch.logo!.isNotEmpty
-                    ? Image.network(
-                        ch.logo!,
-                        fit: BoxFit.cover,
-                        cacheWidth: 88,
-                        cacheHeight: 88,
-                        errorBuilder: (context, error, stackTrace) => Center(
-                          child: Text(
-                            ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
-                            style: const TextStyle(
-                              color: GoPlayTheme.primary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                            ),
+              child: ch.logo != null && ch.logo!.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: ch.logo!,
+                      fit: BoxFit.cover,
+                      memCacheWidth: 88,
+                      memCacheHeight: 88,
+                      imageBuilder: (context, imageProvider) => Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            image: imageProvider,
+                            fit: BoxFit.cover,
                           ),
                         ),
-                      )
-                    : Center(
+                      ),
+                      placeholder: (context, url) => Center(
                         child: Text(
                           ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
                           style: const TextStyle(
@@ -554,7 +569,27 @@ class _SearchResults extends StatelessWidget {
                           ),
                         ),
                       ),
-              ),
+                      errorWidget: (context, url, error) => Center(
+                        child: Text(
+                          ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
+                          style: const TextStyle(
+                            color: GoPlayTheme.primary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    )
+                  : Center(
+                      child: Text(
+                        ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
+                        style: const TextStyle(
+                          color: GoPlayTheme.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
             ),
             const SizedBox(width: 12),
             Expanded(

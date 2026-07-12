@@ -45,21 +45,28 @@ class ChannelAvatar extends StatelessWidget {
       child: SizedBox(
         width: size,
         height: size,
-        child: ClipOval(
-          child: channel.logo != null && channel.logo!.isNotEmpty
-              ? CachedNetworkImage(
-                  imageUrl: channel.logo!,
-                  fit: BoxFit.cover,
-                  memCacheWidth: (size * 2).toInt(),
-                  memCacheHeight: (size * 2).toInt(),
-                  fadeInDuration: const Duration(milliseconds: 150),
-                  placeholder: (context, url) =>
-                      Center(child: Text(initials, style: _initialsStyle)),
-                  errorWidget: (context, url, error) =>
-                      Center(child: Text(initials, style: _initialsStyle)),
-                )
-              : Center(child: Text(initials, style: _initialsStyle)),
-        ),
+        child: channel.logo != null && channel.logo!.isNotEmpty
+            ? CachedNetworkImage(
+                imageUrl: channel.logo!,
+                fit: BoxFit.cover,
+                memCacheWidth: (size * 2).toInt(),
+                memCacheHeight: (size * 2).toInt(),
+                fadeInDuration: const Duration(milliseconds: 150),
+                imageBuilder: (context, imageProvider) => Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      image: imageProvider,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                placeholder: (context, url) =>
+                    Center(child: Text(initials, style: _initialsStyle)),
+                errorWidget: (context, url, error) =>
+                    Center(child: Text(initials, style: _initialsStyle)),
+              )
+            : Center(child: Text(initials, style: _initialsStyle)),
       ),
     );
   }

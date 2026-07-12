@@ -139,6 +139,39 @@ final categoriesProvider = FutureProvider<List<Category>>((ref) async {
   return localCategories;
 });
 
+final activeCategoriesWithCountsProvider = Provider<AsyncValue<List<(Category, int)>>>((ref) {
+  final categoriesAsync = ref.watch(categoriesProvider);
+  final allChannelsAsync = ref.watch(channelsProvider);
+
+  if (categoriesAsync.isLoading || allChannelsAsync.isLoading) {
+    return const AsyncValue.loading();
+  }
+  if (categoriesAsync.hasError) {
+    return AsyncValue.error(categoriesAsync.error!, categoriesAsync.stackTrace!);
+  }
+  if (allChannelsAsync.hasError) {
+    return AsyncValue.error(allChannelsAsync.error!, allChannelsAsync.stackTrace!);
+  }
+
+  final categories = categoriesAsync.requireValue;
+  final allChannels = allChannelsAsync.requireValue;
+
+  final catCounts = <String, int>{};
+  for (final ch in allChannels) {
+    final cat = ch.category ?? 'uncategorized';
+    catCounts[cat] = (catCounts[cat] ?? 0) + 1;
+  }
+
+  final list = categories
+      .where((cat) => (catCounts[cat.id] ?? 0) > 0)
+      .map((cat) => (cat, catCounts[cat.id] ?? 0))
+      .toList();
+
+  list.sort((a, b) => a.$1.sortOrder.compareTo(b.$1.sortOrder));
+
+  return AsyncValue.data(list);
+});
+
 // ─── Announcements ────────────────────────────────────────────
 final announcementsProvider = FutureProvider<List<Announcement>>((ref) async {
   final service = ref.read(supabaseServiceProvider);

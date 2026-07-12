@@ -158,24 +158,30 @@ class _ChannelCardState extends State<ChannelCard> {
                           height: 54,
                           child: DecoratedBox(
                             decoration: _avatarDeco,
-                            child: ClipOval(
-                              child:
-                                  channel.logo != null && channel.logo!.isNotEmpty
-                                  ? CachedNetworkImage(
-                                      imageUrl: channel.logo!,
-                                      fit: BoxFit.cover,
-                                      width: 54,
-                                      height: 54,
-                                      memCacheWidth: 108,
-                                      memCacheHeight: 108,
-                                      fadeInDuration: const Duration(milliseconds: 150),
-                                      placeholder: (context, url) =>
-                                          _buildInitials(),
-                                      errorWidget: (context, url, err) =>
-                                          _buildInitials(),
-                                    )
-                                  : _buildInitials(),
-                            ),
+                            child: channel.logo != null && channel.logo!.isNotEmpty
+                                ? CachedNetworkImage(
+                                    imageUrl: channel.logo!,
+                                    fit: BoxFit.cover,
+                                    width: 54,
+                                    height: 54,
+                                    memCacheWidth: 108,
+                                    memCacheHeight: 108,
+                                    fadeInDuration: const Duration(milliseconds: 150),
+                                    imageBuilder: (context, imageProvider) => Container(
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: DecorationImage(
+                                          image: imageProvider,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                    placeholder: (context, url) =>
+                                        _buildInitials(),
+                                    errorWidget: (context, url, err) =>
+                                        _buildInitials(),
+                                  )
+                                : _buildInitials(),
                           ),
                         ),
                       ),

@@ -418,7 +418,6 @@ class _EmptyState extends StatelessWidget {
     );
   }
 }
-
 // ─── Category Filter Bar ──────────────────────────────────────
 class _CategoryFilterBar extends ConsumerWidget {
   final VoidCallback onCategorySelected;
@@ -427,55 +426,50 @@ class _CategoryFilterBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final categoriesAsync = ref.watch(categoriesProvider);
-    final allChannelsAsync = ref.watch(channelsProvider);
+    final activeCatsWithCountsAsync = ref.watch(activeCategoriesWithCountsProvider);
     final selectedCategory = ref.watch(selectedCategoryProvider);
+    final allChannelsAsync = ref.watch(channelsProvider);
 
     return SizedBox(
       height: 48,
-      child: categoriesAsync.when(
-        data: (categories) {
-          final allChannels = allChannelsAsync.maybeWhen(
-            data: (data) => data,
-            orElse: () => const [],
+      child: activeCatsWithCountsAsync.when(
+        data: (activeCatsWithCounts) {
+          final totalCount = allChannelsAsync.maybeWhen(
+            data: (data) => data.length,
+            orElse: () => 0,
           );
 
-          // Build count map once per provider change — not per chip build.
-          final catCounts = <String, int>{};
-          for (final ch in allChannels) {
-            final cat = ch.category ?? 'uncategorized';
-            catCounts[cat] = (catCounts[cat] ?? 0) + 1;
-          }
-
-          final activeCategories = categories
-              .where((cat) => (catCounts[cat.id] ?? 0) > 0)
-              .toList();
-
-          return ListView(
+          return ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            children: [
-              _CategoryChip(
-                label: 'All',
-                count: allChannels.length,
-                isSelected: selectedCategory == 'all',
-                onTap: () {
-                  ref.read(selectedCategoryProvider.notifier).select('all');
-                  onCategorySelected();
-                },
-              ),
-              for (final cat in activeCategories)
-                _CategoryChip(
-                  label: cat.name,
-                  count: catCounts[cat.id] ?? 0,
-                  isSelected: selectedCategory == cat.id,
-                  iconUrl: cat.iconUrl,
+            itemCount: activeCatsWithCounts.length + 1,
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return _CategoryChip(
+                  label: 'All',
+                  count: totalCount,
+                  isSelected: selectedCategory == 'all',
                   onTap: () {
-                    ref.read(selectedCategoryProvider.notifier).select(cat.id);
+                    ref.read(selectedCategoryProvider.notifier).select('all');
                     onCategorySelected();
                   },
-                ),
-            ],
+                );
+              }
+              final item = activeCatsWithCounts[index - 1];
+              final cat = item.$1;
+              final count = item.$2;
+              return _CategoryChip(
+                key: ValueKey(cat.id),
+                label: cat.name,
+                count: count,
+                isSelected: selectedCategory == cat.id,
+                iconUrl: cat.iconUrl,
+                onTap: () {
+                  ref.read(selectedCategoryProvider.notifier).select(cat.id);
+                  onCategorySelected();
+                },
+              );
+            },
           );
         },
         loading: () => const SizedBox.shrink(),
@@ -598,6 +592,7 @@ class _CategoryChip extends StatefulWidget {
   final String? iconUrl;
 
   const _CategoryChip({
+    super.key,
     required this.label,
     required this.count,
     required this.isSelected,
@@ -724,10 +719,10 @@ class _CategoryChipState extends State<_CategoryChip> {
                 SizedBox(
                   width: 16,
                   height: 16,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: widget.iconUrl!.toLowerCase().endsWith('.svg')
-                        ? SvgPicture.network(
+                  child: widget.iconUrl!.toLowerCase().endsWith('.svg')
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: SvgPicture.network(
                             widget.iconUrl!,
                             width: 16,
                             height: 16,
@@ -737,24 +732,38 @@ class _CategoryChipState extends State<_CategoryChip> {
                               height: 16,
                               color: Colors.white10,
                             ),
-                          )
-                        : CachedNetworkImage(
-                            imageUrl: widget.iconUrl!,
-                            width: 16,
-                            height: 16,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(
-                              width: 16,
-                              height: 16,
-                              color: Colors.white10,
-                            ),
-                            errorWidget: (context, url, error) => const Icon(
-                              Icons.category_outlined,
-                              size: 12,
-                              color: Colors.grey,
+                          ),
+                        )
+                      : CachedNetworkImage(
+                          imageUrl: widget.iconUrl!,
+                          width: 16,
+                          height: 16,
+                          fit: BoxFit.cover,
+                          memCacheWidth: 48,
+                          memCacheHeight: 48,
+                          imageBuilder: (context, imageProvider) => Container(
+                            decoration: BoxDecoration(
+                              borderRadius: const BorderRadius.all(Radius.circular(4)),
+                              image: DecorationImage(
+                                image: imageProvider,
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
-                  ),
+                          placeholder: (context, url) => Container(
+                            width: 16,
+                            height: 16,
+                            decoration: const BoxDecoration(
+                              color: Colors.white10,
+                              borderRadius: BorderRadius.all(Radius.circular(4)),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => const Icon(
+                            Icons.category_outlined,
+                            size: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
                 ),
                 const SizedBox(width: 6),
               ],
