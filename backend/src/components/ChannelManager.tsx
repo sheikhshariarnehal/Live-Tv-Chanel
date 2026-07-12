@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { createAdminSupabaseClient } from '../utils/supabase';
 import {
   Plus, Edit2, Trash2, Save, X, Search, Tv, ToggleLeft, ToggleRight,
   Filter, ChevronLeft, ChevronRight, Check, AlertCircle, Lock, Shield,
-  Copy, ExternalLink, Layers, Activity, Star, Eye
+  Copy, ExternalLink, Layers, Activity, Star, Eye, GripVertical
 } from 'lucide-react';
 
 interface DrmConfig {
@@ -76,7 +76,7 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12;
+  const itemsPerPage = 50;
 
   // Form modal states
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -86,6 +86,10 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
   // Copied URL state
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
 
+  // Drag and drop state
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const originalChannelsRef = useRef<Channel[]>([]);
+
   const supabaseAdmin = createAdminSupabaseClient(adminToken);
 
   const fetchData = async () => {
@@ -93,16 +97,17 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
       setLoading(true);
       setError(null);
 
-      // Fetch Categories
+      // Fetch Categories with stable secondary sorting
       const { data: catData, error: catErr } = await supabaseAdmin
         .from('categories')
         .select('id, name, active')
-        .order('sort_order', { ascending: true });
+        .order('sort_order', { ascending: true })
+        .order('id', { ascending: true });
 
       if (catErr) throw catErr;
       setCategories(catData || []);
 
-      // Fetch ALL Channels using pagination (bypass 1000-row PostgREST limit)
+      // Fetch ALL Channels using pagination with stable secondary sorting (prevents duplicate/omitted rows due to identical sort orders)
       const BATCH_SIZE = 1000;
       let offset = 0;
       const allChannels: Channel[] = [];
@@ -112,6 +117,7 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
           .from('channels')
           .select('*')
           .order('sort_order', { ascending: true })
+          .order('id', { ascending: true })
           .range(offset, offset + BATCH_SIZE - 1);
 
         if (chErr) throw chErr;
@@ -132,6 +138,7 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
 
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adminToken]);
@@ -391,6 +398,141 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
     }
   };
 
+  const handleBulkCategoryChange = async (catId: string) => {
+    const categoryValue = catId === 'uncategorized' ? null : catId;
+    const count = selectedChannelIds.length;
+    const categoryName = catId === 'uncategorized' ? 'Uncategorized' : categories.find(c => c.id === catId)?.name || catId;
+    if (!confirm(`Are you sure you want to move the ${count} selected channels to category "${categoryName}"?`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const { error: updateErr } = await supabaseAdmin
+        .from('channels')
+        .update({ category: categoryValue })
+        .in('id', selectedChannelIds);
+
+      if (updateErr) throw updateErr;
+
+      showNotification('success', `Moved ${count} channels to category "${categoryName}"`);
+      setSelectedChannelIds([]);
+      fetchData();
+      onRefreshStats();
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Failed to update category');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBulkBooleanChange = async (column: 'proxy' | 'is_live' | 'is_trending', value: boolean) => {
+    const count = selectedChannelIds.length;
+    const friendlyNames = {
+      proxy: value ? 'Enable Proxy' : 'Disable Proxy',
+      is_live: value ? 'Set Active' : 'Set Inactive',
+      is_trending: value ? 'Mark Trending' : 'Remove Trending',
+    };
+    const friendlyName = friendlyNames[column];
+
+    if (!confirm(`Are you sure you want to ${friendlyName} for the ${count} selected channels?`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const { error: updateErr } = await supabaseAdmin
+        .from('channels')
+        .update({ [column]: value })
+        .in('id', selectedChannelIds);
+
+      if (updateErr) throw updateErr;
+
+      showNotification('success', `Applied "${friendlyName}" to ${count} channels`);
+      setSelectedChannelIds([]);
+      fetchData();
+      onRefreshStats();
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : `Failed to bulk update ${column}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    // Store original database state to only update modified channels on drop
+    originalChannelsRef.current = [...channels];
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index.toString());
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    // Reorder locally
+    const updatedChannels = [...channels];
+    const draggedItem = updatedChannels[draggedIndex];
+    updatedChannels.splice(draggedIndex, 1);
+    updatedChannels.splice(index, 0, draggedItem);
+
+    // Update sort_order values locally based on the new array indices
+    const reordered = updatedChannels.map((ch, idx) => ({
+      ...ch,
+      sort_order: idx + 1,
+    }));
+
+    setChannels(reordered);
+    setDraggedIndex(index);
+  };
+
+  const handleDragEnd = async () => {
+    if (draggedIndex === null) return;
+    setDraggedIndex(null);
+
+    // Find which channels have actually changed their sort_order
+    const changed = channels.filter(ch => {
+      const original = originalChannelsRef.current.find(orig => orig.id === ch.id);
+      return !original || original.sort_order !== ch.sort_order;
+    });
+
+    if (changed.length === 0) return;
+
+    // Save the new sort order to Supabase for changed channels only
+    try {
+      setLoading(true);
+      const { error: upsertErr } = await supabaseAdmin
+        .from('channels')
+        .upsert(
+          changed.map(ch => ({
+            id: ch.id,
+            name: ch.name,
+            logo: ch.logo,
+            category: ch.category,
+            quality: ch.quality,
+            stream_url: ch.stream_url,
+            proxy: ch.proxy,
+            is_live: ch.is_live,
+            is_trending: ch.is_trending,
+            sort_order: ch.sort_order,
+            drm: ch.drm
+          }))
+        );
+
+      if (upsertErr) throw upsertErr;
+
+      showNotification('success', 'Channel order updated successfully');
+      fetchData();
+      onRefreshStats();
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Failed to save new channel order');
+      fetchData();
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Stats Counter Section */}
@@ -554,10 +696,16 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
         </div>
 
         {/* Counter Info */}
-        <div className="text-xs text-zinc-500">
-          Showing <span className="text-zinc-300 font-medium">{totalItems === 0 ? 0 : startIndex + 1}</span> to{' '}
-          <span className="text-zinc-300 font-medium">{endIndex}</span> of{' '}
-          <span className="text-purple-400 font-semibold">{totalItems}</span> matching channels
+        <div className="text-xs text-zinc-500 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            Showing <span className="text-zinc-300 font-medium">{totalItems === 0 ? 0 : startIndex + 1}</span> to{' '}
+            <span className="text-zinc-300 font-medium">{endIndex}</span> of{' '}
+            <span className="text-purple-400 font-semibold">{totalItems}</span> matching channels
+          </div>
+          <div className="text-[10px] text-purple-400 flex items-center gap-1 bg-purple-950/20 border border-purple-500/10 px-2 py-0.5 rounded">
+            <GripVertical className="w-3 h-3 text-purple-400" />
+            <span>Tip: Drag and drop row grip handles to change channel order</span>
+          </div>
         </div>
 
         {/* Loading / Content */}
@@ -569,14 +717,89 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
           <div className="space-y-4">
             {/* Bulk Action Bar */}
             {selectedChannelIds.length > 0 && (
-              <div className="flex items-center justify-between p-3.5 bg-red-950/20 border border-red-900/40 rounded-xl animate-fadeIn">
-                <div className="flex items-center gap-2 text-red-400 text-xs font-semibold">
-                  <AlertCircle className="w-4 h-4 text-red-400 animate-pulse" />
-                  <span>{selectedChannelIds.length} channels selected</span>
+              <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-zinc-900/90 border border-zinc-800 rounded-xl animate-fadeIn shadow-lg">
+                <div className="flex flex-wrap items-center gap-4 text-xs">
+                  <div className="flex items-center gap-2 text-purple-400 font-semibold">
+                    <AlertCircle className="w-4 h-4 text-purple-400 animate-pulse" />
+                    <span>{selectedChannelIds.length} channels selected</span>
+                  </div>
+
+                  <div className="h-4 w-px bg-zinc-800 hidden md:block" />
+
+                  {/* Bulk Category Change */}
+                  <div className="flex items-center gap-1.5">
+                    <select
+                      onChange={async (e) => {
+                        const val = e.target.value;
+                        if (val === '') return;
+                        await handleBulkCategoryChange(val);
+                        e.target.value = ''; // Reset select
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs focus:ring-purple-500 focus:outline-none cursor-pointer"
+                    >
+                      <option value="">Move to Category...</option>
+                      <option value="uncategorized">-- Uncategorized --</option>
+                      {categories.map(c => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Bulk Proxy Change */}
+                  <div className="flex items-center gap-1.5">
+                    <select
+                      onChange={async (e) => {
+                        const val = e.target.value;
+                        if (val === '') return;
+                        await handleBulkBooleanChange('proxy', val === 'true');
+                        e.target.value = ''; // Reset select
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs focus:ring-purple-500 focus:outline-none cursor-pointer"
+                    >
+                      <option value="">Proxy Status...</option>
+                      <option value="true">Enable Proxy</option>
+                      <option value="false">Disable Proxy</option>
+                    </select>
+                  </div>
+
+                  {/* Bulk Active Change */}
+                  <div className="flex items-center gap-1.5">
+                    <select
+                      onChange={async (e) => {
+                        const val = e.target.value;
+                        if (val === '') return;
+                        await handleBulkBooleanChange('is_live', val === 'true');
+                        e.target.value = ''; // Reset select
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs focus:ring-purple-500 focus:outline-none cursor-pointer"
+                    >
+                      <option value="">Active Status...</option>
+                      <option value="true">Set Active</option>
+                      <option value="false">Set Inactive</option>
+                    </select>
+                  </div>
+
+                  {/* Bulk Trending Change */}
+                  <div className="flex items-center gap-1.5">
+                    <select
+                      onChange={async (e) => {
+                        const val = e.target.value;
+                        if (val === '') return;
+                        await handleBulkBooleanChange('is_trending', val === 'true');
+                        e.target.value = ''; // Reset select
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs focus:ring-purple-500 focus:outline-none cursor-pointer"
+                    >
+                      <option value="">Trending Status...</option>
+                      <option value="true">Mark Trending</option>
+                      <option value="false">Remove Trending</option>
+                    </select>
+                  </div>
                 </div>
+
                 <button
                   onClick={handleBulkDelete}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-red-605 hover:bg-red-700 text-white rounded-lg text-xs font-semibold transition cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold transition cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   Delete Selected
@@ -590,6 +813,7 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
                 <table className="w-full border-collapse text-left text-sm text-zinc-400">
                   <thead>
                     <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wider">
+                      <th className="py-3 px-3 w-8 text-center"></th>
                       <th className="py-3 px-3 w-8">
                         <input
                           type="checkbox"
@@ -610,141 +834,155 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-800/40">
-                    {paginatedChannels.map((channel) => (
-                      <tr key={channel.id} className="hover:bg-zinc-800/30 transition-colors group">
-                        <td className="py-3.5 px-3">
-                          <input
-                            type="checkbox"
-                            checked={selectedChannelIds.includes(channel.id)}
-                            onChange={() => handleSelectRow(channel.id)}
-                            className="rounded border-zinc-700 bg-zinc-950 text-purple-600 focus:ring-purple-500 cursor-pointer"
-                          />
-                        </td>
-                        {/* Sort Order */}
-                        <td className="py-3.5 px-3">
-                          <span className="font-mono text-zinc-500">#{channel.sort_order}</span>
-                        </td>
+                    {paginatedChannels.map((channel) => {
+                      const absoluteIndex = channels.findIndex(ch => ch.id === channel.id);
+                      const isDraggable = true;
+                      return (
+                        <tr
+                          key={channel.id}
+                          className={`hover:bg-zinc-800/30 transition-colors group ${draggedIndex === absoluteIndex ? 'opacity-40 bg-zinc-800/50' : ''}`}
+                          draggable={isDraggable}
+                          onDragStart={(e) => handleDragStart(e, absoluteIndex)}
+                          onDragOver={(e) => handleDragOver(e, absoluteIndex)}
+                          onDragEnd={handleDragEnd}
+                        >
+                          <td className="py-3.5 px-1 text-center w-8 text-zinc-650 group-hover:text-zinc-400 cursor-grab active:cursor-grabbing">
+                            <GripVertical className="w-4 h-4 mx-auto" />
+                          </td>
+                          <td className="py-3.5 px-3">
+                            <input
+                              type="checkbox"
+                              checked={selectedChannelIds.includes(channel.id)}
+                              onChange={() => handleSelectRow(channel.id)}
+                              className="rounded border-zinc-700 bg-zinc-950 text-purple-600 focus:ring-purple-500 cursor-pointer"
+                            />
+                          </td>
+                          {/* Sort Order */}
+                          <td className="py-3.5 px-3">
+                            <span className="font-mono text-zinc-500">#{channel.sort_order}</span>
+                          </td>
 
-                        {/* Info & Logo */}
-                        <td className="py-3.5 px-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-zinc-950 border border-zinc-800 overflow-hidden flex items-center justify-center flex-shrink-0">
-                              {channel.logo ? (
-                                <img src={channel.logo} alt="" className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} />
-                              ) : (
-                                <Tv className="w-5 h-5 text-zinc-660" />
-                              )}
+                          {/* Info & Logo */}
+                          <td className="py-3.5 px-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-zinc-950 border border-zinc-800 overflow-hidden flex items-center justify-center flex-shrink-0">
+                                {channel.logo ? (
+                                  <img src={channel.logo} alt="" className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} />
+                                ) : (
+                                  <Tv className="w-5 h-5 text-zinc-660" />
+                                )}
+                              </div>
+                              <div className="truncate max-w-[180px]">
+                                <p className="font-semibold text-white truncate text-xs">{channel.name}</p>
+                                <p className="text-[10px] font-mono text-zinc-500 truncate">{channel.id}</p>
+                              </div>
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-zinc-850 text-zinc-400">
+                                {channel.quality || 'HD'}
+                              </span>
                             </div>
-                            <div className="truncate max-w-[180px]">
-                              <p className="font-semibold text-white truncate text-xs">{channel.name}</p>
-                              <p className="text-[10px] font-mono text-zinc-500 truncate">{channel.id}</p>
-                            </div>
-                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-zinc-850 text-zinc-400">
-                              {channel.quality || 'HD'}
+                          </td>
+
+                          {/* Category */}
+                          <td className="py-3.5 px-3">
+                            <span className="text-[10px] text-purple-300 bg-purple-950/40 border border-purple-500/20 px-2 py-0.5 rounded-full font-semibold">
+                              {categories.find(c => c.id === channel.category)?.name || channel.category || 'Uncategorized'}
                             </span>
-                          </div>
-                        </td>
+                          </td>
 
-                        {/* Category */}
-                        <td className="py-3.5 px-3">
-                          <span className="text-[10px] text-purple-300 bg-purple-950/40 border border-purple-500/20 px-2 py-0.5 rounded-full font-semibold">
-                            {categories.find(c => c.id === channel.category)?.name || channel.category || 'Uncategorized'}
-                          </span>
-                        </td>
+                          {/* Stream URL */}
+                          <td className="py-3.5 px-3 font-mono text-xs max-w-[240px] truncate relative">
+                            <div className="flex items-center gap-1.5">
+                              <span className="truncate text-zinc-400" title={channel.stream_url}>{channel.stream_url}</span>
+                              <button
+                                onClick={() => copyToClipboard(channel.stream_url)}
+                                className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-white transition-all cursor-pointer flex-shrink-0"
+                                title="Copy URL"
+                              >
+                                {copiedUrl === channel.stream_url ? (
+                                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                                ) : (
+                                  <Copy className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+                            </div>
+                          </td>
 
-                        {/* Stream URL */}
-                        <td className="py-3.5 px-3 font-mono text-xs max-w-[240px] truncate relative">
-                          <div className="flex items-center gap-1.5">
-                            <span className="truncate text-zinc-400" title={channel.stream_url}>{channel.stream_url}</span>
+                          {/* DRM Badge */}
+                          <td className="py-3.5 px-3 text-center">
+                            {channel.drm ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-950/40 border border-orange-500/20 text-orange-400 text-[9px] font-bold uppercase">
+                                <Lock className="w-2.5 h-2.5" />
+                                {channel.drm.type}
+                              </span>
+                            ) : (
+                              <span className="text-zinc-700 text-[10px]">—</span>
+                            )}
+                          </td>
+
+                          {/* Toggle: Proxy */}
+                          <td className="py-3.5 px-3 text-center">
                             <button
-                              onClick={() => copyToClipboard(channel.stream_url)}
-                              className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-white transition-all cursor-pointer flex-shrink-0"
-                              title="Copy URL"
+                              onClick={() => toggleBooleanColumn(channel.id, 'proxy', channel.proxy)}
+                              className="focus:outline-none transition-colors cursor-pointer"
                             >
-                              {copiedUrl === channel.stream_url ? (
-                                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                              {channel.proxy ? (
+                                <ToggleRight className="w-6 h-6 text-purple-400" />
                               ) : (
-                                <Copy className="w-3.5 h-3.5" />
+                                <ToggleLeft className="w-6 h-6 text-zinc-700" />
                               )}
                             </button>
-                          </div>
-                        </td>
+                          </td>
 
-                        {/* DRM Badge */}
-                        <td className="py-3.5 px-3 text-center">
-                          {channel.drm ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-950/40 border border-orange-500/20 text-orange-400 text-[9px] font-bold uppercase">
-                              <Lock className="w-2.5 h-2.5" />
-                              {channel.drm.type}
-                            </span>
-                          ) : (
-                            <span className="text-zinc-700 text-[10px]">—</span>
-                          )}
-                        </td>
-
-                        {/* Toggle: Proxy */}
-                        <td className="py-3.5 px-3 text-center">
-                          <button
-                            onClick={() => toggleBooleanColumn(channel.id, 'proxy', channel.proxy)}
-                            className="focus:outline-none transition-colors cursor-pointer"
-                          >
-                            {channel.proxy ? (
-                              <ToggleRight className="w-6 h-6 text-purple-400" />
-                            ) : (
-                              <ToggleLeft className="w-6 h-6 text-zinc-700" />
-                            )}
-                          </button>
-                        </td>
-
-                        {/* Toggle: Active / Live */}
-                        <td className="py-3.5 px-3 text-center">
-                          <button
-                            onClick={() => toggleBooleanColumn(channel.id, 'is_live', channel.is_live)}
-                            className="focus:outline-none transition-colors cursor-pointer"
-                          >
-                            {channel.is_live ? (
-                              <ToggleRight className="w-6 h-6 text-emerald-400" />
-                            ) : (
-                              <ToggleLeft className="w-6 h-6 text-zinc-700" />
-                            )}
-                          </button>
-                        </td>
-
-                        {/* Toggle: Trending */}
-                        <td className="py-3.5 px-3 text-center">
-                          <button
-                            onClick={() => toggleBooleanColumn(channel.id, 'is_trending', channel.is_trending)}
-                            className="focus:outline-none transition-colors cursor-pointer"
-                          >
-                            {channel.is_trending ? (
-                              <ToggleRight className="w-6 h-6 text-pink-400" />
-                            ) : (
-                              <ToggleLeft className="w-6 h-6 text-zinc-700" />
-                            )}
-                          </button>
-                        </td>
-
-                        {/* Action Buttons */}
-                        <td className="py-3.5 px-3 text-right">
-                          <div className="flex justify-end gap-1.5">
+                          {/* Toggle: Active / Live */}
+                          <td className="py-3.5 px-3 text-center">
                             <button
-                              onClick={() => handleEdit(channel)}
-                              className="p-1.5 bg-zinc-950 hover:bg-zinc-800 text-purple-400 hover:text-white rounded-lg border border-zinc-800 hover:border-zinc-700 transition-colors cursor-pointer"
-                              title="Edit Channel"
+                              onClick={() => toggleBooleanColumn(channel.id, 'is_live', channel.is_live)}
+                              className="focus:outline-none transition-colors cursor-pointer"
                             >
-                              <Edit2 className="w-3.5 h-3.5" />
+                              {channel.is_live ? (
+                                <ToggleRight className="w-6 h-6 text-emerald-400" />
+                              ) : (
+                                <ToggleLeft className="w-6 h-6 text-zinc-700" />
+                              )}
                             </button>
+                          </td>
+
+                          {/* Toggle: Trending */}
+                          <td className="py-3.5 px-3 text-center">
                             <button
-                              onClick={() => handleDelete(channel.id)}
-                              className="p-1.5 bg-zinc-950 hover:bg-red-950/40 text-red-400 hover:text-red-300 rounded-lg border border-zinc-800 hover:border-red-900/50 transition-colors cursor-pointer"
-                              title="Delete Channel"
+                              onClick={() => toggleBooleanColumn(channel.id, 'is_trending', channel.is_trending)}
+                              className="focus:outline-none transition-colors cursor-pointer"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              {channel.is_trending ? (
+                                <ToggleRight className="w-6 h-6 text-pink-400" />
+                              ) : (
+                                <ToggleLeft className="w-6 h-6 text-zinc-700" />
+                              )}
                             </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+
+                          {/* Action Buttons */}
+                          <td className="py-3.5 px-3 text-right">
+                            <div className="flex justify-end gap-1.5">
+                              <button
+                                onClick={() => handleEdit(channel)}
+                                className="p-1.5 bg-zinc-950 hover:bg-zinc-800 text-purple-400 hover:text-white rounded-lg border border-zinc-800 hover:border-zinc-700 transition-colors cursor-pointer"
+                                title="Edit Channel"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(channel.id)}
+                                className="p-1.5 bg-zinc-950 hover:bg-red-950/40 text-red-400 hover:text-red-300 rounded-lg border border-zinc-800 hover:border-red-900/50 transition-colors cursor-pointer"
+                                title="Delete Channel"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
