@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../models/event.dart';
 import '../models/channel.dart';
 import '../providers/app_providers.dart';
@@ -108,23 +109,34 @@ void showChannelSelector({
                             shape: BoxShape.circle,
                             color: Colors.white.withAlpha(15),
                           ),
-                          child: ClipOval(
-                            child: channel.logo != null && channel.logo!.isNotEmpty
-                                ? Image.network(
-                                    channel.logo!,
-                                    fit: BoxFit.cover,
-                                    cacheWidth: 80,
-                                    cacheHeight: 80,
-                                    errorBuilder: (context, error, stackTrace) => const Icon(
-                                      Icons.live_tv_rounded,
-                                      color: GoPlayTheme.primary,
+                          child: channel.logo != null && channel.logo!.isNotEmpty
+                              ? CachedNetworkImage(
+                                  imageUrl: channel.logo!,
+                                  fit: BoxFit.cover,
+                                  memCacheWidth: 80,
+                                  memCacheHeight: 80,
+                                  imageBuilder: (context, imageProvider) => Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                        image: imageProvider,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
-                                  )
-                                : const Icon(
+                                  ),
+                                  placeholder: (context, url) => const Icon(
                                     Icons.live_tv_rounded,
                                     color: GoPlayTheme.primary,
                                   ),
-                          ),
+                                  errorWidget: (context, url, error) => const Icon(
+                                    Icons.live_tv_rounded,
+                                    color: GoPlayTheme.primary,
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.live_tv_rounded,
+                                  color: GoPlayTheme.primary,
+                                ),
                         ),
                         title: Text(
                           channel.name,

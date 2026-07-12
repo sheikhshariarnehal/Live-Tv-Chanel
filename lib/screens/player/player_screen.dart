@@ -426,20 +426,20 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                             child: SafeArea(
                               top: false,
                               bottom: true,
-                              child: ListView(
-                                padding: EdgeInsets.zero,
-                                physics: const BouncingScrollPhysics(),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const _SectionLabel(text: 'SWITCH CHANNEL'),
-                                  _RelatedChannelsList(
-                                    category: channel.category ?? '',
-                                    currentChannelId: channel.id,
-                                    isScrollable: false,
-                                    onChannelSelected: (id) =>
-                                        setState(() => _currentChannelId = id),
-                                    eventChannels: widget.eventChannels,
+                                  Expanded(
+                                    child: _RelatedChannelsList(
+                                      category: channel.category ?? '',
+                                      currentChannelId: channel.id,
+                                      isScrollable: true,
+                                      onChannelSelected: (id) =>
+                                          setState(() => _currentChannelId = id),
+                                      eventChannels: widget.eventChannels,
+                                    ),
                                   ),
-                                  const SizedBox(height: 24),
                                 ],
                               ),
                             ),
@@ -449,7 +449,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                     ),
                   ),
 
-                  // 2. Video Player Container (placed on top)
+                  // 2. The Video Player (anchored to top)
                   Positioned(
                     top: 0,
                     left: 0,
@@ -645,44 +645,30 @@ class _ChannelAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final initials = name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
-
     return SizedBox(
       width: size,
       height: size,
       child: DecoratedBox(
         decoration: _kAvatarDeco,
-        child: ClipOval(
-          child: logo != null && logo!.isNotEmpty
-              ? CachedNetworkImage(
-                  imageUrl: logo!,
-                  fit: BoxFit.cover,
-                  width: size,
-                  height: size,
-                  memCacheWidth: (size * 2).toInt(),
-                  memCacheHeight: (size * 2).toInt(),
-                  fadeInDuration: const Duration(milliseconds: 150),
-                  placeholder: (context, url) => Center(
-                    child: Text(
-                      initials,
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: size * 0.28,
-                        fontWeight: FontWeight.w800,
-                      ),
+        child: logo != null && logo!.isNotEmpty
+            ? CachedNetworkImage(
+                imageUrl: logo!,
+                fit: BoxFit.cover,
+                width: size,
+                height: size,
+                memCacheWidth: (size * 2).toInt(),
+                memCacheHeight: (size * 2).toInt(),
+                fadeInDuration: const Duration(milliseconds: 150),
+                imageBuilder: (context, imageProvider) => Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      image: imageProvider,
+                      fit: BoxFit.cover,
                     ),
                   ),
-                  errorWidget: (context, url, err) => Center(
-                    child: Text(
-                      initials,
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: size * 0.28,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                )
-              : Center(
+                ),
+                placeholder: (context, url) => Center(
                   child: Text(
                     initials,
                     style: TextStyle(
@@ -692,7 +678,27 @@ class _ChannelAvatar extends StatelessWidget {
                     ),
                   ),
                 ),
-        ),
+                errorWidget: (context, url, err) => Center(
+                  child: Text(
+                    initials,
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: size * 0.28,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              )
+            : Center(
+                child: Text(
+                  initials,
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: size * 0.28,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
       ),
     );
   }
@@ -755,6 +761,7 @@ class _RelatedChannelsList extends ConsumerWidget {
               final ch = related[index];
               final isCurrent = ch.id == currentChannelId;
               return _ChannelTile(
+                key: ValueKey(ch.id),
                 channel: ch,
                 isCurrent: isCurrent,
                 onTap: () => onChannelSelected(ch.id),
@@ -797,6 +804,7 @@ class _ChannelTile extends StatefulWidget {
   final VoidCallback onTap;
 
   const _ChannelTile({
+    super.key,
     required this.channel,
     required this.isCurrent,
     required this.onTap,
