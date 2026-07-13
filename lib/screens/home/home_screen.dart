@@ -1,4 +1,4 @@
-// dart:ui import removed — BackdropFilter/ImageFilter no longer used.
+// dart:ui import removed â€” BackdropFilter/ImageFilter no longer used.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,20 +17,6 @@ import '../../widgets/team_flag.dart';
 import '../../widgets/channel_avatar.dart';
 import '../../widgets/countdown_timer.dart';
 
-// Pre-cached AppBar title states — eliminates per-scroll-pixel copyWith() allocation.
-const TextStyle _kTitleExpanded = TextStyle(
-  fontWeight: FontWeight.w900,
-  color: GoPlayTheme.primary,
-  fontSize: 22,
-  letterSpacing: 3,
-);
-
-const TextStyle _kTitleCollapsed = TextStyle(
-  fontWeight: FontWeight.w900,
-  color: GoPlayTheme.primary,
-  fontSize: 20,
-  letterSpacing: 2,
-);
 
 
 class HomeScreen extends ConsumerWidget {
@@ -120,12 +106,22 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildMainContent(BuildContext context, WidgetRef ref) {
+    final baseTitleStyle = Theme.of(context).appBarTheme.titleTextStyle ?? const TextStyle();
+    final titleCollapsed = baseTitleStyle.copyWith(
+      fontSize: 20,
+      color: Colors.white,
+    );
+    final titleExpanded = baseTitleStyle.copyWith(
+      fontSize: 26,
+      color: Colors.white,
+    );
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
           // Collapsing Dark-Themed App Bar
           SliverAppBar(
-            expandedHeight: 130.0,
+            expandedHeight: 108.0,
             floating: false,
             pinned: true,
             backgroundColor: Colors.transparent,
@@ -142,7 +138,7 @@ class HomeScreen extends ConsumerWidget {
                 final double statusBarHeight = MediaQuery.paddingOf(
                   context,
                 ).top;
-                const double expandedHeight = 130.0;
+                const double expandedHeight = 108.0;
                 final double minHeight = kToolbarHeight + statusBarHeight;
                 final double maxHeight = expandedHeight + statusBarHeight;
 
@@ -162,7 +158,7 @@ class HomeScreen extends ConsumerWidget {
                     padding: EdgeInsets.only(top: statusBarHeight),
                     child: Stack(
                       children: [
-                        // Title — snaps between two pre-cached const styles,
+                        // Title â€” snaps between two pre-cached const styles,
                         // eliminating per-frame TextStyle allocation via copyWith().
                         Positioned(
                           left: 16,
@@ -173,14 +169,14 @@ class HomeScreen extends ConsumerWidget {
                             child: Text(
                               'GOPLAY',
                               style: collapseRatio > 0.5
-                                  ? _kTitleCollapsed
-                                  : _kTitleExpanded,
+                                  ? titleCollapsed
+                                  : titleExpanded,
                             ),
                           ),
                         ),
 
                         // Search Icon on top-right, fading in on scroll
-                        // Search icon — only painted when visible (avoids saveLayer)
+                        // Search icon â€” only painted when visible (avoids saveLayer)
                         if (collapseRatio >= 0.5)
                           Positioned(
                             right: 48,
@@ -250,12 +246,12 @@ class HomeScreen extends ConsumerWidget {
                         ),
 
                         // Search text field below, fading/sliding out on scroll
-                        // Search field — skip entire subtree when collapsed (avoids saveLayer + Theme.copyWith)
+                        // Search field â€” skip entire subtree when collapsed (avoids saveLayer + Theme.copyWith)
                         if (collapseRatio < 0.67)
                           Positioned(
                             left: 16,
                             right: 16,
-                            bottom: 12 * (1.0 - collapseRatio),
+                            bottom: 8 * (1.0 - collapseRatio),
                             height: 44,
                             child: Theme(
                               data: Theme.of(context).copyWith(
@@ -307,7 +303,7 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 );
 
-                // No BackdropFilter — eliminated GPU blur costing ~5-8ms/frame.
+                // No BackdropFilter â€” eliminated GPU blur costing ~5-8ms/frame.
                 // The semi-opaque headerBgColor provides a similar frosted-glass
                 // appearance without the raster-thread cost.
                 return headerContent;
@@ -364,7 +360,7 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-// ─── Hero Banner ──────────────────────────────────────────────
+// â”€â”€â”€ Hero Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _HeroBanner extends ConsumerStatefulWidget {
   const _HeroBanner();
 
@@ -445,9 +441,19 @@ class _HeroBannerState extends ConsumerState<_HeroBanner> {
 }
 
 /// Individual hero banner card
-class _HeroBannerCard extends ConsumerWidget {
+class _HeroBannerCard extends ConsumerStatefulWidget {
   final SportEvent event;
   const _HeroBannerCard({required this.event});
+
+  @override
+  ConsumerState<_HeroBannerCard> createState() => _HeroBannerCardState();
+}
+
+class _HeroBannerCardState extends ConsumerState<_HeroBannerCard> {
+  // Tracks whether the countdown has finished for this card.
+  // Once true, the CTA flips from countdown â†’ WATCH without waiting
+  // for a network refresh.
+  bool _countdownDone = false;
 
   static const _cardRadius = BorderRadius.all(Radius.circular(20));
   static const _cardDecoration = BoxDecoration(
@@ -457,17 +463,51 @@ class _HeroBannerCard extends ConsumerWidget {
     ),
     boxShadow: [
       BoxShadow(
-        color: Color(0x1F000000), // Soft shadow
+        color: Color(0x1F000000),
         blurRadius: 10,
         offset: Offset(0, 4),
       ),
     ],
   );
 
+  void _onCountdownFinished() {
+    // Flip the button to WATCH immediately without waiting for a network refresh.
+    if (mounted) setState(() => _countdownDone = true);
+    // Also trigger a background sync so isLive updates for other consumers.
+    ref.read(syncServiceProvider).sync();
+    ref.invalidate(eventsProvider);
+  }
+
+  String _formatKickoff(DateTime time) {
+    final t = time.toLocal();
+    final h = t.hour;
+    final m = t.minute.toString().padLeft(2, '0');
+    final period = h >= 12 ? 'PM' : 'AM';
+    final displayHour = h % 12 == 0 ? 12 : h % 12;
+    final timeStr = '$displayHour:$m $period';
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+    final eventDay = DateTime(t.year, t.month, t.day);
+
+    if (eventDay == today) return 'TODAY, $timeStr';
+    if (eventDay == tomorrow) return 'TOMORROW, $timeStr';
+
+    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    return '${months[t.month - 1]} ${t.day}, $timeStr';
+  }
+
+  bool get _canWatch =>
+      widget.event.isLive || _countdownDone;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final event = widget.event;
+
     return GestureDetector(
       onTap: () {
+        if (!_canWatch) return; // Disable tap while still upcoming
         if (event.channels.isNotEmpty) {
           context.push(
             '/player/${event.channels.first}',
@@ -513,9 +553,9 @@ class _HeroBannerCard extends ConsumerWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Color(0x40000000), // Soft dark top for badge contrast
+                        Color(0x40000000),
                         Colors.transparent,
-                        Color(0x50000000), // Soft bottom shading
+                        Color(0x50000000),
                       ],
                     ),
                   ),
@@ -547,8 +587,8 @@ class _HeroBannerCard extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      // Live / Status Badge
-                      if (event.isLive)
+                      // Live / Upcoming Badge
+                      if (event.isLive || _countdownDone)
                         const LiveBadge(fontSize: 9)
                       else
                         const _UpcomingBadge(),
@@ -556,7 +596,7 @@ class _HeroBannerCard extends ConsumerWidget {
                   ),
                 ),
 
-                // 4. Integrated Bottom Content Row (Native drawing, with top divider border)
+                // 4. Bottom Detail Row
                 Positioned(
                   bottom: 0,
                   left: 0,
@@ -564,10 +604,10 @@ class _HeroBannerCard extends ConsumerWidget {
                   height: 68,
                   child: Container(
                     decoration: const BoxDecoration(
-                      color: Color(0xE61F2026), // Lighter premium dark slate (90% opacity)
+                      color: Color(0xE61F2026),
                       border: Border(
                         top: BorderSide(
-                          color: Color(0x24FFFFFF), // Sleek divider line
+                          color: Color(0x24FFFFFF),
                           width: 0.8,
                         ),
                       ),
@@ -585,9 +625,21 @@ class _HeroBannerCard extends ConsumerWidget {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
+                                  Flexible(
+                                    child: Text(
+                                      event.homeTeam.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.inter(
+                                        color: Colors.white,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
                                   if (event.homeTeam.flag != null)
                                     Padding(
-                                      padding: const EdgeInsets.only(right: 6.0),
+                                      padding: const EdgeInsets.only(left: 6.0),
                                       child: SizedBox(
                                         width: 16,
                                         height: 16,
@@ -599,9 +651,20 @@ class _HeroBannerCard extends ConsumerWidget {
                                         ),
                                       ),
                                     ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                                    child: Text(
+                                      'vs',
+                                      style: GoogleFonts.inter(
+                                        color: const Color(0xB3FFFFFF),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
                                   Flexible(
                                     child: Text(
-                                      '${event.homeTeam.name} vs ${event.awayTeam.name}',
+                                      event.awayTeam.name,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: GoogleFonts.inter(
@@ -628,8 +691,8 @@ class _HeroBannerCard extends ConsumerWidget {
                                 ],
                               ),
                               const SizedBox(height: 3),
-                              // Subtitle status details
-                              if (event.isLive)
+                              // Subtitle: LIVE NOW or Kickoff time
+                              if (event.isLive || _countdownDone)
                                 Row(
                                   children: [
                                     Container(
@@ -655,25 +718,19 @@ class _HeroBannerCard extends ConsumerWidget {
                               else
                                 Row(
                                   children: [
+                                    const Icon(
+                                      Icons.calendar_today_rounded,
+                                      color: Color(0x80FFFFFF),
+                                      size: 10,
+                                    ),
+                                    const SizedBox(width: 5),
                                     Text(
-                                      'STARTS IN: ',
+                                      _formatKickoff(event.startTime),
                                       style: GoogleFonts.inter(
                                         color: const Color(0x80FFFFFF),
                                         fontSize: 9,
                                         fontWeight: FontWeight.w700,
                                         letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                    CountdownTimerWidget(
-                                      startTime: event.startTime,
-                                      onTimerFinished: () {
-                                        ref.read(syncServiceProvider).sync();
-                                        ref.invalidate(eventsProvider);
-                                      },
-                                      style: GoogleFonts.inter(
-                                        color: GoPlayTheme.primary,
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w800,
                                       ),
                                     ),
                                   ],
@@ -684,41 +741,18 @@ class _HeroBannerCard extends ConsumerWidget {
 
                         const SizedBox(width: 12),
 
-                        // Right Side: Slim CTA Accent Button
-                        Container(
-                          height: 32,
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          decoration: BoxDecoration(
-                            color: GoPlayTheme.primary,
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x2000ADB5),
-                                blurRadius: 6,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                event.isLive ? Icons.play_arrow_rounded : Icons.info_outline_rounded,
-                                color: const Color(0xFF17181C),
-                                size: 14,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                event.isLive ? 'WATCH' : 'DETAILS',
-                                style: GoogleFonts.inter(
-                                  color: const Color(0xFF17181C),
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 0.5,
+                        // Right Side: CTA Button
+                        // â€” Live / countdown done â†’ teal WATCH button
+                        // â€” Upcoming â†’ dark pill showing live countdown inside
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          child: _canWatch
+                              ? _WatchButton(key: const ValueKey('watch'))
+                              : _CountdownButton(
+                                  key: const ValueKey('countdown'),
+                                  startTime: event.startTime,
+                                  onFinished: _onCountdownFinished,
                                 ),
-                              ),
-                            ],
-                          ),
                         ),
                       ],
                     ),
@@ -733,7 +767,99 @@ class _HeroBannerCard extends ConsumerWidget {
   }
 }
 
-// ─── Today's Schedule ─────────────────────────────────────────
+// â”€â”€â”€ Watch CTA Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+class _WatchButton extends StatelessWidget {
+  const _WatchButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 32,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: GoPlayTheme.primary,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x2000ADB5),
+            blurRadius: 6,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.play_arrow_rounded, color: Color(0xFF17181C), size: 14),
+          const SizedBox(width: 4),
+          Text(
+            'WATCH',
+            style: GoogleFonts.inter(
+              color: const Color(0xFF17181C),
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// â”€â”€â”€ Countdown CTA Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Shows a compact live countdown inside the button.
+// Isolated RepaintBoundary keeps per-second repaints cheap.
+class _CountdownButton extends StatelessWidget {
+  final DateTime startTime;
+  final VoidCallback onFinished;
+
+  const _CountdownButton({
+    super.key,
+    required this.startTime,
+    required this.onFinished,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      child: Container(
+        height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2C2D31),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: GoPlayTheme.primary.withValues(alpha: 0.35),
+            width: 0.8,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.timer_outlined,
+              size: 11,
+              color: GoPlayTheme.primary.withValues(alpha: 0.8),
+            ),
+            const SizedBox(width: 4),
+            CountdownTimerWidget(
+              startTime: startTime,
+              onTimerFinished: onFinished,
+              style: GoogleFonts.inter(
+                color: GoPlayTheme.primary,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+// â”€â”€â”€ Today's Schedule â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _TodaySchedule extends ConsumerWidget {
   const _TodaySchedule();
 
@@ -794,7 +920,7 @@ class _TodaySchedule extends ConsumerWidget {
   }
 }
 
-// ─── Trending Channels ────────────────────────────────────────
+// â”€â”€â”€ Trending Channels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _TrendingChannels extends ConsumerWidget {
   const _TrendingChannels();
 
@@ -837,7 +963,7 @@ class _TrendingChannels extends ConsumerWidget {
   }
 }
 
-// ─── Recently Watched ─────────────────────────────────────────
+// â”€â”€â”€ Recently Watched â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _RecentlyWatched extends ConsumerWidget {
   const _RecentlyWatched();
 
@@ -873,7 +999,7 @@ class _RecentlyWatched extends ConsumerWidget {
   }
 }
 
-// ─── Announcements ────────────────────────────────────────────
+// â”€â”€â”€ Announcements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _AnnouncementsSection extends ConsumerWidget {
   const _AnnouncementsSection();
 
@@ -900,13 +1026,13 @@ class _AnnouncementsSection extends ConsumerWidget {
 
 
 
-// ─── Cached style ────────────────────────────────────────────────────────────
+// â”€â”€â”€ Cached style â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const TextStyle _historyNameStyle = TextStyle(
   color: GoPlayTheme.onSurface,
   fontSize: 10,
 );
 
-// ─── _HeroBannerSkeleton ─────────────────────────────────────────────────────
+// â”€â”€â”€ _HeroBannerSkeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _HeroBannerSkeleton extends StatelessWidget {
   const _HeroBannerSkeleton();
 
@@ -932,7 +1058,7 @@ class _HeroBannerSkeleton extends StatelessWidget {
   }
 }
 
-// ─── _UpcomingBadge ──────────────────────────────────────────────────────────
+// â”€â”€â”€ _UpcomingBadge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _UpcomingBadge extends StatelessWidget {
   const _UpcomingBadge();
 
@@ -979,7 +1105,7 @@ class _UpcomingBadge extends StatelessWidget {
   }
 }
 
-// ─── _ChannelItem ────────────────────────────────────────────────────────────
+// â”€â”€â”€ _ChannelItem â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _ChannelItem extends StatelessWidget {
   final dynamic channel;
   final TextStyle nameStyle;
@@ -1020,7 +1146,7 @@ class _ChannelItem extends StatelessWidget {
   }
 }
 
-// ─── _AnnouncementTile ───────────────────────────────────────────────────────
+// â”€â”€â”€ _AnnouncementTile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _AnnouncementTile extends StatelessWidget {
   final dynamic announcement;
 
