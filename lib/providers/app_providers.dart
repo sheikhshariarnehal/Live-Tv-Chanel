@@ -190,6 +190,32 @@ class SearchQueryNotifier extends Notifier<String> {
   void update(String query) => state = query;
 }
 
+final filteredChannelsProvider =
+    FutureProvider.family<List<Channel>, String>((ref, query) async {
+  if (query.isEmpty) return const [];
+  final channels = await ref.watch(channelsProvider.future);
+  final lowerQuery = query.toLowerCase();
+  return channels.where((ch) {
+    return ch.name.toLowerCase().contains(lowerQuery) ||
+        (ch.category?.toLowerCase().contains(lowerQuery) ?? false) ||
+        (ch.country?.toLowerCase().contains(lowerQuery) ?? false) ||
+        (ch.language?.toLowerCase().contains(lowerQuery) ?? false);
+  }).toList();
+});
+
+final filteredEventsProvider =
+    FutureProvider.family<List<SportEvent>, String>((ref, query) async {
+  if (query.isEmpty) return const [];
+  final events = await ref.watch(eventsProvider.future);
+  final lowerQuery = query.toLowerCase();
+  return events.where((e) {
+    return e.league.toLowerCase().contains(lowerQuery) ||
+        e.sport.toLowerCase().contains(lowerQuery) ||
+        e.homeTeam.name.toLowerCase().contains(lowerQuery) ||
+        e.awayTeam.name.toLowerCase().contains(lowerQuery);
+  }).toList();
+});
+
 // ─── Selected Category ───────────────────────────────────────
 final selectedCategoryProvider =
     NotifierProvider<SelectedCategoryNotifier, String>(
