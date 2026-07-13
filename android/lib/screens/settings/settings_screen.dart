@@ -44,15 +44,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onPressed: () => Navigator.of(context).pop(),
               ),
               title: Text(
-                'SETTINGS',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                  color: GoPlayTheme.primary,
-                  letterSpacing: 2,
+                'Settings',
+                style: Theme.of(context).appBarTheme.titleTextStyle?.copyWith(
+                  color: Colors.white,
                 ),
               ),
-              centerTitle: true,
+              centerTitle: false,
               actions: [
                 IconButton(
                   icon: const Icon(Icons.more_vert_rounded, color: Colors.white, size: 22),

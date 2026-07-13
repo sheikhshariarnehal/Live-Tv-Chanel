@@ -148,7 +148,7 @@ export default function ChannelLogsPage() {
           </Link>
           {channel && (
             <>
-              <h1 className="text-2xl font-bold text-white tracking-tight">{channel.name}</h1>
+              <h1 className="text-xl font-semibold text-white tracking-tight">{channel.name}</h1>
               <p className="text-zinc-500 font-mono text-[10px] truncate max-w-2xl">{channel.stream_url}</p>
             </>
           )}

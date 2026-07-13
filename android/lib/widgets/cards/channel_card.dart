@@ -7,7 +7,7 @@ import '../../models/channel.dart';
 // ─── Pre-cached card decorations — never reallocated ─────────
 const _cardDecoNormal = BoxDecoration(
   gradient: GoPlayTheme.cardGradient,
-  borderRadius: BorderRadius.all(Radius.circular(10)),
+  borderRadius: BorderRadius.all(Radius.circular(8)),
   border: Border.fromBorderSide(
     BorderSide(color: GoPlayTheme.cardBorder, width: 0.8),
   ),
@@ -19,7 +19,7 @@ const _cardDecoHovered = BoxDecoration(
     end: Alignment.bottomRight,
     colors: [Color(0xFF35373C), Color(0xFF2C2D31)], // Highlighted container
   ),
-  borderRadius: BorderRadius.all(Radius.circular(10)),
+  borderRadius: BorderRadius.all(Radius.circular(8)),
   border: Border.fromBorderSide(
     BorderSide(color: Color(0x6471768E), width: 0.8), // Alabaster Grey @ 39%
   ),

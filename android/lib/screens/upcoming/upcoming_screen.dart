@@ -100,11 +100,9 @@ class UpcomingScreen extends ConsumerWidget {
                               )!,
                               child: Text(
                                 'Upcoming',
-                                style: TextStyle(
+                                style: (Theme.of(context).appBarTheme.titleTextStyle ?? const TextStyle()).copyWith(
                                   color: Colors.white,
-                                  fontSize: 26 - (9 * collapseRatio),
-                                  fontWeight: FontWeight.w300,
-                                  letterSpacing: -0.5,
+                                  fontSize: 26 - (6 * collapseRatio),
                                 ),
                               ),
                             ),

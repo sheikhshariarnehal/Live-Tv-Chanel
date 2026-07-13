@@ -581,10 +581,10 @@ export default function ChannelManager({ adminToken, onRefreshStats }: ChannelMa
       {/* Header and Controls */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-zinc-900/40 p-4 rounded-2xl border border-zinc-800/60">
         <div>
-          <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            Channel Directory
+          <h1 className="text-xl font-semibold text-white tracking-tight flex items-center gap-2">
+            Channels
           </h1>
-          <p className="text-xs text-zinc-500 mt-0.5">Manage live streaming sources, CORS proxy bypass and content protection DRM</p>
+          <p className="text-xs text-zinc-400 mt-1">Manage live streaming sources, CORS proxy bypass and content protection DRM</p>
         </div>
         <div className="flex gap-2">
           {/* View Mode Switcher */}

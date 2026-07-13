@@ -64,12 +64,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
     );
     final favorites = ref.watch(favoriteChannelIdsProvider);
 
-    final titleStyle = TextStyle(
-      fontSize: 20,
-      fontWeight: FontWeight.w900,
-      color: theme.colorScheme.primary,
-      letterSpacing: 3,
-    );
+    final titleStyle = theme.appBarTheme.titleTextStyle ?? const TextStyle();
 
     final appBarGlassDeco = BoxDecoration(
       color: theme.colorScheme.surface,
@@ -112,7 +107,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
                       }
                     },
                   )
-                : Text('CHANNELS', style: titleStyle),
+                : Text('Channels', style: titleStyle),
             actions: _isSearching
                 ? null
                 : [
@@ -631,7 +626,7 @@ class _CategoryChipState extends State<_CategoryChip> {
 
     _selectedDeco = BoxDecoration(
       color: primaryColor.withValues(alpha: 0.12),
-      borderRadius: const BorderRadius.all(Radius.circular(20)),
+      borderRadius: const BorderRadius.all(Radius.circular(8)),
       border: Border.fromBorderSide(
         BorderSide(color: primaryColor.withValues(alpha: 0.47), width: 0.8),
       ),
@@ -639,7 +634,7 @@ class _CategoryChipState extends State<_CategoryChip> {
 
     _unselectedDeco = BoxDecoration(
       color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.04),
-      borderRadius: const BorderRadius.all(Radius.circular(20)),
+      borderRadius: const BorderRadius.all(Radius.circular(8)),
       border: Border.fromBorderSide(
         BorderSide(
           color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06),
@@ -650,7 +645,7 @@ class _CategoryChipState extends State<_CategoryChip> {
 
     _unselectedHoveredDeco = BoxDecoration(
       color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08),
-      borderRadius: const BorderRadius.all(Radius.circular(20)),
+      borderRadius: const BorderRadius.all(Radius.circular(8)),
       border: Border.fromBorderSide(
         BorderSide(
           color: isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.15),
@@ -661,12 +656,12 @@ class _CategoryChipState extends State<_CategoryChip> {
 
     _countSelectedDeco = BoxDecoration(
       color: primaryColor.withValues(alpha: 0.24),
-      borderRadius: const BorderRadius.all(Radius.circular(10)),
+      borderRadius: const BorderRadius.all(Radius.circular(4)),
     );
 
     _countUnselectedDeco = BoxDecoration(
       color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.08),
-      borderRadius: const BorderRadius.all(Radius.circular(10)),
+      borderRadius: const BorderRadius.all(Radius.circular(4)),
     );
 
     _selectedTextStyle = TextStyle(
