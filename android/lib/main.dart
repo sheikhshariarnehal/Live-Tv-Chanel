@@ -23,6 +23,11 @@ void main() {
   // Ensure binding is ready synchronously — very fast, no I/O.
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Cap the image cache to avoid unbounded decoded-image GC pressure.
+  // 150 images max; 50 MB total — covers a full search result page with headroom.
+  PaintingBinding.instance.imageCache.maximumSize = 150;
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 50 * 1024 * 1024;
+
   // System UI — synchronous, no cost.
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,

@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createAdminSupabaseClient } from '../utils/supabase';
-import { Plus, Edit2, Trash2, Save, X, Search, MoveUp, MoveDown, Layers } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Search, Layers, GripVertical, AlertCircle } from 'lucide-react';
 
 interface Category {
   id: string;
@@ -40,6 +40,13 @@ export default function CategoryManager({ adminToken, onRefreshStats }: Category
 
   const [showAddForm, setShowAddForm] = useState(false);
 
+  // Multi-select state
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+
+  // Drag and drop state
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const originalCategoriesRef = useRef<Category[]>([]);
+
   const supabaseAdmin = createAdminSupabaseClient(adminToken);
 
   const fetchCategories = async () => {
@@ -49,19 +56,22 @@ export default function CategoryManager({ adminToken, onRefreshStats }: Category
       const { data, error: fetchErr } = await supabaseAdmin
         .from('categories')
         .select('*')
-        .order('sort_order', { ascending: true });
+        .order('sort_order', { ascending: true })
+        .order('id', { ascending: true });
 
       if (fetchErr) throw fetchErr;
       setCategories(data || []);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch categories');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch categories');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adminToken]);
 
   const showNotification = (type: 'success' | 'error', msg: string) => {
@@ -116,8 +126,8 @@ export default function CategoryManager({ adminToken, onRefreshStats }: Category
       setEditingId(null);
       fetchCategories();
       onRefreshStats();
-    } catch (err: any) {
-      showNotification('error', err.message || 'Failed to update category');
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Failed to update category');
     }
   };
 
@@ -160,17 +170,26 @@ export default function CategoryManager({ adminToken, onRefreshStats }: Category
       setShowAddForm(false);
       fetchCategories();
       onRefreshStats();
-    } catch (err: any) {
-      showNotification('error', err.message || 'Failed to add category');
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Failed to add category');
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this category? Any channels associated with this category will have their category field set to null.')) {
+    if (!confirm('Are you sure you want to delete this category? This will ALSO permanently delete all channels associated with this category from the database.')) {
       return;
     }
 
     try {
+      // First delete all channels associated with this category
+      const { error: channelsDeleteErr } = await supabaseAdmin
+        .from('channels')
+        .delete()
+        .eq('category', id);
+
+      if (channelsDeleteErr) throw channelsDeleteErr;
+
+      // Then delete the category
       const { error: deleteErr } = await supabaseAdmin
         .from('categories')
         .delete()
@@ -178,11 +197,165 @@ export default function CategoryManager({ adminToken, onRefreshStats }: Category
 
       if (deleteErr) throw deleteErr;
 
-      showNotification('success', 'Category deleted successfully');
+      showNotification('success', 'Category and associated channels deleted successfully');
       fetchCategories();
       onRefreshStats();
-    } catch (err: any) {
-      showNotification('error', err.message || 'Failed to delete category');
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Failed to delete category and associated channels');
+    }
+  };
+
+  const handleSelectRow = (id: string) => {
+    setSelectedCategoryIds(prev =>
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = () => {
+    const pageIds = filteredCategories.map(cat => cat.id);
+    const allPageSelected = pageIds.length > 0 && pageIds.every(id => selectedCategoryIds.includes(id));
+
+    if (allPageSelected) {
+      setSelectedCategoryIds(prev => prev.filter(id => !pageIds.includes(id)));
+    } else {
+      setSelectedCategoryIds(prev => {
+        const otherSelected = prev.filter(id => !pageIds.includes(id));
+        return [...otherSelected, ...pageIds];
+      });
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    const count = selectedCategoryIds.length;
+    if (!confirm(`Are you sure you want to delete the ${count} selected categories? This will ALSO permanently delete all channels associated with these categories.`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      // First delete all channels associated with these categories
+      const { error: channelsDeleteErr } = await supabaseAdmin
+        .from('channels')
+        .delete()
+        .in('category', selectedCategoryIds);
+
+      if (channelsDeleteErr) throw channelsDeleteErr;
+
+      // Then delete the categories
+      const { error: deleteErr } = await supabaseAdmin
+        .from('categories')
+        .delete()
+        .in('id', selectedCategoryIds);
+
+      if (deleteErr) throw deleteErr;
+
+      showNotification('success', `${count} categories deleted successfully`);
+      setSelectedCategoryIds([]);
+      fetchCategories();
+      onRefreshStats();
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Failed to delete selected categories');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBulkActiveChange = async (value: boolean) => {
+    const count = selectedCategoryIds.length;
+    const actionLabel = value ? 'Activate' : 'Deactivate';
+    if (!confirm(`Are you sure you want to ${actionLabel} the ${count} selected categories?`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const { error: updateErr } = await supabaseAdmin
+        .from('categories')
+        .update({ active: value })
+        .in('id', selectedCategoryIds);
+
+      if (updateErr) throw updateErr;
+
+      showNotification('success', `Successfully updated status for ${count} categories`);
+      setSelectedCategoryIds([]);
+      fetchCategories();
+      onRefreshStats();
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Failed to update selected categories');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    if (searchTerm) {
+      e.preventDefault();
+      showNotification('error', 'Please clear search filter before reordering');
+      return;
+    }
+    originalCategoriesRef.current = [...categories];
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index.toString());
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    // Reorder locally
+    const updatedCategories = [...categories];
+    const draggedItem = updatedCategories[draggedIndex];
+    updatedCategories.splice(draggedIndex, 1);
+    updatedCategories.splice(index, 0, draggedItem);
+
+    // Update sort_order values locally based on the new array indices
+    const reordered = updatedCategories.map((cat, idx) => ({
+      ...cat,
+      sort_order: idx + 1,
+    }));
+
+    setCategories(reordered);
+    setDraggedIndex(index);
+  };
+
+  const handleDragEnd = async () => {
+    if (draggedIndex === null) return;
+    setDraggedIndex(null);
+
+    // Find which categories have actually changed their sort_order
+    const changed = categories.filter(cat => {
+      const original = originalCategoriesRef.current.find(orig => orig.id === cat.id);
+      return !original || original.sort_order !== cat.sort_order;
+    });
+
+    if (changed.length === 0) return;
+
+    try {
+      setLoading(true);
+      const { error: upsertErr } = await supabaseAdmin
+        .from('categories')
+        .upsert(
+          changed.map(cat => ({
+            id: cat.id,
+            name: cat.name,
+            icon: cat.icon,
+            icon_url: cat.icon_url,
+            sort_order: cat.sort_order,
+            active: cat.active
+          }))
+        );
+
+      if (upsertErr) throw upsertErr;
+
+      showNotification('success', 'Category order updated successfully');
+      fetchCategories();
+      onRefreshStats();
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Failed to save new category order');
+      fetchCategories();
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -328,12 +501,68 @@ export default function CategoryManager({ adminToken, onRefreshStats }: Category
           <div className="text-center py-8 text-zinc-500">No categories found.</div>
         ) : (
           <div className="space-y-4">
+            {/* Reorder Tip */}
+            {!searchTerm && (
+              <div className="text-[10px] text-purple-400 flex items-center gap-1 bg-purple-950/20 border border-purple-500/10 px-2 py-0.5 rounded w-max">
+                <GripVertical className="w-3 h-3 text-purple-400" />
+                <span>Tip: Drag and drop row grip handles to change category order</span>
+              </div>
+            )}
+
+            {/* Bulk Action Bar */}
+            {selectedCategoryIds.length > 0 && (
+              <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-zinc-900/90 border border-zinc-800 rounded-xl animate-fadeIn shadow-lg">
+                <div className="flex flex-wrap items-center gap-4 text-xs">
+                  <div className="flex items-center gap-2 text-purple-400 font-semibold">
+                    <AlertCircle className="w-4 h-4 text-purple-400 animate-pulse" />
+                    <span>{selectedCategoryIds.length} categories selected</span>
+                  </div>
+
+                  <div className="h-4 w-px bg-zinc-800 hidden md:block" />
+
+                  {/* Bulk Active Status Change */}
+                  <div className="flex items-center gap-1.5">
+                    <select
+                      onChange={async (e) => {
+                        const val = e.target.value;
+                        if (val === '') return;
+                        await handleBulkActiveChange(val === 'true');
+                        e.target.value = ''; // Reset select
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs focus:ring-purple-500 focus:outline-none cursor-pointer"
+                    >
+                      <option value="">Status...</option>
+                      <option value="true">Set Active</option>
+                      <option value="false">Set Inactive</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleBulkDelete}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold transition cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Delete Selected
+                </button>
+              </div>
+            )}
+
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full border-collapse text-left text-sm text-zinc-400">
                 <thead>
-                  <tr className="border-b border-zinc-800 text-zinc-500 text-xs">
-                    <th className="py-3 px-4">Sort Order</th>
+                  <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wider">
+                    <th className="py-3 px-4 w-8 text-center"></th>
+                    <th className="py-3 px-4 w-8">
+                      <input
+                        type="checkbox"
+                        checked={filteredCategories.length > 0 && filteredCategories.every(cat => selectedCategoryIds.includes(cat.id))}
+                        onChange={handleSelectAll}
+                        className="rounded border-zinc-700 bg-zinc-950 text-purple-600 focus:ring-purple-500 cursor-pointer"
+                      />
+                    </th>
+                    <th className="py-3 px-4 w-16">Sort Order</th>
                     <th className="py-3 px-4">ID/Slug</th>
                     <th className="py-3 px-4">Name</th>
                     <th className="py-3 px-4">Icon Identifier</th>
@@ -345,8 +574,28 @@ export default function CategoryManager({ adminToken, onRefreshStats }: Category
                 <tbody className="divide-y divide-zinc-800/50">
                   {filteredCategories.map((category) => {
                     const isEditing = editingId === category.id;
+                    const absoluteIndex = categories.findIndex(c => c.id === category.id);
+                    const isDraggable = true;
                     return (
-                      <tr key={category.id} className="hover:bg-zinc-900/40 transition-colors">
+                      <tr
+                        key={category.id}
+                        className={`hover:bg-zinc-900/40 transition-colors ${draggedIndex === absoluteIndex ? 'opacity-40 bg-zinc-800/50' : ''}`}
+                        draggable={isDraggable}
+                        onDragStart={(e) => handleDragStart(e, absoluteIndex)}
+                        onDragOver={(e) => handleDragOver(e, absoluteIndex)}
+                        onDragEnd={handleDragEnd}
+                      >
+                        <td className="py-3 px-1 text-center w-8 text-zinc-650 hover:text-zinc-400 cursor-grab active:cursor-grabbing">
+                          <GripVertical className="w-4 h-4 mx-auto" />
+                        </td>
+                        <td className="py-3 px-4">
+                          <input
+                            type="checkbox"
+                            checked={selectedCategoryIds.includes(category.id)}
+                            onChange={() => handleSelectRow(category.id)}
+                            className="rounded border-zinc-700 bg-zinc-950 text-purple-600 focus:ring-purple-500 cursor-pointer"
+                          />
+                        </td>
                         <td className="py-3 px-4">
                           {isEditing ? (
                             <input
@@ -472,9 +721,17 @@ export default function CategoryManager({ adminToken, onRefreshStats }: Category
                 return (
                   <div key={category.id} className="p-4 rounded-xl bg-zinc-900/40 border border-zinc-805 space-y-3">
                     <div className="flex justify-between items-center border-b border-zinc-800/60 pb-2">
-                      <span className="font-mono text-xs px-2 py-0.5 rounded bg-zinc-800 text-purple-300">
-                        {category.id}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedCategoryIds.includes(category.id)}
+                          onChange={() => handleSelectRow(category.id)}
+                          className="rounded border-zinc-700 bg-zinc-950 text-purple-600 focus:ring-purple-500 cursor-pointer"
+                        />
+                        <span className="font-mono text-xs px-2 py-0.5 rounded bg-zinc-800 text-purple-300">
+                          {category.id}
+                        </span>
+                      </div>
                       {isEditing ? (
                         <div className="flex gap-2">
                           <button

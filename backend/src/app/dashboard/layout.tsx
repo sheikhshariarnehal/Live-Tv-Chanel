@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, type ReactNode } from 'react';
+import React, { useState, useEffect, useMemo, type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../../providers/auth-provider';
+import { createAdminSupabaseClient } from '../../utils/supabase';
 import {
   Layers, Tv, Calendar, Bell, Shield, LogOut,
   ChevronRight, Activity, Menu, X, Search, Sparkles, List, Users,
@@ -26,9 +27,91 @@ function getTabLabel(pathname: string): string {
 }
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading, logout } = useAuth();
+  const { isAuthenticated, isLoading, logout, adminToken } = useAuth();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Real-time active users logic
+  const [users, setUsers] = useState<any[]>([]);
+  const [nowTime, setNowTime] = useState(new Date());
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const timer = setInterval(() => {
+      setNowTime(new Date());
+    }, 15000);
+    return () => clearInterval(timer);
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !adminToken) return;
+
+    const supabase = createAdminSupabaseClient(adminToken);
+    let channel: any;
+
+    const fetchPresence = async () => {
+      try {
+        const { data } = await supabase
+          .from('user_presence')
+          .select('device_id, status, last_active_at');
+        setUsers(data || []);
+      } catch (err) {
+        console.error('Error fetching presence:', err);
+      }
+    };
+
+    fetchPresence();
+
+    channel = supabase
+      .channel('header-dashboard-presence')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_presence',
+        },
+        (payload: any) => {
+          setUsers((prev) => {
+            const updated = [...prev];
+            const eventType = payload.eventType;
+            const newRow = payload.new;
+            const oldRow = payload.old;
+
+            if (eventType === 'INSERT') {
+              return [newRow, ...updated.filter((u) => u.device_id !== newRow.device_id)];
+            } else if (eventType === 'UPDATE') {
+              const index = updated.findIndex((u) => u.device_id === newRow.device_id);
+              if (index > -1) {
+                updated[index] = newRow;
+                return updated;
+              } else {
+                return [newRow, ...updated];
+              }
+            } else if (eventType === 'DELETE') {
+              const id = oldRow.id || payload.old.id;
+              return updated.filter((u) => u.id !== id);
+            }
+            return prev;
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [isAuthenticated, adminToken]);
+
+  const activeUsersCount = useMemo(() => {
+    return users.filter((u) => {
+      if (u.status === 'offline') return false;
+      const diffMs = nowTime.getTime() - new Date(u.last_active_at).getTime();
+      return diffMs <= 120000;
+    }).length;
+  }, [users, nowTime]);
 
   // Auth gate — guard renders a spinner or redirects
   if (isLoading) {
@@ -151,6 +234,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
           {/* Right */}
           <div className="flex items-center gap-3">
+            {/* Vercel-Style Live Active Users Badge */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold text-xs animate-fadeIn select-none">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span>{activeUsersCount} active now</span>
+            </div>
+
             <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950/60 border border-zinc-800 text-zinc-500 text-xs w-56">
               <Search className="w-3.5 h-3.5" />
               <span className="text-zinc-600">Quick search…</span>
