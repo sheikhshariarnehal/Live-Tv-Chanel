@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/cards/channel_card.dart';
 import '../../models/category.dart';
+import '../../models/channel.dart';
 
 class ChannelsScreen extends ConsumerStatefulWidget {
   const ChannelsScreen({super.key});
@@ -67,8 +67,9 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> with TickerProv
 
     final titleStyle = theme.appBarTheme.titleTextStyle ?? const TextStyle();
 
-    final appBarGlassDeco = BoxDecoration(
-      color: theme.colorScheme.surface,
+    // Static decoration — avoids BoxDecoration allocation on every build.
+    const appBarGlassDeco = BoxDecoration(
+      color: GoPlayTheme.surfaceContainer,
     );
 
     final totalCount = allChannelsAsync.maybeWhen(
@@ -545,51 +546,37 @@ class _CategoryFilterBar extends StatelessWidget {
                 SizedBox(
                   width: 16,
                   height: 16,
-                  child: cat.iconUrl!.toLowerCase().endsWith('.svg')
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: SvgPicture.network(
-                            cat.iconUrl!,
-                            width: 16,
-                            height: 16,
-                            fit: BoxFit.contain,
-                            placeholderBuilder: (context) => Container(
-                              width: 16,
-                              height: 16,
-                              color: Colors.white10,
-                            ),
-                          ),
-                        )
-                      : CachedNetworkImage(
-                          imageUrl: cat.iconUrl!,
-                          width: 16,
-                          height: 16,
+                  child: CachedNetworkImage(
+                    imageUrl: cat.iconUrl!,
+                    width: 16,
+                    height: 16,
+                    fit: BoxFit.cover,
+                    memCacheWidth: 48,
+                    memCacheHeight: 48,
+                    fadeInDuration: const Duration(milliseconds: 100),
+                    imageBuilder: (context, imageProvider) => Container(
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.all(Radius.circular(4)),
+                        image: DecorationImage(
+                          image: imageProvider,
                           fit: BoxFit.cover,
-                          memCacheWidth: 48,
-                          memCacheHeight: 48,
-                          imageBuilder: (context, imageProvider) => Container(
-                            decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.all(Radius.circular(4)),
-                              image: DecorationImage(
-                                image: imageProvider,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          placeholder: (context, url) => Container(
-                            width: 16,
-                            height: 16,
-                            decoration: const BoxDecoration(
-                              color: Colors.white10,
-                              borderRadius: BorderRadius.all(Radius.circular(4)),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) => const Icon(
-                            Icons.category_outlined,
-                            size: 12,
-                            color: Colors.grey,
-                          ),
                         ),
+                      ),
+                    ),
+                    placeholder: (context, url) => Container(
+                      width: 16,
+                      height: 16,
+                      decoration: const BoxDecoration(
+                        color: Colors.white10,
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => const Icon(
+                      Icons.category_outlined,
+                      size: 12,
+                      color: Colors.grey,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 6),
               ],
@@ -656,7 +643,7 @@ class _CategoryFilterBar extends StatelessWidget {
 
 // ─── Responsive Grid ──────────────────────────────────────────
 class _ResponsiveGrid extends StatefulWidget {
-  final List channels;
+  final List<Channel> channels;
   final Set<String> favorites;
   final WidgetRef ref;
   final double topPad;
@@ -675,6 +662,11 @@ class _ResponsiveGrid extends StatefulWidget {
 }
 
 class _ResponsiveGridState extends State<_ResponsiveGrid> {
+  // Memoized filtered list — only recomputed when query or channels change.
+  List<Channel>? _filtered;
+  String _lastQuery = '';
+  List<Channel>? _lastChannels;
+
   @override
   void initState() {
     super.initState();
@@ -688,6 +680,11 @@ class _ResponsiveGridState extends State<_ResponsiveGrid> {
       oldWidget.searchQueryNotifier.removeListener(_onSearchChanged);
       widget.searchQueryNotifier.addListener(_onSearchChanged);
     }
+    // Channels list reference changed — invalidate memoized result.
+    if (oldWidget.channels != widget.channels) {
+      _filtered = null;
+      _lastChannels = null;
+    }
   }
 
   @override
@@ -697,27 +694,40 @@ class _ResponsiveGridState extends State<_ResponsiveGrid> {
   }
 
   void _onSearchChanged() {
-    if (mounted) setState(() {});
+    if (mounted) setState(() => _filtered = null); // invalidate cache, rebuild
   }
 
-  @override
-  Widget build(BuildContext context) {
+  List<Channel> _computeFiltered() {
     final query = widget.searchQueryNotifier.value.trim().toLowerCase();
-    final filtered = query.isEmpty
+    // Use memoized result if inputs haven't changed.
+    if (_filtered != null &&
+        _lastQuery == query &&
+        _lastChannels == widget.channels) {
+      return _filtered!;
+    }
+    _lastQuery = query;
+    _lastChannels = widget.channels;
+    _filtered = query.isEmpty
         ? widget.channels
         : widget.channels.where((ch) {
             return ch.name.toLowerCase().contains(query) ||
                 (ch.country?.toLowerCase().contains(query) ?? false) ||
                 (ch.language?.toLowerCase().contains(query) ?? false);
           }).toList();
+    return _filtered!;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filtered = _computeFiltered();
 
     if (filtered.isEmpty) {
       return SliverFillRemaining(
         hasScrollBody: false,
         child: _EmptyState(
-          isSearch: query.isNotEmpty,
+          isSearch: _lastQuery.isNotEmpty,
           onAction: () {
-            if (query.isNotEmpty) {
+            if (_lastQuery.isNotEmpty) {
               widget.searchQueryNotifier.value = '';
             } else {
               widget.ref.read(selectedCategoryProvider.notifier).select('all');
@@ -740,13 +750,18 @@ class _ResponsiveGridState extends State<_ResponsiveGrid> {
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final channel = filtered[index];
-            return ChannelCard(
-              key: ValueKey(channel.id),
-              channel: channel,
-              isFavorite: widget.favorites.contains(channel.id),
-              onFavoriteTap: () => widget.ref
-                  .read(favoriteChannelIdsProvider.notifier)
-                  .toggle(channel.id),
+            // ExcludeSemantics prevents expensive accessibility tree
+            // recalculations during fast scrolling (Semantics.ensureGeometry
+            // spiked to 7.5 s in the trace).
+            return ExcludeSemantics(
+              child: ChannelCard(
+                key: ValueKey(channel.id),
+                channel: channel,
+                isFavorite: widget.favorites.contains(channel.id),
+                onFavoriteTap: () => widget.ref
+                    .read(favoriteChannelIdsProvider.notifier)
+                    .toggle(channel.id),
+              ),
             );
           },
           childCount: filtered.length,
@@ -777,9 +792,38 @@ class _CategoryPageContent extends ConsumerStatefulWidget {
 
 class _CategoryPageContentState extends ConsumerState<_CategoryPageContent>
     with AutomaticKeepAliveClientMixin {
+  List<Channel>? _lastPrecachedChannels;
 
   @override
   bool get wantKeepAlive => true;
+
+  /// Staggered precaching — fires 5 logos per frame across multiple frames
+  /// so no single POST_FRAME callback blocks the pipeline.
+  void _staggeredPrecache(BuildContext context, List<Channel> channels) {
+    const batchSize = 5;
+    final total = channels.length < 30 ? channels.length : 30;
+    var offset = 0;
+
+    void batch() {
+      if (!mounted) return;
+      final end = (offset + batchSize).clamp(0, total);
+      for (var i = offset; i < end; i++) {
+        final logo = channels[i].logo;
+        if (logo != null && logo.isNotEmpty) {
+          precacheImage(
+            CachedNetworkImageProvider(logo, maxWidth: 108, maxHeight: 108),
+            context,
+          );
+        }
+      }
+      offset = end;
+      if (offset < total) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => batch());
+      }
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => batch());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -790,6 +834,11 @@ class _CategoryPageContentState extends ConsumerState<_CategoryPageContent>
 
     return channelsAsync.when(
       data: (channels) {
+        if (_lastPrecachedChannels != channels) {
+          _lastPrecachedChannels = channels;
+          _staggeredPrecache(context, channels);
+        }
+
         return SafeArea(
           top: false,
           bottom: false,
@@ -797,6 +846,7 @@ class _CategoryPageContentState extends ConsumerState<_CategoryPageContent>
             builder: (context) {
               return CustomScrollView(
                 key: PageStorageKey<String>(widget.categoryId),
+                cacheExtent: 200, // Limit offscreen pre-fetch to reduce image cache churn
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
                   SliverOverlapInjector(

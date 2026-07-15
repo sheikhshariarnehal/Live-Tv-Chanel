@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
-/// Renders a team flag or logo, supporting both emoji characters, network image URLs, and country codes
+/// Renders a team flag or logo, supporting both emoji characters, network image URLs, and country codes.
+///
+/// Uses pre-rasterized PNG flags from flagcdn.com instead of SVG to avoid
+/// per-frame XML re-parsing and Canvas::saveLayer overhead.
 class TeamFlagWidget extends StatelessWidget {
   final String? flag;
   final double size;
@@ -36,10 +39,10 @@ class TeamFlagWidget extends StatelessWidget {
 
     final trimmed = flag!.trim();
 
-    // 1. If it's a URL
+    // 1. If it's a URL — use CachedNetworkImage for all URLs (including SVG URLs,
+    //    which CachedNetworkImage handles by downloading and decoding the bytes).
     if (trimmed.startsWith('http') || trimmed.startsWith('/') || trimmed.startsWith('data:')) {
-      final isSvg = trimmed.toLowerCase().split('?').first.endsWith('.svg');
-      // RepaintBoundary isolates SVG/image raster work from parent list repaints.
+      // RepaintBoundary isolates image raster work from parent list repaints.
       return RepaintBoundary(
         child: Container(
           width: size * 1.2,
@@ -49,31 +52,29 @@ class TeamFlagWidget extends StatelessWidget {
             border: Border.all(color: Colors.white.withAlpha(25), width: 0.5),
           ),
           child: ClipOval(
-            child: isSvg
-                ? SvgPicture.network(
-                    trimmed,
-                    fit: BoxFit.cover,
-                    placeholderBuilder: (context) => _buildFallback(),
-                  )
-                : Image.network(
-                    trimmed,
-                    fit: BoxFit.cover,
-                    // Cap decode size to 96 px (covers up to 40 dp at 3× DPR).
-                    // Prevents the raster thread from decoding oversized network images.
-                    cacheWidth: ((size * 1.2 * 2).toInt()).clamp(0, 96),
-                    cacheHeight: ((size * 1.2 * 2).toInt()).clamp(0, 96),
-                    errorBuilder: (context, error, stackTrace) => _buildFallback(),
-                  ),
+            child: CachedNetworkImage(
+              imageUrl: trimmed,
+              fit: BoxFit.cover,
+              // Cap decode size to 96 px (covers up to 40 dp at 3× DPR).
+              memCacheWidth: 96,
+              memCacheHeight: 96,
+              fadeInDuration: const Duration(milliseconds: 100),
+              placeholder: (context, url) => _buildFallback(),
+              errorWidget: (context, url, error) => _buildFallback(),
+            ),
           ),
         ),
       );
     }
 
-    // 2. Try to get country code (either from raw code or from emoji flag)
+    // 2. Try to get country code (either from raw code or from emoji flag).
+    //    Use pre-rasterized PNG from flagcdn.com instead of SVG from flag-icons.
     final countryCode = _emojiToCountryCode(trimmed);
     if (countryCode != null) {
-      final svgUrl = 'https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/flags/1x1/$countryCode.svg';
-      // RepaintBoundary isolates SVG raster work from parent list repaints.
+      // flagcdn.com serves pre-rasterized PNGs at exact widths — no SVG parsing needed.
+      // w80 covers up to 26dp flags at 3× DPR.
+      final pngUrl = 'https://flagcdn.com/w80/$countryCode.png';
+      // RepaintBoundary isolates image raster work from parent list repaints.
       return RepaintBoundary(
         child: Container(
           width: size * 1.2,
@@ -83,10 +84,14 @@ class TeamFlagWidget extends StatelessWidget {
             border: Border.all(color: Colors.white.withAlpha(25), width: 0.5),
           ),
           child: ClipOval(
-            child: SvgPicture.network(
-              svgUrl,
+            child: CachedNetworkImage(
+              imageUrl: pngUrl,
               fit: BoxFit.cover,
-              placeholderBuilder: (context) => _buildFallback(),
+              memCacheWidth: 80,
+              memCacheHeight: 80,
+              fadeInDuration: const Duration(milliseconds: 100),
+              placeholder: (context, url) => _buildFallback(),
+              errorWidget: (context, url, error) => _buildFallback(),
             ),
           ),
         ),
