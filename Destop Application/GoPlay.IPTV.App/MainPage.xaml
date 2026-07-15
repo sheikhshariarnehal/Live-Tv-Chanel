@@ -1,0 +1,218 @@
+<Page
+    x:Class="GoPlay_IPTV_App.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:GoPlay_IPTV_App"
+    xmlns:converters="using:GoPlay_IPTV_App.Converters"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibility" />
+        <converters:NullToVisibilityConverter x:Key="NotNullToVisibility" Inverse="True" />
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+    </Page.Resources>
+
+    <Grid Background="{StaticResource ThemeBrushBackground}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="290" />
+        </Grid.ColumnDefinitions>
+
+        <!-- LEFT: Player Viewport -->
+        <Grid Grid.Column="0" Background="Black" CornerRadius="12" Margin="12,12,6,12">
+            
+            <!-- WELCOME PANEL: Shows when no channel is selected -->
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="16"
+                        Visibility="{Binding SelectedChannel, Converter={StaticResource NullToVisibility}}">
+                <!-- Large Logo/Icon -->
+                <Border Width="96" Height="96" CornerRadius="48" Background="#1DFFFFFF" BorderThickness="1" BorderBrush="#33FFFFFF" HorizontalAlignment="Center">
+                    <FontIcon Glyph="&#xE7F4;" FontFamily="Segoe MDL2 Assets" FontSize="44" Foreground="{StaticResource ThemeBrushPrimary}" />
+                </Border>
+                <TextBlock Text="GoPlay IPTV Desktop" Style="{StaticResource TextBlockHeadlineMd}" HorizontalAlignment="Center" Foreground="White" />
+                <TextBlock Text="Select a channel from the list to start watching" Style="{StaticResource TextBlockBodyMd}" Foreground="{StaticResource ThemeBrushOnSurfaceVariant}" HorizontalAlignment="Center" />
+            </StackPanel>
+
+            <!-- PLAYER INTERFACE: Shows when a channel is selected -->
+            <Grid Visibility="{Binding SelectedChannel, Converter={StaticResource NotNullToVisibility}}">
+                <!-- Container Grid for dynamic WebView2 creation -->
+                <Grid x:Name="PlayerContainer" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+
+                <!-- Center Play Button (Interactive Overlay) -->
+                <Button Command="{Binding TogglePlayCommand}" Width="80" Height="80" CornerRadius="40" Background="#1AFFFFFF" BorderThickness="1" BorderBrush="#33FFFFFF" 
+                        HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0">
+                    <FontIcon Glyph="{Binding PlayPauseGlyph}" FontFamily="Segoe MDL2 Assets" FontSize="36" Foreground="White" />
+                </Button>
+
+                <!-- Floating Channel Info Overlay (OSD) -->
+                <Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="24,0,0,96" 
+                        Background="#CC20201F" CornerRadius="8" Padding="16,12" BorderThickness="1" BorderBrush="#404752">
+                    <StackPanel Orientation="Horizontal" Spacing="16">
+                        <!-- Channel Logo Thumbnail -->
+                        <Border Width="48" Height="48" CornerRadius="8" Background="#353535" VerticalAlignment="Center">
+                            <Grid>
+                                <!-- Logo Image -->
+                                <Image Source="{Binding SelectedChannel.Logo}" Stretch="UniformToFill" />
+                                <!-- Initials Fallback if no logo image -->
+                                <TextBlock Text="TV" Style="{StaticResource TextBlockTitleSm}" 
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"
+                                           Visibility="{Binding SelectedChannel.Logo, Converter={StaticResource NullToVisibility}}" />
+                            </Grid>
+                        </Border>
+                        <!-- Channel Details -->
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding SelectedChannel.Name}" 
+                                       Style="{StaticResource TextBlockHeadlineMd}" FontSize="18" Foreground="White" Margin="0,0,0,4" />
+                            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                                <Border Background="#404752" CornerRadius="4" Padding="6,2">
+                                    <TextBlock Text="{Binding SelectedChannel.Quality, FallbackValue='HD'}" Style="{StaticResource TextBlockLabelXs}" Foreground="{StaticResource ThemeBrushOnSurfaceVariant}" />
+                                </Border>
+                                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" 
+                                            Visibility="{Binding SelectedChannel.IsLive, Converter={StaticResource BoolToVisibility}}">
+                                    <Ellipse Width="8" Height="8" Fill="{StaticResource ThemeBrushError}" />
+                                    <TextBlock Text="LIVE" Style="{StaticResource TextBlockLabelXs}" Foreground="{StaticResource ThemeBrushError}" FontWeight="Bold" />
+                                </StackPanel>
+                                <TextBlock Text="H.265" Style="{StaticResource TextBlockLabelXs}" Foreground="{StaticResource ThemeBrushOnSurfaceVariant}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Bottom Controls Bar -->
+                <Border VerticalAlignment="Bottom" Height="80" Background="#E60E0E0E" BorderThickness="0,1,0,0" BorderBrush="#404752" Padding="24,8">
+                    <Grid VerticalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <!-- Progress Slider -->
+                        <Slider Grid.Row="0" Margin="0,0,0,4" Height="10" Value="65" Minimum="0" Maximum="100" Foreground="{StaticResource ThemeBrushPrimaryContainer}" />
+                        <!-- Controls Row -->
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Left: Playback controls -->
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                                <Button Command="{Binding PreviousChannelCommand}" Content="&#xE892;" FontFamily="Segoe MDL2 Assets" Width="36" Height="36" Background="Transparent" BorderBrush="Transparent" Foreground="White" />
+                                <Button Command="{Binding TogglePlayCommand}" Content="{Binding PlayPauseGlyph}" FontFamily="Segoe MDL2 Assets" Width="40" Height="40" Background="Transparent" BorderBrush="Transparent" Foreground="White" FontSize="20" />
+                                <Button Command="{Binding NextChannelCommand}" Content="&#xE893;" FontFamily="Segoe MDL2 Assets" Width="36" Height="36" Background="Transparent" BorderBrush="Transparent" Foreground="White" />
+                                <AppBarSeparator Margin="4,0" />
+                                <!-- Volume -->
+                                <Button Command="{Binding ToggleMuteCommand}" Content="{Binding VolumeGlyph}" FontFamily="Segoe MDL2 Assets" Width="36" Height="36" Background="Transparent" BorderBrush="Transparent" Foreground="White" />
+                                <Slider Width="100" Value="{Binding Volume, Mode=TwoWay}" Minimum="0" Maximum="100" Foreground="White" VerticalAlignment="Center" />
+                                <TextBlock Text="Live" Style="{StaticResource TextBlockMonoStats}" Foreground="{StaticResource ThemeBrushOnSurfaceVariant}" VerticalAlignment="Center" Margin="12,0,0,0" />
+                            </StackPanel>
+
+                            <!-- Right Actions -->
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <Button Command="{Binding NavigateToSettingsCommand}" Content="&#xE713;" FontFamily="Segoe MDL2 Assets" Width="36" Height="36" Background="Transparent" BorderBrush="Transparent" Foreground="{StaticResource ThemeBrushOnSurfaceVariant}" />
+                                <Button Content="&#xE9D2;" FontFamily="Segoe MDL2 Assets" Width="36" Height="36" Background="Transparent" BorderBrush="Transparent" Foreground="{StaticResource ThemeBrushOnSurfaceVariant}" />
+                                <Button Content="&#xE8F1;" FontFamily="Segoe MDL2 Assets" Width="36" Height="36" Background="Transparent" BorderBrush="Transparent" Foreground="{StaticResource ThemeBrushPrimary}" />
+                                <Button Content="&#xE740;" FontFamily="Segoe MDL2 Assets" Width="36" Height="36" Background="Transparent" BorderBrush="Transparent" Foreground="{StaticResource ThemeBrushOnSurfaceVariant}" />
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+
+
+        <!-- RIGHT: Sidebar (Acrylic style container) -->
+        <Grid Grid.Column="1" Background="#E61B1B1B" CornerRadius="12" Margin="6,12,12,12" BorderThickness="1,0,0,0" BorderBrush="#404752">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" /> <!-- Premium Header & Search -->
+                <RowDefinition Height="Auto" /> <!-- Categories Chips -->
+                <RowDefinition Height="*" />    <!-- Channels List -->
+            </Grid.RowDefinitions>
+
+            <!-- Sidebar Header / Search -->
+            <StackPanel Grid.Row="0" Padding="16" Spacing="16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="GoPlay Premium" Style="{StaticResource TextBlockTitleSm}" Foreground="{StaticResource ThemeBrushPrimary}" />
+                        <TextBlock Text="4K Monitoring Active" Style="{StaticResource TextBlockLabelXs}" Foreground="{StaticResource ThemeBrushOnSurfaceVariant}" />
+                    </StackPanel>
+                    <Border Grid.Column="1" Width="32" Height="32" CornerRadius="16" Background="#353535" BorderThickness="1" BorderBrush="#404752">
+                        <FontIcon Glyph="&#xE77B;" FontSize="14" Foreground="White" />
+                    </Border>
+                </Grid>
+                <!-- Search Box -->
+                <TextBox Text="{Binding SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Search channels..." Background="#131313" BorderThickness="1" BorderBrush="#404752" CornerRadius="6" VerticalAlignment="Center" Height="36" />
+            </StackPanel>
+
+            <!-- Category Chips (ListView Styled Horizontally) -->
+            <ListView Grid.Row="1" 
+                      ItemsSource="{Binding Categories}" 
+                      SelectedItem="{Binding SelectedCategory, Mode=TwoWay}"
+                      ScrollViewer.HorizontalScrollMode="Enabled" 
+                      ScrollViewer.HorizontalScrollBarVisibility="Hidden" 
+                      ScrollViewer.VerticalScrollMode="Disabled" 
+                      SelectionMode="Single"
+                      Margin="16,0,16,12">
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="6" />
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Margin" Value="0" />
+                        <Setter Property="MinWidth" Value="0" />
+                        <Setter Property="MinHeight" Value="0" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border CornerRadius="8" Padding="12,6" BorderThickness="1" Background="#353535" BorderBrush="Transparent">
+                            <TextBlock Text="{Binding Name}" Style="{StaticResource TextBlockLabelXs}" Foreground="White" />
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <!-- Channel List -->
+            <ListView Grid.Row="2" ItemsSource="{Binding Channels}" SelectedItem="{Binding SelectedChannel, Mode=TwoWay}" Padding="8" Margin="0,0,0,8">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="8" CornerRadius="8" Margin="0,2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <!-- Channel Logo Thumbnail -->
+                            <Border Grid.Column="0" Width="48" Height="32" CornerRadius="4" Background="#131313" BorderThickness="1" BorderBrush="#404752" Margin="0,0,12,0">
+                                <Image Source="{Binding Logo}" Stretch="UniformToFill" />
+                            </Border>
+                            <!-- Info -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Name}" Style="{StaticResource TextBlockBodyMd}" FontWeight="SemiBold" Foreground="White" MaxLines="1" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding Category}" Style="{StaticResource TextBlockLabelXs}" Foreground="{StaticResource ThemeBrushOnSurfaceVariant}" />
+                            </StackPanel>
+                            <!-- Live badge -->
+                            <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                <Border Background="#93000A" CornerRadius="2" Padding="4,2" Margin="0,0,0,4">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <Ellipse Width="6" Height="6" Fill="Red" />
+                                        <TextBlock Text="LIVE" FontSize="8" FontWeight="Bold" Foreground="White" />
+                                    </StackPanel>
+                                </Border>
+                                <TextBlock Text="{Binding Quality}" Style="{StaticResource TextBlockMonoStats}" FontSize="10" Foreground="{StaticResource ThemeBrushOutline}" HorizontalAlignment="Right" />
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
+    </Grid>
+</Page>
+

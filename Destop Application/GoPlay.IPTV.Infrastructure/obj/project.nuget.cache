@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "8NQzt5vXV5k=",
+  "success": true,
+  "projectFilePath": "D:\\Poject\\GoPlay\\Destop Application\\GoPlay.IPTV.Infrastructure\\GoPlay.IPTV.Infrastructure.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Sheikh Shariar Nehal\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\9.0.17\\microsoft.netcore.app.runtime.win-x64.9.0.17.nupkg.sha512",
+    "C:\\Users\\Sheikh Shariar Nehal\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\9.0.17\\microsoft.windowsdesktop.app.runtime.win-x64.9.0.17.nupkg.sha512",
+    "C:\\Users\\Sheikh Shariar Nehal\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\9.0.17\\microsoft.aspnetcore.app.runtime.win-x64.9.0.17.nupkg.sha512"
+  ],
+  "logs": []
+}

@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:media_kit/media_kit.dart';
 
 import 'core/constants.dart';
 import 'core/theme.dart';
@@ -22,6 +25,9 @@ late final Future<void> appInitFuture;
 void main() {
   // Ensure binding is ready synchronously — very fast, no I/O.
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize media_kit for cross-platform video playback (Windows/Linux/macOS).
+  MediaKit.ensureInitialized();
 
   // Cap the image cache to avoid unbounded decoded-image GC pressure.
   // 150 images max; 50 MB total — covers a full search result page with headroom.
@@ -58,13 +64,49 @@ Future<void> _initializeApp() async {
 }
 
 Future<void> _initHive() async {
-  await Hive.initFlutter();
-  await Future.wait([
-    Hive.openBox(AppConstants.settingsBox),
-    Hive.openBox(AppConstants.channelsBox),
-    Hive.openBox(AppConstants.eventsBox),
-    Hive.openBox(AppConstants.categoriesBox),
-  ]);
+  if (kIsWeb) {
+    // On web, Hive uses IndexedDB — no path needed.
+    await Hive.initFlutter();
+  } else {
+    // Use the app-private support directory instead of Documents.
+    // Documents is shared and any other process can interfere with .lock files.
+    // getApplicationSupportDirectory() → AppData\Roaming\<bundle-id>\ on Windows.
+    final supportDir = await getApplicationSupportDirectory();
+    final hiveDir = Directory('${supportDir.path}/hive');
+    if (!hiveDir.existsSync()) hiveDir.createSync(recursive: true);
+
+    // Clean up any stale .lock files from a previous crashed instance.
+    try {
+      final lockFiles = hiveDir
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.lock'));
+      for (final f in lockFiles) {
+        try { f.deleteSync(); } catch (_) {}
+      }
+    } catch (_) {}
+
+    Hive.init(hiveDir.path);
+  }
+
+  // Open each box individually so a single failure doesn't block the others.
+  final boxNames = [
+    AppConstants.settingsBox,
+    AppConstants.channelsBox,
+    AppConstants.eventsBox,
+    AppConstants.categoriesBox,
+  ];
+  await Future.wait(
+    boxNames.map((name) async {
+      try {
+        if (!Hive.isBoxOpen(name)) {
+          await Hive.openBox(name);
+        }
+      } catch (e) {
+        debugPrint('Hive: failed to open box "$name": $e');
+      }
+    }),
+  );
 }
 
 Future<void> _initSupabase() async {

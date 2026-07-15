@@ -1,0 +1,12 @@
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Core\bin\Debug\net9.0\win-x86\GoPlay.IPTV.Core.deps.json
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Core\bin\Debug\net9.0\win-x86\GoPlay.IPTV.Core.dll
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Core\bin\Debug\net9.0\win-x86\GoPlay.IPTV.Core.pdb
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Core\obj\Debug\net9.0\win-x86\GoPlay.IPTV.Core.GeneratedMSBuildEditorConfig.editorconfig
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Core\obj\Debug\net9.0\win-x86\GoPlay.IPTV.Core.AssemblyInfoInputs.cache
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Core\obj\Debug\net9.0\win-x86\GoPlay.IPTV.Core.AssemblyInfo.cs
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Core\obj\Debug\net9.0\win-x86\GoPlay.IPTV.Core.csproj.CoreCompileInputs.cache
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Core\obj\Debug\net9.0\win-x86\GoPlay.IPTV.Core.sourcelink.json
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Core\obj\Debug\net9.0\win-x86\GoPlay.IPTV.Core.dll
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Core\obj\Debug\net9.0\win-x86\refint\GoPlay.IPTV.Core.dll
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Core\obj\Debug\net9.0\win-x86\GoPlay.IPTV.Core.pdb
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Core\obj\Debug\net9.0\win-x86\ref\GoPlay.IPTV.Core.dll

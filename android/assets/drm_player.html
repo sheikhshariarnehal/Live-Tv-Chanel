@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GoPlay DRM Player</title>
+  <!-- Load Shaka Player from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      outline: none;
+      background: black;
+    }
+    #error-container {
+      display: none;
+      color: #ff5252;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+      position: absolute;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <video id="video" autoplay crossorigin="anonymous"></video>
+  <div id="error-container"></div>
+
+  <script>
+    let player = null;
+
+    async function initPlayer(streamUrl, drmConfigJson, headersJson) {
+      console.log("initPlayer called with url: " + streamUrl);
+      const video = document.getElementById('video');
+      const errorContainer = document.getElementById('error-container');
+      
+      // Clear existing error
+      errorContainer.style.display = 'none';
+
+      // Attach video event listeners to communicate state back to Flutter
+      video.addEventListener('play', () => {
+        if (window.flutter_inappwebview) {
+          window.flutter_inappwebview.callHandler('onPlayStateChanged', true);
+          window.flutter_inappwebview.callHandler('onBufferingStateChanged', false);
+        }
+      });
+      video.addEventListener('pause', () => {
+        if (window.flutter_inappwebview) {
+          window.flutter_inappwebview.callHandler('onPlayStateChanged', false);
+        }
+      });
+      video.addEventListener('waiting', () => {
+        if (window.flutter_inappwebview) {
+          window.flutter_inappwebview.callHandler('onBufferingStateChanged', true);
+        }
+      });
+      video.addEventListener('playing', () => {
+        if (window.flutter_inappwebview) {
+          window.flutter_inappwebview.callHandler('onPlayStateChanged', true);
+          window.flutter_inappwebview.callHandler('onBufferingStateChanged', false);
+        }
+      });
+      video.addEventListener('timeupdate', () => {
+        if (window.flutter_inappwebview) {
+          window.flutter_inappwebview.callHandler('onProgressChanged', video.currentTime, video.duration || 0);
+        }
+      });
+
+      // Install polyfills
+      shaka.polyfill.installAll();
+
+      if (!shaka.Player.isBrowserSupported()) {
+        errorContainer.textContent = 'Browser does not support DRM playback.';
+        errorContainer.style.display = 'block';
+        return;
+      }
+
+      if (player) {
+        try {
+          await player.destroy();
+        } catch (e) {
+          console.error("Error destroying previous player:", e);
+        }
+      }
+
+      player = new shaka.Player(video);
+      
+      // Set up error handler
+      player.addEventListener('error', (event) => {
+        console.error('Shaka player error:', event.detail);
+        errorContainer.textContent = 'Playback Error: ' + (event.detail.message || 'Code ' + event.detail.code);
+        errorContainer.style.display = 'block';
+      });
+
+      // Parse custom request headers
+      let headers = {};
+      if (headersJson) {
+        try {
+          headers = JSON.parse(headersJson);
+        } catch (e) {
+          console.error("Error parsing headers:", e);
+        }
+      }
+
+      // Register request filter to inject custom headers (for Referer, User-Agent, Auth, etc.)
+      player.getNetworkingEngine().registerRequestFilter((type, request) => {
+        for (const [key, value] of Object.entries(headers)) {
+          request.headers[key] = value;
+        }
+      });
+
+      // Configure DRM
+      if (drmConfigJson) {
+        try {
+          const drm = JSON.parse(drmConfigJson);
+          const shakaDrmConfig = {};
+
+          if (drm.type === 'widevine') {
+            shakaDrmConfig.servers = {
+              'com.widevine.alpha': drm.licenseUrl
+            };
+            if (drm.licenseHeaders) {
+              player.getNetworkingEngine().registerRequestFilter((type, request) => {
+                if (type === shaka.net.NetworkingEngine.RequestType.LICENSE) {
+                  for (const [key, value] of Object.entries(drm.licenseHeaders)) {
+                    request.headers[key] = value;
+                  }
+                }
+              });
+            }
+          } else if (drm.type === 'clearkey') {
+            if (drm.clearKeys) {
+              shakaDrmConfig.clearKeys = drm.clearKeys;
+            } else if (drm.kid && drm.key) {
+              shakaDrmConfig.clearKeys = {};
+              shakaDrmConfig.clearKeys[drm.kid] = drm.key;
+            }
+          }
+
+          player.configure({ drm: shakaDrmConfig });
+        } catch (e) {
+          console.error("Error parsing DRM config:", e);
+        }
+      }
+
+      try {
+        await player.load(streamUrl);
+        console.log('Stream loaded successfully!');
+      } catch (e) {
+        console.error('Error loading stream: Severity ' + e.severity + ' Category ' + e.category + ' Code ' + e.code + ' Msg ' + e.message);
+      }
+    }
+  </script>
+</body>
+</html>

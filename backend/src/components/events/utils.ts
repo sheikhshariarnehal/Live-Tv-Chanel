@@ -13,6 +13,8 @@ export interface EventData {
   channels: string[];
   banner: string | null;
   is_featured: boolean;
+  hero_type?: number;
+  custom_title?: string | null;
 }
 
 export interface ChannelData {
@@ -40,6 +42,8 @@ export interface EventFormState {
   channels: string[];
   banner: string;
   is_featured: boolean;
+  hero_type: number;
+  custom_title: string;
 }
 
 export const defaultFormState: EventFormState = {
@@ -55,6 +59,8 @@ export const defaultFormState: EventFormState = {
   channels: [],
   banner: '',
   is_featured: false,
+  hero_type: 1,
+  custom_title: '',
 };
 
 export const SPORT_OPTIONS = [
@@ -235,18 +241,22 @@ export const eventToFormState = (event: EventData): EventFormState => ({
   channels: event.channels || [],
   banner: event.banner || '',
   is_featured: event.is_featured,
+  hero_type: event.hero_type ?? 1,
+  custom_title: event.custom_title || '',
 });
 
 export const formStateToPayload = (form: EventFormState) => ({
   sport: form.sport,
-  league: form.league.trim(),
-  home_team: { name: form.home_name.trim(), flag: cleanFlagValue(form.home_logo) || undefined },
-  away_team: { name: form.away_name.trim(), flag: cleanFlagValue(form.away_logo) || undefined },
+  league: form.league.trim() || 'Featured',
+  home_team: { name: form.home_name.trim() || 'TBD', flag: cleanFlagValue(form.home_logo) || undefined },
+  away_team: { name: form.away_name.trim() || 'TBD', flag: cleanFlagValue(form.away_logo) || undefined },
   start_time: parseLocalDateTime(form.start_time),
   status: form.status,
   channels: form.channels,
   banner: form.banner.trim() || null,
   is_featured: form.is_featured,
+  hero_type: form.hero_type,
+  custom_title: form.custom_title.trim() || null,
 });
 
 export const generateSlug = (homeName: string, awayName: string): string => {

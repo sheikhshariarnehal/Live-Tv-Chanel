@@ -1,0 +1,16 @@
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Infrastructure\bin\Debug\net9.0\win-x86\GoPlay.IPTV.Infrastructure.deps.json
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Infrastructure\bin\Debug\net9.0\win-x86\GoPlay.IPTV.Infrastructure.dll
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Infrastructure\bin\Debug\net9.0\win-x86\GoPlay.IPTV.Infrastructure.pdb
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Infrastructure\bin\Debug\net9.0\win-x86\GoPlay.IPTV.Core.dll
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Infrastructure\bin\Debug\net9.0\win-x86\GoPlay.IPTV.Core.pdb
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Infrastructure\obj\Debug\net9.0\win-x86\GoPlay.IPTV.Infrastructure.csproj.AssemblyReference.cache
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Infrastructure\obj\Debug\net9.0\win-x86\GoPlay.IPTV.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Infrastructure\obj\Debug\net9.0\win-x86\GoPlay.IPTV.Infrastructure.AssemblyInfoInputs.cache
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Infrastructure\obj\Debug\net9.0\win-x86\GoPlay.IPTV.Infrastructure.AssemblyInfo.cs
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Infrastructure\obj\Debug\net9.0\win-x86\GoPlay.IPTV.Infrastructure.csproj.CoreCompileInputs.cache
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Infrastructure\obj\Debug\net9.0\win-x86\GoPlay.IPTV.Infrastructure.sourcelink.json
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Infrastructure\obj\Debug\net9.0\win-x86\GoPlay.I.B9FCAE33.Up2Date
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Infrastructure\obj\Debug\net9.0\win-x86\GoPlay.IPTV.Infrastructure.dll
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Infrastructure\obj\Debug\net9.0\win-x86\refint\GoPlay.IPTV.Infrastructure.dll
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Infrastructure\obj\Debug\net9.0\win-x86\GoPlay.IPTV.Infrastructure.pdb
+D:\Poject\GoPlay\Destop Application\GoPlay.IPTV.Infrastructure\obj\Debug\net9.0\win-x86\ref\GoPlay.IPTV.Infrastructure.dll

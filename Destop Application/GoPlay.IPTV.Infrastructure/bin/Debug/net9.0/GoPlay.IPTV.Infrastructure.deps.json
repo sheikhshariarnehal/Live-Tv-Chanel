@@ -1,0 +1,39 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {
+      "GoPlay.IPTV.Infrastructure/1.0.0": {
+        "dependencies": {
+          "GoPlay.IPTV.Core": "1.0.0"
+        },
+        "runtime": {
+          "GoPlay.IPTV.Infrastructure.dll": {}
+        }
+      },
+      "GoPlay.IPTV.Core/1.0.0": {
+        "runtime": {
+          "GoPlay.IPTV.Core.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "GoPlay.IPTV.Infrastructure/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "GoPlay.IPTV.Core/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

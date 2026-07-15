@@ -149,8 +149,13 @@ export default function EventManager({ adminToken, onRefreshStats }: EventManage
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.home_name.trim() || !formData.away_name.trim()) {
-      notify('error', 'Both team names are required');
+    if (formData.hero_type === 1 && (!formData.home_name.trim() || !formData.away_name.trim())) {
+      notify('error', 'Both team names are required for matchup style events');
+      return;
+    }
+
+    if (formData.hero_type === 2 && !formData.custom_title.trim()) {
+      notify('error', 'Custom title is required for spotlight style events');
       return;
     }
 

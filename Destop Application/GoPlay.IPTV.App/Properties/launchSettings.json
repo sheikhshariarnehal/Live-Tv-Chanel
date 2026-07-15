@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "GoPlay.IPTV.App (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "GoPlay.IPTV.App (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

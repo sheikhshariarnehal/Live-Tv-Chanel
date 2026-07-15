@@ -1,0 +1,64 @@
+<Window
+    x:Class="GoPlay_IPTV_App.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:GoPlay_IPTV_App"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="GoPlay IPTV"
+    mc:Ignorable="d">
+    
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <Grid Background="{StaticResource ThemeBrushBackground}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Custom TitleBar / TopNavBar -->
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="40" Background="#E6131313" BorderBrush="#338A919E" BorderThickness="0,0,0,1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Left: Brand and Now Playing -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0" Spacing="12">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <!-- TV Icon -->
+                    <FontIcon Glyph="&#xE7F4;" FontSize="16" Foreground="{StaticResource ThemeBrushPrimary}" />
+                    <TextBlock Text="GoPlay IPTV" FontFamily="{StaticResource FontFamilyHeader}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ThemeBrushPrimary}" VerticalAlignment="Center" />
+                </StackPanel>
+                <Border Width="1" Height="16" Background="#338A919E" Margin="8,0" />
+                <TextBlock Text="Now Playing: TSports HD" FontFamily="{StaticResource FontFamilyBody}" FontSize="12" Foreground="{StaticResource ThemeBrushOnSurfaceVariant}" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <!-- Center: Navigation Links -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Stretch">
+                <!-- Home Link -->
+                <Button Content="Home" FontFamily="{StaticResource FontFamilyBody}" FontSize="13" Background="Transparent" BorderBrush="Transparent" Foreground="{StaticResource ThemeBrushOnSurfaceVariant}" Padding="12,0" Height="40" CornerRadius="0" />
+                <!-- Channels Link (Active) -->
+                <Border BorderBrush="{StaticResource ThemeBrushPrimary}" BorderThickness="0,0,0,2">
+                    <Button Content="Channels" FontFamily="{StaticResource FontFamilyBody}" FontSize="13" Background="Transparent" BorderBrush="Transparent" Foreground="{StaticResource ThemeBrushPrimary}" Padding="12,0" Height="38" CornerRadius="0" />
+                </Border>
+                <!-- Live Link -->
+                <Button Content="Live" FontFamily="{StaticResource FontFamilyBody}" FontSize="13" Background="Transparent" BorderBrush="Transparent" Foreground="{StaticResource ThemeBrushOnSurfaceVariant}" Padding="12,0" Height="40" CornerRadius="0" />
+                <!-- Upcoming Link -->
+                <Button Content="Upcoming" FontFamily="{StaticResource FontFamilyBody}" FontSize="13" Background="Transparent" BorderBrush="Transparent" Foreground="{StaticResource ThemeBrushOnSurfaceVariant}" Padding="12,0" Height="40" CornerRadius="0" />
+                <!-- Favorites Link -->
+                <Button Content="Favorites" FontFamily="{StaticResource FontFamilyBody}" FontSize="13" Background="Transparent" BorderBrush="Transparent" Foreground="{StaticResource ThemeBrushOnSurfaceVariant}" Padding="12,0" Height="40" CornerRadius="0" />
+            </StackPanel>
+
+            <!-- Right Padding to avoid overlap with Native Window Controls -->
+            <Border Grid.Column="2" Width="140" />
+        </Grid>
+
+        <!-- Root Frame for Page Navigation -->
+        <Frame x:Name="RootFrame" Grid.Row="1" />
+    </Grid>
+</Window>
+

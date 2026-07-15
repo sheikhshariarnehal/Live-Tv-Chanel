@@ -1,0 +1,226 @@
+#EXTM3U x-tvg-url=""
+# FIFA World Cup Broadcasters Playlist (Verified)
+
+#EXTINF:-1 tvg-id="TelefeBuenosAires.ar@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Telefe Buenos Aires
+http://45.134.141.161:2200/ARG/TELEFE_HD/index.m3u8
+
+#EXTINF:-1 tvg-id="TelefeInternacional.ar@SD" tvg-logo="" group-title="FIFA World Cup" quality="576p", Telefe Internacional
+http://190.108.83.69:8000/play/a08l/index.m3u8
+
+#EXTINF:-1 tvg-id="TVPublicaMarcosPaz.ar@SD" tvg-logo="" group-title="FIFA World Cup", TV Publica Marcos Paz
+https://online.radiomelody.com.ar:2443/hls/mediospublicos.m3u8
+
+#EXTINF:-1 tvg-id="TyCSports.ar@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", TyC Sports
+http://45.181.87.106/TYCSPORTSHD/index.m3u8
+
+#EXTINF:-1 tvg-id="TyCSports.ar@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", TyC Sports
+https://amg26268-amg26268c14-freelivesports-emea-10267.playouts.now.amagi.tv/ts-us-e2-n2/playlist/amg26268-sportsstudio-tycsports-freelivesportsemea/playlist.m3u8
+
+#EXTINF:-1 tvg-id="TyCSports2.ar@SD" tvg-logo="" group-title="FIFA World Cup" quality="720p", TyC Sports 2
+http://200.91.32.158:8080/tyc2hd/index.m3u8
+
+#EXTINF:-1 tvg-id="TyCSportsUSA.ar@SD" tvg-logo="" group-title="FIFA World Cup", TyC Sports USA
+http://45.170.130.224:8000/play/a020/index.m3u8
+
+#EXTINF:-1 tvg-id="LaUne.be@SD" tvg-logo="" group-title="FIFA World Cup" quality="720p", La Une
+http://193.111.198.85:8589/stream/mstv/rtbflaunelive26/master.m3u8?p=967e33767f592e1aaf3d4019f38f380bf784e113b193d89c412d047059d6300d&u=Oleg
+
+#EXTINF:-1 tvg-id="Tipik.be@SD" tvg-logo="" group-title="FIFA World Cup" quality="720p", Tipik
+http://193.111.198.85:8589/stream/mstv/rtbftipiklive26/master.m3u8?p=967e33767f592e1aaf3d4019f38f380bf784e113b193d89c412d047059d6300d&u=Oleg
+
+#EXTINF:-1 tvg-id="RedeGlobo.br@SD" tvg-logo="" group-title="FIFA World Cup" quality="720p", Rede Globo
+http://45.190.156.152/GLOBO_HD/index.m3u8
+
+#EXTINF:-1 tvg-id="TVGloboRiodeJaneiro.br@SD" tvg-logo="" group-title="FIFA World Cup" quality="720p", TV Globo Rio de Janeiro
+http://45.190.28.50/GLOBO_HD/index.m3u8
+
+#EXTINF:-1 tvg-id="CTV2Atlantic.ca@SD" tvg-logo="" group-title="FIFA World Cup" quality="720p", CTV 2 Atlantic
+http://stream.cammonitorplus.net/1731/index.m3u8
+
+#EXTINF:-1 tvg-id="TSN1.ca@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", TSN1
+http://40.160.24.55/TSN_1/index.m3u8
+
+#EXTINF:-1 tvg-id="TSN2.ca@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", TSN2
+http://40.160.24.55/TSN_2/index.m3u8
+
+#EXTINF:-1 tvg-id="TSN3.ca@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", TSN3
+http://40.160.24.55/TSN_3/index.m3u8
+
+#EXTINF:-1 tvg-id="TSN4.ca@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", TSN4
+http://40.160.24.55/TSN_4/index.m3u8
+
+#EXTINF:-1 tvg-id="TSN5.ca@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", TSN5
+http://40.160.24.55/TSN_5/index.m3u8
+
+#EXTINF:-1 tvg-id="TSNTheOcho.ca@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", TSN The Ocho
+https://d3pnbvng3bx2nj.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-rds8g35qfqrnv/TSN_The_Ocho.m3u8
+
+#EXTINF:-1 tvg-id="CanalRCN.co@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Canal RCN
+http://138.121.15.230:9002/RCN/index.m3u8
+
+#EXTINF:-1 tvg-id="CanalRCN.co@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Canal RCN
+http://138.186.23.7:8082/RCN/index.m3u8
+
+#EXTINF:-1 tvg-id="CanalRCN.co@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Canal RCN
+http://177.234.249.178:8888/RCN/index.m3u8
+
+#EXTINF:-1 tvg-id="CanalRCN.co@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Canal RCN
+http://181.78.17.228:8081/RCN-HD/index.m3u8
+
+#EXTINF:-1 tvg-id="CanalRCN.co@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Canal RCN
+http://190.61.43.123:8081/RCNHD/index.m3u8
+
+#EXTINF:-1 tvg-id="CaracolHD2.co@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Caracol HD2
+http://181.78.14.26:4000/play/a00d/index.m3u8
+
+#EXTINF:-1 tvg-id="CaracolTV.co@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Caracol TV
+http://45.171.108.253:8888/CARACOL/index.m3u8
+
+#EXTINF:-1 tvg-id="CaracolTV.co@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Caracol TV
+http://138.121.15.230:9002/CARACOL/index.m3u8
+
+#EXTINF:-1 tvg-id="CaracolTV.co@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Caracol TV
+http://177.234.249.178:8888/CARACOL/index.m3u8
+
+#EXTINF:-1 tvg-id="CaracolTV.co@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Caracol TV
+http://181.78.17.228:8081/CARACOL-HD/index.m3u8
+
+#EXTINF:-1 tvg-id="CaracolTV.co@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Caracol TV
+http://190.61.43.123:8081/CARACOLHD/index.m3u8
+
+#EXTINF:-1 tvg-id="RCNHD2.co@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", RCN HD2
+http://181.78.14.26:4000/play/a07m/index.m3u8
+
+#EXTINF:-1 tvg-id="DasErste.de@HD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Das Erste HD
+https://daserste-live.ard-mcdn.de/daserste/live/hls/int/master.m3u8
+
+#EXTINF:-1 tvg-id="La1.es@SD" tvg-logo="" group-title="FIFA World Cup" quality="720p", La 1
+https://rtvelivestream.rtve.es/rtvesec/la1/la1_main.m3u8
+
+#EXTINF:-1 tvg-id="La1.es@SD" tvg-logo="" group-title="FIFA World Cup" quality="720p", La 1
+https://ztnr.rtve.es/ztnr/1688877.m3u8
+
+#EXTINF:-1 tvg-id="La1Canarias.es@SD" tvg-logo="" group-title="FIFA World Cup" quality="720p", La 1 Canarias
+https://rtvelivestream.rtve.es/rtvesec/can/la1_can_main.m3u8
+
+#EXTINF:-1 tvg-id="La1Canarias.es@SD" tvg-logo="" group-title="FIFA World Cup" quality="720p", La 1 Canarias
+https://ztnr.rtve.es/ztnr/5190066.m3u8
+
+#EXTINF:-1 tvg-id="La1Catalunya.es@SD" tvg-logo="" group-title="FIFA World Cup" quality="720p", La 1 Catalunya
+https://rtvelivestream.rtve.es/rtvesec/cat/la1_cat_main.m3u8
+
+#EXTINF:-1 tvg-id="La1Catalunya.es@SD" tvg-logo="" group-title="FIFA World Cup" quality="720p", La 1 Catalunya
+https://ztnr.rtve.es/ztnr/3293681.m3u8
+
+#EXTINF:-1 tvg-id="Teledeporte.es@SD" tvg-logo="" group-title="FIFA World Cup" quality="720p", Teledeporte
+https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8
+
+#EXTINF:-1 tvg-id="M6.fr@HD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", M6
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.3
+http://99.27.51.147:8080/M6/index.m3u8
+
+#EXTINF:-1 tvg-id="TF1.fr@SD" tvg-logo="" group-title="FIFA World Cup" quality="720p", TF1
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
+http://151.80.18.177:86/TF1_HD/index.m3u8
+
+#EXTINF:-1 tvg-id="Rai1.it@SD" tvg-logo="" group-title="FIFA World Cup" quality="576p", Rai 1
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=2606803
+
+#EXTINF:-1 tvg-id="Rai1.it@SD" tvg-logo="" group-title="FIFA World Cup" quality="576p", Rai 1 (Geo)
+https://mediapolisevent.rai.it/relinker/relinkerServlet.htm?cont=2606803
+
+#EXTINF:-1 tvg-id="Rai2.it@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Rai 2
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
+https://d3k8wzt41aflvx.cloudfront.net/RAI2/Live.m3u8
+
+#EXTINF:-1 tvg-id="Canal5.mx@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Canal 5
+http://45.181.87.106/CANAL5HD/index.m3u8
+
+#EXTINF:-1 tvg-id="Canal5.mx@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Canal 5
+http://190.11.225.124:5000/live/canal5_hd/playlist.m3u8
+
+#EXTINF:-1 tvg-id="Canal5.mx@SD" tvg-logo="" group-title="FIFA World Cup" quality="720p", Canal 5
+http://45.5.119.43:4000/play/a05o/index.m3u8
+
+#EXTINF:-1 tvg-id="Canal5TVCozumel.mx@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Canal 5 TV Cozumel
+https://video0.rogohosting.com:19360/tvcozumel/tvcozumel.m3u8
+
+#EXTINF:-1 tvg-id="LasEstrellas.mx@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Las Estrellas
+https://channel01-onlymex.akamaized.net/hls/live/2022749/event01/index.m3u8
+
+#EXTINF:-1 tvg-id="LasEstrellasLatinAmerica.mx@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Las Estrellas Latin America
+http://177.234.249.135:8888/LasEstrellas/index.m3u8
+
+#EXTINF:-1 tvg-id="LasEstrellasLatinAmerica.mx@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Las Estrellas Latin America
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
+http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/Canal_Las_Estrellas.stream/playlist.m3u8
+
+#EXTINF:-1 tvg-id="TUDN.mx@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", TUDN
+https://streaming.alwaysdata.net/tudn.php
+
+#EXTINF:-1 tvg-id="TUDN.mx@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", TUDN
+https://streamvidex.qzz.io/videx/tudnmx/index.m3u8
+
+#EXTINF:-1 tvg-id="WKAQTV21.pr@HD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", WKAQ-DT1 (Telemundo PR)
+https://nbculocallive.akamaized.net/hls/live/2037499/puertorico/stream1/master.m3u8
+
+#EXTINF:-1 tvg-id="Rai1.it@SD" tvg-logo="" group-title="FIFA World Cup" quality="720p", Rai 1
+https://dash2.antik.sk/live/test_rai_uno_tizen/playlist.m3u8
+
+#EXTINF:-1 tvg-id="DSports.us@Panregional" tvg-logo="" group-title="FIFA World Cup" quality="1080p", DSports
+https://streamvidex.qzz.io/videx/dsportsar/index.m3u8
+
+#EXTINF:-1 tvg-id="DSports2.us@Panregional" tvg-logo="" group-title="FIFA World Cup" quality="1080p", DSports 2
+https://streamvidex.qzz.io/videx/dsports2/index.m3u8
+
+#EXTINF:-1 tvg-id="DSportsPlus.us@Panregional" tvg-logo="" group-title="FIFA World Cup" quality="720p", DSports+
+https://streamvidex.qzz.io/videx/dsportsplus/index.m3u8
+
+#EXTINF:-1 tvg-id="FoxSports1.us@HD" tvg-logo="" group-title="FIFA World Cup" quality="720p", Fox Sports 1
+http://85.237.89.160:9590/usa-s/FOX-SPORTS-1/index.m3u8
+
+#EXTINF:-1 tvg-id="FoxSports1.us@HD" tvg-logo="" group-title="FIFA World Cup" quality="720p", Fox Sports 1
+https://streamvidex.qzz.io/videx/fox1usa/index.m3u8
+
+#EXTINF:-1 tvg-id="Telemundo.us@East" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Telemundo
+https://streamvidex.qzz.io/videx/telemundo/index.m3u8
+
+#EXTINF:-1 tvg-id="Telemundo.us@East" tvg-logo="" group-title="FIFA World Cup" quality="720p", Telemundo
+http://168.228.44.241:9998/play/a0a9/index.m3u8
+
+#EXTINF:-1 tvg-id="TelemundoAlDia.us@HD" tvg-logo="" group-title="FIFA World Cup", Telemundo Al Dia
+https://d1rqgw5gocwo9i.cloudfront.net/manifest/3fec3e5cac39a52b2132f9c66c83dae043dc17d4/prod_default_xumo-nbcu-stitched/10a44c37-f976-4d2b-ab23-8637a7a094ca/3.m3u8
+
+#EXTINF:-1 tvg-id="TelemundoInternacional.us@South" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Telemundo Internacional
+http://138.121.15.230:9002/TELEMUNDO/index.m3u8
+
+#EXTINF:-1 tvg-id="TelemundoInternacional.us@South" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Telemundo Internacional
+http://177.234.249.178:8888/TELEMUNDO/index.m3u8
+
+#EXTINF:-1 tvg-id="TelemundoInternacional.us@South" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Telemundo Internacional
+http://179.60.51.134:8888/TELEMUNDO/index.m3u8
+
+#EXTINF:-1 tvg-id="TelemundoInternacional.us@South" tvg-logo="" group-title="FIFA World Cup" quality="720p", Telemundo Internacional
+http://45.181.87.106/TELEMUNDOHD/index.m3u8
+
+#EXTINF:-1 tvg-id="TelemundoInternacional.us@CentralAmerica" tvg-logo="" group-title="FIFA World Cup" quality="1080p", Telemundo Internacional Central America
+http://190.60.46.156:8089/TELEMUNDO/index.m3u8
+
+#EXTINF:-1 tvg-id="RCNMas.co@SD" tvg-logo="" group-title="FIFA World Cup" quality="1080p", RCN Más
+https://rcntv-rcnmas-1-us.plex.wurl.tv/playlist.m3u8
+
+#EXTINF:-1 tvg-id="RCNMas.co@SD" tvg-logo="" group-title="FIFA World Cup", RCN Mas
+https://rcntv-rcnmas-1-us.roku.wurl.tv/playlist.m3u8
+
+#EXTINF:-1 tvg-id="" tvg-logo="" group-title="FIFA World Cup" quality="1080p", FOX Sports
+https://d1jzu95oc8fgt3.cloudfront.net/FOX_Sports.m3u8
+
+#EXTINF:-1 tvg-id="" tvg-logo="" group-title="FIFA World Cup" quality="720p", Fox Sports
+https://live-manifest.production-public.tubi.io/live/6035c7fd-efff-4ec7-93dc-aa0c7a58ba47/playlist.m3u8
+
+#EXTINF:-1 tvg-id="FoxDeportes.us@SD" tvg-logo="" group-title="FIFA World Cup" quality="720p", Fox Sports en Espanol
+https://live-manifest.production-public.tubi.io/live/d906efca-1302-4e29-b0d9-9a1d7a305d69/playlist.m3u8
+
+#EXTINF:-1 tvg-id="TelemundoCorpusChristi.us@SD" tvg-logo="" group-title="FIFA World Cup" quality="720p", Telemundo Corpus Christi
+https://content.uplynk.com/channel/b6a96ed39d694ae1b738faa98cf7dd3f.m3u8
+

@@ -1,6 +1,10 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import '../../models/channel.dart';
 import '../../services/local_proxy.dart';
 import '../../services/playback/playback_state.dart';
@@ -8,6 +12,7 @@ import '../../services/playback/playback_state_machine.dart';
 import '../../services/playback/connectivity_service.dart';
 import '../../services/playback/playback_telemetry.dart';
 import 'channel_video_player.dart';
+import 'drm_webview_player.dart';
 
 Widget getChannelVideoPlayer({
   required Channel channel,
@@ -98,10 +103,10 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
 
   static const _pipChannel = MethodChannel('com.goplay/pip');
 
-  // ─── Playback State Machine ────────────────────────────────────
-
   late final PlaybackStateMachine _stateMachine;
   late final ConnectivityService _connectivityService;
+  final List<StreamSubscription> _mkSubscriptions = [];
+  final DrmPlayerController _drmController = DrmPlayerController();
 
   // ─── Pre-cached gradient decorations — allocated once, not per build() ──
 
@@ -370,7 +375,11 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
   }
 
   void _seekTo(Duration position) {
-    _methodChannel?.invokeMethod('seekTo', position.inMilliseconds);
+    if (widget.channel.hasDrm) {
+      _drmController.seek(position);
+    } else {
+      _methodChannel?.invokeMethod('seekTo', position.inMilliseconds);
+    }
     setState(() {
       _position = position;
     });
@@ -639,6 +648,19 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
 
     // Tell the state machine about the initial channel
     _stateMachine.playChannel(widget.channel);
+
+    // PiP is Android-only — skip on other platforms.
+    if (!kIsWeb && Platform.isAndroid) {
+      _pipChannel.invokeMethod('setPlayerActive', true).catchError((e) {
+        debugPrint('PiP setPlayerActive failed: $e');
+      });
+    }
+
+    // On desktop (Windows/Linux/macOS), initialize media_kit player immediately if not a DRM channel.
+    // This must be in initState, not in build(), to avoid re-initializing on rebuilds.
+    if (!kIsWeb && !Platform.isAndroid && !widget.channel.hasDrm) {
+      _initDesktopPlayer();
+    }
   }
 
   @override
@@ -668,6 +690,21 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
         _bufferedPosition = Duration.zero;
       });
 
+      // On desktop, re-open the new stream in the media_kit player if it's not a DRM channel.
+      if (!kIsWeb && !Platform.isAndroid) {
+        if (widget.channel.hasDrm) {
+          _clearDesktopPlayer();
+        } else {
+          _initDesktopPlayer();
+          _isPlayerOpened = false;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              _openDesktopPlayerMedia();
+            }
+          });
+        }
+      }
+
       _methodChannel?.invokeMethod('play', _getCreationParams());
     }
   }
@@ -682,6 +719,8 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
       LocalProxy.stopKkx4Auth();
     }
     _methodChannel?.setMethodCallHandler(null);
+    // Dispose media_kit player on desktop platforms.
+    _clearDesktopPlayer();
     super.dispose();
   }
 
@@ -696,13 +735,18 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
       child: SizedBox.expand(
         child: Stack(
           children: [
-            // Native ExoPlayer view
-            AndroidView(
-              viewType: 'com.goplay/native_player',
-              creationParams: _getCreationParams(),
-              creationParamsCodec: const StandardMessageCodec(),
-              onPlatformViewCreated: _onPlatformViewCreated,
-            ),
+            // Native ExoPlayer view (Android only)
+            if (!kIsWeb && Platform.isAndroid)
+              AndroidView(
+                viewType: 'com.goplay/native_player',
+                creationParams: _getCreationParams(),
+                creationParamsCodec: const StandardMessageCodec(),
+                onPlatformViewCreated: _onPlatformViewCreated,
+              )
+            else
+              // Windows/Desktop: ExoPlayer is not available.
+              // Show a styled fallback with stream info.
+              _buildDesktopPlayerFallback(),
 
             // Buffering indicator (isolated — when controls are hidden)
             if (_isBuffering && !widget.showControls)
@@ -763,7 +807,218 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
     );
   }
 
-  // ─── Locked controls ─────────────────────────────────────────────
+  // ─── Desktop player (Windows / Linux / macOS via media_kit / libmpv) ─────
+  //
+  // media_kit uses libmpv which supports HLS, DASH, MPEG-TS and custom headers.
+  // The Player & VideoController are lazy-created the first time this widget
+  // runs on a non-Android platform and disposed in dispose().
+
+  Player? _mkPlayer;
+  VideoController? _mkController;
+  bool _isPlayerOpened = false;
+
+  void _openDesktopPlayerMedia() {
+    if (widget.channel.hasDrm) return;
+    if (_mkPlayer == null || _isPlayerOpened) return;
+    _isPlayerOpened = true;
+
+    final params = _getCreationParams();
+    final url = params['url'] as String? ?? widget.channel.streamUrl;
+    final rawHeaders = params['headers'] as Map<dynamic, dynamic>? ?? {};
+    final headers = rawHeaders.map((k, v) => MapEntry(k.toString(), v.toString()));
+
+    debugPrint('DesktopPlayer: Opening media URL: $url');
+    _mkPlayer!.open(
+      Media(url, httpHeaders: headers.isEmpty ? null : headers),
+    );
+  }
+
+  void _clearDesktopPlayer() {
+    for (final s in _mkSubscriptions) {
+      s.cancel();
+    }
+    _mkSubscriptions.clear();
+    _mkPlayer?.dispose();
+    _mkPlayer = null;
+    _mkController = null;
+    _isPlayerOpened = false;
+  }
+
+  void _initDesktopPlayer() {
+    if (_mkPlayer != null) return; // already initialised
+
+    _mkPlayer = Player();
+    _mkController = VideoController(
+      _mkPlayer!,
+      configuration: const VideoControllerConfiguration(
+        enableHardwareAcceleration: false,
+        width: 1280,
+        height: 720,
+      ),
+    );
+
+    // Mirror native playback events into the state machine
+    _mkSubscriptions.add(_mkPlayer!.stream.playing.listen((playing) {
+      if (!mounted) return;
+      setState(() {
+        _isPlaying = playing;
+        _isBuffering = !playing;
+        _hasError = false;
+      });
+    }));
+
+    _mkSubscriptions.add(_mkPlayer!.stream.buffering.listen((buffering) {
+      if (!mounted) return;
+      setState(() => _isBuffering = buffering);
+    }));
+
+    _mkSubscriptions.add(_mkPlayer!.stream.error.listen((err) {
+      if (!mounted || err.isEmpty) return;
+      debugPrint('media_kit error: $err');
+      setState(() {
+        _hasError = true;
+        _errorMessage = err;
+        _isBuffering = false;
+      });
+    }));
+
+    _mkSubscriptions.add(_mkPlayer!.stream.position.listen((pos) {
+      if (!mounted) return;
+      setState(() => _position = pos);
+    }));
+
+    _mkSubscriptions.add(_mkPlayer!.stream.duration.listen((dur) {
+      if (!mounted) return;
+      setState(() => _duration = dur);
+    }));
+  }
+
+  Widget _buildDrmDesktopFallback() {
+    final params = _getCreationParams();
+    final url = params['url'] as String? ?? widget.channel.streamUrl;
+
+    return Container(
+      color: Colors.black,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.lock_outline, color: Colors.cyanAccent, size: 72),
+              const SizedBox(height: 16),
+              Text(
+                widget.channel.name,
+                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'This channel uses DRM (Widevine/ClearKey) protection.\nDRM playback is supported on Android devices only.',
+                style: TextStyle(color: Colors.white60, fontSize: 13),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white10,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.white24),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        url,
+                        style: const TextStyle(color: Colors.white70, fontSize: 11, fontFamily: 'monospace'),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.copy, color: Colors.white70, size: 18),
+                      tooltip: 'Copy stream URL',
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: url));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Stream URL copied to clipboard'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDesktopPlayerFallback() {
+    if (widget.channel.hasDrm) {
+      return DrmWebViewPlayer(
+        channel: widget.channel,
+        controller: _drmController,
+        onPlayStateChanged: (playing) {
+          if (mounted) {
+            setState(() {
+              _isPlaying = playing;
+            });
+          }
+        },
+        onBufferingStateChanged: (buffering) {
+          if (mounted) {
+            setState(() {
+              _isBuffering = buffering;
+            });
+          }
+        },
+        onProgressChanged: (pos, dur) {
+          if (mounted) {
+            setState(() {
+              _position = pos;
+              _duration = dur;
+            });
+          }
+        },
+      );
+    }
+
+    _initDesktopPlayer();
+    final ctrl = _mkController;
+    if (ctrl == null) return const SizedBox.shrink();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // If the layout constraints are zero, do not render the Video widget yet.
+        // This prevents native libmpv from crashing when trying to initialize a 0x0 texture.
+        if (constraints.maxWidth <= 0.0 || constraints.maxHeight <= 0.0) {
+          debugPrint('DesktopPlayerFallback: Zero constraints (${constraints.maxWidth}x${constraints.maxHeight}), skipping Video build');
+          return const SizedBox.shrink();
+        }
+        
+        debugPrint('DesktopPlayerFallback: Rendering Video with constraints ${constraints.maxWidth}x${constraints.maxHeight}');
+        // Safe layout established — open the stream now (delayed until after the current frame is drawn)
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _openDesktopPlayerMedia();
+          }
+        });
+
+        return Video(
+          controller: ctrl,
+          controls: NoVideoControls, // we use our own controls overlay
+        );
+      },
+    );
+  }
+
 
   Widget _buildLockedControls() {
     return Stack(
@@ -823,10 +1078,18 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
               isPlaying: _isPlaying,
               isBuffering: _isBuffering,
               onPlayPause: () {
-                if (_isPlaying) {
-                  _methodChannel?.invokeMethod('pause');
+                if (widget.channel.hasDrm) {
+                  if (_isPlaying) {
+                    _drmController.pause();
+                  } else {
+                    _drmController.play();
+                  }
                 } else {
-                  _methodChannel?.invokeMethod('resume');
+                  if (_isPlaying) {
+                    _methodChannel?.invokeMethod('pause');
+                  } else {
+                    _methodChannel?.invokeMethod('resume');
+                  }
                 }
               },
               onPrev: widget.onPreviousChannel,

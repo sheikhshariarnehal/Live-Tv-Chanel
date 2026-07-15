@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../core/theme.dart';
@@ -184,17 +187,22 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     }
 
-    _pipChannel.invokeMethod('setPlayerActive', true);
-    _pipChannel.setMethodCallHandler((call) async {
-      if (call.method == 'onPiPModeChanged') {
-        final isInPiP = call.arguments as bool? ?? false;
-        if (isInPiP) {
-          setState(() {
-            _controlsVisible = false;
-          });
+    // PiP is Android-only — skip on other platforms.
+    if (!kIsWeb && Platform.isAndroid) {
+      _pipChannel.invokeMethod('setPlayerActive', true).catchError((e) {
+        debugPrint('PiP setPlayerActive failed: $e');
+      });
+      _pipChannel.setMethodCallHandler((call) async {
+        if (call.method == 'onPiPModeChanged') {
+          final isInPiP = call.arguments as bool? ?? false;
+          if (isInPiP) {
+            setState(() {
+              _controlsVisible = false;
+            });
+          }
         }
-      }
-    });
+      });
+    }
   }
 
   void _startControlsTimer() {
@@ -248,8 +256,12 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   @override
   void dispose() {
     _controlsTimer?.cancel();
-    _pipChannel.invokeMethod('setPlayerActive', false);
-    _pipChannel.setMethodCallHandler(null);
+    if (!kIsWeb && Platform.isAndroid) {
+      _pipChannel.invokeMethod('setPlayerActive', false).catchError((e) {
+        debugPrint('PiP setPlayerActive(false) failed: $e');
+      });
+      _pipChannel.setMethodCallHandler(null);
+    }
     // Allow screen to sleep again when leaving the player
     WakelockPlus.disable();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -286,7 +298,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         if (widget.forceFullscreen) {
-          Navigator.of(context).pop();
+          debugPrint('PlayerScreen: PopScope popping route');
+          context.pop();
         } else {
           _toggleFullscreen();
         }
@@ -475,7 +488,10 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                                 category: channel.category ?? '',
                                 currentChannelId: channel.id,
                                 onBackPressed: widget.forceFullscreen
-                                    ? () => Navigator.of(context).pop()
+                                    ? () {
+                                        debugPrint('PlayerScreen: FullscreenTopBar pop pressed');
+                                        context.pop();
+                                      }
                                     : _toggleFullscreen,
                                 onChannelSelected: (id) {
                                   setState(() => _currentChannelId = id);
@@ -604,15 +620,20 @@ class _BackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.of(context).pop(),
+      onTap: () {
+        debugPrint('PlayerScreen: BackButton tapped, popping route');
+        context.pop();
+      },
       behavior: HitTestBehavior.opaque,
       child: const SizedBox(
-        width: 34,
-        height: 34,
-        child: Icon(
-          Icons.arrow_back_rounded,
-          color: Colors.white,
-          size: 24,
+        width: 44, // increased size slightly for better hit area
+        height: 44,
+        child: Center(
+          child: Icon(
+            Icons.arrow_back_rounded,
+            color: Colors.white,
+            size: 24,
+          ),
         ),
       ),
     );

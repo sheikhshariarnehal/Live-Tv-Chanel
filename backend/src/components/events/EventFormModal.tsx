@@ -52,8 +52,12 @@ export default function EventFormModal({
     onFormChange({ ...formData, [key]: value });
 
   const autoSlug = () => {
-    if (!editingId && !formData.id && formData.home_name && formData.away_name) {
-      set('id', generateSlug(formData.home_name, formData.away_name));
+    if (!editingId && !formData.id) {
+      if (formData.hero_type === 2 && formData.custom_title) {
+        set('id', generateSlug(formData.custom_title, ''));
+      } else if (formData.home_name && formData.away_name) {
+        set('id', generateSlug(formData.home_name, formData.away_name));
+      }
     }
   };
 
@@ -90,34 +94,104 @@ export default function EventFormModal({
             <div className="lg:col-span-3 p-6 space-y-6 lg:border-r border-zinc-850 bg-zinc-900/40">
 
               {/* Section 1: Match Identity */}
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Match Identity</h3>
-                <div className="space-y-3">
+
+                {/* Hero Banner Style Selector */}
+                <div className="space-y-2 pb-2">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Hero Banner Style</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onFormChange({
+                          ...formData,
+                          hero_type: 1,
+                          id: (!editingId && !formData.id && formData.home_name && formData.away_name) ? generateSlug(formData.home_name, formData.away_name) : formData.id
+                        });
+                      }}
+                      className={`p-3 rounded-xl border text-left transition-all ${
+                        formData.hero_type === 1
+                          ? 'border-purple-500/50 bg-purple-500/10 ring-1 ring-purple-500/30'
+                          : 'border-zinc-800 bg-zinc-950/60 hover:border-zinc-700'
+                      }`}
+                    >
+                      <span className={`text-xs font-bold ${formData.hero_type === 1 ? 'text-purple-300' : 'text-zinc-400'}`}>
+                        ⚽ Matchup
+                      </span>
+                      <p className="text-[9px] text-zinc-500 mt-0.5">Teams, flags, vs layout</p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onFormChange({
+                          ...formData,
+                          hero_type: 2,
+                          id: (!editingId && !formData.id && formData.custom_title) ? generateSlug(formData.custom_title, '') : formData.id
+                        });
+                      }}
+                      className={`p-3 rounded-xl border text-left transition-all ${
+                        formData.hero_type === 2
+                          ? 'border-purple-500/50 bg-purple-500/10 ring-1 ring-purple-500/30'
+                          : 'border-zinc-800 bg-zinc-950/60 hover:border-zinc-700'
+                      }`}
+                    >
+                      <span className={`text-xs font-bold ${formData.hero_type === 2 ? 'text-purple-300' : 'text-zinc-400'}`}>
+                        🖼️ Spotlight
+                      </span>
+                      <p className="text-[9px] text-zinc-500 mt-0.5">Cover image + title only</p>
+                    </button>
+                  </div>
+                </div>
+
+                {formData.hero_type === 2 && (
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-zinc-400">Event ID / Slug</label>
+                    <label className="text-xs font-semibold text-zinc-400">Custom Title</label>
                     <input
                       type="text"
-                      placeholder="auto-generated from team names"
-                      value={formData.id}
-                      onChange={e => set('id', e.target.value)}
-                      className="w-full p-2.5 rounded-lg glass-input text-sm font-mono"
+                      placeholder="e.g. Champions League Final 2026"
+                      value={formData.custom_title}
+                      onChange={e => {
+                        const val = e.target.value;
+                        onFormChange({
+                          ...formData,
+                          custom_title: val,
+                          id: (!editingId && !formData.id) ? generateSlug(val, '') : formData.id
+                        });
+                      }}
+                      className="w-full p-2.5 rounded-lg glass-input text-sm"
                       required
-                      disabled={!!editingId}
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-xs font-semibold text-zinc-400">Sport</label>
-                      <select
-                        value={formData.sport}
-                        onChange={e => set('sport', e.target.value)}
-                        className="w-full p-2.5 rounded-lg glass-input text-sm"
-                      >
-                        {SPORT_OPTIONS.map(o => (
-                          <option key={o.value} value={o.value}>{o.label}</option>
-                        ))}
-                      </select>
-                    </div>
+                )}
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-zinc-400">Event ID / Slug</label>
+                  <input
+                    type="text"
+                    placeholder="auto-generated from title or team names"
+                    value={formData.id}
+                    onChange={e => set('id', e.target.value)}
+                    className="w-full p-2.5 rounded-lg glass-input text-sm font-mono"
+                    required
+                    disabled={!!editingId}
+                  />
+                </div>
+                
+                <div className={`grid gap-3 ${formData.hero_type === 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-zinc-400">Sport</label>
+                    <select
+                      value={formData.sport}
+                      onChange={e => set('sport', e.target.value)}
+                      className="w-full p-2.5 rounded-lg glass-input text-sm"
+                    >
+                      {SPORT_OPTIONS.map(o => (
+                        <option key={o.value} value={o.value}>{o.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {formData.hero_type === 1 && (
                     <div className="space-y-1">
                       <label className="text-xs font-semibold text-zinc-400">League / Cup</label>
                       <input
@@ -126,47 +200,63 @@ export default function EventFormModal({
                         value={formData.league}
                         onChange={e => set('league', e.target.value)}
                         className="w-full p-2.5 rounded-lg glass-input text-sm"
-                        required
+                        required={formData.hero_type === 1}
                       />
                     </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Section 2: Teams (Only visible for Type 1 Matchup Style) */}
+              {formData.hero_type === 1 && (
+                <>
+                  {/* Divider */}
+                  <div className="border-t border-zinc-850" />
+
+                  <div className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Teams</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <TeamInput
+                        label="Home Team"
+                        accentColor="text-purple-400"
+                        name={formData.home_name}
+                        logo={formData.home_logo}
+                        onNameChange={v => {
+                          const updated = { ...formData, home_name: v };
+                          onFormChange({
+                            ...updated,
+                            id: (!editingId && !formData.id && v && formData.away_name) ? generateSlug(v, formData.away_name) : formData.id
+                          });
+                        }}
+                        onLogoChange={v => set('home_logo', v)}
+                      />
+                      <TeamInput
+                        label="Away Team"
+                        accentColor="text-pink-400"
+                        name={formData.away_name}
+                        logo={formData.away_logo}
+                        onNameChange={v => {
+                          const updated = { ...formData, away_name: v };
+                          onFormChange({
+                            ...updated,
+                            id: (!editingId && !formData.id && formData.home_name && v) ? generateSlug(formData.home_name, v) : formData.id
+                          });
+                        }}
+                        onLogoChange={v => set('away_logo', v)}
+                      />
+                    </div>
+                    {!editingId && !formData.id && formData.home_name && formData.away_name && (
+                      <button
+                        type="button"
+                        onClick={autoSlug}
+                        className="text-[10px] text-purple-400 hover:text-purple-300 transition-colors"
+                      >
+                        Auto-generate slug: {generateSlug(formData.home_name, formData.away_name)}
+                      </button>
+                    )}
                   </div>
-                </div>
-              </div>
-
-              {/* Divider */}
-              <div className="border-t border-zinc-850" />
-
-              {/* Section 2: Teams */}
-              <div className="space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Teams</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <TeamInput
-                    label="Home Team"
-                    accentColor="text-purple-400"
-                    name={formData.home_name}
-                    logo={formData.home_logo}
-                    onNameChange={v => { set('home_name', v); }}
-                    onLogoChange={v => set('home_logo', v)}
-                  />
-                  <TeamInput
-                    label="Away Team"
-                    accentColor="text-pink-400"
-                    name={formData.away_name}
-                    logo={formData.away_logo}
-                    onNameChange={v => { set('away_name', v); }}
-                    onLogoChange={v => set('away_logo', v)}
-                  />
-                </div>
-                {!editingId && !formData.id && formData.home_name && formData.away_name && (
-                  <button
-                    type="button"
-                    onClick={autoSlug}
-                    className="text-[10px] text-purple-400 hover:text-purple-300 transition-colors"
-                  >
-                    Auto-generate slug: {generateSlug(formData.home_name, formData.away_name)}
-                  </button>
-                )}
-              </div>
+                </>
+              )}
 
               {/* Divider */}
               <div className="border-t border-zinc-850" />

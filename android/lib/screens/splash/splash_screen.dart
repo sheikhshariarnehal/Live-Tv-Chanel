@@ -98,12 +98,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     Future.wait([
       appInitFuture,
       Future.delayed(const Duration(milliseconds: 900)),
-    ]).then((_) {
+    ]).catchError((e) {
+      // Init failed (e.g. Hive lock issue) — log and proceed anyway.
+      debugPrint('appInitFuture error (non-fatal): $e');
+    }).then((_) {
       if (!mounted) return;
-      
+
       // Initialize analytics service
       ref.read(analyticsServiceProvider).initialize();
-      
+
       context.go('/home');
     });
   }

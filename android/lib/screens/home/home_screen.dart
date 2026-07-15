@@ -505,6 +505,13 @@ class _HeroBannerCardState extends ConsumerState<_HeroBannerCard> {
   Widget build(BuildContext context) {
     final event = widget.event;
 
+    // ── Type 2: Spotlight / Cover Style ──────────────────────────
+    if (event.heroType == 2) {
+      return _buildSpotlightCard(context, event);
+    }
+
+    // ── Type 1: Matchup Style (default, existing layout) ────────
+
     return GestureDetector(
       onTap: () {
         if (!_canWatch) return; // Disable tap while still upcoming
@@ -765,9 +772,174 @@ class _HeroBannerCardState extends ConsumerState<_HeroBannerCard> {
       ),
     );
   }
+
+  // ── Type 2: Spotlight / Cover Style ────────────────────────────
+  Widget _buildSpotlightCard(BuildContext context, SportEvent event) {
+    final displayTitle = event.customTitle?.isNotEmpty == true
+        ? event.customTitle!
+        : event.league;
+
+    return GestureDetector(
+      onTap: () {
+        if (!_canWatch) return;
+        if (event.channels.isNotEmpty) {
+          context.push(
+            '/player/${event.channels.first}',
+            extra: {'eventChannels': event.channels, 'forceFullscreen': true},
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No channels available for this event.'),
+              backgroundColor: GoPlayTheme.error,
+            ),
+          );
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 8),
+        child: DecoratedBox(
+          decoration: _cardDecoration,
+          child: ClipRRect(
+            borderRadius: _cardRadius,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // 1. Full-bleed Cover Image
+                if (event.banner != null && event.banner!.isNotEmpty)
+                  CachedNetworkImage(
+                    imageUrl: event.banner!,
+                    fit: BoxFit.cover,
+                    memCacheWidth: 800,
+                    fadeInDuration: const Duration(milliseconds: 200),
+                    placeholder: (context, url) => const ColoredBox(
+                      color: GoPlayTheme.surfaceContainerHigh,
+                    ),
+                    errorWidget: (context, url, error) => const ColoredBox(
+                      color: GoPlayTheme.surfaceContainerHigh,
+                    ),
+                  ),
+
+                // 2. Cinematic Gradient — heavier top/bottom for title legibility
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: [0.0, 0.45, 1.0],
+                      colors: [
+                        Color(0xCC000000), // Darker top for title legibility
+                        Color(0x20000000),
+                        Color(0x80000000), // Darker bottom for button visibility
+                      ],
+                    ),
+                  ),
+                ),
+
+                // 3. Top Section: Title & Status Badge
+                Positioned(
+                  top: 14,
+                  left: 14,
+                  right: 14,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Spotlight Title at the top-left
+                      Expanded(
+                        child: Text(
+                          displayTitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            height: 1.25,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      // Status Badge at top-right
+                      if (event.isLive || _countdownDone)
+                        const LiveBadge(fontSize: 9)
+                      else
+                        const _UpcomingBadge(),
+                    ],
+                  ),
+                ),
+
+                // 4. Bottom Section: Centered CTA Action Button
+                Positioned(
+                  bottom: 12,
+                  left: 12,
+                  right: 12,
+                  child: Center(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: _canWatch
+                          ? _WatchNowButton(key: const ValueKey('watch_now'))
+                          : _CountdownButton(
+                              key: const ValueKey('countdown'),
+                              startTime: event.startTime,
+                              onFinished: _onCountdownFinished,
+                            ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-// â”€â”€â”€ Watch CTA Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+// ─── Watch Now CTA Button (Centered spotlight style) ──────────
+class _WatchNowButton extends StatelessWidget {
+  const _WatchNowButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 34,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: GoPlayTheme.primary,
+        borderRadius: BorderRadius.circular(17), // pill shape
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x3000ADB5),
+            blurRadius: 8,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.play_arrow_rounded, color: Color(0xFF17181C), size: 14),
+          const SizedBox(width: 5),
+          Text(
+            'WATCH NOW',
+            style: GoogleFonts.inter(
+              color: const Color(0xFF17181C),
+              fontSize: 10.5,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Watch CTA Button ─────────────────────────────────────────
 class _WatchButton extends StatelessWidget {
   const _WatchButton({super.key});
 
@@ -807,7 +979,7 @@ class _WatchButton extends StatelessWidget {
   }
 }
 
-// â”€â”€â”€ Countdown CTA Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ——— Countdown CTA Button ————————————————————————————————————
 // Shows a compact live countdown inside the button.
 // Isolated RepaintBoundary keeps per-second repaints cheap.
 class _CountdownButton extends StatelessWidget {

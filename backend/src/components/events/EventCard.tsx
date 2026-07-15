@@ -41,6 +41,11 @@ export default function EventCard({
             {event.sport}
           </span>
           <StatusBadge status={event.status} size="sm" />
+          {event.hero_type === 2 && (
+            <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/20">
+              Spotlight
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-1">
           <button

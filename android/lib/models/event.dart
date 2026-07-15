@@ -27,6 +27,8 @@ class SportEvent {
   final List<String> channels;
   final String? banner;
   final bool isFeatured;
+  final int heroType; // 1 = Matchup, 2 = Spotlight/Cover
+  final String? customTitle;
 
   const SportEvent({
     required this.id,
@@ -39,6 +41,8 @@ class SportEvent {
     this.channels = const [],
     this.banner,
     this.isFeatured = false,
+    this.heroType = 1,
+    this.customTitle,
   });
 
   bool get isLive =>
@@ -78,6 +82,8 @@ class SportEvent {
           : [],
       banner: json['banner'] as String?,
       isFeatured: json['is_featured'] as bool? ?? false,
+      heroType: json['hero_type'] as int? ?? 1,
+      customTitle: json['custom_title'] as String?,
     );
   }
 
@@ -92,5 +98,7 @@ class SportEvent {
         'channels': channels,
         'banner': banner,
         'is_featured': isFeatured,
+        'hero_type': heroType,
+        'custom_title': customTitle,
       };
 }

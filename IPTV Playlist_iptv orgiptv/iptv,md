@@ -1,0 +1,1743 @@
+### Complete Generation Pipeline Example
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/generators.md
+
+This example demonstrates a full generation pipeline, including loading data, parsing streams, attaching guides, and initializing various generators. It shows how to use `Storage`, `PlaylistParser`, and different generator classes.
+
+```typescript
+import { loadData, data } from './api'
+import { PlaylistParser } from './core'
+import { Storage } from '@freearhey/storage-js'
+import * as generators from './generators'
+
+async function generate() {
+  // 1. Load reference data
+  await loadData()
+
+  // 2. Parse existing streams
+  const streamsStorage = new Storage(STREAMS_DIR)
+  const parser = new PlaylistParser({ storage: streamsStorage })
+  const files = await streamsStorage.list('**/*.m3u')
+  let streams = await parser.parse(files)
+
+  // 3. Attach guides
+  streams = streams.map(stream => {
+    stream.setGuides(data.guidesGroupedByStreamId.get(stream.getId()))
+    return stream
+  })
+
+  // 4. Generate all playlists
+  const logFile = new File('generators.log')
+  const generatorList = [
+    new generators.RawGenerator({ streams, logFile }),
+    new generators.CategoriesGenerator({ categories: data.categories, streams, logFile }),
+    new generators.CountriesGenerator({ countries: data.countries, streams, logFile }),
+    // ... etc
+  ]
+
+  for (const gen of generatorList) {
+    await gen.generate()
+  }
+}
+```
+
+--------------------------------
+
+### getGuides()
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/playlist.md
+
+Aggregates all Electronic Program Guides from all streams in the playlist.
+
+```APIDOC
+## getGuides()
+
+### Description
+Aggregates all Electronic Program Guides from all streams in the playlist.
+
+### Method
+GET (conceptual)
+
+### Endpoint
+N/A (Method of Playlist class)
+
+### Parameters
+None
+
+### Request Example
+```typescript
+const playlist = new Playlist(streams)
+const guides = playlist.getGuides()
+console.log(guides.count()) // Total number of guides across all streams
+```
+
+### Response
+#### Success Response
+- **Collection<sdk.Models.Guide>** - Combined guides from all streams
+```
+
+--------------------------------
+
+### IPTV URL Format Examples
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/tables.md
+
+Examples demonstrating the URL structure for accessing different types of IPTV playlists, including by country, category, language, and region.
+
+```plaintext
+https://iptv-org.github.io/iptv/countries/us.m3u
+https://iptv-org.github.io/iptv/categories/news.m3u
+https://iptv-org.github.io/iptv/languages/en.m3u
+https://iptv-org.github.io/iptv/regions/eu.m3u
+```
+
+--------------------------------
+
+### Example StreamTester Command
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/configuration.md
+
+Demonstrates how to use the configured stream tester options via the command line.
+
+```bash
+npm run playlist:test \
+  --parallel 8 \
+  --timeout 15000 \
+  --proxy socks5://proxy.example.com:1080 \
+  --fix
+```
+
+--------------------------------
+
+### Get Playlist Guides
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/playlist.md
+
+Aggregates all Electronic Program Guides from all streams within the playlist. Useful for consolidating EPG data from multiple sources.
+
+```typescript
+getGuides(): Collection<sdk.Models.Guide>
+```
+
+```typescript
+const playlist = new Playlist(streams)
+const guides = playlist.getGuides()
+console.log(guides.count()) // Total number of guides across all streams
+```
+
+--------------------------------
+
+### getGuideUrls()
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/playlist.md
+
+Extracts and deduplicates guide URLs from all streams, prioritizing GZIP over XML.
+
+```APIDOC
+## getGuideUrls()
+
+### Description
+Extracts and deduplicates guide URLs from all streams. Prioritizes GZIP-compressed guides over XML guides.
+
+### Method
+GET (conceptual)
+
+### Endpoint
+N/A (Method of Playlist class)
+
+### Parameters
+None
+
+### Request Example
+```typescript
+const playlist = new Playlist(streams)
+const guideUrls = playlist.getGuideUrls()
+// Result: ["https://epg.example.com/epg.xml.gz", "https://epg2.example.com/epg.xml", ...]
+```
+
+### Response
+#### Success Response
+- **Collection<string>** - Unique guide URLs sorted by format preference (GZIP > XML > other)
+```
+
+--------------------------------
+
+### VLC Option Headers Example
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/playlist-parser.md
+
+Demonstrates the use of #EXTVLCOPT headers for specifying HTTP referrer and user-agent strings in M3U8 playlists.
+
+```m3u
+#EXTVLCOPT:http-referrer=https://example.com
+#EXTVLCOPT:http-user-agent=Mozilla/5.0
+```
+
+--------------------------------
+
+### Get Playlist Guide URLs
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/playlist.md
+
+Extracts and deduplicates guide URLs from all streams in the playlist. It prioritizes GZIP-compressed guides over XML and other formats.
+
+```typescript
+getGuideUrls(): Collection<string>
+```
+
+```typescript
+const playlist = new Playlist(streams)
+const guideUrls = playlist.getGuideUrls()
+// Result: ["https://epg.example.com/epg.xml.gz", "https://epg2.example.com/epg.xml", ...]
+```
+
+--------------------------------
+
+### Categories Table Example Output
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/tables.md
+
+An example of the markdown table generated by the CategoriesTable.create() method, showing category details.
+
+```markdown
+| # | Category | Count | Link |
+|---|----------|-------|------|
+| 1 | Business | 42 | https://iptv-org.github.io/iptv/categories/business.m3u |
+| 2 | Entertainment | 156 | https://iptv-org.github.io/iptv/categories/entertainment.m3u |
+| 3 | Kids | 78 | https://iptv-org.github.io/iptv/categories/kids.m3u |
+| 4 | News | 234 | https://iptv-org.github.io/iptv/categories/news.m3u |
+| 5 | Sports | 189 | https://iptv-org.github.io/iptv/categories/sports.m3u |
+```
+
+--------------------------------
+
+### StreamInfo Example Usage
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/types.md
+
+Demonstrates how to obtain StreamInfo by calling getStreamInfo with a stream URL.
+
+```typescript
+const info = await getStreamInfo('http://example.com/stream.m3u8')
+// {
+//   resolution: { width: 1920, height: 1080 },
+//   bandwidth: 5000000,
+//   frameRate: 29.97,
+//   codecs: "avc1.42c01e,mp4a.40.2"
+// }
+```
+
+--------------------------------
+
+### EXTINF Header Example
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/playlist-parser.md
+
+Example of the EXTINF header format used in M3U8 playlists, including supported metadata fields like tvg-id, tvg-name, tvg-logo, and group-title.
+
+```m3u
+#EXTINF:-1 tvg-id="channel.id" tvg-name="Channel Name" tvg-logo="http://logo.url" group-title="Category"
+Channel Title
+http://stream.url
+```
+
+--------------------------------
+
+### Example Usage of DataSet.getArray()
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/dataset-and-models.md
+
+Demonstrates the getArray method for parsing multi-line strings into arrays. Shows examples with actual content, the delete symbol, and a missing key.
+
+```typescript
+const data = new DataSet(new Dictionary({
+  'notes': 'Line 1\r\nLine 2\r\nLine 3',
+  'tags': '~'
+}))
+
+console.log(data.getArray('notes')) // ['Line 1', 'Line 2', 'Line 3']
+console.log(data.getArray('tags')) // []
+console.log(data.getArray('missing')) // undefined
+```
+
+--------------------------------
+
+### Languages Table Example Output
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/tables.md
+
+An example of the markdown table generated by the LanguagesTable.create() method, showing language details.
+
+```markdown
+| # | Language | Code | Count | Link |
+|---|----------|------|-------|------|
+| 1 | English | en | 2000 | https://iptv-org.github.io/iptv/languages/en.m3u |
+| 2 | Spanish | es | 850 | https://iptv-org.github.io/iptv/languages/es.m3u |
+| 3 | French | fr | 650 | https://iptv-org.github.io/iptv/languages/fr.m3u |
+| 4 | German | de | 480 | https://iptv-org.github.io/iptv/languages/de.m3u |
+| 5 | Portuguese | pt | 320 | https://iptv-org.github.io/iptv/languages/pt.m3u |
+```
+
+--------------------------------
+
+### Markdown Template File Example
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/core-utilities.md
+
+An example of a markdown template file that uses include directives to incorporate content from other files.
+
+```markdown
+# IPTV Playlists
+
+#include "./.readme/categories.md"
+#include "./.readme/countries.md"
+#include "./.readme/languages.md"
+```
+
+--------------------------------
+
+### Setup Script for Custom Paths
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/configuration.md
+
+This bash script sets environment variables for custom directories and a GitHub token. It then navigates to the IPTV directory and runs generation, validation, and testing commands.
+
+```bash
+#!/bin/bash
+
+# Set custom paths
+export ROOT_DIR=/var/iptv
+export STREAMS_DIR=/var/iptv/streams
+export PUBLIC_DIR=/var/www/html/playlists
+export DATA_DIR=/var/iptv/data
+export LOGS_DIR=/var/iptv/logs
+
+# GitHub token for discussions
+export GITHUB_TOKEN=ghp_your_token
+
+# Run generation
+cd /var/iptv
+npm run playlist:generate
+npm run playlist:validate
+npm run playlist:test --parallel 4 --timeout 15000
+```
+
+--------------------------------
+
+### GitHub Token Setup and Playlist Update
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/configuration.md
+
+Sets the GITHUB_TOKEN environment variable for authentication and runs the playlist update script. Ensure you replace 'ghp_your_token_here' with your actual token.
+
+```bash
+export GITHUB_TOKEN=ghp_your_token_here
+npm run playlist:update
+```
+
+--------------------------------
+
+### Create and Use a Playlist Object
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/README.md
+
+Shows how to create a Playlist object from a list of streams and its methods for retrieving EPG guides and outputting in M3U format.
+
+```typescript
+const playlist = new Playlist(streams, { public: true })
+
+// Methods
+playlist.getGuides()           // Get all EPG guides
+playlist.getGuideUrls()        // Get unique guide URLs
+playlist.toString()            // M3U format output
+```
+
+--------------------------------
+
+### LogItem Example Usage
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/types.md
+
+Illustrates the creation of a LogItem object, specifying the type, filepath, and count for a generator output log entry.
+
+```typescript
+const logItem: LogItem = {
+  type: 'country',
+  filepath: 'countries/us.m3u',
+  count: 1250
+}
+```
+
+--------------------------------
+
+### Load Data and Create Playlists (TypeScript)
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/README.md
+
+Loads IPTV database, parses existing streams from M3U files, and generates new playlists. Requires setup of Storage and PlaylistParser.
+
+```typescript
+import { loadData, data } from './api'
+import { PlaylistParser } from './core'
+import { IndexGenerator } from './generators'
+import { Storage, File } from '@freearhey/storage-js'
+
+// 1. Load IPTV database
+await loadData()
+
+// 2. Parse existing streams
+const storage = new Storage('./streams')
+const parser = new PlaylistParser({ storage })
+const files = await storage.list('**/*.m3u')
+const streams = await parser.parse(files)
+
+// 3. Generate playlists
+const logFile = new File('generators.log')
+const generator = new IndexGenerator({ streams, logFile })
+await generator.generate()
+```
+
+--------------------------------
+
+### CountriesGenerator Usage Example
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/generators.md
+
+Instantiates and runs the CountriesGenerator to create numerous country and special playlists. This example demonstrates the typical usage pattern.
+
+```typescript
+const generator = new CountriesGenerator({
+  streams,
+  countries: data.countries,
+  logFile
+})
+await generator.generate()
+
+// Creates 190+ country playlists + int + undefined
+```
+
+--------------------------------
+
+### truncate() Example Usage
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/core-utilities.md
+
+Provides an example of using the truncate function to shorten a long URL. The second argument specifies the maximum length.
+
+```typescript
+import { truncate } from './utils'
+
+const url = 'https://example.com/very/long/path/to/stream'
+console.log(truncate(url, 30)) // 'https://example.com/very/lo...'
+```
+
+--------------------------------
+
+### Generator Configuration Example
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/configuration.md
+
+Loads data and initializes a CountriesGenerator. Automatically uses configured data.
+
+```typescript
+import { loadData, data } from './api'
+
+// Automatically uses configured data
+await loadData()
+const generator = new CountriesGenerator({
+  streams,
+  countries: data.countries,  // From loaded data
+  logFile
+})
+await generator.generate()
+```
+
+--------------------------------
+
+### isURI() Example Usage
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/core-utilities.md
+
+Shows examples of using the isURI function to check the validity of different URL strings. It returns true for supported streaming protocols and false otherwise.
+
+```typescript
+import { isURI } from './utils'
+
+console.log(isURI('http://example.com/stream.m3u8')) // true
+console.log(isURI('rtmp://example.com/live')) // true
+console.log(isURI('not-a-url')) // false
+console.log(isURI('ftp://example.com')) // false
+```
+
+--------------------------------
+
+### Example Regions Table Output
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/tables.md
+
+Illustrates the expected markdown format for the generated regions table, showing region, country count, and download links.
+
+```markdown
+| # | Region | Countries | Count | Link |
+|---|--------|-----------|-------|------|
+| 1 | Europe | Germany, UK, France, Spain, Italy | 2500 | https://iptv-org.github.io/iptv/regions/eu.m3u |
+| 2 | Asia | China, Japan, India, Thailand | 1800 | https://iptv-org.github.io/iptv/regions/as.m3u |
+| 3 | Americas | USA, Canada, Brazil, Mexico | 1200 | https://iptv-org.github.io/iptv/regions/na.m3u |
+| 4 | Middle East | UAE, Saudi Arabia, Iran, Turkey | 600 | https://iptv-org.github.io/iptv/regions/me.m3u |
+```
+
+--------------------------------
+
+### normalizeURL() Example Usage
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/core-utilities.md
+
+Demonstrates the normalization of URLs using the normalizeURL function. It cleans up common URL formatting issues.
+
+```typescript
+import { normalizeURL } from './utils'
+
+const url1 = 'http://www.example.com/path%20with%20spaces'
+console.log(normalizeURL(url1)) // 'http://example.com/path+with+spaces'
+
+const url2 = 'https://example.com:443/path'
+console.log(normalizeURL(url2)) // 'https://example.com/path'
+```
+
+--------------------------------
+
+### Example Usage of DataSet.getString()
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/dataset-and-models.md
+
+Illustrates the getString method's behavior with a valid URL, the delete symbol '~', and an undefined value. Shows how each case is represented.
+
+```typescript
+const data = new DataSet(new Dictionary({
+  'stream_url': 'http://example.com/stream.m3u8',
+  'label': '~',
+  'notes': undefined
+}))
+
+console.log(data.getString('stream_url')) // 'http://example.com/stream.m3u8'
+console.log(data.getString('label')) // ''
+console.log(data.getString('notes')) // undefined
+```
+
+--------------------------------
+
+### downloadData()
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/api-interface.md
+
+Downloads IPTV database files from remote source to disk, showing progress bars for each file. This is typically used during setup.
+
+```APIDOC
+## downloadData()
+
+### Description
+Downloads IPTV database files from remote source to disk. Shows progress bars for each file. Used during setup (`npm run api:load`).
+
+### Files Downloaded:
+- blocklist.json
+- categories.json
+- channels.json
+- cities.json
+- countries.json
+- feeds.json
+- guides.json
+- languages.json
+- logos.json
+- regions.json
+- streams.json
+- subdivisions.json
+- timezones.json
+
+### Progress Display:
+- Per-file progress bar with speed and ETA
+- Format: `filename [████████░░░░░░░░] 50% | ETA: 5s | 25 MB | 5 MB/s`
+
+### Example:
+```typescript
+import { downloadData } from './api'
+
+console.log('Downloading IPTV data...')
+await downloadData()
+console.log('Download complete')
+```
+```
+
+--------------------------------
+
+### Valid Proxy URL Formats
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/configuration.md
+
+Lists examples of valid proxy URL formats, including required protocols and optional credentials.
+
+```typescript
+const validProxies = [
+  'http://proxy.example.com:8080',
+  'https://secure-proxy.example.com:8443',
+  'socks5://user:pass@socks-proxy.example.com:1080',
+  'socks5h://user:pass@socks-proxy.example.com:1080'
+]
+```
+
+--------------------------------
+
+### IndexGenerator Usage Example
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/generators.md
+
+Demonstrates how to instantiate and use the IndexGenerator to create the main index playlist. This generator filters for SFW streams and sorts them by title.
+
+```typescript
+import { IndexGenerator } from './generators'
+import { Collection } from '@freearhey/core'
+import { Storage, File } from '@freearhey/storage-js'
+
+const streams = new Collection(/* ... */)
+const logFile = new File('generators.log')
+
+const generator = new IndexGenerator({ streams, logFile })
+await generator.generate()
+
+// Output: ./.gh-pages/index.m3u (5000+ streams)
+```
+
+--------------------------------
+
+### Example Usage of DataSet.getBoolean()
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/dataset-and-models.md
+
+Demonstrates how to use the getBoolean method to retrieve and interpret boolean values from a DataSet. Shows handling of 'true' strings and empty strings.
+
+```typescript
+const data = new DataSet(new Dictionary({
+  'approved': 'true',
+  'archived': ''
+}))
+
+console.log(data.getBoolean('approved')) // true
+console.log(data.getBoolean('archived')) // false
+```
+
+--------------------------------
+
+### LogParser Example Usage
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/core-utilities.md
+
+Demonstrates how to use the LogParser to parse JSON log content. The parser expects newline-delimited JSON.
+
+```typescript
+import { LogParser } from './core/logParser'
+
+const logContent = `{"type":"index","filepath":"index.m3u","count":5000}
+{"type":"country","filepath":"countries/us.m3u","count":1250}
+{"type":"category","filepath":"categories/news.m3u","count":42}`
+
+const parser = new LogParser()
+const logs = parser.parse(logContent)
+
+console.log(logs)
+// [
+//   { type: 'index', filepath: 'index.m3u', count: 5000 },
+//   { type: 'country', filepath: 'countries/us.m3u', count: 1250 },
+//   { type: 'category', filepath: 'categories/news.m3u', count: 42 }
+// ]
+```
+
+--------------------------------
+
+### CountriesTable Example Output Format
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/tables.md
+
+Illustrates the markdown table format generated by the CountriesTable class, including country flags, stream counts, and links.
+
+```markdown
+| # | Country | Subdivisions | Count | Link |
+|---|---------|--------------|-------|------|
+| 1 | 🇺🇸 United States | California, Texas, New York | 1250 | https://iptv-org.github.io/iptv/countries/us.m3u |
+| 2 | 🇬🇧 United Kingdom | England, Scotland | 480 | https://iptv-org.github.io/iptv/countries/gb.m3u |
+```
+
+--------------------------------
+
+### Playlist Generation with IndexGenerator
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/playlist.md
+
+Example of using IndexGenerator and Playlist classes in TypeScript for creating M3U playlists. Ensure streams and logFile are defined, and storage is available.
+
+```typescript
+import { IndexGenerator } from './generators/indexGenerator'
+import { Playlist } from './models/playlist'
+
+// IndexGenerator uses Playlist internally
+const generator = new IndexGenerator({ streams, logFile })
+await generator.generate()
+
+// Generators create playlists like:
+const playlist = new Playlist(filteredStreams, { public: true })
+await storage.save('index.m3u', playlist.toString())
+```
+
+--------------------------------
+
+### Get EPG Guides Grouped by Stream ID
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/api-interface.md
+
+Retrieve Electronic Program Guide (EPG) data for a specific stream ID. Useful for displaying TV schedules.
+
+```typescript
+const guides = data.guidesGroupedByStreamId.get('us.nbc@main')
+// [Guide { lang: 'en', site: 'tvguide.com', ... }]
+```
+
+--------------------------------
+
+### Download IPTV Data
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/api-interface.md
+
+Downloads IPTV database files from a remote source to the local disk, displaying progress bars for each file. This is typically used during initial setup.
+
+```typescript
+import { downloadData } from './api'
+
+console.log('Downloading IPTV data...')
+await downloadData()
+console.log('Download complete')
+```
+
+--------------------------------
+
+### IPTV Configuration Environment Variables
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/README.md
+
+Lists the environment variables used for configuring the IPTV project, including directories for data, streams, and public output, as well as a GitHub token.
+
+```bash
+ROOT_DIR=./                    # Project root
+STREAMS_DIR=./streams          # Source M3U files
+PUBLIC_DIR=./.gh-pages         # Generated playlists
+DATA_DIR=./temp/data           # Downloaded databases
+LOGS_DIR=./temp/logs           # Generator logs
+GITHUB_TOKEN=ghp_...           # For discussions API
+```
+
+--------------------------------
+
+### Get Feeds Grouped by Channel
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/api-interface.md
+
+Retrieve a list of Feed objects grouped by channel ID. Useful for getting all streams for a specific channel.
+
+```typescript
+const nbcFeeds = data.feedsGroupedByChannel.get('us.nbc')
+// [Feed { id: 'main', ... }, Feed { id: 'backup', ... }]
+```
+
+--------------------------------
+
+### IPTV Project Command Reference
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/INDEX.md
+
+A collection of npm scripts for managing IPTV data, playlists, documentation, and development tasks.
+
+```bash
+# Data management
+npm run api:load                # Download IPTV database
+
+# Playlist operations
+npm run playlist:generate       # Generate all playlists
+npm run playlist:validate       # Validate syntax
+npm run playlist:test           # Test stream URLs
+npm run playlist:format         # Format playlists
+npm run playlist:update         # Apply GitHub issues
+npm run playlist:edit           # Interactive editor
+npm run playlist:export         # Export to format
+
+# Documentation
+npm run readme:update           # Update README tables
+npm run report:create           # Generate reports
+
+# Development
+npm run lint                    # Run ESLint
+npm test                        # Run tests
+npm run act:check              # Run GitHub Actions locally
+```
+
+--------------------------------
+
+### Initialize StreamTester with Options
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/stream-tester.md
+
+Demonstrates how to initialize the StreamTester class with command-line options parsed by commander.js. This includes setting up proxy and timeout configurations.
+
+```typescript
+import { StreamTester } from './core/streamTester'
+import { program } from 'commander'
+
+program
+  .option('-p, --proxy <url>', 'Proxy URL')
+  .option('-t, --timeout <number>', 'Timeout in ms', '30000')
+  .parse()
+
+const tester = new StreamTester({ options: program.opts() })
+```
+
+--------------------------------
+
+### SDK DataManager Initialization and Loading
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/configuration.md
+
+Initializes the DataManager with a specified data directory and loads data from disk. Ensure the DATA_DIR environment variable is set correctly.
+
+```typescript
+import { DataManager } from '@iptv-org/sdk'
+
+const dataManager = new DataManager({ dataDir: DATA_DIR })
+await dataManager.loadFromDisk()
+```
+
+--------------------------------
+
+### Project File Structure
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/INDEX.md
+
+Overview of the IPTV project's directory structure, highlighting key files and subdirectories for different functionalities.
+
+```text
+output/
+├── INDEX.md                           # This file
+├── README.md                          # Start here
+├── types.md                           # Type definitions
+├── configuration.md                   # Configuration reference
+└── api-reference/
+    ├── stream.md                      # Stream class (16 methods)
+    ├── playlist.md                    # Playlist class (4 methods)
+    ├── stream-tester.md              # StreamTester class (1 method)
+    ├── playlist-parser.md            # PlaylistParser class (2 methods)
+    ├── dataset-and-models.md         # DataSet, Issue, Discussion classes
+    ├── api-interface.md              # API functions for data loading
+    ├── core-utilities.md             # 7 utility classes + functions
+    ├── generators.md                 # 11 generator classes
+    └── tables.md                     # 4 table classes
+```
+
+--------------------------------
+
+### Playlist Constructor
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/playlist.md
+
+Initializes a new Playlist instance with a collection of streams and optional configuration.
+
+```APIDOC
+## Playlist Constructor
+
+### Description
+Initializes a new Playlist instance with a collection of streams and optional configuration.
+
+### Parameters
+#### Path Parameters
+None
+
+#### Query Parameters
+None
+
+#### Request Body
+None
+
+### Parameters
+- **streams** (Collection<Stream>) - Required - Collection of Stream objects to include in playlist
+- **options.public** (boolean) - Optional - If true, includes full metadata (logos, headers, groups) in output
+```
+
+--------------------------------
+
+### Invalid Proxy URL Formats
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/configuration.md
+
+Lists examples of invalid proxy URL formats that will not be accepted.
+
+```typescript
+const invalidProxies = [
+  'proxy.example.com:8080',  // Missing protocol
+  'http://proxy.example.com',  // Missing port
+]
+```
+
+--------------------------------
+
+### Typical IPTV API Integration Pattern
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/api-interface.md
+
+Demonstrates a common workflow for integrating the IPTV API into scripts. This includes loading data, accessing reference data, performing lookups, searching channels, and checking blocklists.
+
+```typescript
+import { loadData, data, searchChannels } from './api'
+import { Stream } from './models'
+
+// 1. Load all data
+await loadData()
+
+// 2. Access reference data
+for (const country of data.countries.all()) {
+  console.log(`${country.flag} ${country.name}`)
+}
+
+// 3. Look up specific items
+const channel = data.channelsKeyById.get('us.nbc')
+const feeds = data.feedsGroupedByChannel.get('us.nbc')
+
+// 4. Search
+const newsChannels = searchChannels('News')
+
+// 5. Check blocklist
+const records = data.blocklistRecordsGroupedByChannel.get('us.nbc')
+if (records && records.some(r => r.reason === 'dmca')) {
+  console.log('Channel is on DMCA blocklist')
+}
+```
+
+--------------------------------
+
+### Set Runtime Environment with NODE_ENV
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/configuration.md
+
+Shows how to set the NODE_ENV environment variable to control the runtime environment, such as running tests or production builds.
+
+```bash
+# Run in test mode
+NODE_ENV=test npm test
+
+# Run in production
+NODE_ENV=production npm run playlist:generate
+```
+
+--------------------------------
+
+### Get Stream Filename
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/stream.md
+
+Returns just the filename portion of the filepath (e.g., "us.m3u").
+
+```typescript
+stream.getFilename()
+```
+
+--------------------------------
+
+### Download IPTV Database
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/README.md
+
+Use this command to download the IPTV database for API usage.
+
+```bash
+npm run api:load
+```
+
+--------------------------------
+
+### Get City by Code
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/api-interface.md
+
+Retrieve a City object using its code. Useful for city-specific data.
+
+```typescript
+data.citiesKeyByCode.get('US-CA-LAX') // → City { code: 'US-CA-LAX', name: 'Los Angeles', ... }
+```
+
+--------------------------------
+
+### Get Stream Filepath
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/stream.md
+
+Returns the playlist file path for this stream (e.g., "us.m3u").
+
+```typescript
+stream.getFilepath()
+```
+
+--------------------------------
+
+### Get Region by Code
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/api-interface.md
+
+Retrieve a Region object using its code. Useful for broad geographical data.
+
+```typescript
+data.regionsKeyByCode.get('eu') // → Region { code: 'eu', name: 'Europe', ... }
+```
+
+--------------------------------
+
+### Initialize PlaylistParser
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/playlist-parser.md
+
+Instantiate the PlaylistParser class with a storage instance. The storage instance is required for file I/O operations.
+
+```typescript
+import { PlaylistParser } from './core/playlistParser'
+import { Storage } from '@freearhey/storage-js'
+
+const storage = new Storage('./streams')
+const parser = new PlaylistParser({ storage })
+```
+
+--------------------------------
+
+### Generate All Playlists
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/README.md
+
+Use this command to generate all playlists.
+
+```bash
+npm run playlist:generate
+```
+
+--------------------------------
+
+### Get Channel by ID
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/api-interface.md
+
+Retrieve a Channel object using its unique ID. Useful for accessing channel details.
+
+```typescript
+data.channelsKeyById.get('us.nbc') // → Channel { id: 'us.nbc', name: 'NBC', country: 'US', ... }
+```
+
+--------------------------------
+
+### Get Language by Code
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/api-interface.md
+
+Retrieve a Language object using its ISO language code. Useful for language-specific data.
+
+```typescript
+data.languagesKeyByCode.get('en') // → Language { code: 'en', name: 'English', ... }
+```
+
+--------------------------------
+
+### Create Search Index
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/configuration.md
+
+Initializes a search index for channel data. Ensure `sdk` and `searchableData` are properly imported and available.
+
+```typescript
+searchIndex = sdk.SearchEngine.createIndex<sdk.Types.ChannelSearchableData>(
+  searchableData.all()
+)
+```
+
+--------------------------------
+
+### Log File Format Example
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/configuration.md
+
+Generator logs use newline-delimited JSON. Each line represents a distinct log entry.
+
+```json
+{"type":"index","filepath":"index.m3u","count":5000}
+```
+
+```json
+{"type":"country","filepath":"countries/us.m3u","count":1250}
+```
+
+--------------------------------
+
+### Sourcing Environment Variables and Running Generation
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/configuration.md
+
+This command sequence first sources the variables from the .env file into the current shell environment, then executes the playlist generation command.
+
+```bash
+source .env
+npm run playlist:generate
+```
+
+--------------------------------
+
+### Get Feed by Stream ID
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/api-interface.md
+
+Retrieve a Feed object using its stream ID. Useful for accessing stream variants.
+
+```typescript
+data.feedsKeyByStreamId.get('us.nbc@main') // → Feed { id: 'main', channel: 'us.nbc', ... }
+data.feedsKeyByStreamId.get('us.nbc@backup') // → Feed { id: 'backup', channel: 'us.nbc', ... }
+```
+
+--------------------------------
+
+### Create a Public Playlist
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/playlist.md
+
+Instantiate a public playlist with a collection of streams and save it to storage. Ensure streams are added to the collection before creating the playlist.
+
+```typescript
+import { Playlist } from './models/playlist'
+import { Collection } from '@freearhey/core'
+import { Storage } from '@freearhey/storage-js'
+
+const streams = new Collection<Stream>()
+// ... add streams ...
+
+const publicPlaylist = new Playlist(streams, { public: true })
+const m3uContent = publicPlaylist.toString()
+
+const storage = new Storage('./.gh-pages')
+await storage.save('index.m3u', m3uContent)
+```
+
+--------------------------------
+
+### Get Subdivision by Code
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/api-interface.md
+
+Retrieve a Subdivision object using its code. Useful for accessing regional data within countries.
+
+```typescript
+data.subdivisionsKeyByCode.get('US-CA') // → Subdivision { code: 'US-CA', name: 'California', ... }
+```
+
+--------------------------------
+
+### Get Country by Code
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/api-interface.md
+
+Retrieve a Country object using its ISO country code. Useful for country-specific data retrieval.
+
+```typescript
+data.countriesKeyByCode.get('US') // → Country { code: 'US', name: 'United States', flag: '🇺🇸', ... }
+data.countriesKeyByCode.get('GB') // → Country { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', ... }
+```
+
+--------------------------------
+
+### Generate README Tables
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/README.md
+
+Use this command to generate tables for the README file.
+
+```bash
+npm run readme:update
+```
+
+--------------------------------
+
+### Get Category by ID
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/api-interface.md
+
+Retrieve a Category object using its unique ID. Useful for filtering or displaying category information.
+
+```typescript
+data.categoriesKeyById.get('news') // → Category { id: 'news', name: 'News', ... }
+data.categoriesKeyById.get('sports') // → Category { id: 'sports', name: 'Sports', ... }
+```
+
+--------------------------------
+
+### Format Playlists
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/README.md
+
+Use this command to format the generated playlists.
+
+```bash
+npm run playlist:format
+```
+
+--------------------------------
+
+### Generate Playlists with IndexGenerator
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/README.md
+
+Demonstrates the creation and execution of the IndexGenerator to produce the main playlist containing all SFW streams.
+
+```typescript
+const generator = new IndexGenerator({ streams, logFile })
+await generator.generate()
+```
+
+--------------------------------
+
+### Initialize and Render CliTable
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/core-utilities.md
+
+Use CliTable to create and display tabular data in the console. Initialize with column names, append rows as objects, and then render or convert to a string.
+
+```typescript
+import { CliTable } from './core'
+
+const table = new CliTable(['Category', 'Count', 'URL'])
+
+table.append({
+  'Category': 'News',
+  'Count': 42,
+  'URL': 'https://example.com/news'
+})
+
+table.append({
+  'Category': 'Sports',
+  'Count': 156,
+  'URL': 'https://example.com/sports'
+})
+
+table.render() // Prints to console
+console.log(table.toString()) // Get as string
+```
+
+--------------------------------
+
+### Get Stream Logos
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/stream.md
+
+Retrieves logos for the stream, sorted by format preference (SVG > PNG > JPEG/GIF/WebP > APNG) and proximity to 512x512 size.
+
+```typescript
+stream.getLogos()
+```
+
+--------------------------------
+
+### Interactive Playlist Editor
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/README.md
+
+Use this command to launch an interactive editor for playlists.
+
+```bash
+npm run playlist:edit
+```
+
+--------------------------------
+
+### PlaylistParser Constructor
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/playlist-parser.md
+
+Initializes a new instance of the PlaylistParser class. Requires a storage instance for file operations.
+
+```APIDOC
+## Constructor PlaylistParser
+
+### Description
+Initializes a new instance of the PlaylistParser class. Requires a storage instance for file operations.
+
+### Parameters
+#### Path Parameters
+None
+
+#### Query Parameters
+None
+
+#### Request Body
+None
+
+### Parameters
+#### Constructor Parameters
+- **storage** (Storage) - Required - Storage instance from @freearhey/storage-js for file I/O
+
+### Request Example
+```typescript
+import { PlaylistParser } from './core/playlistParser'
+import { Storage } from '@freearhey/storage-js'
+
+const storage = new Storage('./streams')
+const parser = new PlaylistParser({ storage })
+```
+```
+
+--------------------------------
+
+### Get Stream Line Number
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/stream.md
+
+Returns the line number in the original M3U file where this stream was defined. Returns -1 if the line number is unknown.
+
+```typescript
+stream.getLine()
+```
+
+--------------------------------
+
+### Instantiate and Use Discussion Class
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/dataset-and-models.md
+
+Shows how to create a Discussion object with parsed data and access its properties. Requires DataSet and Dictionary imports.
+
+```typescript
+import { Discussion } from './models/discussion'
+import { DataSet } from './core/dataSet'
+import { Dictionary } from '@freearhey/core'
+
+const discussionData = new DataSet(new Dictionary({
+  'stream_id': 'uk.bbc@hd'
+}))
+
+const discussion = new Discussion({
+  number: 2891,
+  category: 'Suggestions',
+  data: discussionData
+})
+
+console.log(discussion.number) // 2891
+console.log(discussion.category) // 'Suggestions'
+console.log(discussion.data.getString('stream_id')) // 'uk.bbc@hd'
+```
+
+--------------------------------
+
+### Get Blocklist Records Grouped by Channel
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/api-interface.md
+
+Retrieve blocklist records for a channel, typically due to DMCA or copyright issues. Useful for content moderation.
+
+```typescript
+const blocklistRecords = data.blocklistRecordsGroupedByChannel.get('us.nbc')
+// [BlocklistRecord { reason: 'dmca', ref: 'https://...', ... }]
+```
+
+--------------------------------
+
+### Initialize Logger
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/configuration.md
+
+Instantiates a logger from `@freearhey/core`. Use `{ level: 5 }` for verbose logging.
+
+```typescript
+const logger = new Logger()
+```
+
+```typescript
+const logger = new Logger({ level: 5 }) // Verbose logging
+```
+
+--------------------------------
+
+### Playlist Constructor
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/playlist.md
+
+Initializes a new Playlist instance with a collection of streams and optional configuration. The 'public' option in PlaylistOptions determines if full metadata is included in the output.
+
+```typescript
+constructor(streams: Collection<Stream>, options?: PlaylistOptions)
+```
+
+--------------------------------
+
+### Get Full Stream Title
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/stream.md
+
+Retrieves the complete display title for a stream, including quality and label annotations. Useful for presenting stream information to users.
+
+```typescript
+const stream = new Stream({
+  channel: 'us.nbc',
+  feed: null,
+  title: 'NBC',
+  quality: '720p',
+  url: 'http://example.com/nbc.m3u8',
+  referrer: null,
+  user_agent: null,
+  label: 'HD'
+})
+
+console.log(stream.getFullTitle()) // "NBC (720p) [HD]"
+```
+
+--------------------------------
+
+### Get Broadcast Countries for a Stream
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/stream.md
+
+Retrieves all countries where this stream broadcasts based on the feed's broadcast area configuration. Returns a collection with duplicates removed.
+
+```typescript
+const stream = data.channelsKeyById.get('de.zdf').streams[0]
+const countries = stream.getBroadcastCountries()
+countries.forEach(country => {
+  console.log(country.name, country.code) // "Germany" "DE"
+})
+```
+
+--------------------------------
+
+### Search Channels
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/README.md
+
+Shows how to load data and search for channels by name, then log their IDs and names.
+
+```typescript
+await loadData()
+const results = searchChannels('bbc')
+results.forEach(channel => {
+  console.log(channel.id, channel.name)
+})
+```
+
+--------------------------------
+
+### Get Stream TVG Logo URL
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/stream.md
+
+Returns the best logo URL for the stream, typically in SVG or PNG format. Returns an empty string if no logo is available.
+
+```typescript
+stream.getTvgLogo()
+```
+
+--------------------------------
+
+### DataSet Constructor
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/dataset-and-models.md
+
+Initializes a new instance of the DataSet class with provided data.
+
+```APIDOC
+## DataSet Constructor
+
+### Description
+Initializes a new instance of the DataSet class with provided data.
+
+### Signature
+```typescript
+constructor(data: Dictionary<string>)
+```
+
+### Parameters
+#### Path Parameters
+- **data** (Dictionary<string>) - Required - Dictionary mapping field names to values
+```
+
+--------------------------------
+
+### Get Stream TVG ID
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/stream.md
+
+Returns the TVG ID for the stream, preferring the explicitly set tvgId over the channel ID (e.g., "us.nbc@main").
+
+```typescript
+stream.getTvgId()
+```
+
+--------------------------------
+
+### Create and Use a Stream Object
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/README.md
+
+Demonstrates the creation of a Stream object with metadata and showcases its common methods for validation, updating, and conversion.
+
+```typescript
+const stream = new Stream({
+  channel: 'us.nbc',
+  feed: null,
+  title: 'NBC',
+  quality: '720p',
+  url: 'http://example.com/nbc.m3u8',
+  referrer: null,
+  user_agent: null,
+  label: 'HD'
+})
+
+// Methods
+stream.validate()                    // Validate URL format
+stream.updateWithIssue(dataSet)     // Apply GitHub issue data
+stream.getBroadcastCountries()      // Get countries
+stream.isSFW()                       // Check if safe-for-work
+stream.toString({ public: true })   // M3U format output
+stream.toObject()                   // Plain object conversion
+```
+
+--------------------------------
+
+### Testing Streams with Concurrency Limit
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/stream-tester.md
+
+Use StreamTester with async 'eachLimit' to test multiple streams concurrently. This example demonstrates setting a concurrency limit and tracking passed/failed counts.
+
+```typescript
+import { StreamTester } from './core/streamTester'
+import { eachLimit } from 'async'
+
+const tester = new StreamTester({ options })
+let passedCount = 0
+let failedCount = 0
+
+const testResults = new Collection<Stream>()
+
+// Test streams in parallel with concurrency limit
+await new Promise((resolve, reject) => {
+  eachLimit(
+    streams.all(),
+    4, // Test 4 streams concurrently
+    async (stream: Stream) => {
+      const result = await tester.test(stream)
+      
+      if (result.status.ok) {
+        passedCount++
+      } else {
+        failedCount++
+        stream.statusCode = result.status.code
+      }
+    },
+    (err) => {
+      if (err) reject(err)
+      else resolve(undefined)
+    }
+  )
+})
+
+console.log(`Passed: ${passedCount}, Failed: ${failedCount}`)
+```
+
+--------------------------------
+
+### Test Stream with Proxy
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/README.md
+
+Demonstrates how to configure and use a StreamTester with proxy settings for testing a stream.
+
+```typescript
+const tester = new StreamTester({
+  options: {
+    proxy: 'socks5://user:pass@proxy.example.com:1080',
+    timeout: 30000
+  }
+})
+
+const result = await tester.test(stream)
+```
+
+--------------------------------
+
+### Serialize Playlist to M3U8 Format
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/playlist.md
+
+Serializes the playlist into the Extended M3U (M3U8) format, including EPG guide URLs, stream entries, and optional metadata like HTTP headers and logos when in public mode.
+
+```plaintext
+#EXTM3U x-tvg-url="epg1.xml.gz,epg2.xml"
+#EXTINF:-1 tvg-id="..." tvg-logo="" http-referrer="" group-title=""
+Stream Title (720p) [Label]
+#EXTVLCOPT:http-referrer=...
+#EXTVLCOPT:http-user-agent=...
+http://stream.url
+...
+```
+
+```typescript
+toString(): string
+```
+
+```typescript
+const streams = new Collection<Stream>()
+streams.add(new Stream({
+  channel: 'us.nbc',
+  feed: null,
+  title: 'NBC',
+  quality: '720p',
+  url: 'http://example.com/nbc.m3u8',
+  referrer: null,
+  user_agent: null,
+  label: 'HD'
+}))
+
+const playlist = new Playlist(streams, { public: true })
+const m3uContent = playlist.toString()
+```
+
+--------------------------------
+
+### Environment File (.env) Configuration
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/configuration.md
+
+This file defines environment variables for custom directories, a GitHub token, and the Node environment. These variables can be sourced into the shell to configure the application.
+
+```bash
+ROOT_DIR=./
+STREAMS_DIR=./streams
+PUBLIC_DIR=./.gh-pages
+DATA_DIR=./temp/data
+LOGS_DIR=./temp/logs
+GITHUB_TOKEN=ghp_your_token
+NODE_ENV=production
+```
+
+--------------------------------
+
+### Import SDK module from @iptv-org/sdk
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/types.md
+
+Imports the entire SDK module from @iptv-org/sdk. This module contains various model types for channels, categories, locations, and EPG data.
+
+```typescript
+import * as sdk from '@iptv-org/sdk'
+```
+
+--------------------------------
+
+### loadData()
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/api-interface.md
+
+Loads IPTV database files from disk, processes them, and populates the global data structures. This function must be called before accessing any data.
+
+```APIDOC
+## loadData()
+
+### Description
+Loads IPTV database files from disk, processes them, and populates the global data structures. Must be called before accessing data.
+
+### Requirements:
+- Requires `DATA_DIR` environment variable (default: `./temp/data`)
+- Database files must be JSON format from IPTV SDK
+
+### Data Files Loaded:
+- categories.json
+- channels.json
+- feeds.json
+- guides.json
+- languages.json
+- countries.json
+- subdivisions.json
+- cities.json
+- regions.json
+- blocklist.json
+
+### Creates Search Index:
+- Builds full-text search index for channels using SearchEngine
+
+### Example:
+```typescript
+import { loadData, data } from './api'
+
+await loadData()
+
+// Now data is available
+console.log(data.countries.count()) // Total countries
+console.log(data.channels.count()) // Total channels
+```
+```
+
+--------------------------------
+
+### Instantiate and Use Issue Class
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/dataset-and-models.md
+
+Demonstrates how to create an Issue object with parsed data and access its properties. Ensure DataSet and Dictionary are imported.
+
+```typescript
+import { Issue } from './models/issue'
+import { DataSet } from './core/dataSet'
+import { Dictionary } from '@freearhey/core'
+
+const issueData = new DataSet(new Dictionary({
+  'stream_id': 'us.nbc@main',
+  'label': 'HD',
+  'quality': '1080p',
+  'http_user_agent': 'Mozilla/5.0',
+  'http_referrer': 'https://example.com',
+  'reason': 'Stream stopped working'
+}))
+
+const issue = new Issue({
+  number: 5432,
+  labels: ['approved', 'streams:edit'],
+  data: issueData
+})
+
+console.log(issue.number) // 5432
+console.log(issue.labels) // ['approved', 'streams:edit']
+console.log(issue.data.getString('stream_id')) // 'us.nbc@main'
+```
+
+--------------------------------
+
+### EXTINF Entry Format (Public Mode)
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/api-reference/playlist.md
+
+Use this format for public M3U playlists, including EPG IDs, logos, referrers, user agents, and group titles.
+
+```plaintext
+#EXTINF:-1 tvg-id="{id}" tvg-logo="{logo}" http-referrer="{referrer}" http-user-agent="{ua}" group-title="{group}"
+{full_title}
+```
+
+--------------------------------
+
+### Override Directory Paths with Environment Variables
+
+Source: https://github.com/iptv-org/iptv/blob/master/_autodocs/configuration.md
+
+Demonstrates how to override default directory paths like DATA_DIR and STREAMS_DIR using environment variables to customize playlist generation and validation processes.
+
+```bash
+# Override data directory
+export DATA_DIR=/custom/data/path npm run playlist:generate
+
+# Use different streams directory
+export STREAMS_DIR=/mnt/iptv/streams npm run playlist:validate
+
+# Custom output directory
+export PUBLIC_DIR=/var/www/html npm run playlist:generate
+```

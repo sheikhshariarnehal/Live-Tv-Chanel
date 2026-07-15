@@ -72,16 +72,16 @@ class SyncService {
         debugPrint('SyncService: Events synchronized.');
       }
 
-      // 4. Invalidate providers if anything changed to trigger reactive UI updates
-      // Only invalidate if we had a prior valid local version (meaning we displayed old cache and need to refresh it).
-      // If the local version was null, the provider was awaiting the sync completion anyway, so it will naturally load the new data.
-      if (channelsUpdated && localChannelsVer != null) {
+      // 4. Always invalidate providers after a successful sync so they re-read
+      // the updated in-memory / Hive cache. This covers both first-install
+      // (localVer == null) and subsequent refreshes (localVer != null).
+      if (channelsUpdated) {
         debugPrint('SyncService: Invalidating channels and categories providers...');
         _ref.invalidate(channelsProvider);
         _ref.invalidate(categoriesProvider);
       }
 
-      if (eventsUpdated && localEventsVer != null) {
+      if (eventsUpdated) {
         debugPrint('SyncService: Invalidating events providers...');
         _ref.invalidate(eventsProvider);
       }

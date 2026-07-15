@@ -40,24 +40,14 @@ final appSyncProvider = FutureProvider<void>((ref) async {
 final channelsProvider = FutureProvider<List<Channel>>((ref) async {
   final cache = ref.watch(cacheServiceProvider);
   final localChannels = cache.getLocalChannels();
-  
-  final List<Channel> channelsList;
+
   if (localChannels.isEmpty) {
     // If the local cache is empty (first install), wait for the background sync to populate it
     await ref.watch(appSyncProvider.future);
-    channelsList = cache.getLocalChannels();
-  } else {
-    channelsList = localChannels;
+    return cache.getLocalChannels();
   }
 
-  // Filter channels to only show those that belong to active categories (or have no category)
-  final localCategories = cache.getLocalCategories();
-  final activeCategoryIds = localCategories.map((c) => c.id).toSet();
-
-  return channelsList.where((ch) {
-    final cat = ch.category;
-    return cat == null || cat.isEmpty || activeCategoryIds.contains(cat);
-  }).toList();
+  return localChannels;
 });
 
 final trendingChannelsProvider = FutureProvider<List<Channel>>((ref) async {

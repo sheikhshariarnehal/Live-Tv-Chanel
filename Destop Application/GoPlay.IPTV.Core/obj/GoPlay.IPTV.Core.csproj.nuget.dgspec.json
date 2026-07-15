@@ -1,0 +1,86 @@
+{
+  "format": 1,
+  "restore": {
+    "D:\\Poject\\GoPlay\\Destop Application\\GoPlay.IPTV.Core\\GoPlay.IPTV.Core.csproj": {}
+  },
+  "projects": {
+    "D:\\Poject\\GoPlay\\Destop Application\\GoPlay.IPTV.Core\\GoPlay.IPTV.Core.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Poject\\GoPlay\\Destop Application\\GoPlay.IPTV.Core\\GoPlay.IPTV.Core.csproj",
+        "projectName": "GoPlay.IPTV.Core",
+        "projectPath": "D:\\Poject\\GoPlay\\Destop Application\\GoPlay.IPTV.Core\\GoPlay.IPTV.Core.csproj",
+        "packagesPath": "C:\\Users\\Sheikh Shariar Nehal\\.nuget\\packages\\",
+        "outputPath": "D:\\Poject\\GoPlay\\Destop Application\\GoPlay.IPTV.Core\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\Sheikh Shariar Nehal\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Runtime.win-x64",
+              "version": "[9.0.17, 9.0.17]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Runtime.win-x64",
+              "version": "[9.0.17, 9.0.17]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Runtime.win-x64",
+              "version": "[9.0.17, 9.0.17]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Users\\Sheikh Shariar Nehal\\.dotnet\\sdk\\9.0.315/PortableRuntimeIdentifierGraph.json"
+        }
+      },
+      "runtimes": {
+        "win-x64": {
+          "#import": []
+        }
+      }
+    }
+  }
+}
