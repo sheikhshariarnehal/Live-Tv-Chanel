@@ -424,9 +424,20 @@ class _CategoryFilterBar extends ConsumerWidget {
     final activeCatsWithCountsAsync = ref.watch(activeCategoriesWithCountsProvider);
     final selectedCategory = ref.watch(selectedCategoryProvider);
     final allChannelsAsync = ref.watch(channelsProvider);
+    final theme = Theme.of(context);
 
-    return SizedBox(
+    return Container(
       height: 48,
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: theme.brightness == Brightness.dark
+                ? Colors.white.withValues(alpha: 0.08)
+                : Colors.black.withValues(alpha: 0.08),
+            width: 1.0,
+          ),
+        ),
+      ),
       child: activeCatsWithCountsAsync.when(
         data: (activeCatsWithCounts) {
           final totalCount = allChannelsAsync.maybeWhen(
@@ -436,11 +447,11 @@ class _CategoryFilterBar extends ConsumerWidget {
 
           return ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             itemCount: activeCatsWithCounts.length + 1,
             itemBuilder: (context, index) {
               if (index == 0) {
-                return _CategoryChip(
+                return _CategoryTab(
                   label: 'All',
                   count: totalCount,
                   isSelected: selectedCategory == 'all',
@@ -453,7 +464,7 @@ class _CategoryFilterBar extends ConsumerWidget {
               final item = activeCatsWithCounts[index - 1];
               final cat = item.$1;
               final count = item.$2;
-              return _CategoryChip(
+              return _CategoryTab(
                 key: ValueKey(cat.id),
                 label: cat.name,
                 count: count,
@@ -578,15 +589,15 @@ class _ResponsiveGridState extends State<_ResponsiveGrid> {
   }
 }
 
-// ─── Category Chip ────────────────────────────────────────────
-class _CategoryChip extends StatefulWidget {
+// ─── Category Tab ────────────────────────────────────────────
+class _CategoryTab extends StatefulWidget {
   final String label;
   final int count;
   final bool isSelected;
   final VoidCallback onTap;
   final String? iconUrl;
 
-  const _CategoryChip({
+  const _CategoryTab({
     super.key,
     required this.label,
     required this.count,
@@ -596,22 +607,23 @@ class _CategoryChip extends StatefulWidget {
   });
 
   @override
-  State<_CategoryChip> createState() => _CategoryChipState();
+  State<_CategoryTab> createState() => _CategoryTabState();
 }
 
-class _CategoryChipState extends State<_CategoryChip> {
+class _CategoryTabState extends State<_CategoryTab> {
   bool _isHovered = false;
 
-  // Pre-cached decorations — computed once, not per build().
-  late BoxDecoration _selectedDeco;
-  late BoxDecoration _unselectedDeco;
-  late BoxDecoration _unselectedHoveredDeco;
-  late BoxDecoration _countSelectedDeco;
-  late BoxDecoration _countUnselectedDeco;
   late TextStyle _selectedTextStyle;
   late TextStyle _unselectedTextStyle;
+  late TextStyle _hoveredTextStyle;
+
+  late BoxDecoration _countSelectedDeco;
+  late BoxDecoration _countUnselectedDeco;
+  late BoxDecoration _countHoveredDeco;
+
   late TextStyle _countSelectedTextStyle;
   late TextStyle _countUnselectedTextStyle;
+  late TextStyle _countHoveredTextStyle;
 
   @override
   void didChangeDependencies() {
@@ -622,166 +634,171 @@ class _CategoryChipState extends State<_CategoryChip> {
   void _rebuildDecorations() {
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
-    final isDark = theme.brightness == Brightness.dark;
-
-    _selectedDeco = BoxDecoration(
-      color: primaryColor.withValues(alpha: 0.12),
-      borderRadius: const BorderRadius.all(Radius.circular(8)),
-      border: Border.fromBorderSide(
-        BorderSide(color: primaryColor.withValues(alpha: 0.47), width: 0.8),
-      ),
-    );
-
-    _unselectedDeco = BoxDecoration(
-      color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.04),
-      borderRadius: const BorderRadius.all(Radius.circular(8)),
-      border: Border.fromBorderSide(
-        BorderSide(
-          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06),
-          width: 0.8,
-        ),
-      ),
-    );
-
-    _unselectedHoveredDeco = BoxDecoration(
-      color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08),
-      borderRadius: const BorderRadius.all(Radius.circular(8)),
-      border: Border.fromBorderSide(
-        BorderSide(
-          color: isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.15),
-          width: 0.8,
-        ),
-      ),
-    );
-
-    _countSelectedDeco = BoxDecoration(
-      color: primaryColor.withValues(alpha: 0.24),
-      borderRadius: const BorderRadius.all(Radius.circular(4)),
-    );
-
-    _countUnselectedDeco = BoxDecoration(
-      color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.08),
-      borderRadius: const BorderRadius.all(Radius.circular(4)),
-    );
 
     _selectedTextStyle = TextStyle(
       color: primaryColor,
-      fontSize: 12,
-      fontWeight: FontWeight.w700,
-      letterSpacing: 0.2,
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.1,
     );
 
     _unselectedTextStyle = TextStyle(
-      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-      fontSize: 12,
+      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+      fontSize: 14,
       fontWeight: FontWeight.w500,
-      letterSpacing: 0.2,
+      letterSpacing: 0.1,
+    );
+
+    _hoveredTextStyle = TextStyle(
+      color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      letterSpacing: 0.1,
+    );
+
+    _countSelectedDeco = BoxDecoration(
+      color: primaryColor,
+      borderRadius: const BorderRadius.all(Radius.circular(10)),
+    );
+
+    _countUnselectedDeco = BoxDecoration(
+      color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
+      borderRadius: const BorderRadius.all(Radius.circular(10)),
+    );
+
+    _countHoveredDeco = BoxDecoration(
+      color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
+      borderRadius: const BorderRadius.all(Radius.circular(10)),
     );
 
     _countSelectedTextStyle = TextStyle(
-      color: primaryColor,
-      fontSize: 10,
-      fontWeight: FontWeight.w600,
+      color: theme.colorScheme.onPrimary,
+      fontSize: 11,
+      fontWeight: FontWeight.bold,
     );
 
     _countUnselectedTextStyle = TextStyle(
       color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-      fontSize: 10,
-      fontWeight: FontWeight.w600,
+      fontSize: 11,
+      fontWeight: FontWeight.bold,
+    );
+
+    _countHoveredTextStyle = TextStyle(
+      color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+      fontSize: 11,
+      fontWeight: FontWeight.bold,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        behavior: HitTestBehavior.opaque,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeInOut,
-          margin: const EdgeInsets.only(right: 8, bottom: 6, top: 2),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: widget.isSelected
-              ? _selectedDeco
-              : (_isHovered ? _unselectedHoveredDeco : _unselectedDeco),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (widget.iconUrl != null && widget.iconUrl!.isNotEmpty) ...[
-                SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: widget.iconUrl!.toLowerCase().endsWith('.svg')
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: SvgPicture.network(
-                            widget.iconUrl!,
-                            width: 16,
-                            height: 16,
-                            fit: BoxFit.contain,
-                            placeholderBuilder: (context) => Container(
-                              width: 16,
-                              height: 16,
-                              color: Colors.white10,
-                            ),
-                          ),
-                        )
-                      : CachedNetworkImage(
-                          imageUrl: widget.iconUrl!,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: widget.onTap,
+          splashColor: theme.colorScheme.primary.withValues(alpha: 0.08),
+          highlightColor: Colors.transparent,
+          hoverColor: theme.colorScheme.onSurface.withValues(alpha: 0.04),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Expanded(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      if (widget.iconUrl != null && widget.iconUrl!.isNotEmpty) ...[
+                        SizedBox(
                           width: 16,
                           height: 16,
-                          fit: BoxFit.cover,
-                          memCacheWidth: 48,
-                          memCacheHeight: 48,
-                          imageBuilder: (context, imageProvider) => Container(
-                            decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.all(Radius.circular(4)),
-                              image: DecorationImage(
-                                image: imageProvider,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          placeholder: (context, url) => Container(
-                            width: 16,
-                            height: 16,
-                            decoration: const BoxDecoration(
-                              color: Colors.white10,
-                              borderRadius: BorderRadius.all(Radius.circular(4)),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) => const Icon(
-                            Icons.category_outlined,
-                            size: 12,
-                            color: Colors.grey,
-                          ),
+                          child: widget.iconUrl!.toLowerCase().endsWith('.svg')
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: SvgPicture.network(
+                                    widget.iconUrl!,
+                                    width: 16,
+                                    height: 16,
+                                    fit: BoxFit.contain,
+                                    placeholderBuilder: (context) => Container(
+                                      width: 16,
+                                      height: 16,
+                                      color: Colors.white10,
+                                    ),
+                                  ),
+                                )
+                              : CachedNetworkImage(
+                                  imageUrl: widget.iconUrl!,
+                                  width: 16,
+                                  height: 16,
+                                  fit: BoxFit.cover,
+                                  memCacheWidth: 48,
+                                  memCacheHeight: 48,
+                                  imageBuilder: (context, imageProvider) => Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: const BorderRadius.all(Radius.circular(4)),
+                                      image: DecorationImage(
+                                        image: imageProvider,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                  placeholder: (context, url) => Container(
+                                    width: 16,
+                                    height: 16,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white10,
+                                      borderRadius: BorderRadius.all(Radius.circular(4)),
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) => const Icon(
+                                    Icons.category_outlined,
+                                    size: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
                         ),
+                        const SizedBox(width: 6),
+                      ],
+                      Text(
+                        widget.label,
+                        style: widget.isSelected
+                            ? _selectedTextStyle
+                            : (_isHovered ? _hoveredTextStyle : _unselectedTextStyle),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                        decoration: widget.isSelected
+                            ? _countSelectedDeco
+                            : (_isHovered ? _countHoveredDeco : _countUnselectedDeco),
+                        child: Text(
+                          '${widget.count}',
+                          style: widget.isSelected
+                              ? _countSelectedTextStyle
+                              : (_isHovered ? _countHoveredTextStyle : _countUnselectedTextStyle),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(width: 6),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  height: 3,
+                  width: widget.isSelected ? 36 : 0,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    borderRadius: const BorderRadius.all(Radius.circular(1.5)),
+                  ),
+                ),
               ],
-              Text(
-                widget.label,
-                style: widget.isSelected
-                    ? _selectedTextStyle
-                    : _unselectedTextStyle,
-              ),
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                decoration: widget.isSelected
-                    ? _countSelectedDeco
-                    : _countUnselectedDeco,
-                child: Text(
-                  '${widget.count}',
-                  style: widget.isSelected
-                      ? _countSelectedTextStyle
-                      : _countUnselectedTextStyle,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
