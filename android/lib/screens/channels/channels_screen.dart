@@ -8,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/cards/channel_card.dart';
+import '../../models/category.dart';
 
 class ChannelsScreen extends ConsumerStatefulWidget {
   const ChannelsScreen({super.key});
@@ -16,12 +17,14 @@ class ChannelsScreen extends ConsumerStatefulWidget {
   ConsumerState<ChannelsScreen> createState() => _ChannelsScreenState();
 }
 
-class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
+class _ChannelsScreenState extends ConsumerState<ChannelsScreen> with TickerProviderStateMixin {
   final _searchController = TextEditingController();
   bool _isSearching = false;
   final _searchQueryNotifier = ValueNotifier<String>('');
   final _scrollController = ScrollController();
   Timer? _debounceTimer;
+
+  TabController? _tabController;
 
   @override
   void dispose() {
@@ -29,6 +32,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
     _searchQueryNotifier.dispose();
     _scrollController.dispose();
     _debounceTimer?.cancel();
+    _tabController?.dispose();
     super.dispose();
   }
 
@@ -57,11 +61,8 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final selectedCategory = ref.watch(selectedCategoryProvider);
-    // Cache padding lookup — avoids full MediaQueryData allocation each frame
-    final topPad = MediaQuery.paddingOf(context).top;
-    final channelsAsync = ref.watch(
-      channelsByCategoryProvider(selectedCategory),
-    );
+    final activeCatsAsync = ref.watch(activeCategoriesWithCountsProvider);
+    final allChannelsAsync = ref.watch(channelsProvider);
     final favorites = ref.watch(favoriteChannelIdsProvider);
 
     final titleStyle = theme.appBarTheme.titleTextStyle ?? const TextStyle();
@@ -70,185 +71,233 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
       color: theme.colorScheme.surface,
     );
 
-    return Scaffold(
-      body: CustomScrollView(
-        controller: _scrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        cacheExtent: 200.0,
-        slivers: [
-          SliverAppBar(
-            floating: true,
-            pinned: true,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leadingWidth: 0,
-            leading: const SizedBox.shrink(),
-            titleSpacing: 16,
-            toolbarHeight: 56,
-            title: _isSearching
-                ? _SearchField(
-                    controller: _searchController,
-                    onChanged: (val) {
-                      if (_debounceTimer?.isActive ?? false) {
-                        _debounceTimer!.cancel();
-                      }
-                      _debounceTimer = Timer(
-                        const Duration(milliseconds: 150),
-                        () => _searchQueryNotifier.value = val,
-                      );
-                    },
-                    onClose: () {
-                      if (_searchController.text.isEmpty) {
-                        _toggleSearch();
-                      } else {
-                        _searchController.clear();
-                        _debounceTimer?.cancel();
-                        _searchQueryNotifier.value = '';
-                      }
-                    },
-                  )
-                : Text('Channels', style: titleStyle),
-            actions: _isSearching
-                ? null
-                : [
-                    IconButton(
-                      icon: Icon(
-                        Icons.search_rounded,
-                        color: theme.colorScheme.onSurface,
-                        size: 22,
-                      ),
-                      onPressed: _toggleSearch,
-                    ),
-                    PopupMenuButton<String>(
-                      icon: Icon(
-                        Icons.more_vert_rounded,
-                        color: theme.colorScheme.onSurface,
-                        size: 22,
-                      ),
-                      color: theme.brightness == Brightness.dark
-                          ? GoPlayTheme.darkSurfaceContainerHigh
-                          : GoPlayTheme.lightSurfaceContainerHigh,
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(
-                          color: theme.brightness == Brightness.dark
-                              ? GoPlayTheme.darkCardBorder
-                              : GoPlayTheme.lightCardBorder,
-                          width: 0.5,
-                        ),
-                      ),
-                      onSelected: (value) {
-                        if (value == 'settings') {
-                          context.push('/settings');
-                        }
-                      },
-                      itemBuilder: (BuildContext context) => [
-                        PopupMenuItem<String>(
-                          value: 'settings',
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.settings_rounded,
+    final totalCount = allChannelsAsync.maybeWhen(
+      data: (data) => data.length,
+      orElse: () => 0,
+    );
+
+    // Sync selectedCategoryProvider changes back to the TabController
+    ref.listen<String>(selectedCategoryProvider, (prev, next) {
+      final activeCatsVal = ref.read(activeCategoriesWithCountsProvider).value;
+      if (activeCatsVal != null && _tabController != null) {
+        final categoryIds = ['all', ...activeCatsVal.map((e) => e.$1.id)];
+        final index = categoryIds.indexOf(next);
+        if (index != -1 && index != _tabController!.index) {
+          _tabController!.animateTo(index);
+        }
+      }
+    });
+
+    return activeCatsAsync.when(
+      data: (activeCats) {
+        final categoryIds = ['all', ...activeCats.map((e) => e.$1.id)];
+
+        // Dynamic TabController initialization
+        if (_tabController == null || _tabController!.length != categoryIds.length) {
+          _tabController?.dispose();
+          _tabController = TabController(
+            length: categoryIds.length,
+            vsync: this,
+          );
+
+          final initialIndex = categoryIds.indexOf(selectedCategory);
+          if (initialIndex != -1) {
+            _tabController!.index = initialIndex;
+          }
+
+          _tabController!.addListener(() {
+            if (!_tabController!.indexIsChanging) {
+              final newCatId = categoryIds[_tabController!.index];
+              ref.read(selectedCategoryProvider.notifier).select(newCatId);
+            }
+          });
+        }
+
+        return Scaffold(
+          body: NestedScrollView(
+            controller: _scrollController,
+            headerSliverBuilder: (context, innerBoxIsScrolled) {
+              return [
+                SliverOverlapAbsorber(
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  sliver: SliverAppBar(
+                    floating: true,
+                    pinned: true,
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                    leadingWidth: 0,
+                    leading: const SizedBox.shrink(),
+                    titleSpacing: 16,
+                    toolbarHeight: 56,
+                    title: _isSearching
+                        ? _SearchField(
+                            controller: _searchController,
+                            onChanged: (val) {
+                              if (_debounceTimer?.isActive ?? false) {
+                                _debounceTimer!.cancel();
+                              }
+                              _debounceTimer = Timer(
+                                const Duration(milliseconds: 150),
+                                () => _searchQueryNotifier.value = val,
+                              );
+                            },
+                            onClose: () {
+                              if (_searchController.text.isEmpty) {
+                                _toggleSearch();
+                              } else {
+                                _searchController.clear();
+                                _debounceTimer?.cancel();
+                                _searchQueryNotifier.value = '';
+                              }
+                            },
+                          )
+                        : Text('Channels', style: titleStyle),
+                    actions: _isSearching
+                        ? null
+                        : [
+                            IconButton(
+                              icon: Icon(
+                                Icons.search_rounded,
                                 color: theme.colorScheme.onSurface,
-                                size: 20,
+                                size: 22,
                               ),
-                              const SizedBox(width: 12),
-                              Text(
-                                'App Settings',
-                                style: TextStyle(
-                                  color: theme.colorScheme.onSurface,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
+                              onPressed: _toggleSearch,
+                            ),
+                            PopupMenuButton<String>(
+                              icon: Icon(
+                                Icons.more_vert_rounded,
+                                color: theme.colorScheme.onSurface,
+                                size: 22,
+                              ),
+                              color: theme.brightness == Brightness.dark
+                                  ? GoPlayTheme.darkSurfaceContainerHigh
+                                  : GoPlayTheme.lightSurfaceContainerHigh,
+                              elevation: 4,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(
+                                  color: theme.brightness == Brightness.dark
+                                      ? GoPlayTheme.darkCardBorder
+                                      : GoPlayTheme.lightCardBorder,
+                                  width: 0.5,
                                 ),
                               ),
-                            ],
+                              onSelected: (value) {
+                                if (value == 'settings') {
+                                  context.push('/settings');
+                                }
+                              },
+                              itemBuilder: (BuildContext context) => [
+                                PopupMenuItem<String>(
+                                  value: 'settings',
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.settings_rounded,
+                                        color: theme.colorScheme.onSurface,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        'App Settings',
+                                        style: TextStyle(
+                                          color: theme.colorScheme.onSurface,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                    flexibleSpace: DecoratedBox(
+                      decoration: appBarGlassDeco,
+                      child: const SizedBox.expand(),
+                    ),
+                    bottom: PreferredSize(
+                      preferredSize: const Size.fromHeight(48),
+                      child: Container(
+                        height: 48,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: theme.brightness == Brightness.dark
+                                  ? Colors.white.withValues(alpha: 0.08)
+                                  : Colors.black.withValues(alpha: 0.08),
+                              width: 1.0,
+                            ),
                           ),
                         ),
-                      ],
+                        child: _CategoryFilterBar(
+                          tabController: _tabController!,
+                          activeCatsWithCounts: activeCats,
+                          totalCount: totalCount,
+                          selectedCategory: selectedCategory,
+                          onTabReSelected: _scrollToTop,
+                        ),
+                      ),
                     ),
-                    const SizedBox(width: 8),
-                  ],
-            // RepaintBoundary isolates the blur surface so it is not
-            // re-rasterised whenever the list scrolls beneath it.
-            flexibleSpace: DecoratedBox(
-              // No BackdropFilter — eliminated GPU blur costing ~5-8ms/frame.
-              // High-opacity surface color provides similar frosted-glass appearance.
-              decoration: appBarGlassDeco,
-              child: const SizedBox.expand(),
-            ),
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(48),
-              child: _CategoryFilterBar(onCategorySelected: _scrollToTop),
-            ),
-          ),
-
-          // Channel Grid
-          channelsAsync.when(
-            data: (channels) {
-              return _ResponsiveGrid(
-                channels: channels,
-                favorites: favorites,
-                ref: ref,
-                topPad: topPad,
-                searchQueryNotifier: _searchQueryNotifier,
-              );
+                  ),
+                ),
+              ];
             },
-            loading: () => SliverPadding(
-              padding: const EdgeInsets.all(10),
-              sliver: SliverGrid(
-                gridDelegate: _gridDelegate(context),
-                delegate: SliverChildBuilderDelegate(
-                  (ctx, i) => const _ShimmerCard(),
-                  childCount: 12,
-                  addAutomaticKeepAlives: false,
-                  addRepaintBoundaries: false,
-                ),
-              ),
-            ),
-            error: (e, s) => SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 48,
-                      color: GoPlayTheme.error,
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Error loading channels',
-                      style: TextStyle(color: GoPlayTheme.error),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '$e',
-                      style: const TextStyle(
-                        color: GoPlayTheme.onSurfaceVariant,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextButton.icon(
-                      onPressed: () => ref.invalidate(
-                        channelsByCategoryProvider(selectedCategory),
-                      ),
-                      icon: const Icon(Icons.refresh_rounded, size: 18),
-                      label: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              ),
+            body: TabBarView(
+              controller: _tabController,
+              children: categoryIds.map((catId) {
+                return _CategoryPageContent(
+                  key: ValueKey(catId),
+                  categoryId: catId,
+                  searchQueryNotifier: _searchQueryNotifier,
+                  favorites: favorites,
+                );
+              }).toList(),
             ),
           ),
-        ],
+        );
+      },
+      loading: () => Scaffold(
+        appBar: AppBar(
+          title: Text('Channels', style: titleStyle),
+          backgroundColor: theme.colorScheme.surface,
+          elevation: 0,
+        ),
+        body: GridView.builder(
+          padding: const EdgeInsets.all(10),
+          gridDelegate: _gridDelegate(context),
+          itemCount: 12,
+          itemBuilder: (ctx, i) => const _ShimmerCard(),
+        ),
+      ),
+      error: (e, s) => Scaffold(
+        appBar: AppBar(
+          title: Text('Channels', style: titleStyle),
+          backgroundColor: theme.colorScheme.surface,
+          elevation: 0,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                size: 48,
+                color: GoPlayTheme.error,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Error loading categories: $e',
+                style: const TextStyle(color: GoPlayTheme.error),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  // Static — never changes at runtime so no need to recreate.
   static SliverGridDelegateWithFixedCrossAxisCount _gridDelegate(
     BuildContext context,
   ) {
@@ -413,74 +462,194 @@ class _EmptyState extends StatelessWidget {
     );
   }
 }
-// ─── Category Filter Bar ──────────────────────────────────────
-class _CategoryFilterBar extends ConsumerWidget {
-  final VoidCallback onCategorySelected;
 
-  const _CategoryFilterBar({required this.onCategorySelected});
+// ─── Category Filter Bar ──────────────────────────────────────
+class _CategoryFilterBar extends StatelessWidget {
+  final TabController tabController;
+  final List<(Category, int)> activeCatsWithCounts;
+  final int totalCount;
+  final String selectedCategory;
+  final VoidCallback? onTabReSelected;
+
+  const _CategoryFilterBar({
+    required this.tabController,
+    required this.activeCatsWithCounts,
+    required this.totalCount,
+    required this.selectedCategory,
+    this.onTabReSelected,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final activeCatsWithCountsAsync = ref.watch(activeCategoriesWithCountsProvider);
-    final selectedCategory = ref.watch(selectedCategoryProvider);
-    final allChannelsAsync = ref.watch(channelsProvider);
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
 
-    return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: theme.brightness == Brightness.dark
-                ? Colors.white.withValues(alpha: 0.08)
-                : Colors.black.withValues(alpha: 0.08),
-            width: 1.0,
-          ),
+    final countSelectedDeco = BoxDecoration(
+      color: primaryColor,
+      borderRadius: const BorderRadius.all(Radius.circular(10)),
+    );
+
+    final countUnselectedDeco = BoxDecoration(
+      color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
+      borderRadius: const BorderRadius.all(Radius.circular(10)),
+    );
+
+    final countSelectedTextStyle = TextStyle(
+      color: theme.colorScheme.onPrimary,
+      fontSize: 11,
+      fontWeight: FontWeight.bold,
+    );
+
+    final countUnselectedTextStyle = TextStyle(
+      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+      fontSize: 11,
+      fontWeight: FontWeight.bold,
+    );
+
+    final tabs = <Widget>[];
+
+    // 1. "All" tab
+    final isAllSelected = selectedCategory == 'all';
+    tabs.add(
+      Tab(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('All'),
+            const SizedBox(width: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+              decoration: isAllSelected ? countSelectedDeco : countUnselectedDeco,
+              child: Text(
+                '$totalCount',
+                style: isAllSelected ? countSelectedTextStyle : countUnselectedTextStyle,
+              ),
+            ),
+          ],
         ),
       ),
-      child: activeCatsWithCountsAsync.when(
-        data: (activeCatsWithCounts) {
-          final totalCount = allChannelsAsync.maybeWhen(
-            data: (data) => data.length,
-            orElse: () => 0,
-          );
+    );
 
-          return ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            itemCount: activeCatsWithCounts.length + 1,
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return _CategoryTab(
-                  label: 'All',
-                  count: totalCount,
-                  isSelected: selectedCategory == 'all',
-                  onTap: () {
-                    ref.read(selectedCategoryProvider.notifier).select('all');
-                    onCategorySelected();
-                  },
-                );
-              }
-              final item = activeCatsWithCounts[index - 1];
-              final cat = item.$1;
-              final count = item.$2;
-              return _CategoryTab(
-                key: ValueKey(cat.id),
-                label: cat.name,
-                count: count,
-                isSelected: selectedCategory == cat.id,
-                iconUrl: cat.iconUrl,
-                onTap: () {
-                  ref.read(selectedCategoryProvider.notifier).select(cat.id);
-                  onCategorySelected();
-                },
-              );
-            },
-          );
-        },
-        loading: () => const SizedBox.shrink(),
-        error: (e, s) => const SizedBox.shrink(),
+    // 2. Category tabs
+    for (final item in activeCatsWithCounts) {
+      final cat = item.$1;
+      final count = item.$2;
+      final isSelected = selectedCategory == cat.id;
+
+      tabs.add(
+        Tab(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (cat.iconUrl != null && cat.iconUrl!.isNotEmpty) ...[
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: cat.iconUrl!.toLowerCase().endsWith('.svg')
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: SvgPicture.network(
+                            cat.iconUrl!,
+                            width: 16,
+                            height: 16,
+                            fit: BoxFit.contain,
+                            placeholderBuilder: (context) => Container(
+                              width: 16,
+                              height: 16,
+                              color: Colors.white10,
+                            ),
+                          ),
+                        )
+                      : CachedNetworkImage(
+                          imageUrl: cat.iconUrl!,
+                          width: 16,
+                          height: 16,
+                          fit: BoxFit.cover,
+                          memCacheWidth: 48,
+                          memCacheHeight: 48,
+                          imageBuilder: (context, imageProvider) => Container(
+                            decoration: BoxDecoration(
+                              borderRadius: const BorderRadius.all(Radius.circular(4)),
+                              image: DecorationImage(
+                                image: imageProvider,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          placeholder: (context, url) => Container(
+                            width: 16,
+                            height: 16,
+                            decoration: const BoxDecoration(
+                              color: Colors.white10,
+                              borderRadius: BorderRadius.all(Radius.circular(4)),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => const Icon(
+                            Icons.category_outlined,
+                            size: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                ),
+                const SizedBox(width: 6),
+              ],
+              Text(cat.name),
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                decoration: isSelected ? countSelectedDeco : countUnselectedDeco,
+                child: Text(
+                  '$count',
+                  style: isSelected ? countSelectedTextStyle : countUnselectedTextStyle,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return TabBar(
+      controller: tabController,
+      isScrollable: true,
+      tabAlignment: TabAlignment.start,
+      physics: const BouncingScrollPhysics(),
+      dividerColor: Colors.transparent,
+      onTap: (index) {
+        if (index == tabController.index) {
+          onTabReSelected?.call();
+        }
+      },
+      indicator: UnderlineTabIndicator(
+        borderSide: BorderSide(color: primaryColor, width: 3.0),
+        borderRadius: const BorderRadius.all(Radius.circular(1.5)),
       ),
+      indicatorSize: TabBarIndicatorSize.label,
+      indicatorPadding: const EdgeInsets.only(bottom: 2),
+      labelColor: primaryColor,
+      unselectedLabelColor: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+      labelPadding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.only(left: 4),
+      labelStyle: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.1,
+      ),
+      unselectedLabelStyle: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.1,
+      ),
+      overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.hovered)) {
+          return theme.colorScheme.onSurface.withValues(alpha: 0.04);
+        }
+        if (states.contains(WidgetState.focused) || states.contains(WidgetState.pressed)) {
+          return theme.colorScheme.primary.withValues(alpha: 0.08);
+        }
+        return null;
+      }),
+      tabs: tabs,
     );
   }
 }
@@ -589,217 +758,139 @@ class _ResponsiveGridState extends State<_ResponsiveGrid> {
   }
 }
 
-// ─── Category Tab ────────────────────────────────────────────
-class _CategoryTab extends StatefulWidget {
-  final String label;
-  final int count;
-  final bool isSelected;
-  final VoidCallback onTap;
-  final String? iconUrl;
+// ─── Category Page Content (Lazy & Kept-alive Page View Content) ─────────────────
+class _CategoryPageContent extends ConsumerStatefulWidget {
+  final String categoryId;
+  final ValueNotifier<String> searchQueryNotifier;
+  final Set<String> favorites;
 
-  const _CategoryTab({
+  const _CategoryPageContent({
     super.key,
-    required this.label,
-    required this.count,
-    required this.isSelected,
-    required this.onTap,
-    this.iconUrl,
+    required this.categoryId,
+    required this.searchQueryNotifier,
+    required this.favorites,
   });
 
   @override
-  State<_CategoryTab> createState() => _CategoryTabState();
+  ConsumerState<_CategoryPageContent> createState() => _CategoryPageContentState();
 }
 
-class _CategoryTabState extends State<_CategoryTab> {
-  bool _isHovered = false;
-
-  late TextStyle _selectedTextStyle;
-  late TextStyle _unselectedTextStyle;
-  late TextStyle _hoveredTextStyle;
-
-  late BoxDecoration _countSelectedDeco;
-  late BoxDecoration _countUnselectedDeco;
-  late BoxDecoration _countHoveredDeco;
-
-  late TextStyle _countSelectedTextStyle;
-  late TextStyle _countUnselectedTextStyle;
-  late TextStyle _countHoveredTextStyle;
+class _CategoryPageContentState extends ConsumerState<_CategoryPageContent>
+    with AutomaticKeepAliveClientMixin {
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _rebuildDecorations();
-  }
-
-  void _rebuildDecorations() {
-    final theme = Theme.of(context);
-    final primaryColor = theme.colorScheme.primary;
-
-    _selectedTextStyle = TextStyle(
-      color: primaryColor,
-      fontSize: 14,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.1,
-    );
-
-    _unselectedTextStyle = TextStyle(
-      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-      fontSize: 14,
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0.1,
-    );
-
-    _hoveredTextStyle = TextStyle(
-      color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
-      fontSize: 14,
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0.1,
-    );
-
-    _countSelectedDeco = BoxDecoration(
-      color: primaryColor,
-      borderRadius: const BorderRadius.all(Radius.circular(10)),
-    );
-
-    _countUnselectedDeco = BoxDecoration(
-      color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
-      borderRadius: const BorderRadius.all(Radius.circular(10)),
-    );
-
-    _countHoveredDeco = BoxDecoration(
-      color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
-      borderRadius: const BorderRadius.all(Radius.circular(10)),
-    );
-
-    _countSelectedTextStyle = TextStyle(
-      color: theme.colorScheme.onPrimary,
-      fontSize: 11,
-      fontWeight: FontWeight.bold,
-    );
-
-    _countUnselectedTextStyle = TextStyle(
-      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-      fontSize: 11,
-      fontWeight: FontWeight.bold,
-    );
-
-    _countHoveredTextStyle = TextStyle(
-      color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
-      fontSize: 11,
-      fontWeight: FontWeight.bold,
-    );
-  }
+  bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    super.build(context); // Required by AutomaticKeepAliveClientMixin
 
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: widget.onTap,
-          splashColor: theme.colorScheme.primary.withValues(alpha: 0.08),
-          highlightColor: Colors.transparent,
-          hoverColor: theme.colorScheme.onSurface.withValues(alpha: 0.04),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Expanded(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      if (widget.iconUrl != null && widget.iconUrl!.isNotEmpty) ...[
-                        SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: widget.iconUrl!.toLowerCase().endsWith('.svg')
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(4),
-                                  child: SvgPicture.network(
-                                    widget.iconUrl!,
-                                    width: 16,
-                                    height: 16,
-                                    fit: BoxFit.contain,
-                                    placeholderBuilder: (context) => Container(
-                                      width: 16,
-                                      height: 16,
-                                      color: Colors.white10,
-                                    ),
-                                  ),
-                                )
-                              : CachedNetworkImage(
-                                  imageUrl: widget.iconUrl!,
-                                  width: 16,
-                                  height: 16,
-                                  fit: BoxFit.cover,
-                                  memCacheWidth: 48,
-                                  memCacheHeight: 48,
-                                  imageBuilder: (context, imageProvider) => Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: const BorderRadius.all(Radius.circular(4)),
-                                      image: DecorationImage(
-                                        image: imageProvider,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                  placeholder: (context, url) => Container(
-                                    width: 16,
-                                    height: 16,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white10,
-                                      borderRadius: BorderRadius.all(Radius.circular(4)),
-                                    ),
-                                  ),
-                                  errorWidget: (context, url, error) => const Icon(
-                                    Icons.category_outlined,
-                                    size: 12,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                        ),
-                        const SizedBox(width: 6),
-                      ],
-                      Text(
-                        widget.label,
-                        style: widget.isSelected
-                            ? _selectedTextStyle
-                            : (_isHovered ? _hoveredTextStyle : _unselectedTextStyle),
-                      ),
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                        decoration: widget.isSelected
-                            ? _countSelectedDeco
-                            : (_isHovered ? _countHoveredDeco : _countUnselectedDeco),
-                        child: Text(
-                          '${widget.count}',
-                          style: widget.isSelected
-                              ? _countSelectedTextStyle
-                              : (_isHovered ? _countHoveredTextStyle : _countUnselectedTextStyle),
-                        ),
-                      ),
-                    ],
+    final channelsAsync = ref.watch(channelsByCategoryProvider(widget.categoryId));
+    final topPad = MediaQuery.paddingOf(context).top;
+
+    return channelsAsync.when(
+      data: (channels) {
+        return SafeArea(
+          top: false,
+          bottom: false,
+          child: Builder(
+            builder: (context) {
+              return CustomScrollView(
+                key: PageStorageKey<String>(widget.categoryId),
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverOverlapInjector(
+                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                   ),
+                  _ResponsiveGrid(
+                    channels: channels,
+                    favorites: widget.favorites,
+                    ref: ref,
+                    topPad: topPad,
+                    searchQueryNotifier: widget.searchQueryNotifier,
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+      loading: () => SafeArea(
+        top: false,
+        bottom: false,
+        child: Builder(
+          builder: (context) {
+            return CustomScrollView(
+              physics: const NeverScrollableScrollPhysics(),
+              slivers: [
+                SliverOverlapInjector(
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                 ),
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  height: 3,
-                  width: widget.isSelected ? 36 : 0,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    borderRadius: const BorderRadius.all(Radius.circular(1.5)),
+                SliverPadding(
+                  padding: const EdgeInsets.all(10),
+                  sliver: SliverGrid(
+                    gridDelegate: _ChannelsScreenState._gridDelegate(context),
+                    delegate: SliverChildBuilderDelegate(
+                      (ctx, i) => const _ShimmerCard(),
+                      childCount: 12,
+                    ),
                   ),
                 ),
               ],
-            ),
-          ),
+            );
+          },
+        ),
+      ),
+      error: (e, s) => SafeArea(
+        top: false,
+        bottom: false,
+        child: Builder(
+          builder: (context) {
+            return CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverOverlapInjector(
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                ),
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: GoPlayTheme.error,
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Error loading channels',
+                          style: TextStyle(color: GoPlayTheme.error),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '$e',
+                          style: const TextStyle(
+                            color: GoPlayTheme.onSurfaceVariant,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextButton.icon(
+                          onPressed: () => ref.invalidate(
+                            channelsByCategoryProvider(widget.categoryId),
+                          ),
+                          icon: const Icon(Icons.refresh_rounded, size: 18),
+                          label: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
