@@ -56,6 +56,36 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> with TickerProv
       );
     }
   }
+  List<Channel>? _lastPrecachedChannels;
+
+  void _staggeredPrecache(BuildContext context, List<Channel> channels) {
+    if (_lastPrecachedChannels == channels) return;
+    _lastPrecachedChannels = channels;
+
+    const batchSize = 5;
+    final total = channels.length < 30 ? channels.length : 30;
+    var offset = 0;
+
+    void batch() {
+      if (!mounted) return;
+      final end = (offset + batchSize).clamp(0, total);
+      for (var i = offset; i < end; i++) {
+        final logo = channels[i].logo;
+        if (logo != null && logo.isNotEmpty) {
+          precacheImage(
+            CachedNetworkImageProvider(logo, maxWidth: 108, maxHeight: 108),
+            context,
+          );
+        }
+      }
+      offset = end;
+      if (offset < total) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => batch());
+      }
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => batch());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,15 +93,11 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> with TickerProv
     final selectedCategory = ref.watch(selectedCategoryProvider);
     final activeCatsAsync = ref.watch(activeCategoriesWithCountsProvider);
 
-
     final titleStyle = theme.appBarTheme.titleTextStyle ?? const TextStyle();
 
-    // Static decoration — avoids BoxDecoration allocation on every build.
     const appBarGlassDeco = BoxDecoration(
       color: GoPlayTheme.surfaceContainer,
     );
-
-
 
     // Sync selectedCategoryProvider changes back to the TabController
     ref.listen<String>(selectedCategoryProvider, (prev, next) {
@@ -88,7 +114,6 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> with TickerProv
     return activeCatsAsync.when(
       data: (activeCats) {
         final categoryIds = ['all', ...activeCats.map((e) => e.$1.id)];
-        // Compute totalCount from per-category counts — avoids watching channelsProvider.
         final totalCount = activeCats.fold<int>(0, (sum, e) => sum + e.$2);
 
         // Dynamic TabController initialization
@@ -112,15 +137,160 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> with TickerProv
           });
         }
 
+        final channelsAsync = ref.watch(channelsByCategoryProvider(selectedCategory));
+        final favorites = ref.watch(favoriteChannelIdsProvider);
+
         return Scaffold(
-          body: NestedScrollView(
-            controller: _scrollController,
-            headerSliverBuilder: (context, innerBoxIsScrolled) {
-              return [
-                SliverOverlapAbsorber(
-                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                  sliver: SliverAppBar(
-                    floating: true,
+          body: SafeArea(
+            top: false,
+            bottom: false,
+            child: channelsAsync.when(
+              data: (channels) {
+                // Trigger pre-caching when channel list updates
+                _staggeredPrecache(context, channels);
+
+                return CustomScrollView(
+                  controller: _scrollController,
+                  cacheExtent: 400,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverAppBar(
+                      floating: false,
+                      pinned: true,
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      leadingWidth: 0,
+                      leading: const SizedBox.shrink(),
+                      titleSpacing: 16,
+                      toolbarHeight: 56,
+                      title: _isSearching
+                          ? _SearchField(
+                              controller: _searchController,
+                              onChanged: (val) {
+                                if (_debounceTimer?.isActive ?? false) {
+                                  _debounceTimer!.cancel();
+                                }
+                                _debounceTimer = Timer(
+                                  const Duration(milliseconds: 150),
+                                  () => _searchQueryNotifier.value = val,
+                                );
+                              },
+                              onClose: () {
+                                if (_searchController.text.isEmpty) {
+                                  _toggleSearch();
+                                } else {
+                                  _searchController.clear();
+                                  _debounceTimer?.cancel();
+                                  _searchQueryNotifier.value = '';
+                                }
+                              },
+                            )
+                          : Text('Channels', style: titleStyle),
+                      actions: _isSearching
+                          ? null
+                          : [
+                              IconButton(
+                                icon: Icon(
+                                  Icons.search_rounded,
+                                  color: theme.colorScheme.onSurface,
+                                  size: 22,
+                                ),
+                                onPressed: _toggleSearch,
+                              ),
+                              PopupMenuButton<String>(
+                                icon: Icon(
+                                  Icons.more_vert_rounded,
+                                  color: theme.colorScheme.onSurface,
+                                  size: 22,
+                                ),
+                                color: theme.brightness == Brightness.dark
+                                    ? GoPlayTheme.darkSurfaceContainerHigh
+                                    : GoPlayTheme.lightSurfaceContainerHigh,
+                                elevation: 4,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  side: BorderSide(
+                                    color: theme.brightness == Brightness.dark
+                                        ? GoPlayTheme.darkCardBorder
+                                        : GoPlayTheme.lightCardBorder,
+                                    width: 0.5,
+                                  ),
+                                ),
+                                onSelected: (value) {
+                                  if (value == 'settings') {
+                                    context.push('/settings');
+                                  }
+                                },
+                                itemBuilder: (BuildContext context) => [
+                                  PopupMenuItem<String>(
+                                    value: 'settings',
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.settings_rounded,
+                                          color: theme.colorScheme.onSurface,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          'App Settings',
+                                          style: TextStyle(
+                                            color: theme.colorScheme.onSurface,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(width: 8),
+                            ],
+                      flexibleSpace: DecoratedBox(
+                        decoration: appBarGlassDeco,
+                        child: const SizedBox.expand(),
+                      ),
+                      bottom: PreferredSize(
+                        preferredSize: const Size.fromHeight(48),
+                        child: Container(
+                          height: 48,
+                          decoration: BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                color: theme.brightness == Brightness.dark
+                                    ? Colors.white.withValues(alpha: 0.08)
+                                    : Colors.black.withValues(alpha: 0.08),
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                          child: _CategoryFilterBar(
+                            tabController: _tabController!,
+                            activeCatsWithCounts: activeCats,
+                            totalCount: totalCount,
+                            selectedCategory: selectedCategory,
+                            onTabReSelected: _scrollToTop,
+                          ),
+                        ),
+                      ),
+                    ),
+                    _ResponsiveGrid(
+                      channels: channels,
+                      favorites: favorites,
+                      ref: ref,
+                      topPad: 0,
+                      searchQueryNotifier: _searchQueryNotifier,
+                    ),
+                  ],
+                );
+              },
+              loading: () => CustomScrollView(
+                controller: _scrollController,
+                physics: const NeverScrollableScrollPhysics(),
+                slivers: [
+                  SliverAppBar(
+                    floating: false,
                     pinned: true,
                     backgroundColor: Colors.transparent,
                     elevation: 0,
@@ -128,90 +298,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> with TickerProv
                     leading: const SizedBox.shrink(),
                     titleSpacing: 16,
                     toolbarHeight: 56,
-                    title: _isSearching
-                        ? _SearchField(
-                            controller: _searchController,
-                            onChanged: (val) {
-                              if (_debounceTimer?.isActive ?? false) {
-                                _debounceTimer!.cancel();
-                              }
-                              _debounceTimer = Timer(
-                                const Duration(milliseconds: 150),
-                                () => _searchQueryNotifier.value = val,
-                              );
-                            },
-                            onClose: () {
-                              if (_searchController.text.isEmpty) {
-                                _toggleSearch();
-                              } else {
-                                _searchController.clear();
-                                _debounceTimer?.cancel();
-                                _searchQueryNotifier.value = '';
-                              }
-                            },
-                          )
-                        : Text('Channels', style: titleStyle),
-                    actions: _isSearching
-                        ? null
-                        : [
-                            IconButton(
-                              icon: Icon(
-                                Icons.search_rounded,
-                                color: theme.colorScheme.onSurface,
-                                size: 22,
-                              ),
-                              onPressed: _toggleSearch,
-                            ),
-                            PopupMenuButton<String>(
-                              icon: Icon(
-                                Icons.more_vert_rounded,
-                                color: theme.colorScheme.onSurface,
-                                size: 22,
-                              ),
-                              color: theme.brightness == Brightness.dark
-                                  ? GoPlayTheme.darkSurfaceContainerHigh
-                                  : GoPlayTheme.lightSurfaceContainerHigh,
-                              elevation: 4,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: BorderSide(
-                                  color: theme.brightness == Brightness.dark
-                                      ? GoPlayTheme.darkCardBorder
-                                      : GoPlayTheme.lightCardBorder,
-                                  width: 0.5,
-                                ),
-                              ),
-                              onSelected: (value) {
-                                if (value == 'settings') {
-                                  context.push('/settings');
-                                }
-                              },
-                              itemBuilder: (BuildContext context) => [
-                                PopupMenuItem<String>(
-                                  value: 'settings',
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.settings_rounded,
-                                        color: theme.colorScheme.onSurface,
-                                        size: 20,
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Text(
-                                        'App Settings',
-                                        style: TextStyle(
-                                          color: theme.colorScheme.onSurface,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(width: 8),
-                          ],
+                    title: Text('Channels', style: titleStyle),
                     flexibleSpace: DecoratedBox(
                       decoration: appBarGlassDeco,
                       child: const SizedBox.expand(),
@@ -240,18 +327,97 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> with TickerProv
                       ),
                     ),
                   ),
-                ),
-              ];
-            },
-            body: TabBarView(
-              controller: _tabController,
-              children: categoryIds.map((catId) {
-                return _CategoryPageContent(
-                  key: ValueKey(catId),
-                  categoryId: catId,
-                  searchQueryNotifier: _searchQueryNotifier,
-                );
-              }).toList(),
+                  SliverPadding(
+                    padding: const EdgeInsets.all(10),
+                    sliver: SliverGrid(
+                      gridDelegate: _gridDelegate(context),
+                      delegate: SliverChildBuilderDelegate(
+                        (ctx, i) => const _ShimmerCard(),
+                        childCount: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              error: (e, s) => CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  SliverAppBar(
+                    floating: false,
+                    pinned: true,
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                    leadingWidth: 0,
+                    leading: const SizedBox.shrink(),
+                    titleSpacing: 16,
+                    toolbarHeight: 56,
+                    title: Text('Channels', style: titleStyle),
+                    flexibleSpace: DecoratedBox(
+                      decoration: appBarGlassDeco,
+                      child: const SizedBox.expand(),
+                    ),
+                    bottom: PreferredSize(
+                      preferredSize: const Size.fromHeight(48),
+                      child: Container(
+                        height: 48,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: theme.brightness == Brightness.dark
+                                  ? Colors.white.withValues(alpha: 0.08)
+                                  : Colors.black.withValues(alpha: 0.08),
+                              width: 1.0,
+                            ),
+                          ),
+                        ),
+                        child: _CategoryFilterBar(
+                          tabController: _tabController!,
+                          activeCatsWithCounts: activeCats,
+                          totalCount: totalCount,
+                          selectedCategory: selectedCategory,
+                          onTabReSelected: _scrollToTop,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            size: 48,
+                            color: GoPlayTheme.error,
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Error loading channels',
+                            style: TextStyle(color: GoPlayTheme.error),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '$e',
+                            style: const TextStyle(
+                              color: GoPlayTheme.onSurfaceVariant,
+                              fontSize: 12,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          TextButton.icon(
+                            onPressed: () => ref.invalidate(
+                              channelsByCategoryProvider(selectedCategory),
+                            ),
+                            icon: const Icon(Icons.refresh_rounded, size: 18),
+                            label: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -790,203 +956,7 @@ class _ResponsiveGridState extends State<_ResponsiveGrid> {
   }
 }
 
-// ─── Category Page Content (Lazy & Kept-alive Page View Content) ─────────────────
-class _CategoryPageContent extends ConsumerStatefulWidget {
-  final String categoryId;
-  final ValueNotifier<String> searchQueryNotifier;
 
-  const _CategoryPageContent({
-    super.key,
-    required this.categoryId,
-    required this.searchQueryNotifier,
-  });
-
-  @override
-  ConsumerState<_CategoryPageContent> createState() => _CategoryPageContentState();
-}
-
-class _CategoryPageContentState extends ConsumerState<_CategoryPageContent>
-    with AutomaticKeepAliveClientMixin {
-  List<Channel>? _lastPrecachedChannels;
-
-  static final List<String> _recentCategoryIds = [];
-  static final Set<_CategoryPageContentState> _activeStates = {};
-
-  @override
-  void initState() {
-    super.initState();
-    _activeStates.add(this);
-  }
-
-  @override
-  void dispose() {
-    _activeStates.remove(this);
-    super.dispose();
-  }
-
-  void _markAsVisited() {
-    final catId = widget.categoryId;
-    if (_recentCategoryIds.isEmpty || _recentCategoryIds.last != catId) {
-      if (_recentCategoryIds.contains(catId)) {
-        _recentCategoryIds.remove(catId);
-      }
-      _recentCategoryIds.add(catId);
-      if (_recentCategoryIds.length > 3) {
-        _recentCategoryIds.removeAt(0);
-      }
-      // Schedule keep-alive updates after the current frame to prevent layout/draw phase collisions.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        for (final state in _activeStates) {
-          if (state.mounted) {
-            state.updateKeepAlive();
-          }
-        }
-      });
-    }
-  }
-
-  @override
-  bool get wantKeepAlive => _recentCategoryIds.contains(widget.categoryId);
-
-  /// Staggered precaching — fires 5 logos per frame across multiple frames
-  /// so no single POST_FRAME callback blocks the pipeline.
-  void _staggeredPrecache(BuildContext context, List<Channel> channels) {
-    const batchSize = 5;
-    final total = channels.length < 30 ? channels.length : 30;
-    var offset = 0;
-
-    void batch() {
-      if (!mounted) return;
-      final end = (offset + batchSize).clamp(0, total);
-      for (var i = offset; i < end; i++) {
-        final logo = channels[i].logo;
-        if (logo != null && logo.isNotEmpty) {
-          precacheImage(
-            CachedNetworkImageProvider(logo, maxWidth: 108, maxHeight: 108),
-            context,
-          );
-        }
-      }
-      offset = end;
-      if (offset < total) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => batch());
-      }
-    }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) => batch());
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context); // Required by AutomaticKeepAliveClientMixin
-    _markAsVisited();
-
-    final channelsAsync = ref.watch(channelsByCategoryProvider(widget.categoryId));
-    final favorites = ref.watch(favoriteChannelIdsProvider);
-    final topPad = MediaQuery.paddingOf(context).top;
-
-    return channelsAsync.when(
-      data: (channels) {
-        if (_lastPrecachedChannels != channels) {
-          _lastPrecachedChannels = channels;
-          _staggeredPrecache(context, channels);
-        }
-
-        return SafeArea(
-          top: false,
-          bottom: false,
-          child: CustomScrollView(
-            key: PageStorageKey<String>(widget.categoryId),
-            cacheExtent: 400, // Increased from 200 to 400 for smoother scrolling flings
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              SliverOverlapInjector(
-                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-              ),
-              _ResponsiveGrid(
-                channels: channels,
-                favorites: favorites,
-                ref: ref,
-                topPad: topPad,
-                searchQueryNotifier: widget.searchQueryNotifier,
-              ),
-            ],
-          ),
-        );
-      },
-      loading: () => SafeArea(
-        top: false,
-        bottom: false,
-        child: CustomScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          slivers: [
-            SliverOverlapInjector(
-              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.all(10),
-              sliver: SliverGrid(
-                gridDelegate: _ChannelsScreenState._gridDelegate(context),
-                delegate: SliverChildBuilderDelegate(
-                  (ctx, i) => const _ShimmerCard(),
-                  childCount: 12,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      error: (e, s) => SafeArea(
-        top: false,
-        bottom: false,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            SliverOverlapInjector(
-              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-            ),
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 48,
-                      color: GoPlayTheme.error,
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Error loading channels',
-                      style: TextStyle(color: GoPlayTheme.error),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '$e',
-                      style: const TextStyle(
-                        color: GoPlayTheme.onSurfaceVariant,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextButton.icon(
-                      onPressed: () => ref.invalidate(
-                        channelsByCategoryProvider(widget.categoryId),
-                      ),
-                      icon: const Icon(Icons.refresh_rounded, size: 18),
-                      label: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 // ─── Shimmer Loading Card — fully const ───────────────────────
 class _ShimmerCard extends StatelessWidget {

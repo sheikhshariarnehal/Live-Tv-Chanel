@@ -52,7 +52,7 @@ class ChannelAvatar extends StatelessWidget {
                 memCacheWidth: (size * 2).toInt(),
                 memCacheHeight: (size * 2).toInt(),
                 fadeInDuration: const Duration(milliseconds: 150),
-                imageBuilder: (context, imageProvider) => Container(
+                imageBuilder: (context, imageProvider) => DecoratedBox(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     image: DecorationImage(
