@@ -62,8 +62,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> with TickerProv
     final theme = Theme.of(context);
     final selectedCategory = ref.watch(selectedCategoryProvider);
     final activeCatsAsync = ref.watch(activeCategoriesWithCountsProvider);
-    final allChannelsAsync = ref.watch(channelsProvider);
-    final favorites = ref.watch(favoriteChannelIdsProvider);
+
 
     final titleStyle = theme.appBarTheme.titleTextStyle ?? const TextStyle();
 
@@ -72,10 +71,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> with TickerProv
       color: GoPlayTheme.surfaceContainer,
     );
 
-    final totalCount = allChannelsAsync.maybeWhen(
-      data: (data) => data.length,
-      orElse: () => 0,
-    );
+
 
     // Sync selectedCategoryProvider changes back to the TabController
     ref.listen<String>(selectedCategoryProvider, (prev, next) {
@@ -92,6 +88,8 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> with TickerProv
     return activeCatsAsync.when(
       data: (activeCats) {
         final categoryIds = ['all', ...activeCats.map((e) => e.$1.id)];
+        // Compute totalCount from per-category counts — avoids watching channelsProvider.
+        final totalCount = activeCats.fold<int>(0, (sum, e) => sum + e.$2);
 
         // Dynamic TabController initialization
         if (_tabController == null || _tabController!.length != categoryIds.length) {
@@ -252,7 +250,6 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> with TickerProv
                   key: ValueKey(catId),
                   categoryId: catId,
                   searchQueryNotifier: _searchQueryNotifier,
-                  favorites: favorites,
                 );
               }).toList(),
             ),
@@ -334,70 +331,37 @@ class _SearchField extends StatelessWidget {
     required this.onClose,
   });
 
+  // Pre-computed borders — avoids expensive theme.copyWith() on every build.
+  static const _borderRadius = BorderRadius.all(Radius.circular(12));
+  static const _borderSide = BorderSide(color: Color(0x14FFFFFF), width: 0.8);
+  static const _focusBorderSide = BorderSide(color: Color(0x40FFFFFF), width: 1.0);
+  static final _border = OutlineInputBorder(borderRadius: _borderRadius, borderSide: _borderSide);
+  static final _focusBorder = OutlineInputBorder(borderRadius: _borderRadius, borderSide: _focusBorderSide);
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Theme(
-      data: theme.copyWith(
-        inputDecorationTheme: InputDecorationTheme(
+    return SizedBox(
+      height: 40,
+      child: TextField(
+        controller: controller,
+        autofocus: true,
+        onChanged: onChanged,
+        cursorColor: Colors.white,
+        style: const TextStyle(color: Colors.white, fontSize: 14),
+        decoration: InputDecoration(
           filled: true,
           fillColor: const Color(0xFF222326),
           contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Colors.white.withValues(alpha: 0.08),
-              width: 0.8,
-            ),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Colors.white.withValues(alpha: 0.08),
-              width: 0.8,
-            ),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Colors.white.withValues(alpha: 0.25),
-              width: 1.0,
-            ),
-          ),
-        ),
-      ),
-      child: SizedBox(
-        height: 40,
-        child: TextField(
-          controller: controller,
-          autofocus: true,
-          onChanged: onChanged,
-          cursorColor: Colors.white,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-          ),
-          decoration: InputDecoration(
-            hintText: 'Search channels by name, country...',
-            hintStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.6),
-              fontSize: 14,
-            ),
-            isDense: true,
-            prefixIcon: const Icon(
-              Icons.search_rounded,
-              color: Colors.white70,
-              size: 20,
-            ),
-            suffixIcon: IconButton(
-              icon: const Icon(
-                Icons.close_rounded,
-                color: Colors.white70,
-                size: 18,
-              ),
-              onPressed: onClose,
-            ),
+          hintText: 'Search channels by name, country...',
+          hintStyle: const TextStyle(color: Color(0x99FFFFFF), fontSize: 14),
+          isDense: true,
+          border: _border,
+          enabledBorder: _border,
+          focusedBorder: _focusBorder,
+          prefixIcon: const Icon(Icons.search_rounded, color: Colors.white70, size: 20),
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.close_rounded, color: Colors.white70, size: 18),
+            onPressed: onClose,
           ),
         ),
       ),
@@ -426,14 +390,16 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
+          const SizedBox(
             width: 80,
             height: 80,
-            decoration: _iconDecoration,
-            child: const Icon(
-              Icons.live_tv_outlined,
-              size: 32,
-              color: GoPlayTheme.onSurfaceVariant,
+            child: DecoratedBox(
+              decoration: _iconDecoration,
+              child: Icon(
+                Icons.live_tv_outlined,
+                size: 32,
+                color: GoPlayTheme.onSurfaceVariant,
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -465,7 +431,7 @@ class _EmptyState extends StatelessWidget {
 }
 
 // ─── Category Filter Bar ──────────────────────────────────────
-class _CategoryFilterBar extends StatelessWidget {
+class _CategoryFilterBar extends StatefulWidget {
   final TabController tabController;
   final List<(Category, int)> activeCatsWithCounts;
   final int totalCount;
@@ -481,36 +447,53 @@ class _CategoryFilterBar extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  State<_CategoryFilterBar> createState() => _CategoryFilterBarState();
+}
+
+class _CategoryFilterBarState extends State<_CategoryFilterBar> {
+  BoxDecoration? _countSelectedDeco;
+  BoxDecoration? _countUnselectedDeco;
+  TextStyle? _countSelectedTextStyle;
+  TextStyle? _countUnselectedTextStyle;
+  Color? _primaryColor;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
+    _primaryColor = primaryColor;
 
-    final countSelectedDeco = BoxDecoration(
+    _countSelectedDeco = BoxDecoration(
       color: primaryColor,
       borderRadius: const BorderRadius.all(Radius.circular(10)),
     );
 
-    final countUnselectedDeco = BoxDecoration(
+    _countUnselectedDeco = BoxDecoration(
       color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
       borderRadius: const BorderRadius.all(Radius.circular(10)),
     );
 
-    final countSelectedTextStyle = TextStyle(
+    _countSelectedTextStyle = TextStyle(
       color: theme.colorScheme.onPrimary,
       fontSize: 11,
       fontWeight: FontWeight.bold,
     );
 
-    final countUnselectedTextStyle = TextStyle(
+    _countUnselectedTextStyle = TextStyle(
       color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
       fontSize: 11,
       fontWeight: FontWeight.bold,
     );
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final tabs = <Widget>[];
 
     // 1. "All" tab
-    final isAllSelected = selectedCategory == 'all';
+    final isAllSelected = widget.selectedCategory == 'all';
     tabs.add(
       Tab(
         child: Row(
@@ -518,12 +501,14 @@ class _CategoryFilterBar extends StatelessWidget {
           children: [
             const Text('All'),
             const SizedBox(width: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-              decoration: isAllSelected ? countSelectedDeco : countUnselectedDeco,
-              child: Text(
-                '$totalCount',
-                style: isAllSelected ? countSelectedTextStyle : countUnselectedTextStyle,
+            DecoratedBox(
+              decoration: isAllSelected ? _countSelectedDeco! : _countUnselectedDeco!,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                child: Text(
+                  '${widget.totalCount}',
+                  style: isAllSelected ? _countSelectedTextStyle : _countUnselectedTextStyle,
+                ),
               ),
             ),
           ],
@@ -532,10 +517,10 @@ class _CategoryFilterBar extends StatelessWidget {
     );
 
     // 2. Category tabs
-    for (final item in activeCatsWithCounts) {
+    for (final item in widget.activeCatsWithCounts) {
       final cat = item.$1;
       final count = item.$2;
-      final isSelected = selectedCategory == cat.id;
+      final isSelected = widget.selectedCategory == cat.id;
 
       tabs.add(
         Tab(
@@ -554,7 +539,7 @@ class _CategoryFilterBar extends StatelessWidget {
                     memCacheWidth: 48,
                     memCacheHeight: 48,
                     fadeInDuration: const Duration(milliseconds: 100),
-                    imageBuilder: (context, imageProvider) => Container(
+                    imageBuilder: (context, imageProvider) => DecoratedBox(
                       decoration: BoxDecoration(
                         borderRadius: const BorderRadius.all(Radius.circular(4)),
                         image: DecorationImage(
@@ -563,12 +548,14 @@ class _CategoryFilterBar extends StatelessWidget {
                         ),
                       ),
                     ),
-                    placeholder: (context, url) => Container(
+                    placeholder: (context, url) => const SizedBox(
                       width: 16,
                       height: 16,
-                      decoration: const BoxDecoration(
-                        color: Colors.white10,
-                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Colors.white10,
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+                        ),
                       ),
                     ),
                     errorWidget: (context, url, error) => const Icon(
@@ -582,12 +569,14 @@ class _CategoryFilterBar extends StatelessWidget {
               ],
               Text(cat.name),
               const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                decoration: isSelected ? countSelectedDeco : countUnselectedDeco,
-                child: Text(
-                  '$count',
-                  style: isSelected ? countSelectedTextStyle : countUnselectedTextStyle,
+              DecoratedBox(
+                decoration: isSelected ? _countSelectedDeco! : _countUnselectedDeco!,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                  child: Text(
+                    '$count',
+                    style: isSelected ? _countSelectedTextStyle : _countUnselectedTextStyle,
+                  ),
                 ),
               ),
             ],
@@ -597,23 +586,23 @@ class _CategoryFilterBar extends StatelessWidget {
     }
 
     return TabBar(
-      controller: tabController,
+      controller: widget.tabController,
       isScrollable: true,
       tabAlignment: TabAlignment.start,
       physics: const BouncingScrollPhysics(),
       dividerColor: Colors.transparent,
       onTap: (index) {
-        if (index == tabController.index) {
-          onTabReSelected?.call();
+        if (index == widget.tabController.index) {
+          widget.onTabReSelected?.call();
         }
       },
       indicator: UnderlineTabIndicator(
-        borderSide: BorderSide(color: primaryColor, width: 3.0),
+        borderSide: BorderSide(color: _primaryColor ?? theme.colorScheme.primary, width: 3.0),
         borderRadius: const BorderRadius.all(Radius.circular(1.5)),
       ),
       indicatorSize: TabBarIndicatorSize.label,
       indicatorPadding: const EdgeInsets.only(bottom: 2),
-      labelColor: primaryColor,
+      labelColor: _primaryColor ?? theme.colorScheme.primary,
       unselectedLabelColor: theme.colorScheme.onSurface.withValues(alpha: 0.6),
       labelPadding: const EdgeInsets.symmetric(horizontal: 12),
       padding: const EdgeInsets.only(left: 4),
@@ -717,6 +706,34 @@ class _ResponsiveGridState extends State<_ResponsiveGrid> {
     return _filtered!;
   }
 
+  SliverGridDelegateWithFixedCrossAxisCount? _cachedGridDelegate;
+  double? _lastWidth;
+
+  SliverGridDelegateWithFixedCrossAxisCount _getGridDelegate(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    if (_cachedGridDelegate != null && _lastWidth == width) {
+      return _cachedGridDelegate!;
+    }
+    _lastWidth = width;
+    final int cols;
+    if (width >= 1200) {
+      cols = 6;
+    } else if (width >= 900) {
+      cols = 5;
+    } else if (width >= 600) {
+      cols = 4;
+    } else {
+      cols = 3;
+    }
+    _cachedGridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: cols,
+      childAspectRatio: 1.0,
+      crossAxisSpacing: 8,
+      mainAxisSpacing: 8,
+    );
+    return _cachedGridDelegate!;
+  }
+
   @override
   Widget build(BuildContext context) {
     final filtered = _computeFiltered();
@@ -746,7 +763,7 @@ class _ResponsiveGridState extends State<_ResponsiveGrid> {
         bottom: bottomPadding,
       ),
       sliver: SliverGrid(
-        gridDelegate: _ChannelsScreenState._gridDelegate(context),
+        gridDelegate: _getGridDelegate(context),
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final channel = filtered[index];
@@ -777,13 +794,11 @@ class _ResponsiveGridState extends State<_ResponsiveGrid> {
 class _CategoryPageContent extends ConsumerStatefulWidget {
   final String categoryId;
   final ValueNotifier<String> searchQueryNotifier;
-  final Set<String> favorites;
 
   const _CategoryPageContent({
     super.key,
     required this.categoryId,
     required this.searchQueryNotifier,
-    required this.favorites,
   });
 
   @override
@@ -794,8 +809,44 @@ class _CategoryPageContentState extends ConsumerState<_CategoryPageContent>
     with AutomaticKeepAliveClientMixin {
   List<Channel>? _lastPrecachedChannels;
 
+  static final List<String> _recentCategoryIds = [];
+  static final Set<_CategoryPageContentState> _activeStates = {};
+
   @override
-  bool get wantKeepAlive => true;
+  void initState() {
+    super.initState();
+    _activeStates.add(this);
+  }
+
+  @override
+  void dispose() {
+    _activeStates.remove(this);
+    super.dispose();
+  }
+
+  void _markAsVisited() {
+    final catId = widget.categoryId;
+    if (_recentCategoryIds.isEmpty || _recentCategoryIds.last != catId) {
+      if (_recentCategoryIds.contains(catId)) {
+        _recentCategoryIds.remove(catId);
+      }
+      _recentCategoryIds.add(catId);
+      if (_recentCategoryIds.length > 3) {
+        _recentCategoryIds.removeAt(0);
+      }
+      // Schedule keep-alive updates after the current frame to prevent layout/draw phase collisions.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        for (final state in _activeStates) {
+          if (state.mounted) {
+            state.updateKeepAlive();
+          }
+        }
+      });
+    }
+  }
+
+  @override
+  bool get wantKeepAlive => _recentCategoryIds.contains(widget.categoryId);
 
   /// Staggered precaching — fires 5 logos per frame across multiple frames
   /// so no single POST_FRAME callback blocks the pipeline.
@@ -828,8 +879,10 @@ class _CategoryPageContentState extends ConsumerState<_CategoryPageContent>
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required by AutomaticKeepAliveClientMixin
+    _markAsVisited();
 
     final channelsAsync = ref.watch(channelsByCategoryProvider(widget.categoryId));
+    final favorites = ref.watch(favoriteChannelIdsProvider);
     final topPad = MediaQuery.paddingOf(context).top;
 
     return channelsAsync.when(
@@ -842,105 +895,93 @@ class _CategoryPageContentState extends ConsumerState<_CategoryPageContent>
         return SafeArea(
           top: false,
           bottom: false,
-          child: Builder(
-            builder: (context) {
-              return CustomScrollView(
-                key: PageStorageKey<String>(widget.categoryId),
-                cacheExtent: 200, // Limit offscreen pre-fetch to reduce image cache churn
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  SliverOverlapInjector(
-                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                  ),
-                  _ResponsiveGrid(
-                    channels: channels,
-                    favorites: widget.favorites,
-                    ref: ref,
-                    topPad: topPad,
-                    searchQueryNotifier: widget.searchQueryNotifier,
-                  ),
-                ],
-              );
-            },
+          child: CustomScrollView(
+            key: PageStorageKey<String>(widget.categoryId),
+            cacheExtent: 400, // Increased from 200 to 400 for smoother scrolling flings
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverOverlapInjector(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+              ),
+              _ResponsiveGrid(
+                channels: channels,
+                favorites: favorites,
+                ref: ref,
+                topPad: topPad,
+                searchQueryNotifier: widget.searchQueryNotifier,
+              ),
+            ],
           ),
         );
       },
       loading: () => SafeArea(
         top: false,
         bottom: false,
-        child: Builder(
-          builder: (context) {
-            return CustomScrollView(
-              physics: const NeverScrollableScrollPhysics(),
-              slivers: [
-                SliverOverlapInjector(
-                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+        child: CustomScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          slivers: [
+            SliverOverlapInjector(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.all(10),
+              sliver: SliverGrid(
+                gridDelegate: _ChannelsScreenState._gridDelegate(context),
+                delegate: SliverChildBuilderDelegate(
+                  (ctx, i) => const _ShimmerCard(),
+                  childCount: 12,
                 ),
-                SliverPadding(
-                  padding: const EdgeInsets.all(10),
-                  sliver: SliverGrid(
-                    gridDelegate: _ChannelsScreenState._gridDelegate(context),
-                    delegate: SliverChildBuilderDelegate(
-                      (ctx, i) => const _ShimmerCard(),
-                      childCount: 12,
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
+              ),
+            ),
+          ],
         ),
       ),
       error: (e, s) => SafeArea(
         top: false,
         bottom: false,
-        child: Builder(
-          builder: (context) {
-            return CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                SliverOverlapInjector(
-                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                ),
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.error_outline,
-                          size: 48,
-                          color: GoPlayTheme.error,
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Error loading channels',
-                          style: TextStyle(color: GoPlayTheme.error),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '$e',
-                          style: const TextStyle(
-                            color: GoPlayTheme.onSurfaceVariant,
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextButton.icon(
-                          onPressed: () => ref.invalidate(
-                            channelsByCategoryProvider(widget.categoryId),
-                          ),
-                          icon: const Icon(Icons.refresh_rounded, size: 18),
-                          label: const Text('Retry'),
-                        ),
-                      ],
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverOverlapInjector(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+            ),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: GoPlayTheme.error,
                     ),
-                  ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Error loading channels',
+                      style: TextStyle(color: GoPlayTheme.error),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$e',
+                      style: const TextStyle(
+                        color: GoPlayTheme.onSurfaceVariant,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextButton.icon(
+                      onPressed: () => ref.invalidate(
+                        channelsByCategoryProvider(widget.categoryId),
+                      ),
+                      icon: const Icon(Icons.refresh_rounded, size: 18),
+                      label: const Text('Retry'),
+                    ),
+                  ],
                 ),
-              ],
-            );
-          },
+              ),
+            ),
+          ],
         ),
       ),
     );
