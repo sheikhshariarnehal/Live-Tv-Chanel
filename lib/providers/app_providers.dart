@@ -66,10 +66,17 @@ final trendingChannelsProvider = FutureProvider<List<Channel>>((ref) async {
 });
 
 final channelsByCategoryProvider =
-    FutureProvider.family<List<Channel>, String>((ref, categoryId) async {
-  final channels = await ref.watch(channelsProvider.future);
-  if (categoryId == 'all') return channels;
-  return channels.where((ch) => ch.category == categoryId).toList();
+    Provider.family<AsyncValue<List<Channel>>, String>((ref, categoryId) {
+  final channelsAsync = ref.watch(channelsProvider);
+  return channelsAsync.when(
+    data: (channels) {
+      if (categoryId == 'all') return AsyncValue.data(channels);
+      final filtered = channels.where((ch) => ch.category == categoryId).toList();
+      return AsyncValue.data(filtered);
+    },
+    error: (err, stack) => AsyncValue.error(err, stack),
+    loading: () => const AsyncValue.loading(),
+  );
 });
 
 final channelProvider =
