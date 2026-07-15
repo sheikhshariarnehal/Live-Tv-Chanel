@@ -144,10 +144,11 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
       (key, value) => MapEntry(key, value.toString()),
     );
 
-    var playUrl = widget.channel.streamUrl;
-    if (widget.channel.proxy) {
-      playUrl = LocalProxy.getUrl(playUrl, widget.channel.headers);
-    }
+    // Bypass local proxy — ExoPlayer's DefaultHttpDataSource.Factory
+    // already propagates custom headers to all sub-requests (manifests,
+    // segments, keys) natively.  Routing segments through the Dart heap
+    // caused severe GC stalls (CollectNewGeneration up to 9.5 s).
+    final playUrl = widget.channel.streamUrl;
 
     final params = <String, dynamic>{
       'url': playUrl,

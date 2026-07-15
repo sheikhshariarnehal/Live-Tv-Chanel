@@ -4,32 +4,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme.dart';
 import '../../models/channel.dart';
 
-// ─── Pre-cached card decorations — never reallocated ─────────
-const _cardDecoNormal = BoxDecoration(
+// ─── Pre-cached card decoration — never reallocated ──────────
+const _cardDeco = BoxDecoration(
   gradient: GoPlayTheme.cardGradient,
   borderRadius: BorderRadius.all(Radius.circular(8)),
   border: Border.fromBorderSide(
     BorderSide(color: GoPlayTheme.cardBorder, width: 0.8),
   ),
-);
-
-const _cardDecoHovered = BoxDecoration(
-  gradient: LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [Color(0xFF35373C), Color(0xFF2C2D31)], // Highlighted container
-  ),
-  borderRadius: BorderRadius.all(Radius.circular(8)),
-  border: Border.fromBorderSide(
-    BorderSide(color: Color(0x6471768E), width: 0.8), // Alabaster Grey @ 39%
-  ),
-  boxShadow: [
-    BoxShadow(
-      color: Color(0x1471768E), // Alabaster Grey @ 8%
-      blurRadius: 12,
-      offset: Offset(0, 4),
-    ),
-  ],
 );
 
 // ─── Pre-cached quality badge decorations ────────────────────
@@ -80,12 +61,19 @@ const _sdStyle = TextStyle(
   letterSpacing: 0.5,
 );
 
-// ─── Pre-cached Matrix4 transforms ───────────────────────────
-final _kIdentity = Matrix4.identity();
-final _kHoverScale = Matrix4.diagonal3Values(1.03, 1.03, 1.0);
+// ─── Pre-cached initials text style ──────────────────────────
+const _initialsStyle = TextStyle(
+  color: Color(0xC8FFFFFF), // white @ 78%
+  fontSize: 14,
+  fontWeight: FontWeight.w800,
+  letterSpacing: 1,
+);
 
-/// Premium channel card widget for the channel grid.
-class ChannelCard extends StatefulWidget {
+/// Fully stateless channel card widget for the channel grid.
+/// StatelessWidget eliminates ~400 State objects per category view,
+/// reducing tree walk cost, GC pressure and rebuild overhead on mobile
+/// where hover events never fire.
+class ChannelCard extends StatelessWidget {
   final Channel channel;
   final bool isFavorite;
   final VoidCallback? onFavoriteTap;
@@ -97,128 +85,98 @@ class ChannelCard extends StatefulWidget {
     this.onFavoriteTap,
   });
 
-  @override
-  State<ChannelCard> createState() => _ChannelCardState();
-}
-
-class _ChannelCardState extends State<ChannelCard> {
-  bool _isHovered = false;
-
-  Widget _buildInitials() {
-    final name = widget.channel.name;
-    final initials = name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
-    return Center(
-      child: Text(
-        initials,
-        style: const TextStyle(
-          color: Color(0xC8FFFFFF), // white @ 78%
-          fontSize: 14,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 1,
-        ),
-      ),
-    );
+  String get _initials {
+    final name = channel.name;
+    return name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
   }
+
+  Widget _buildInitials() => Center(
+        child: Text(_initials, style: _initialsStyle),
+      );
 
   @override
   Widget build(BuildContext context) {
-    final channel = widget.channel;
     final is4K = channel.quality == '4K';
 
-    return RepaintBoundary(
-      child: MouseRegion(
-        onEnter: (_) => setState(() => _isHovered = true),
-        onExit: (_) => setState(() => _isHovered = false),
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          onTap: () => context.push('/player/${channel.id}'),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeInOut,
-            // Hovered: slight 3% scale — pre-cached matrices, zero allocations.
-            transform: _isHovered ? _kHoverScale : _kIdentity,
-            // Switch between two pre-cached decorations — zero allocations.
-            decoration: _isHovered ? _cardDecoHovered : _cardDecoNormal,
-            child: Stack(
-              alignment: Alignment
-                  .center, // Vertically and horizontally centers the main content!
-              children: [
-                // ── Main Content ─────────────────────────────────
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Logo avatar — const decoration, no rebuild cost
-                      Center(
-                        child: SizedBox(
-                          width: 54,
-                          height: 54,
-                          child: DecoratedBox(
-                            decoration: _avatarDeco,
-                            child: channel.logo != null && channel.logo!.isNotEmpty
-                                ? CachedNetworkImage(
-                                    imageUrl: channel.logo!,
-                                    fit: BoxFit.cover,
-                                    width: 54,
-                                    height: 54,
-                                    memCacheWidth: 108,
-                                    memCacheHeight: 108,
-                                    fadeInDuration: const Duration(milliseconds: 150),
-                                    imageBuilder: (context, imageProvider) => Container(
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        image: DecorationImage(
-                                          image: imageProvider,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
+    return GestureDetector(
+      onTap: () => context.push('/player/${channel.id}'),
+      child: DecoratedBox(
+        decoration: _cardDeco,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // ── Main Content ─────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Logo avatar — const decoration, no rebuild cost
+                  Center(
+                    child: SizedBox(
+                      width: 54,
+                      height: 54,
+                      child: DecoratedBox(
+                        decoration: _avatarDeco,
+                        child: channel.logo != null && channel.logo!.isNotEmpty
+                            ? CachedNetworkImage(
+                                imageUrl: channel.logo!,
+                                fit: BoxFit.cover,
+                                width: 54,
+                                height: 54,
+                                memCacheWidth: 108,
+                                memCacheHeight: 108,
+                                fadeInDuration: const Duration(milliseconds: 150),
+                                imageBuilder: (context, imageProvider) => DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                      image: imageProvider,
+                                      fit: BoxFit.cover,
                                     ),
-                                    placeholder: (context, url) =>
-                                        _buildInitials(),
-                                    errorWidget: (context, url, err) =>
-                                        _buildInitials(),
-                                  )
-                                : _buildInitials(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        channel.name,
-                        style: _nameStyle,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-
-                // ── Quality Badge ─────────────────────────────────
-                if (channel.quality != null)
-                  Positioned(
-                    top: 6,
-                    left: 6,
-                    child: DecoratedBox(
-                      decoration: is4K ? _hd4kDeco : _hdDeco,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 1,
-                        ),
-                        child: Text(
-                          channel.quality!,
-                          style: is4K ? _hdStyle : _sdStyle,
-                        ),
+                                  ),
+                                ),
+                                placeholder: (context, url) => _buildInitials(),
+                                errorWidget: (context, url, err) => _buildInitials(),
+                              )
+                            : _buildInitials(),
                       ),
                     ),
                   ),
-              ],
+                  const SizedBox(height: 8),
+                  Text(
+                    channel.name,
+                    style: _nameStyle,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
-          ),
+
+            // ── Quality Badge ─────────────────────────────────
+            if (channel.quality != null)
+              Positioned(
+                top: 6,
+                left: 6,
+                child: DecoratedBox(
+                  decoration: is4K ? _hd4kDeco : _hdDeco,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 1,
+                    ),
+                    child: Text(
+                      channel.quality!,
+                      style: is4K ? _hdStyle : _sdStyle,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

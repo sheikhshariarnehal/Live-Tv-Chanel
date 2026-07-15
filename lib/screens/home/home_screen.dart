@@ -536,7 +536,7 @@ class _HeroBannerCardState extends ConsumerState<_HeroBannerCard> {
                   CachedNetworkImage(
                     imageUrl: event.banner!,
                     fit: BoxFit.cover,
-                    memCacheWidth: 800,
+                    memCacheWidth: 400,
                     fadeInDuration: const Duration(milliseconds: 200),
                     placeholder: (context, url) => const ColoredBox(
                       color: GoPlayTheme.surfaceContainerHigh,

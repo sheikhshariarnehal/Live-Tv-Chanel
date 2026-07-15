@@ -10,9 +10,9 @@ import 'core/router.dart';
 
 
 
+
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'utils/web_helper.dart';
-import 'services/local_proxy.dart';
 import 'widgets/update_handler.dart';
 
 // Global future that SplashScreen waits on before navigating.
@@ -24,9 +24,9 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Cap the image cache to avoid unbounded decoded-image GC pressure.
-  // 150 images max; 50 MB total — covers a full search result page with headroom.
-  PaintingBinding.instance.imageCache.maximumSize = 150;
-  PaintingBinding.instance.imageCache.maximumSizeBytes = 50 * 1024 * 1024;
+  // 200 images max; 80 MB total — covers a full search result page with headroom.
+  PaintingBinding.instance.imageCache.maximumSize = 200;
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 80 * 1024 * 1024;
 
   // System UI — synchronous, no cost.
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -46,12 +46,8 @@ void main() {
 /// Performs all heavy initialization in the background.
 /// SplashScreen races this future against a minimum display timer.
 Future<void> _initializeApp() async {
-  // Start local proxy in parallel with Hive+Supabase init.
-  final proxyFuture = kIsWeb ? Future.value() : LocalProxy.start();
-
   // Hive + Supabase can run concurrently.
   await Future.wait([
-    proxyFuture,
     _initHive(),
     _initSupabase(),
   ]);
