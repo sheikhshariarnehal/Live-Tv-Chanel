@@ -866,8 +866,8 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                 ),
               ),
               padding: EdgeInsets.only(
-                top: widget.isFullscreen ? 16.0 : 8.0,
-                bottom: widget.isFullscreen ? 8.0 : 4.0,
+                top: widget.isFullscreen ? 16.0 : 4.0,
+                bottom: widget.isFullscreen ? 8.0 : 0.0,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -884,12 +884,14 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                     ),
                   ),
 
+                  const SizedBox(height: 2),
+
                   // Bottom Buttons row
                   Padding(
                     padding: EdgeInsets.only(
                       left: widget.isFullscreen ? 24.0 : 12.0,
                       right: widget.isFullscreen ? 24.0 : 12.0,
-                      bottom: widget.isFullscreen ? 12.0 : 4.0,
+                      bottom: widget.isFullscreen ? 12.0 : 0.0,
                       top: 0.0,
                     ),
                     child: Row(
@@ -972,12 +974,14 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
         // Settings / Quality Button
         GestureDetector(
           onTapDown: (details) => _showQualityMenu(details),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 6),
-            child: Icon(
-              Icons.settings,
-              color: Colors.white,
-              size: 28,
+          behavior: HitTestBehavior.opaque,
+          child: IgnorePointer(
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.settings, color: Colors.white),
+              iconSize: 28,
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              constraints: const BoxConstraints(),
             ),
           ),
         ),
@@ -1018,12 +1022,14 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
         // Settings Button
         GestureDetector(
           onTapDown: (details) => _showQualityMenu(details),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 6),
-            child: Icon(
-              Icons.settings,
-              color: Colors.white,
-              size: 24,
+          behavior: HitTestBehavior.opaque,
+          child: IgnorePointer(
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.settings, color: Colors.white),
+              iconSize: 24,
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              constraints: const BoxConstraints(),
             ),
           ),
         ),
@@ -1422,7 +1428,6 @@ class _CentralControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final double iconSize = isFullscreen ? 34 : 24;
     final double playSize = isFullscreen ? 60 : 44;
-    final double playIconSize = isFullscreen ? 38 : 26;
     final double spacing = isFullscreen ? 20 : 12;
 
     return Row(
@@ -1449,27 +1454,24 @@ class _CentralControls extends StatelessWidget {
         SizedBox(width: spacing),
         GestureDetector(
           onTap: onPlayPause,
-          child: Container(
+          behavior: HitTestBehavior.opaque,
+          child: SizedBox(
             width: playSize,
             height: playSize,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
             child: Center(
               child: isBuffering
                   ? SizedBox(
-                      width: playSize * 0.45,
-                      height: playSize * 0.45,
+                      width: playSize * 0.5,
+                      height: playSize * 0.5,
                       child: CircularProgressIndicator(
-                        color: Colors.black,
+                        color: Colors.white,
                         strokeWidth: isFullscreen ? 2.5 : 2.0,
                       ),
                     )
                   : Icon(
                       isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                      color: Colors.black,
-                      size: playIconSize,
+                      color: Colors.white,
+                      size: playSize,
                     ),
             ),
           ),
