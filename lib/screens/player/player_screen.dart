@@ -412,6 +412,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 children: [
                   // 1. Details & scrollable channels list (placed at the bottom)
                   // We only display and layout this if not in fullscreen mode.
+                  // 1. Details & scrollable channels list (placed at the bottom)
+                  // We only display and layout this if not in fullscreen mode.
                   // We use Offstage with maintainState: true to keep it alive
                   // and avoid destroying/recreating the list during transitions.
                   Positioned.fill(
@@ -419,8 +421,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                       offstage: isFullscreen,
                       child: Column(
                         children: [
-                          const SizedBox(
-                            height: 240,
+                          SizedBox(
+                            height: isFullscreen ? 0 : mq.padding.top + 240,
                           ), // Placeholder for the player
                           Expanded(
                             child: SafeArea(
@@ -451,40 +453,34 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
                   // 2. The Video Player (anchored to top)
                   Positioned(
-                    top: 0,
+                    top: isFullscreen ? 0 : mq.padding.top,
                     left: 0,
                     right: 0,
                     height: isFullscreen ? mq.size.height : 240,
-                    child: SafeArea(
-                      top: !isFullscreen,
-                      bottom: false,
-                      left: false,
-                      right: false,
-                      child: _PlayerContainer(
-                        channel: channel,
-                        isFullscreen: isFullscreen,
-                        controlsVisible: _controlsVisible,
-                        onTap: _onPlayerTap,
-                        onFullscreenToggle: _toggleFullscreen,
-                        showBackButton: !isFullscreen,
-                        onPreviousChannel: onPrev,
-                        onNextChannel: onNext,
-                        onInteract: _onPlayerInteract,
-                        topBar: isFullscreen
-                            ? _FullscreenTopBar(
-                                category: channel.category ?? '',
-                                currentChannelId: channel.id,
-                                onBackPressed: widget.forceFullscreen
-                                    ? () => Navigator.of(context).pop()
-                                    : _toggleFullscreen,
-                                onChannelSelected: (id) {
-                                  setState(() => _currentChannelId = id);
-                                  _startControlsTimer();
-                                },
-                                eventChannels: widget.eventChannels,
-                              )
-                            : null,
-                      ),
+                    child: _PlayerContainer(
+                      channel: channel,
+                      isFullscreen: isFullscreen,
+                      controlsVisible: _controlsVisible,
+                      onTap: _onPlayerTap,
+                      onFullscreenToggle: _toggleFullscreen,
+                      showBackButton: !isFullscreen,
+                      onPreviousChannel: onPrev,
+                      onNextChannel: onNext,
+                      onInteract: _onPlayerInteract,
+                      topBar: isFullscreen
+                          ? _FullscreenTopBar(
+                              category: channel.category ?? '',
+                              currentChannelId: channel.id,
+                              onBackPressed: widget.forceFullscreen
+                                  ? () => Navigator.of(context).pop()
+                                  : _toggleFullscreen,
+                              onChannelSelected: (id) {
+                                setState(() => _currentChannelId = id);
+                                _startControlsTimer();
+                              },
+                              eventChannels: widget.eventChannels,
+                            )
+                          : null,
                     ),
                   ),
                 ],
