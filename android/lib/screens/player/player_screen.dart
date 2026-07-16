@@ -86,10 +86,10 @@ final _kChipDecoActive = BoxDecoration(
   ),
 );
 final _kChipDecoInactive = BoxDecoration(
-  color: Colors.white.withValues(alpha: 0.08), // Translucent glossy capsule
+  color: Colors.white.withValues(alpha: 0.18), // Increased opacity for better visibility
   borderRadius: const BorderRadius.all(Radius.circular(20)),
   border: Border.fromBorderSide(
-    BorderSide(color: Colors.white.withValues(alpha: 0.12), width: 0.8),
+    BorderSide(color: Colors.white.withValues(alpha: 0.28), width: 0.8),
   ),
 );
 
@@ -134,7 +134,7 @@ const _kChipActiveStyle = TextStyle(
   letterSpacing: 0.1,
 );
 const _kChipInactiveStyle = TextStyle(
-  color: Colors.white70,
+  color: Colors.white, // Increased text opacity for maximum readability
   fontSize: 11.5,
   fontWeight: FontWeight.w600,
   letterSpacing: 0.1,
@@ -463,7 +463,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                       controlsVisible: _controlsVisible,
                       onTap: _onPlayerTap,
                       onFullscreenToggle: _toggleFullscreen,
-                      showBackButton: !isFullscreen,
+                      showBackButton: false,
                       onPreviousChannel: onPrev,
                       onNextChannel: onNext,
                       onInteract: _onPlayerInteract,
@@ -599,18 +599,15 @@ class _BackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.of(context).pop(),
-      behavior: HitTestBehavior.opaque,
-      child: const SizedBox(
-        width: 34,
-        height: 34,
-        child: Icon(
-          Icons.arrow_back_rounded,
-          color: Colors.white,
-          size: 24,
-        ),
+    return IconButton(
+      onPressed: () => Navigator.of(context).pop(),
+      icon: const Icon(
+        Icons.arrow_back_rounded,
+        color: Colors.white,
       ),
+      iconSize: 24,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(),
     );
   }
 }
@@ -943,16 +940,6 @@ class _FullscreenTopBar extends ConsumerWidget {
     this.eventChannels,
   });
 
-  // Pre-cached back button decoration — avoids per-build allocation.
-  static final _kBackButtonDeco = BoxDecoration(
-    color: Colors.white.withValues(alpha: 0.25),
-    shape: BoxShape.circle,
-    border: Border.all(
-      color: Colors.white.withValues(alpha: 0.5),
-      width: 0.8,
-    ),
-  );
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final channelsAsync = ref.watch(channelsProvider);
@@ -968,10 +955,22 @@ class _FullscreenTopBar extends ConsumerWidget {
           padding: const EdgeInsets.only(top: 10.0, bottom: 6.0),
           child: SizedBox(
             height: 52,
-            child: Stack(
+            child: Row(
               children: [
-                // 1. Horizontal Channels list (no ShaderMask — eliminated saveLayer)
-                Positioned.fill(
+                // 1. Back button
+                IconButton(
+                  onPressed: onBackPressed,
+                  icon: const Icon(
+                    Icons.arrow_back_rounded,
+                    color: Colors.white,
+                  ),
+                  iconSize: 28,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  constraints: const BoxConstraints(),
+                ),
+
+                // 2. Horizontal Channels list
+                Expanded(
                   child: channelsAsync.when(
                     data: (channels) {
                       final List<Channel> related;
@@ -991,7 +990,7 @@ class _FullscreenTopBar extends ConsumerWidget {
                       if (related.isEmpty) return const SizedBox.shrink();
                       return ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.only(left: 64, right: 16),
+                        padding: const EdgeInsets.only(left: 4, right: 16),
                         physics: const BouncingScrollPhysics(),
                         itemCount: related.length,
                         itemBuilder: (context, index) {
@@ -1007,34 +1006,6 @@ class _FullscreenTopBar extends ConsumerWidget {
                     },
                     loading: () => const SizedBox.shrink(),
                     error: (e, s) => const SizedBox.shrink(),
-                  ),
-                ),
-
-
-                // 3. Overlaid Back button
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: onBackPressed,
-                      behavior: HitTestBehavior.opaque,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        child: DecoratedBox(
-                          decoration: _kBackButtonDeco,
-                          child: const Padding(
-                            padding: EdgeInsets.all(8),
-                            child: Icon(
-                              Icons.arrow_back_ios_new_rounded,
-                              color: Colors.white,
-                              size: 14,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
                   ),
                 ),
               ],
