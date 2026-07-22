@@ -6,6 +6,7 @@ import '../../providers/app_providers.dart';
 import '../live_badge.dart';
 import '../team_flag.dart';
 import '../countdown_timer.dart';
+import '../tv_focus_wrapper.dart';
 
 // ─── Pre-computed static constants ───────────────────────────────────────────
 // Allocated once at class-load time; never re-created during builds/scrolls.
@@ -125,18 +126,7 @@ class EventListTile extends ConsumerStatefulWidget {
   ConsumerState<EventListTile> createState() => _EventListTileState();
 }
 
-class _EventListTileState extends ConsumerState<EventListTile>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 150),
-  );
-
-  late final Animation<double> _scale = Tween<double>(
-    begin: 1.0,
-    end: 0.96,
-  ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-
+class _EventListTileState extends ConsumerState<EventListTile> {
   // Cached values derived from event — recomputed only when event changes.
   late String _homeAbbr;
   late String _awayAbbr;
@@ -170,36 +160,24 @@ class _EventListTileState extends ConsumerState<EventListTile>
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final event = widget.event;
     final isLive = event.isLive;
 
-    // RepaintBoundary isolates the ScaleTransition to its own composited layer,
-    // preventing the full list from repainting on every tap animation frame.
-    return RepaintBoundary(
-      child: GestureDetector(
-        onTapDown: (_) => _controller.forward(),
-        onTapUp: (_) {
-          _controller.reverse();
-          widget.onTap?.call();
-        },
-        onTapCancel: () => _controller.reverse(),
-        child: ScaleTransition(
-          scale: _scale,
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 12),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: RepaintBoundary(
+        child: TvFocusable(
+          borderRadius: BorderRadius.circular(12),
+          onTap: widget.onTap,
+          child: GestureDetector(
+            onTap: widget.onTap,
             child: DecoratedBox(
               decoration: isLive
                   ? _kLiveCardDecoration
                   : _kUpcomingCardDecoration,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -253,7 +231,7 @@ class _EventListTileState extends ConsumerState<EventListTile>
                           ),
                       ],
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 6),
                     // Teams & time row
                     Row(
                       children: [
@@ -263,8 +241,8 @@ class _EventListTileState extends ConsumerState<EventListTile>
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              TeamFlagWidget(flag: event.homeTeam.flag, size: 28),
-                              const SizedBox(height: 6),
+                              TeamFlagWidget(flag: event.homeTeam.flag, size: 24),
+                              const SizedBox(height: 4),
                               Text(
                                 _homeAbbr,
                                 style: _kTeamNameStyle,
@@ -313,8 +291,8 @@ class _EventListTileState extends ConsumerState<EventListTile>
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              TeamFlagWidget(flag: event.awayTeam.flag, size: 28),
-                              const SizedBox(height: 6),
+                              TeamFlagWidget(flag: event.awayTeam.flag, size: 24),
+                              const SizedBox(height: 4),
                               Text(
                                 _awayAbbr,
                                 style: _kTeamNameStyle,

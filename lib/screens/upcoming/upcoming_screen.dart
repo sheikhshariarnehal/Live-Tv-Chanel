@@ -231,6 +231,8 @@ class _DateGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktopOrTv = MediaQuery.of(context).size.width >= 800;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
       child: Column(
@@ -257,14 +259,35 @@ class _DateGroup extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          // Event tiles
-          ...events.map(
-            (event) => EventListTile(
-              key: ValueKey(event.id),
-              event: event,
-              onTap: () => onEventTap(event),
+          // Event tiles — 3 per row on TV/Desktop, 1 per row on mobile
+          if (isDesktopOrTv)
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                mainAxisExtent: 110,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 0,
+              ),
+              itemCount: events.length,
+              itemBuilder: (context, index) {
+                final event = events[index];
+                return EventListTile(
+                  key: ValueKey(event.id),
+                  event: event,
+                  onTap: () => onEventTap(event),
+                );
+              },
+            )
+          else
+            ...events.map(
+              (event) => EventListTile(
+                key: ValueKey(event.id),
+                event: event,
+                onTap: () => onEventTap(event),
+              ),
             ),
-          ),
         ],
       ),
     );

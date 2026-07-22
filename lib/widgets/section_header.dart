@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme.dart';
+import 'tv_focus_wrapper.dart';
 
 /// Section header with title and optional action
 class SectionHeader extends StatelessWidget {
@@ -42,9 +43,13 @@ class SectionHeader extends StatelessWidget {
           Text(title.toUpperCase(), style: _titleStyle),
           const Spacer(),
           if (actionLabel != null)
-            GestureDetector(
+            TvFocusable(
+              borderRadius: BorderRadius.circular(6),
               onTap: onAction,
-              child: Text(actionLabel!, style: _actionStyle),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                child: Text(actionLabel!, style: _actionStyle),
+              ),
             ),
         ],
       ),
