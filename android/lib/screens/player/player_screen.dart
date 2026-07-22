@@ -9,6 +9,7 @@ import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
 import '../../models/channel.dart';
 import '../../widgets/player/channel_video_player.dart';
+import '../../widgets/tv_focus_wrapper.dart';
 
 // ─── Pre-cached top-level constants — zero per-frame allocations ─
 
@@ -163,6 +164,7 @@ class PlayerScreen extends ConsumerStatefulWidget {
 class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   late String _currentChannelId;
   bool _controlsVisible = true;
+  bool _isFullViewMode = false;
   Timer? _controlsTimer;
   String? _lastHistoryChannelId;
   static const _pipChannel = MethodChannel('com.goplay/pip');
@@ -177,6 +179,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     WakelockPlus.enable();
 
     if (widget.forceFullscreen) {
+      _isFullViewMode = true;
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
@@ -221,27 +224,21 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   }
 
   void _toggleFullscreen() {
-    final isFullscreen =
-        MediaQuery.of(context).orientation == Orientation.landscape;
-    if (!isFullscreen) {
+    setState(() {
+      _isFullViewMode = !_isFullViewMode;
+      _controlsVisible = true;
+    });
+
+    if (_isFullViewMode) {
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
       ]);
-      Future.delayed(const Duration(milliseconds: 250), () {
-        if (mounted) {
-          SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-        }
-      });
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     } else {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-      Future.delayed(const Duration(milliseconds: 150), () {
-        if (mounted) {
-          SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-        }
-      });
+      SystemChrome.setPreferredOrientations(DeviceOrientation.values);
     }
-    setState(() => _controlsVisible = true);
     _startControlsTimer();
   }
 
@@ -252,7 +249,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     _pipChannel.setMethodCallHandler(null);
     // Allow screen to sleep again when leaving the player
     WakelockPlus.disable();
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    SystemChrome.setPreferredOrientations(DeviceOrientation.values);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     
     // Stop tracking active channel
@@ -274,12 +271,49 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     }
   }
 
+  KeyEventResult _handlePlayerKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent || event is KeyRepeatEvent) {
+      final key = event.logicalKey;
+      if (key == LogicalKeyboardKey.select ||
+          key == LogicalKeyboardKey.enter ||
+          key == LogicalKeyboardKey.space ||
+          key == LogicalKeyboardKey.gameButtonA) {
+        _onPlayerTap();
+        return KeyEventResult.handled;
+      } else if (key == LogicalKeyboardKey.arrowUp ||
+                 key == LogicalKeyboardKey.arrowDown) {
+        if (!_controlsVisible) {
+          setState(() => _controlsVisible = true);
+          _startControlsTimer();
+          return KeyEventResult.handled;
+        }
+      } else if (key == LogicalKeyboardKey.arrowLeft ||
+                 key == LogicalKeyboardKey.arrowRight) {
+        if (!_controlsVisible) {
+          setState(() => _controlsVisible = true);
+        }
+        _startControlsTimer();
+      } else if (key == LogicalKeyboardKey.goBack ||
+                 key == LogicalKeyboardKey.escape) {
+        if (_controlsVisible) {
+          setState(() => _controlsVisible = false);
+          return KeyEventResult.handled;
+        }
+      }
+    }
+    return KeyEventResult.ignored;
+  }
+
   @override
   Widget build(BuildContext context) {
     final channelsAsync = ref.watch(channelsProvider);
     final mq = MediaQuery.of(context);
-    final isDesktop = mq.size.width >= 800;
-    final isFullscreen = mq.orientation == Orientation.landscape;
+    final isTv = mq.navigationMode == NavigationMode.directional;
+    final isLandscape = mq.orientation == Orientation.landscape || mq.size.width > mq.size.height;
+    final isWide = isTv || isLandscape || mq.size.width >= 600;
+    final isFullscreen = _isFullViewMode || widget.forceFullscreen;
+    final maxPlayerH = mq.size.height * 0.45;
+    final responsivePlayerHeight = (mq.size.width * 9 / 16).clamp(maxPlayerH < 180.0 ? maxPlayerH : 180.0, maxPlayerH);
 
     return PopScope(
       canPop: !isFullscreen || widget.forceFullscreen,
@@ -291,10 +325,13 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
           _toggleFullscreen();
         }
       },
-      child: Scaffold(
-        backgroundColor: const Color(0xFF070709),
-        body: DecoratedBox(
-          decoration: _kScreenBg,
+      child: Focus(
+        autofocus: true,
+        onKeyEvent: _handlePlayerKeyEvent,
+        child: Scaffold(
+          backgroundColor: const Color(0xFF070709),
+          body: DecoratedBox(
+            decoration: _kScreenBg,
           child: channelsAsync.when(
             data: (channels) {
               final channel = channels.cast<Channel?>().firstWhere(
@@ -356,8 +393,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                     }
                   : null;
 
-              // DESKTOP LAYOUT
-              if (isDesktop && !isFullscreen) {
+              // WIDESCREEN / TV RESPONSIVE SPLIT LAYOUT (NON-FULLSCREEN)
+              if (isWide && !isFullscreen) {
                 return Row(
                   children: [
                     Expanded(
@@ -380,7 +417,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                       color: Color(0x14FFFFFF),
                     ),
                     SizedBox(
-                      width: 360,
+                      width: mq.size.width > 1100 ? 380 : 320,
                       child: DecoratedBox(
                         decoration: _kSidePanelDeco,
                         child: SafeArea(
@@ -407,22 +444,19 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 );
               }
 
-              // MOBILE / FULLSCREEN LAYOUT
+              // PORTRAIT / MOBILE LAYOUT (also handles fullscreen)
+              // Both children always exist in the Stack to preserve
+              // widget identity and prevent AndroidView recreation.
               return Stack(
                 children: [
-                  // 1. Details & scrollable channels list (placed at the bottom)
-                  // We only display and layout this if not in fullscreen mode.
-                  // 1. Details & scrollable channels list (placed at the bottom)
-                  // We only display and layout this if not in fullscreen mode.
-                  // We use Offstage with maintainState: true to keep it alive
-                  // and avoid destroying/recreating the list during transitions.
+                  // 1. Channel list — always present, hidden via Offstage
                   Positioned.fill(
                     child: Offstage(
                       offstage: isFullscreen,
                       child: Column(
                         children: [
                           SizedBox(
-                            height: isFullscreen ? 0 : mq.padding.top + 240,
+                            height: mq.padding.top + responsivePlayerHeight,
                           ), // Placeholder for the player
                           Expanded(
                             child: SafeArea(
@@ -451,12 +485,12 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                     ),
                   ),
 
-                  // 2. The Video Player (anchored to top)
+                  // 2. The Video Player — same tree position, same constraint type
                   Positioned(
                     top: isFullscreen ? 0 : mq.padding.top,
                     left: 0,
                     right: 0,
-                    height: isFullscreen ? mq.size.height : 240,
+                    height: isFullscreen ? mq.size.height : responsivePlayerHeight,
                     child: _PlayerContainer(
                       channel: channel,
                       isFullscreen: isFullscreen,
@@ -467,6 +501,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                       onPreviousChannel: onPrev,
                       onNextChannel: onNext,
                       onInteract: _onPlayerInteract,
+                      height: responsivePlayerHeight,
                       topBar: isFullscreen
                           ? _FullscreenTopBar(
                               category: channel.category ?? '',
@@ -501,6 +536,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
           ),
         ),
       ),
+    ),
     );
   }
 }
@@ -510,6 +546,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 class _PlayerContainer extends StatelessWidget {
   final Channel channel;
   final bool isFullscreen;
+  final double? height;
   final bool controlsVisible;
   final VoidCallback onTap;
   final VoidCallback onFullscreenToggle;
@@ -522,6 +559,7 @@ class _PlayerContainer extends StatelessWidget {
   const _PlayerContainer({
     required this.channel,
     required this.isFullscreen,
+    this.height,
     required this.controlsVisible,
     required this.onTap,
     required this.onFullscreenToggle,
@@ -535,7 +573,7 @@ class _PlayerContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: isFullscreen ? double.infinity : 240,
+      height: isFullscreen ? double.infinity : (height ?? double.infinity),
       width: double.infinity,
       child: ColoredBox(
         color: Colors.black,
@@ -817,13 +855,16 @@ class _ChannelTileState extends State<_ChannelTile> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: MouseRegion(
-        onEnter: (_) => setState(() => _isHovered = true),
-        onExit: (_) => setState(() => _isHovered = false),
-        cursor: isCurrent ? SystemMouseCursors.basic : SystemMouseCursors.click,
-        child: GestureDetector(
-          onTap: isCurrent ? null : widget.onTap,
-          child: AnimatedContainer(
+      child: TvFocusable(
+        borderRadius: BorderRadius.circular(16),
+        onTap: isCurrent ? null : widget.onTap,
+        child: MouseRegion(
+          onEnter: (_) => setState(() => _isHovered = true),
+          onExit: (_) => setState(() => _isHovered = false),
+          cursor: isCurrent ? SystemMouseCursors.basic : SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: isCurrent ? null : widget.onTap,
+            child: AnimatedContainer(
             duration: const Duration(milliseconds: 250),
             curve: Curves.easeInOut,
             transform: _isHovered && !isCurrent
@@ -888,6 +929,7 @@ class _ChannelTileState extends State<_ChannelTile> {
           ),
         ),
       ),
+    ),
     );
   }
 
@@ -958,15 +1000,19 @@ class _FullscreenTopBar extends ConsumerWidget {
             child: Row(
               children: [
                 // 1. Back button
-                IconButton(
-                  onPressed: onBackPressed,
-                  icon: const Icon(
-                    Icons.arrow_back_rounded,
-                    color: Colors.white,
+                TvFocusable(
+                  isCircle: true,
+                  onTap: onBackPressed,
+                  child: IconButton(
+                    onPressed: onBackPressed,
+                    icon: const Icon(
+                      Icons.arrow_back_rounded,
+                      color: Colors.white,
+                    ),
+                    iconSize: 28,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    constraints: const BoxConstraints(),
                   ),
-                  iconSize: 28,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  constraints: const BoxConstraints(),
                 ),
 
                 // 2. Horizontal Channels list
@@ -1040,12 +1086,15 @@ class _ServerChipState extends State<_ServerChip> {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 5),
-        child: GestureDetector(
-          onTapDown: (_) => setState(() => _isPressed = true),
-          onTapUp: (_) => setState(() => _isPressed = false),
-          onTapCancel: () => setState(() => _isPressed = false),
+        child: TvFocusable(
+          borderRadius: BorderRadius.circular(20),
           onTap: widget.isCurrent ? null : widget.onTap,
-          child: AnimatedScale(
+          child: GestureDetector(
+            onTapDown: (_) => setState(() => _isPressed = true),
+            onTapUp: (_) => setState(() => _isPressed = false),
+            onTapCancel: () => setState(() => _isPressed = false),
+            onTap: widget.isCurrent ? null : widget.onTap,
+            child: AnimatedScale(
             scale: _isPressed ? 0.95 : 1.0,
             duration: const Duration(milliseconds: 100),
             curve: Curves.easeOut,
@@ -1064,6 +1113,7 @@ class _ServerChipState extends State<_ServerChip> {
           ),
         ),
       ),
+    ),
     );
   }
 }

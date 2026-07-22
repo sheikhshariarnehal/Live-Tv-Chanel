@@ -3,6 +3,7 @@ import '../../core/theme.dart';
 import '../../models/event.dart';
 import '../live_badge.dart';
 import '../team_flag.dart';
+import '../tv_focus_wrapper.dart';
 
 const _kLiveCardDecoration = BoxDecoration(
   gradient: GoPlayTheme.cardGradient,
@@ -65,7 +66,8 @@ class MatchCard extends StatelessWidget {
     final isLive = event.isLive;
 
     return RepaintBoundary(
-      child: GestureDetector(
+      child: TvFocusable(
+        borderRadius: BorderRadius.circular(12),
         onTap: onTap,
         child: Container(
           width: 280,

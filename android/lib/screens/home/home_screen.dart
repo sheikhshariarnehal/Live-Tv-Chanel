@@ -16,6 +16,7 @@ import '../../widgets/live_badge.dart';
 import '../../widgets/team_flag.dart';
 import '../../widgets/channel_avatar.dart';
 import '../../widgets/countdown_timer.dart';
+import '../../widgets/tv_focus_wrapper.dart';
 
 
 
@@ -199,48 +200,51 @@ class HomeScreen extends ConsumerWidget {
                           top: 0,
                           height: kToolbarHeight,
                           child: Center(
-                            child: PopupMenuButton<String>(
-                              icon: const Icon(
-                                Icons.more_vert_rounded,
-                                color: Colors.white,
-                              ),
-                              color: GoPlayTheme.surfaceContainerHigh,
-                              elevation: 4,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: const BorderSide(
-                                  color: GoPlayTheme.cardBorder,
-                                  width: 0.5,
+                            child: Focus(
+                              canRequestFocus: false,
+                              child: PopupMenuButton<String>(
+                                icon: const Icon(
+                                  Icons.more_vert_rounded,
+                                  color: Colors.white,
                                 ),
-                              ),
-                              onSelected: (value) {
-                                if (value == 'settings') {
-                                  context.push('/settings');
-                                }
-                              },
-                              itemBuilder: (BuildContext context) => [
-                                PopupMenuItem<String>(
-                                  value: 'settings',
-                                  child: Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.settings_rounded,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Text(
-                                        'App Settings',
-                                        style: GoogleFonts.inter(
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
+                                color: GoPlayTheme.surfaceContainerHigh,
+                                elevation: 4,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  side: const BorderSide(
+                                    color: GoPlayTheme.cardBorder,
+                                    width: 0.5,
                                   ),
                                 ),
-                              ],
+                                onSelected: (value) {
+                                  if (value == 'settings') {
+                                    context.push('/settings');
+                                  }
+                                },
+                                itemBuilder: (BuildContext context) => [
+                                  PopupMenuItem<String>(
+                                    value: 'settings',
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.settings_rounded,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          'App Settings',
+                                          style: GoogleFonts.inter(
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -253,47 +257,36 @@ class HomeScreen extends ConsumerWidget {
                             right: 16,
                             bottom: 8 * (1.0 - collapseRatio),
                             height: 44,
-                            child: Theme(
-                              data: Theme.of(context).copyWith(
-                                inputDecorationTheme: InputDecorationTheme(
-                                  filled: true,
-                                  fillColor: GoPlayTheme.surfaceContainer,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
+                            child: TvFocusable(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () => context.push('/search'),
+                              child: Container(
+                                height: 44,
+                                padding: const EdgeInsets.symmetric(horizontal: 14),
+                                decoration: BoxDecoration(
+                                  color: GoPlayTheme.surfaceContainer,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.08),
+                                    width: 0.8,
                                   ),
                                 ),
-                              ),
-                              child: TextField(
-                                readOnly: true,
-                                onTap: () => context.push('/search'),
-                                style: GoogleFonts.inter(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                ),
-                                decoration: InputDecoration(
-                                  hintText: 'Search channels, events...',
-                                  hintStyle: GoogleFonts.inter(
-                                    color: Colors.white.withValues(alpha: 0.6),
-                                    fontSize: 14,
-                                  ),
-                                  prefixIcon: const Icon(
-                                    Icons.search_rounded,
-                                    color: Colors.white70,
-                                    size: 20,
-                                  ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.search_rounded,
+                                      color: Colors.white70,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      'Search channels, events...',
+                                      style: GoogleFonts.inter(
+                                        color: Colors.white.withValues(alpha: 0.6),
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -399,7 +392,10 @@ class _HeroBannerState extends ConsumerState<_HeroBanner> {
                 itemCount: events.length,
                 itemBuilder: (context, index) {
                   final event = events[index];
-                  return _HeroBannerCard(event: event);
+                  return _HeroBannerCard(
+                    event: event,
+                    autoFocus: index == 0,
+                  );
                 },
               ),
             ),
@@ -443,7 +439,11 @@ class _HeroBannerState extends ConsumerState<_HeroBanner> {
 /// Individual hero banner card
 class _HeroBannerCard extends ConsumerStatefulWidget {
   final SportEvent event;
-  const _HeroBannerCard({required this.event});
+  final bool autoFocus;
+  const _HeroBannerCard({
+    required this.event,
+    this.autoFocus = false,
+  });
 
   @override
   ConsumerState<_HeroBannerCard> createState() => _HeroBannerCardState();
@@ -498,31 +498,36 @@ class _HeroBannerCardState extends ConsumerState<_HeroBannerCard> {
     return '${months[t.month - 1]} ${t.day}, $timeStr';
   }
 
-  bool get _canWatch =>
-      widget.event.isLive || _countdownDone;
+  bool get _canWatch => widget.event.isLive || _countdownDone;
 
   @override
   Widget build(BuildContext context) {
     final event = widget.event;
 
-    return GestureDetector(
-      onTap: () {
-        if (!_canWatch) return; // Disable tap while still upcoming
-        if (event.channels.isNotEmpty) {
-          context.push(
-            '/player/${event.channels.first}',
-            extra: {'eventChannels': event.channels, 'forceFullscreen': true},
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('No channels available for this event.'),
-              backgroundColor: GoPlayTheme.error,
-            ),
-          );
-        }
-      },
-      child: Padding(
+    void handleTap() {
+      if (!_canWatch) return; // Disable tap while still upcoming
+      if (event.channels.isNotEmpty) {
+        context.push(
+          '/player/${event.channels.first}',
+          extra: {'eventChannels': event.channels, 'forceFullscreen': true},
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No channels available for this event.'),
+            backgroundColor: GoPlayTheme.error,
+          ),
+        );
+      }
+    }
+
+    return TvFocusable(
+      autoFocus: widget.autoFocus,
+      borderRadius: BorderRadius.circular(20),
+      onTap: handleTap,
+      child: GestureDetector(
+        onTap: handleTap,
+        child: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 8),
         child: DecoratedBox(
           decoration: _cardDecoration,
@@ -763,6 +768,7 @@ class _HeroBannerCardState extends ConsumerState<_HeroBannerCard> {
           ),
         ),
       ),
+    ),
     );
   }
 }
@@ -881,34 +887,60 @@ class _TodaySchedule extends ConsumerWidget {
           );
         }
 
+        final isDesktopOrTv = MediaQuery.of(context).size.width >= 800;
+
+        void handleTap(SportEvent event) {
+          if (event.channels.isNotEmpty) {
+            context.push(
+              '/player/${event.channels.first}',
+              extra: {
+                'eventChannels': event.channels,
+                'forceFullscreen': true,
+              },
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('No channels available for this event.'),
+                backgroundColor: GoPlayTheme.error,
+              ),
+            );
+          }
+        }
+
+        if (isDesktopOrTv) {
+          return SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverGrid.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                mainAxisExtent: 110,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 0,
+              ),
+              itemCount: todayEvents.length,
+              itemBuilder: (context, index) {
+                final event = todayEvents[index];
+                return EventListTile(
+                  key: ValueKey(event.id),
+                  event: event,
+                  onTap: () => handleTap(event),
+                );
+              },
+            ),
+          );
+        }
+
         return SliverList.builder(
           itemCount: todayEvents.length,
           itemBuilder: (context, index) {
             final event = todayEvents[index];
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: RepaintBoundary(
-                child: EventListTile(
-                  event: event,
-                  onTap: () {
-                    if (event.channels.isNotEmpty) {
-                      context.push(
-                        '/player/${event.channels.first}',
-                        extra: {
-                          'eventChannels': event.channels,
-                          'forceFullscreen': true,
-                        },
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('No channels available for this event.'),
-                          backgroundColor: GoPlayTheme.error,
-                        ),
-                      );
-                    }
-                  },
-                ),
+              child: EventListTile(
+                key: ValueKey(event.id),
+                event: event,
+                onTap: () => handleTap(event),
               ),
             );
           },
@@ -1121,24 +1153,28 @@ class _ChannelItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.only(right: 12),
-        child: SizedBox(
-          width: 75,
-          child: Column(
-            children: [
-              ChannelAvatar(channel: channel, showBorder: showBorder),
-              const SizedBox(height: 6),
-              Text(
-                channel.name as String,
-                style: nameStyle,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: TvFocusable(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: SizedBox(
+            width: 72,
+            child: Column(
+              children: [
+                ChannelAvatar(channel: channel, showBorder: showBorder),
+                const SizedBox(height: 6),
+                Text(
+                  channel.name as String,
+                  style: nameStyle,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
         ),
       ),

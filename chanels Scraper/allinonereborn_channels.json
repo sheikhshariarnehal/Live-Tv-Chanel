@@ -1,0 +1,517 @@
+[
+  {
+    "filename": "Kerala vs Madhya Pradesh.html",
+    "name": "Kerala vs Madhya Pradesh",
+    "stream_url": "https://prod-sports-eng-cf.jiocinema.com/hls/live/2100306/hd_akamai_merged_avc_eng_cricket_m3_260125/master.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "Crystal Palace Vs Brentford.html",
+    "name": "Crystal Palace Vs Brentford",
+    "stream_url": "https://ottb.live.cf.ww.aiv-cdn.net/dub-nitro/live/clients/dash/enc/xnk4m9bnxt/out/v1/4ced7b7329a54652b9bb0521ed38bd4d/cenc.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "0eab5a3f3e3b4ba5d42d40ca30d17571",
+      "key": "f3f061ded9b70e8160590d5802ecda6d"
+    }
+  },
+  {
+    "filename": "3.html",
+    "name": "3",
+    "stream_url": "https://tmsbd.top/jig/chd/m3u8.php?c=starhindi&e=.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "1234.html",
+    "name": "1234",
+    "stream_url": "https://userx534.protect-cdn.net/live/m3-720p.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "Mumbai vs Jammu & Kashmir.html",
+    "name": "Mumbai vs Jammu & Kashmir",
+    "stream_url": "https://prod-sports-eng-fa.jiocinema.com/hls/live/2100306/hd_akamai_merged_avc_eng_cricket_m1_260125/master.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "asro.html",
+    "name": "asro",
+    "stream_url": "https://linear05-playback.sooka.my/CH2/masterCH2.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "4a267ba09b3a43969364ee77f76dd622",
+      "key": "5b00d4341e90b3022b5e57139ae8ab16"
+    }
+  },
+  {
+    "filename": "ast.html",
+    "name": "ast",
+    "stream_url": "https://streamdog.site/proxy/noob/stream.php/linearjitp-playback.astro.com.my/dash-wv/linear/2504/default_ott.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "03c2e0af2f8159f9f0ce9b5dbc865f10",
+      "key": "cd84ed136b0cc71f8ab8cd4d4f6a2e4c"
+    }
+  },
+  {
+    "filename": "TRAIL",
+    "name": "TRAIL",
+    "stream_url": "https://prod-sports-eng-gm.jiocinema.com/hls/live/2100306/hd_akamai_merged_avc_eng_cricket_m2_141124/master.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "astr0.html",
+    "name": "astr0",
+    "stream_url": "https://astr-crict.vercel.app/2504/default_ott.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "03c2e0af2f8159f9f0ce9b5dbc865f10",
+      "key": "cd84ed136b0cc71f8ab8cd4d4f6a2e4c"
+    }
+  },
+  {
+    "filename": "Tamil Nadu vs Chandigarh.html",
+    "name": "Tamil Nadu vs Chandigarh",
+    "stream_url": "https://prod-sports-eng-fa.jiocinema.com/hls/live/2100306/hd_akamai_merged_avc_eng_cricket_m2_260125/master.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "astro.html",
+    "name": "astro",
+    "stream_url": "https://linearjitp-playback.astro.com.my/dash-wv/linear/2504/default.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "03c2e0af2f8159f9f0ce9b5dbc865f10",
+      "key": "cd84ed136b0cc71f8ab8cd4d4f6a2e4c"
+    }
+  },
+  {
+    "filename": "channel7.html",
+    "name": "channel7",
+    "stream_url": "https://m118753.protect-cdn.net/live/m4-720p.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "bb.html",
+    "name": "bb",
+    "stream_url": "https://prod-ent-live-gm.jiocinema.com/hls/live/2101885/uhd_akamai_atv_avc_24x7_bbhindi_s18_day03/master.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "criclife.html",
+    "name": "criclife",
+    "stream_url": "https://cmaxv1-h.starzplayarabia.com/out/v1/2dc40d7ab2634e7d88efb31f3e332687/index.mpd\n",
+    "drm": {
+      "type": "clearkey",
+      "kid": "75f589bfe5b7c3b7948347be91275e5a",
+      "key": "701fef7de243c4e8e91e6e6b3a2fea1e"
+    }
+  },
+  {
+    "filename": "fancod.html",
+    "name": "fancod",
+    "stream_url": "https://liveauth.fancode.com/primary/119039_english_dash_99862drmadfreeta-di_h264/index.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "8cd51f3177d64e4798eaea5336c2a721",
+      "key": "6a11e488804a219beedb93607ed21b10"
+    }
+  },
+  {
+    "filename": "f1.html",
+    "name": "f1",
+    "stream_url": "https://linearjitp-playback.astro.com.my/dash-wv/linear/408/default_ott.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "1a655189ab5c49eb235308c2b1a9e710",
+      "key": "3c4508af348844107f5e026a4fd6b16e"
+    }
+  },
+  {
+    "filename": "disney.html",
+    "name": "disney",
+    "stream_url": "https://vps.its-nayeemparvez.xyz/disneyindia/video.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "fox.html",
+    "name": "fox",
+    "stream_url": "https://pstvplaylive.online/mpd/fox2/ps_manifest.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "a2ba14ee5ef4440d8e56a8bb5403117d",
+      "key": "b77a334fd7aff9c9960ca7785a20ea66"
+    }
+  },
+  {
+    "filename": "icc2025.html",
+    "name": "icc2025",
+    "stream_url": "https://live-hw-stream.starzplayarabia.com/ICC_Champions_Trophy_2025/dash/drm/index.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "f108f8cb08c765aedf55d5b5eae58f4c",
+      "key": "04a4ed8c992d291ce2097663b2adb677"
+    }
+  },
+  {
+    "filename": "geo-supr.html",
+    "name": "geo-supr",
+    "stream_url": "https://live3.shoq.com.pk/live/eds/Geo_Super/DASH/Geo_Super.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "7641daa5bacfbb61936c40a221c9e78e",
+      "key": "5732dd242f28338e909dc06cb1a1e5a2"
+    }
+  },
+  {
+    "filename": "hot.html",
+    "name": "hot",
+    "stream_url": "https://ee4ee8c03a26.eu-central-1.playback.live-video.net/api/video/v1/eu-central-1.755921704393.channel.LOohfipmCQDP.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "ilt20.html",
+    "name": "ilt20",
+    "stream_url": "https://buddyxiptv.com/fancode/global/primary/115981_english_hls_6221ta-no/index.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "ind-vs-sa-e.html",
+    "name": "ind-vs-sa-e",
+    "stream_url": "https://prod-sports-eng-cf.jiocinema.com/hls/live/2112598/uhd__akamai__ctv__avc__ssaispot__indvssa__eng__m1__081124__dbeedb71-c6de-484c-8b7e-51cbb61645b4/master.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "ipl-ios.html",
+    "name": "ipl-ios",
+    "stream_url": "https://myctxa.temycssme.wiki/720p.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "myco.html",
+    "name": "myco",
+    "stream_url": "https://ml-pull-hwc.myco.io/stream1/hls/stream1.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "legend.html",
+    "name": "legend",
+    "stream_url": "https://dai.google.com/ssai/event/5IyWdNGqRYSLNorD1WtLIg/master.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "pak-vs-sa.html",
+    "name": "pak-vs-sa",
+    "stream_url": "https://prod-sports-eng-cf.jiocinema.com/hls/live/2100307/hd_akamai_merged_avc_eng_cricket_m9_191224/master.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "live.html",
+    "name": "live",
+    "stream_url": "https://dai.fancode.com/primary/107782_english_hls_5947ta-no/index.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "pkl.html",
+    "name": "pkl",
+    "stream_url": "https://amg01269-amg01269c1-yupptv-us-5319.playouts.now.amagi.tv/playlist/amg01269-willowtvfast-willowplus-yupptvus/playlist.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "prime-hindi.html",
+    "name": "prime-hindi",
+    "stream_url": "https://otte.live.fly.ww.aiv-cdn.net/pdx-nitro/live/clients/dash/enc/1jii7mxinw/out/v1/fe9782633a364a6a84c9410f26d9b2c4/cenc.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "553a8e7efc48840b17d03797c023d9b6",
+      "key": "05fa313fa73df33f19e0f2d3d047bbaf"
+    }
+  },
+  {
+    "filename": "prime.html",
+    "name": "prime",
+    "stream_url": "https://otte.live.cf.ww.aiv-cdn.net/pdx-nitro/live/clients/dash/enc/tsrm0zirxz/out/v1/190f1d69a3d5467f8fb7d9df4339bc49/cenc.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "9cb6b6283487afe392adcffebf3cd6be",
+      "key": "05f4eb67381e0c173954603518ce84c3"
+    }
+  },
+  {
+    "filename": "ptv.html",
+    "name": "ptv",
+    "stream_url": "https://c3s9.vfruitfairy.com/com5/tracks-v1a1/mono.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "pushpa2-tamil.html",
+    "name": "pushpa2-tamil",
+    "stream_url": "https://nox7-04.ukra1.shop/hls/pdomcpreogm4f4kmlfgsd7t7hhwrnv6ikwqcpiws52gr3olzqi6yrvoa24xq/index-v1-a1.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "sa-t20.html",
+    "name": "sa-t20",
+    "stream_url": "https://amg01269-amg01269c1-willowtv-us-5479.playouts.now.amagi.tv/playlist/amg01269-willowtvfast-willowplus-willowtvus/playlist.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "ptv_sports.html",
+    "name": "ptv_sports",
+    "drm": null
+  },
+  {
+    "filename": "sky_sports.html",
+    "name": "sky_sports",
+    "stream_url": "https://s1.yuvraj.fun/sky-sp-cric/index.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "santosh.html",
+    "name": "santosh",
+    "stream_url": "https://live3.ssen.co/out/v1/f34f7266d72d42549c3b5b4026793871/index.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "smat2.html",
+    "name": "smat2",
+    "stream_url": "https://prod-sports-eng-gm.jiocinema.com/hls/live/2100306/hd_akamai_merged_avc_eng_cricket_m1_151224/master.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "smat1.html",
+    "name": "smat1",
+    "stream_url": "https://prod-sports-eng-gm.jiocinema.com/hls/live/2100306/hd_akamai_merged_avc_eng_cricket_m2_151224/master.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "sky_sports_main.html",
+    "name": "sky_sports_main",
+    "stream_url": "https://eu02.dmca.run/247-skymain/tracks-v1a1/mono.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "sprts18.html",
+    "name": "sprts18",
+    "stream_url": "https://jiotvmblive.cdn.jio.com/bpk-tv/Sports18_1_HD_MOB/Fallback/Sports18_1_HD_MOB-audio_98838_hin=98800-video=2293600.m3u8?__hdnea__=st=1741005947~exp=1741092347~acl=/*~hmac=5a341c13d65f72234774fc6cbab4bb64bf9ca9ab203f1afccd1b48f4440d0e0c",
+    "drm": null
+  },
+  {
+    "filename": "sports18.html",
+    "name": "sports18",
+    "stream_url": "https://v18tataplaysyndication.akamaized.net/bpk-tv/Sports18_1_HD_voot_MOB/output03/index.m3u8?hdnea=exp=1741533006~acl=/*~hmac=93640845b85405a58e3940beb07059a54c3ffcfe7defc13ed2c682b29b80ff34",
+    "drm": null
+  },
+  {
+    "filename": "sri-vs-aus.html",
+    "name": "sri-vs-aus",
+    "stream_url": "https://fc.pstvlive.xyz/w/hls/index.m3u8?psplaylink=ca3c641744d3fab0d2d35088c83750da099db4f47a638daaf427b40e6ca301f91760cddfcb9d3ecc02f5f20ea4e6f2bd6f465bf8e298f6e9c3b968be638867c3a6673905b89b755d61821bcb12bae9ed3143ef75736d96241dfcc36b9fff003206bce2e9b770852f6caab8a3a3a54b9f6dfcfdf35a2562f501540351fb05a792d979283c2c143088ee8375b71baaab6aedc3b824980472314f9c1f668986f7d25a83a97ec4b7d868a7ee575e3ea29be1dce80f93f4cf148223895503493f12ad05fc6937668bc3f72eb94ae5a910b0b2a89a1ec641b58143010eb17854d1ee87d1ba6b92b10afd0409f865483af1ec870cafa300de4a2304b137fde02661a0e7cf6708655c21d64c5cdfac504e7b95271dfd36ed851a7d2f7187de3f33c96647724b16d11b36e284af87f0a6e8cc33b0d648e9bb75c5cd30e6f531a822b65498f9e4d183b266d81bc349ac8cf580ed16068bf7917922aedd46e4a088031b57ede2e1a94c6c5401a5edc45e0aa759b708&psplay_special_token=",
+    "drm": null
+  },
+  {
+    "filename": "str-tamil.html",
+    "name": "str-tamil",
+    "stream_url": "https://001.fclplayer.online/live/csstream3/playlist.m3u8?id=1003&pk=f487b6aeb69d835debbae3af228af8bcaf9fca5a5573d2a6a3ac9827d9b25562",
+    "drm": null
+  },
+  {
+    "filename": "str1-tamil.html",
+    "name": "str1-tamil",
+    "stream_url": "https://cdn.vaanam24.com/STARSPORTSTAMIL/index.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "str-hindi.html",
+    "name": "str-hindi",
+    "stream_url": "https://crichdco.hocdn.workers.dev/live/starhindi.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "str_sports1.html",
+    "name": "str_sports1",
+    "stream_url": "https://bpprod5catchup.akamaized.net/bpk-tv/irdeto_com_Channel_250/output/manifest.mpd?begin=20240530T010000&end=20240606T160000",
+    "drm": {
+      "type": "clearkey",
+      "kid": "ab912c57a335564f866295c349ad3f91",
+      "key": "85c284f5db424aaffd356cfd23fffb86"
+    }
+  },
+  {
+    "filename": "sun-neo.html",
+    "name": "sun-neo",
+    "stream_url": "https://livestream8.sunnxt.com/248c92b73514435686fd72ba325d4008/SunNeoHDB_IN_index.mpd?PlayBackId=4189987770&cid=194389&country=IN&userid=62278006&nid=0&q=3&bw=&op=SUNNXT&dcid=0a5d51ff-3a72-4b8b-a551-bcb571d490f0&s=hindi_live&t=title_sun%20neo%20hd,contenttype_movie,language_hindi,genre_entertainment,gender_others,partner_sunnxtpaidmonthlypremium,adfeature_multiplead,unexposed,&ifa=2501006464537361310005373651080192024&pid=2501006464537361310005373651080192024&appver=sunnxt_v1.14.4.1&appName=com.suntv.pwa&appBundle=com.suntv.pwa&appid=com.suntv.pwa&appstoreurl=https://sunnxt.com",
+    "drm": {
+      "type": "clearkey",
+      "kid": "09ffaaff477d490abb4516b7e0711d35",
+      "key": "759cc157a993e8a76ff4d675e34b5400"
+    }
+  },
+  {
+    "filename": "str2.html",
+    "name": "str2",
+    "stream_url": "https://v18tataplaysyndication.akamaized.net/bpk-tv/StarSports_2_Hin_HD_voot_MOB/output03/hdntl=exp=1745228733~acl=%2f*~data=hdntl~hmac=e7ba86b2f7a852a539b5ace356b2feae6d4da1281ba9260782c79ec30765f268/StarSports_2_Hin_HD_voot_MOB-audio_108038_hin=108000-video=3932400.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "t_sports.html",
+    "name": "t_sports",
+    "stream_url": "https://smart.bengaldigital.live/T-Sports_HD/tracks-v1a1/index.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "tencric.html",
+    "name": "tencric",
+    "stream_url": "https://edge3-moblive.yuppcdn.net/drm/smil:tencricketdrm.smil/manifest.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "9872e439f21f4a299cab249c6554daa3",
+      "key": "0cdfcfe0d0f1fbe100554ce3ef4c4665"
+    }
+  },
+  {
+    "filename": "t20women.html",
+    "name": "t20women",
+    "stream_url": "https://rr2---sn-npoe23nsr.creativehub.sbs/Sky_Sports_Cricket_Live_TV/tracks-v1a1/mono.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "tnt4.html",
+    "name": "tnt4",
+    "stream_url": "https://ottb.live.cf.ww.aiv-cdn.net/lhr-nitro/live/clients/dash/enc/f0qvkrra8j/out/v1/f8fa17f087564f51aa4d5c700be43ec4/cenc.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "6d1708b185c6c4d7b37600520c7cc93c",
+      "key": "1aace05f58d8edef9697fd52cb09f441"
+    }
+  },
+  {
+    "filename": "ts.html",
+    "name": "ts",
+    "stream_url": "http://103.96.235.18:8080/sports1/index.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "tnt2.html",
+    "name": "tnt2",
+    "stream_url": "https://ottb.live.cf.ww.aiv-cdn.net/lhr-nitro/live/clients/dash/enc/f0qvkrra8j/out/v1/f8fa17f087564f51aa4d5c700be43ec4/cenc.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "6d1708b185c6c4d7b37600520c7cc93c",
+      "key": "1aace05f58d8edef9697fd52cb09f441"
+    }
+  },
+  {
+    "filename": "usa-network.html",
+    "name": "usa-network",
+    "stream_url": "https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL1-CTR-4s/Live/channel(usa-east)/master.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "78ab64fa90f137a697743b5dc27b2f96",
+      "key": "de4d31c7fc6005ede28abab2a0720a9f"
+    }
+  },
+  {
+    "filename": "tnt3.html",
+    "name": "tnt3",
+    "stream_url": "https://ottb.live.cf.ww.aiv-cdn.net/lhr-nitro/live/clients/dash/enc/f0qvkrra8j/out/v1/f8fa17f087564f51aa4d5c700be43ec4/cenc.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "6d1708b185c6c4d7b37600520c7cc93c",
+      "key": "1aace05f58d8edef9697fd52cb09f441"
+    }
+  },
+  {
+    "filename": "vijayhazare.html",
+    "name": "vijayhazare",
+    "stream_url": "https://prod-sports-eng-cf.jiocinema.com/hls/live/2100306/hd_akamai_merged_avc_eng_cricket_m1_180125/master.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "willo-sports-ios.html",
+    "name": "willo-sports-ios",
+    "stream_url": "https://amg01269-amg01269c1-willowtv-us-5479.playouts.now.amagi.tv/playlist/amg01269-willowtvfast-willowplus-willowtvus/cb553d1b7b6c678a98d43e62d9ef41a4d3243dfc087a8d6933fb4b926bc10f41e2e5af97b20cac7822fb0fdf61146d5a4d009247d8780ad7967cac48240d5734c6cdd52e8be24b4daddd0c2d34b07c0e49857671ad594f32d5e0110dc51ab07a0e1ca1494d5e2082b00cb27751c49e0a957f378bbdbe306f2c180680585ee2be5da5edf55b438d3af5b6494a887b4dee875fc8d549ed9d855e9e409b22f3109ec1a68e811280849201ef6d8d5c9f870f07fba957d1ac74b8de93684bf31b4a672d252d270e9c3458a7544a5d8292a31fbcd261a9a32c806736b50ada3aecc15647d86b90c334cb9abecc56011ba1ca5c602bea8dcaecac6161ec34a8f0abb5770d345ab8d4eb9535f85b8d35c41d1c64b2e35ffa97308cb5263637cc9a448f9c884e8eda8267933fc3cbf89972170033444ab154ac9e62cc3a9d569c8e4271121d1fedad5ccad08d05707a19d2c91ef5030bb5debc86dd2532de2f4e09bf2e8a0d4524e71c5851c961b99635678c662d803636f41175a34aeeb721f0e88ab65775e590970caf2fdcb40cd3e40be6386f0e4ce0a45e2a2f264ad9e06202276a8314b4a1adcf434951bcb99d8483395e20361855008e989753939ccf2418568c1311697a14188117940efb055a0b3ac60ed9ce5a229d67c14c00019d813c4713154536f6d1bac8d926c7d65263fb/36/1920x1080_5859480/index.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "vt.html",
+    "name": "vt",
+    "stream_url": "https://stream.vstartv.org:3511/hybrid/play.m3u8",
+    "drm": null
+  },
+  {
+    "filename": "willo-sports.html",
+    "name": "willo-sports",
+    "stream_url": "https://abmyxykaaaaaaaamkyvb65fuqebyg.7a77200bf98444ac997a89ed83775793.emt.cf.ww.aiv-cdn.net/iad-nitro/live/clients/dash/enc/f60kqesunw/out/v1/a435ed7a00f947deb4369b46d8f2fb70/cenc.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "1779c27b9d077a3ba0c9cc1bb9a94b9f",
+      "key": "cc5cf3b7928fb9e0a1ee6a8b566f0a8e"
+    }
+  },
+  {
+    "filename": "willo2.html",
+    "name": "willo2",
+    "stream_url": "https://ABGQJFUAAAAAAAAMKRC6UKXKCD7O6.6012913bad75432096573a35c8c32a15.emt.cf.ww.aiv-cdn.net/pdx-nitro/live/clients/dash/enc/2ppvpr099z/out/v1/8e4142c6df6e442c94feba54c3887da0/cenc.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "cb0149c4ee5c9f50c82d4cffc9551044",
+      "key": "0472ea0f977e324e07a820ff7e1f5a1e"
+    }
+  },
+  {
+    "filename": "willow-extra.html",
+    "name": "willow-extra",
+    "stream_url": "https://cors-proxy.cooks.fyi/https://dfwlive-v1-c1p3-sponsored.s.llnwi.net/Content/HLS.cps/Live/channel(WILLXT-3292.dfw.1080)/index.m3u8",
+    "drm": {
+      "type": "clearkey",
+      "kid": "1f52934d28a25c51a5dd577a650dcece",
+      "key": "323a46b02a31172c2475406e56fd3be6"
+    }
+  },
+  {
+    "filename": "willo.html",
+    "name": "willo",
+    "stream_url": "https://ottb.live.cf.ww.aiv-cdn.net/lhr-nitro/live/clients/dash/enc/5maijv49yl/out/v1/95f4fbbc116b4febbb3e84dc3307e8c1/cenc.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "a6ec15283f93919e9f31db0c54e1fb73",
+      "key": "8b1d7afdb86281f1469586d6ba2642e9"
+    }
+  },
+  {
+    "filename": "willow.html",
+    "name": "willow",
+    "stream_url": "https://cors.lanka.info/https://dfwlive-v1-c1p3-sponsored.akamaized.net/Content/HLS.cps/Live/channel(WILLHD-3291.dfw.1080)/index.m3u8",
+    "drm": {
+      "type": "clearkey",
+      "kid": "59ed8dc9d4a48857ef8e5865919496cc",
+      "key": "0d3680bd8b349deda8b7fdd1da71b7f8"
+    }
+  },
+  {
+    "filename": "willop.html",
+    "name": "willop",
+    "stream_url": "https://abgqckoaaaaaaaambcrovz6jv4i5x.a44e5017b2a24d109a79eef5850f6b97.emt.cf.ww.aiv-cdn.net/iad-nitro/live/clients/dash/enc/qngc3ylwts/out/v1/be2eb65b8d774e8e953dbf3e8958ecb3/cenc.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "61d5f72a22d9e8b6a953f3516e5d4f7f",
+      "key": "c81009990766a50feae298ab74940db2"
+    }
+  },
+  {
+    "filename": "wwe.html",
+    "name": "wwe",
+    "stream_url": "https://cors-anywhere.ammoapps.com/https://g003-sle-us-cmaf-prd-cf.cdn.peacocktv.com/co01/Content/CMAF_S2-CTR-4s-v2/Live/channel(5017873-719505-4905094a0d1)/master.mpd",
+    "drm": {
+      "type": "clearkey",
+      "kid": "00223c422b0436f109f1de7f65a0d3eb",
+      "key": "75b52aa8d6f81447979352d73f66b965"
+    }
+  },
+  {
+    "filename": "willowcric.html",
+    "name": "willowcric",
+    "stream_url": "html#https://vipgoodlive-tvs.creativehub.sbs/Willow_Cricket_Live_TV/index.m3u8",
+    "drm": null
+  }
+]

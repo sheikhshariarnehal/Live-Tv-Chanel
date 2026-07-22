@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme.dart';
 import '../../models/channel.dart';
+import '../tv_focus_wrapper.dart';
 
 // ─── Pre-cached card decoration — never reallocated ──────────
 const _cardDeco = BoxDecoration(
@@ -98,10 +99,12 @@ class ChannelCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final is4K = channel.quality == '4K';
 
-    return GestureDetector(
+    return TvFocusable(
+      borderRadius: BorderRadius.circular(8),
       onTap: () => context.push('/player/${channel.id}'),
-      child: DecoratedBox(
-        decoration: _cardDeco,
+      child: SizedBox.expand(
+        child: DecoratedBox(
+          decoration: _cardDeco,
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -179,6 +182,7 @@ class ChannelCard extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

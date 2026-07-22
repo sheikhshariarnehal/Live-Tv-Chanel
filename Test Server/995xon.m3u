@@ -1,0 +1,412 @@
+#EXTM3U
+#EXTINF:-1 tvg-logo="https://image.allinonereborn.workers.dev/image/9ebfed7a-df6d-44d0-aaba-318247014d05.jpg" group-title="Sponsored", 📢 All In One Reborn - Telegram
+https://raw.githubusercontent.com/aiorbd-video/video/refs/heads/main/Allinonesocialvid/output.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Sponsored", 🌐 টেলিগ্রাম (t.me/allonebd) থেকে আপডেট নিন
+https://raw.githubusercontent.com/aiorbd-video/video/refs/heads/main/Allinonesocialvid/output.m3u8
+error code: 1016
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11190/image/dark" group-title="Cricket: One Day International (ENG vs IND)", WILLOW FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=5be2590ab12743d21a1d377d8b5e7900:ff08faff3b5d2c874b62ec09e2db888c
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmxpdmUuZmx5Lnd3LmFpdi1jZG4ubmV0L2lhZC1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvdXR0eDU5bHptby9vdXQvdjEvZmU5YzQwNDgzOTI4NDExMGE0NjMxMzM1NDIxNGM2Y2IvY2VuYy5tcGQ=
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11190/image/dark" group-title="Cricket: One Day International (ENG vs IND)", TAPMAD FHD [FHD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://tapmad.com
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9zYXNlcmllcy5ha2FtYWl6ZWQubmV0L2hscy9saXZlLzIxMTAwOTcvMjM1NmpraUwtdGFwbWFkL21hc3Rlci5tM3U4|Referer=https://tapmad.com
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11190/image/dark" group-title="Cricket: One Day International (ENG vs IND)", WILLOW ALT [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=5be2590ab12743d21a1d377d8b5e7900:ff08faff3b5d2c874b62ec09e2db888c
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9hYmZqazRoYWFhYWFhYWFta2l0YzU0NDVyeWJtNi5iaWEtY2YubGl2ZS5wdi1jZG4ubmV0L2lhZC1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvdXR0eDU5bHptby9vdXQvdjEvZmU5YzQwNDgzOTI4NDExMGE0NjMxMzM1NDIxNGM2Y2IvY2VuYy5tcGQ=
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11190/image/dark" group-title="Cricket: One Day International (ENG vs IND)", SD SERVER [LOW]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=http://www.fawanews.sc/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cDovLzE5My40Ny42Mi40MS9obHMvWEFYQVhBLm0zdTg=|Referer=http://www.fawanews.sc/
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11190/image/dark" group-title="Cricket: One Day International (ENG vs IND)", SONY TEN 1 - IN [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Origin=https://www.sonyliv.com&Referer=https://www.sonyliv.com/&x-playback-session-id=1e03fe217581440690708a23c8a3a3ff-1784452689983
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9kaXNobXQuc2xpdmNkbi5jb20vaGxzL2xpdmUvMjAxMTc0Ny1iL1RFTjFIRC9tYXN0ZXIubTN1OD9oZG5lYT1leHA9MTc4NDQ5NTg5MH5hY2w9Lyp+aWQ9MWUwM2ZlMjE3NTgxNDQwNjkwNzA4YTIzYzhhM2EzZmYtMjAwODMxMTEwNTEzMTg1MTkxNH5obWFjPTk1YWVkOTNmN2JmN2U5MTM2M2ExZTBiZmMzMTA3Mjg1NjNlYjMxZmU5NDNlYjI1N2ZhZDQzZWJjODRmNTViOWY=|Origin=https://www.sonyliv.com&Referer=https://www.sonyliv.com/&x-playback-session-id=1e03fe217581440690708a23c8a3a3ff-1784452689983
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11190/image/dark" group-title="Cricket: One Day International (ENG vs IND)", SONY TEN 3 - IN [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Origin=https://www.sonyliv.com&Referer=https://www.sonyliv.com/&x-playback-session-id=1e03fe217581440690708a23c8a3a3ff-1784452689983
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9kaXNobXQuc2xpdmNkbi5jb20vaGxzL2xpdmUvMjAyMDU5MS1iL1RFTjNIRC9tYXN0ZXIubTN1OD9oZG5lYT1leHA9MTc4NDQ5NTg5MH5hY2w9Lyp+aWQ9MWUwM2ZlMjE3NTgxNDQwNjkwNzA4YTIzYzhhM2EzZmYtMjAwODMxMTEwNTEzMTg1MTkxNH5obWFjPTk1YWVkOTNmN2JmN2U5MTM2M2ExZTBiZmMzMTA3Mjg1NjNlYjMxZmU5NDNlYjI1N2ZhZDQzZWJjODRmNTViOWY=|Origin=https://www.sonyliv.com&Referer=https://www.sonyliv.com/&x-playback-session-id=1e03fe217581440690708a23c8a3a3ff-1784452689983
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11190/image/dark" group-title="Cricket: One Day International (ENG vs IND)", SONY TEN 4 - IN [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Origin=https://www.sonyliv.com&Referer=https://www.sonyliv.com/&x-playback-session-id=1e03fe217581440690708a23c8a3a3ff-1784452689983
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9kaXNobXQuc2xpdmNkbi5jb20vaGxzL2xpdmUvMjAyMDU5MS1iL1RFTjNIRC9tYXN0ZXIubTN1OD9oZG5lYT1leHA9MTc4NDQ5NTg5MH5hY2w9Lyp+aWQ9MWUwM2ZlMjE3NTgxNDQwNjkwNzA4YTIzYzhhM2EzZmYtMjAwODMxMTEwNTEzMTg1MTkxNH5obWFjPTk1YWVkOTNmN2JmN2U5MTM2M2ExZTBiZmMzMTA3Mjg1NjNlYjMxZmU5NDNlYjI1N2ZhZDQzZWJjODRmNTViOWY=|Origin=https://www.sonyliv.com&Referer=https://www.sonyliv.com/&x-playback-session-id=1e03fe217581440690708a23c8a3a3ff-1784452689983
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11190/image/dark" group-title="Cricket: One Day International (ENG vs IND)", SKY CRICKET FHD [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9ibC5ydXR1YmUucnUvbGl2ZXN0cmVhbS83YzEzYTUxNTc2YjlmZjI2MDFmMDhmNWQ1N2RkNTE2OS9pbmRleC5tM3U4P3M9dWlYRVMyZVB0N3hUcFFuYkp4bjdEZyZlPTIwNzQ2ODQ0NzQmc2NoZW1lPWh0dHBz|User-Agent=Mozilla
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11191/image/dark" group-title="Cricket: T20 International (ZIM vs BAN)", FANCODE FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=065051b99bf5cf8d9a3bde5cbde6aaf9:214bd176832872339ce184338320f9a2
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9hMjA0YWl2b3R0ZXBsLWEuYWthbWFpaGQubmV0L3Npbi1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvaDM1Z2V2NmpmdC9vdXQvdjEvYzY0MDA0ZTExNGMyNDVhNGFiODRiYjU3MDI3NWE0YTkvY2VuYy5tcGQ=
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11191/image/dark" group-title="Cricket: T20 International (ZIM vs BAN)", TAPMAD FHD [FHD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9zYXNlcmllcy5ha2FtYWl6ZWQubmV0L2hscy9saXZlLzIxMTAwOTcvMjM1NmpraUwtdGFwbWFkL21hc3Rlci5tM3U4
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11191/image/dark" group-title="Cricket: T20 International (ZIM vs BAN)", FANCODE SD [SD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=5689304538fa9f3bb3da99c939a2ad4f:6907c88ed8ebdd35a2fa80b9684715e1
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9hYmZqazRoYWFhYWFhYWFta2l0YzU0NDVyeWJtNi5iaWEtY2YubGl2ZS5wdi1jZG4ubmV0L2lhZC1uaXRyby9saXZlL2NsaWVudHMvZGFzaC1zZC9lbmMvdjhnMGRsbzR6OC9vdXQvdjEvOTQ2MDE5Zjg1ZGM2NGFlOTlmZjljZTY0YTk3MjdhNjIvY2VuYy1zZC5tcGQ=
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11191/image/dark" group-title="Cricket: T20 International (ZIM vs BAN)", SD SERVER [LOW]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cDovLzE2Mi4yNTEuMTYwLjUzOjgwODkvQkFOdnNaSU0xL2luZGV4Lm0zdTg=
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11191/image/dark" group-title="Cricket: T20 International (ZIM vs BAN)", FANCODE [BD] [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9iZC1tYy1wZGxpdmUuZmFuY29kZS5jb20vbXVtYmFpLzE0MzQwNV9lbmdsaXNoX2hsc18xN2RhMzg2ZGE0ODg3NV8xdGEtZGlfaDI2NC9pbmRleC5tM3U4
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11191/image/dark" group-title="Cricket: T20 International (ZIM vs BAN)", FANCODE [IN] [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9pbi1tYy1wZGxpdmUuZmFuY29kZS5jb20vbXVtYmFpLzE0MzQwNV9lbmdsaXNoX2hsc18xN2RhMzg2ZGE0ODg3NV8xdGEtZGlfaDI2NC9pbmRleC5tM3U4
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11190/image/dark" group-title="Cricket: One Day International (WI vs NZ)", WILLOW FHD [HD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=2af5031d717117b3abe01558b78e2df5:a971f2b0740eeb1d1ef3e0f2936db73b
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmxpdmUuZmx5Lnd3LmFpdi1jZG4ubmV0L2lhZC1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvZjZ6eHZ4YnJvZi9vdXQvdjEvZTEyNDI2MzM1YTUyNDBmZmE2NzY3OThjNTNhNzdlNmUvY2VuYy5tcGQ=
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11190/image/dark" group-title="Cricket: One Day International (WI vs NZ)", FANCODE FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=7e9239c1982d984a002df3ed049d0756:1b8a17598129a3618535c8fb05f103fe
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2JvbS1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvZmRiM3B1Ym1lay9vdXQvdjEvYWVmY2E2NDIwZjk0NGE5NDgyZTExN2YzMTVkZTUzNWYvY2VuYy5tcGQ=|User-Agent=Mozilla/5.0
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11190/image/dark" group-title="Cricket: One Day International (WI vs NZ)", TAPMAD FHD [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://tapmad.com
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9zYXNlcmllcy5ha2FtYWl6ZWQubmV0L2hscy9saXZlLzIxMTAwOTcvVUZDLTIwLTM4MjdlMS9tYXN0ZXIubTN1OD8=|Referer=https://tapmad.com
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11190/image/dark" group-title="Cricket: One Day International (WI vs NZ)", WILLOW ALT [HD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=2af5031d717117b3abe01558b78e2df5:a971f2b0740eeb1d1ef3e0f2936db73b
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9hYmZqazRoYWFhYWFhYWFta2l0YzU0NDVyeWJtNi5iaWEtY2YubGl2ZS5wdi1jZG4ubmV0L2lhZC1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvZjZ6eHZ4YnJvZi9vdXQvdjEvZTEyNDI2MzM1YTUyNDBmZmE2NzY3OThjNTNhNzdlNmUvY2VuYy5tcGQ=
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11190/image/dark" group-title="Cricket: One Day International (WI vs NZ)", FANCODE SD [SD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=709c812e1b4174002605df1d17d34a4c:0bbee6c9c20a0f065bf8369d54cbf83e
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2lhZC1uaXRyby9saXZlL2NsaWVudHMvZGFzaC1zZC9lbmMvcWRkbndxdGhwcC9vdXQvdjEvNmMyNWNkZGFiNTgwNDNhNmFjZTBhYzY0ZDk3OTgzZjAvY2VuYy1zZC5tcGQ=
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11190/image/dark" group-title="Cricket: One Day International (WI vs NZ)", LOW SERVER [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cDovLzE5My40Ny42Mi41My9obHMvSFlZWVpRUVFRUS5tM3U4Pw==|Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/11190/image/dark" group-title="Cricket: One Day International (WI vs NZ)", TNT SPORTS HD [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly90bWF4YXBwLnNpdGUvOHdpcndqczc2ZXJmdGcvdG50c3BvcnRzMi5tM3U4
+#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/2418/2418779.png" group-title="Motorsport: Formula 1 (Formula 1 vs Formula 1)", FANCODE FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=7e9239c1982d984a002df3ed049d0756:1b8a17598129a3618535c8fb05f103fe
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2JvbS1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvZmRiM3B1Ym1lay9vdXQvdjEvYWVmY2E2NDIwZjk0NGE5NDgyZTExN2YzMTVkZTUzNWYvY2VuYy5tcGQ=|User-Agent=Mozilla/5.0
+#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/2418/2418779.png" group-title="Motorsport: Formula 1 (Formula 1 vs Formula 1)", SKY F1 HD [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://gooz.aapmains.net
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9jaGF0Z3B0LmhlcmVpc21hbi5uZXQvcGxheWxpc3QvNTM0MTQvbG9hZC1wbGF5bGlzdD8mLm0zdTg=|Referer=https://gooz.aapmains.net
+#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/2418/2418779.png" group-title="Motorsport: Formula 1 (Formula 1 vs Formula 1)", APPLE TV FHD [FHD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://pushembdz.store/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9nMDAxLnNhZGhvb2ZpdG9uLnNob3Avb3V0L3YyLzZlMDc4MGUxYThmYWM3ZjBmMDBlZWY5YTA4MjhmMGQwL2luZGV4Lm0zdTg/|Referer=https://pushembdz.store/
+#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/2418/2418779.png" group-title="Motorsport: Formula 1 (Formula 1 vs Formula 1)", FOX SPORTS FHD [FHD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://pushembdz.store/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9nMDAxLnNhZGhvb2ZpdG9uLnNob3Avb3V0L3YyLzZlMDc4MGUxYThmYWM3ZjBmMDBlZWY5YTA4MjhmMGQwL2luZGV4Lm0zdTg/|Referer=https://pushembdz.store/
+#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/2418/2418779.png" group-title="Motorsport: Formula 1 (Formula 1 vs Formula 1)", SportCast F1 [FHD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9saXZlLmtpbmVzY29wZWNkbi5uZXQvb24tYWlyLzViZjJjMDdlLTM2MDQtNDJjZi05NTlhLTY3ZWQ4OTE0ZmZkNS85Zjc1NmVlYi04YTM4LTQzMmYtODlmYS1kZDM5M2QwN2E0YjAvbWFzdGVyLm0zdTg=
+#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/2418/2418779.png" group-title="Motorsport: Formula 1 (Formula 1 vs Formula 1)", SKY F1 FHD [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://vileembeds.pages.dev/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9pbnByb3Zpc3pvbi5zdC9za3ktc3BvcnRzLWYxLm0zdTg/|Referer=https://vileembeds.pages.dev/
+#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/2418/2418779.png" group-title="Motorsport: Formula 1 (Formula 1 vs Formula 1)", DAZN ESPANOL [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://pushembdz.store/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly93aGlvZWZ3aGkuc2Vuc2Utc2NyYW1ibGUtYmF5Lnh5ei9vdXQvdjIvZjZmZjQ5OGE2YWJkMDE4YjJkNmMyNGFhNzdmNmUwMDEvaW5kZXgubTN1OD8=|Referer=https://pushembdz.store/
+#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/2418/2418779.png" group-title="Motorsport: Formula 1 (Formula 1 vs Formula 1)", SKY ITALY FHD [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://pushembdz.store/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly93aGlvZWZ3aGkuc2Vuc2Utc2NyYW1ibGUtYmF5Lnh5ei9vdXQvdjIvMjY0YTA1YmE5OWI4ODUwYThmYmM3NTBhZTEwOWNjMDMvaW5kZXgubTN1OD8=|Referer=https://pushembdz.store/
+#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/2418/2418779.png" group-title="Motorsport: Formula 1 (Formula 1 vs Formula 1)", SKY SPORTS F1 UHD [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cDovL3VsdGF2My5tZS9wbGF5L2xpdmUucGhwP21hYz0wMDoxQTo3OTo0NDo5NTo4NyZzdHJlYW09MzAzMjY1JmV4dGVuc2lvbj1tM3U4
+#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/2418/2418779.png" group-title="Motorsport: Formula 1 (Formula 1 vs Formula 1)", LOW RES [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://pushembdz.store/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly93aGlvZWZ3aGkuc2Vuc2Utc2NyYW1ibGUtYmF5Lnh5ei9vdXQvdjIvNDgzOWI3ZmI0YTY5M2VkYjdmNTk1ZTY4MWJjY2YxMDEvdHJhY2tzLXYwYTAvbW9uby50cy5tM3U4Pw==|Referer=https://pushembdz.store/
+#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/2418/2418779.png" group-title="Motorsport: Formula 1 (Formula 1 vs Formula 1)", SKY SPORTS F1 [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly94c3RtLjI1MDkwOS5jYy9saXZlL1NQT1JUU0ZMVVgtUE9PTC0yMGFjYjBhOWM4LzVmZmU2YzU1MmE4OC8xMDM3Lm0zdTg=
+#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/2418/2418779.png" group-title="Motorsport: Formula 1 (Formula 1 vs Formula 1)", F1 GERMANY [USA] [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=6695688f79dc36f7a41f7db13bff5aca:22ef689af2162aefbf745cba2adb4fe9
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9zaW1wbGl0di1saXZlLm1kbi5vcnMuYXQvbGl2ZS9lZHMvc2t5X3Nwb3J0X2YxX2hkL2Rhc2gvc2t5X3Nwb3J0X2YxX2hkLm1wZA==
+#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/2418/2418779.png" group-title="Motorsport: Formula 1 (Formula 1 vs Formula 1)", SKY F1 ITALY [USA] [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=1118309a2acda72cfc3cb3cc9e047a3b:a9e90af10faf93b3c935bb0a807d285a
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9nMDA2LWxpbi1pdC1jbWFmLXByZC1jZi5wY2RuMDcuY3Nzb3R0MDIuY29tL3Z+MS0wLTBfZX4xNzgzMTE2NjcyX2Z+MF9nfjFfc345OGM2ZjgwZC1kOGRiLTQ4MzUtYWNkZC1mMTgyZDcwNmM0ZTlfdX4wZGQ5NjU2NDU4N2ZhYzU5OGU2OTUzMzlhM2FjYTkzNjdkYjU0OTQwMTljZGQyYjc1NjdiMDRjZDQ2NWFiZmJhZWQ2NWMyOTM1M2NhNjdlZDhiZWFkOGZlNDk2YTQ4Njdfa35BX2x+NTZfeH4xNTQyMDM0OGI1NGZhYjRiZjhmODYwNDY1OTg5YmZmOS9ub3dpdGxpbjIvQ29udGVudC9DTUFGX0NUUl9IMS9MaXZlL2NoYW5uZWwoc2t5c3BvcnRmMSkvbWFzdGVyXzJoci1hbGwubXBk
+#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/2418/2418779.png" group-title="Motorsport: Formula 1 (Formula 1 vs Formula 1)", Tipik FRANCE FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=adca25b8779e4168a0cd710f59f61ccf:be5383ed3cd8079f4ffe78ad067f476a
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9jOTg1MWVjLXJibS1oaWx2LWZzbHkuY2RuLnJlZGJlZS5saXZlL0wyNi82YjY0MGZhMi9hNzY1ZDA3NC5pc21sL2Rhc2gvLm1wZA==
+#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/2418/2418779.png" group-title="Motorsport: Formula 1 (Formula 1 vs Formula 1)", SKY SPORTS HD [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://streamscenter.online/&Origin=https://streamscenter.online
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9lZGdlMmNhc3Rlci5wcm8vaGxzL2hiZmthemJrYXpuYzQ5Lm0zdTg/|Referer=https://streamscenter.online/&Origin=https://streamscenter.online
+#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/2418/2418779.png" group-title="Motorsport: Formula 1 (Formula 1 vs Formula 1)", SKY SPORTS F1 UHD [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cDovL3VsdGF2My5tZS9wbGF5L2xpdmUucGhwP21hYz0wMDoxQTo3OTo0NDo5NTo4NyZzdHJlYW09MzAzMjY1JmV4dGVuc2lvbj1tM3U4
+#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/2418/2418779.png" group-title="Motorsport: Formula 1 (Formula 1 vs Formula 1)", SD SERVER [LOW]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=http://www.fawanews.sc/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cDovLzE5My40Ny42Mi41Ny9obHMvRlJSUkUubTN1OA==|Referer=http://www.fawanews.sc/
+#EXTINF:-1 tvg-logo="https://i.ibb.co/6chYXnTd/mgpp.png" group-title="Motorsport: MotoGP (MotoGP vs MotoGP)", FANCODE FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=065051b99bf5cf8d9a3bde5cbde6aaf9:214bd176832872339ce184338320f9a2
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2xoci1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvaW5weW1zOGV6dS9vdXQvdjEvMTA4NGQ1YzlhOTdhNGM1YjlmOTU1NGM4OGY0ODY2NDYvY2VuYy5tcGQ=
+#EXTINF:-1 tvg-logo="https://i.ibb.co/6chYXnTd/mgpp.png" group-title="Motorsport: MotoGP (MotoGP vs MotoGP)", SPO TV FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=b2d8f6315c494e07a8129f6a3d5c2048:6b4247def21bbd0d08629a3cb4c62ee9
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9xcC1wbGR0LWxpdmUtYnBrLXVjZC1wcm9kLmFrYW1haXplZC5uZXQvYnBrLXR2L2RyX3Nwb3R2MmhkL2RlZmF1bHQvaW5kZXgubXBk
+#EXTINF:-1 tvg-logo="https://i.ibb.co/6chYXnTd/mgpp.png" group-title="Motorsport: MotoGP (MotoGP vs MotoGP)", MotoGP FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=e03f302ec4dabcccca82cc9f76731ec9:53ea1027d2bf2893a552cf15bc0366de
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2JvbS1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvd2pld2V1cHd5Yy9vdXQvdjEvODE5N2M4ZTA1NWM5NGE4Njg2MjM2NTNhYzU1YzEwYmYvY2VuYy5tcGQ=|User-Agent=Mozilla/5.0
+#EXTINF:-1 tvg-logo="https://i.ibb.co/6chYXnTd/mgpp.png" group-title="Motorsport: MotoGP (MotoGP vs MotoGP)", NOW SPORTS FHD [FHD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://pushembdz.store/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9nMDAxLnNhZGhvb2ZpdG9uLnNob3Avb3V0L3YyLzlmN2RlNGRhMzM4MGE4YmRkNDg1NDYxYmZlOGIzYWE0L2luZGV4Lm0zdTg/|Referer=https://pushembdz.store/
+#EXTINF:-1 tvg-logo="https://i.ibb.co/6chYXnTd/mgpp.png" group-title="Motorsport: MotoGP (MotoGP vs MotoGP)", TNT SPORTS SD [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://instream.click/&Origin=https://instream.click
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9pbnN0cmVhbXMucHJvL2JpbDEvbW90b2dwZW4vdHJhY2tzLXYxYTEvbW9uby5tM3U4|Referer=https://instream.click/&Origin=https://instream.click
+#EXTINF:-1 tvg-logo="https://i.ibb.co/6chYXnTd/mgpp.png" group-title="Motorsport: MotoGP (MotoGP vs MotoGP)", DAZN SPORTS [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://instream.click/&Origin=https://instream.click
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9pbnN0cmVhbXMucHJvL2JpbDEvbW90b2dwZnIvdHJhY2tzLXYxYTEvbW9uby5tM3U4|Referer=https://instream.click/&Origin=https://instream.click
+#EXTINF:-1 tvg-logo="https://i.ibb.co/6chYXnTd/mgpp.png" group-title="Motorsport: MotoGP (MotoGP vs MotoGP)", CANAL+ HD [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://instream.click/&Origin=https://instream.click
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9pbnN0cmVhbXMucHJvL0VVL0hEVFYyNy90cmFja3MtdjFhMS9tb25vLm0zdTg=|Referer=https://instream.click/&Origin=https://instream.click
+#EXTINF:-1 tvg-logo="https://i.ibb.co/6chYXnTd/mgpp.png" group-title="Motorsport: MotoGP (MotoGP vs MotoGP)", SD SERVER [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=http://www.fawanews.sc/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cDovLzE5My40Ny42Mi41NS9obHMvemxsbFFRUS5tM3U4|Referer=http://www.fawanews.sc/
+#EXTINF:-1 tvg-logo="https://i.ibb.co/4R6j8XK0/WWE-Logo-svg.png" group-title="Boxing: Monday Night RAW (WWE RAW vs WWE RAW)", WWE HD [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://gooz.aapmains.net
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9jaGF0Z3B0LmhlcmVpc21hbi5uZXQvcGxheWxpc3QvNTMwMDYvbG9hZC1wbGF5bGlzdD8mLm0zdTg=|Referer=https://gooz.aapmains.net
+#EXTINF:-1 tvg-logo="https://i.ibb.co/4R6j8XK0/WWE-Logo-svg.png" group-title="Boxing: Monday Night RAW (WWE RAW vs WWE RAW)", HD SERVER [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0&Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9tZWxhbmNob2x5LmZyb210aHloZWFydC5zaXRlL2RhaWx5bW90aW9uL2xpdmUvcGxheWxpc3QvNS5tM3U4|User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0&Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+#EXTINF:-1 tvg-logo="https://i.ibb.co/4R6j8XK0/WWE-Logo-svg.png" group-title="Boxing: Monday Night RAW (WWE RAW vs WWE RAW)", SD SERVER [SD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=http://www.fawanews.sc/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cDovLzE5My40Ny42Mi40MS9obHMvR0JCQlFRLm0zdTg=|Referer=http://www.fawanews.sc/
+#EXTINF:-1 tvg-logo="https://i.ibb.co/jPLdK3bM/aewlogo24b.png" group-title="Boxing: AEW Dynamite (AEW vs AEW)", TSN2 SPORTS FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=85b277daf5aae05833fe43a68f587968:d52d7e9bc0bcd98787efd547ac91eca0
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2JvbS1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvY2pnbHlkeGdoZS9vdXQvdjEvODk3N2JhZjE3NWRhNGI5NDg3MzE5NDYxM2RkM2ZlNTUvY2VuYy5tcGQ=|User-Agent=Mozilla/5.0
+#EXTINF:-1 tvg-logo="https://i.ibb.co/jPLdK3bM/aewlogo24b.png" group-title="Boxing: AEW Dynamite (AEW vs AEW)", SD SERVER [SD]
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0&Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cDovLzE5My40Ny42Mi40MS9obHMvbm5ubnFxUS5tM3U4|User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0&Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+#EXTINF:-1 tvg-logo="https://i.ibb.co/jPLdK3bM/aewlogo24b.png" group-title="Boxing: AEW Dynamite (AEW vs AEW)", FOX PREMIUM [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=9f327d24c66fbd84e15ab5c9ead7c7a4:83837185529c0c4048f81386c2d36426
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2JvbS1uaXRyby9saXZlL2Rhc2gvZW5jL2ZkeDc0enF6aHUvb3V0L3YxLzdkN2E4YzY5ODFhODQyYjk4YTY4M2U5ZmJmZTUxZDE3L2NlbmMubXBk
+#EXTINF:-1 tvg-logo="https://i.ibb.co/jPLdK3bM/aewlogo24b.png" group-title="Boxing: AEW Dynamite (AEW vs AEW)", AEW HD [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9lbWJlZGluZGlhLnN0L2VtYmVkL2Fldy9keW5hbWl0ZS8yMDI2LTA3LTA4
+#EXTINF:-1 tvg-logo="https://iili.io/FDjaT1R.md.png" group-title="Boxing: One Friday Fights (One Friday Fights vs One Friday Fights)", One Fight FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=308006101c8fd0262c0f529319b9c127:37683aadc75b1450efa82d62c647984d
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2JvbS1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMva2tmZGJpMmQxYy9vdXQvdjEvYTViOWIzMmRhZmQ1NDk5Njg4MjQwMjg3ZWY4YzliOTAvY2VuYy5tcGQ=
+#EXTINF:-1 tvg-logo="https://iili.io/FDjaT1R.md.png" group-title="Boxing: One Friday Fights (One Friday Fights vs One Friday Fights)", SERVER 2 [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=60dc08aae52f4c0b806a8e43f24a12c8:30d5b579966d822b215ec51a91d8a271
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly90Z2xtcDAyLmFrYW1haXplZC5uZXQvb3V0L3YxLzMxNzAyNTJlM2ZiMDQ1MzA4NWYyZjRiMGY4NDAxYTZiL21hbmlmZXN0Lm1wZA==
+#EXTINF:-1 tvg-logo="https://iili.io/FDjaT1R.md.png" group-title="Boxing: One Friday Fights (One Friday Fights vs One Friday Fights)", SERVER 3 [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9mYXN0bHkubGl2ZS5icmlnaHRjb3ZlLmNvbS8xODUwNzIyMTAzNjI0MDYxOTEwL2FwLXNvdXRoZWFzdC0xLzYxOTU1NDk2MzYwMDEvZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5Sm9iM04wSWpvaWFURTNkekl4TG1WbmNtVnpjeTV6WWpCbU9Hc2lMQ0poWTJOdmRXNTBYMmxrSWpvaU5qRTVOVFUwT1RZek5qQXdNU0lzSW1Wb2JpSTZJbVpoYzNSc2VTNXNhWFpsTG1KeWFXZG9kR052ZG1VdVkyOXRJaXdpYVhOeklqb2lZbXhwZG1VdGNHeGhlV0poWTJzdGMyOTFjbU5sTFdGd2FTSXNJbk4xWWlJNkluQmhkR2h0WVhCMGIydGxiaUlzSW1GMVpDSTZXeUkyTVRrMU5UUTVOak0yTURBeElsMHNJbXAwYVNJNklqRTROVEEzTWpJeE1ETTJNalF3TmpFNU1UQWlmUS5NUXJad1k1cHVxWkdSZ1dMODQzZ09aLVk3aTJqVUdCNU1jZlpLd29PQjFJL3BsYXlsaXN0LWhscy5tM3U4
+#EXTINF:-1 tvg-logo="https://www.wwe.com/f/styles/wwe_show_logo_l/public/all/2024/09/Smackdown_LOGO--c8e0b09904cb1356d309a8ea2acb0422.png" group-title="Boxing: Friday Night SmackDown (SmackDown vs SmackDown)", WWE HD [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://gooz.aapmains.net
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9jaGF0Z3B0LmhlcmVpc21hbi5uZXQvcGxheWxpc3QvNTI1ODMvbG9hZC1wbGF5bGlzdD8mLm0zdTg=|Referer=https://gooz.aapmains.net
+#EXTINF:-1 tvg-logo="https://www.wwe.com/f/styles/wwe_show_logo_l/public/all/2024/09/Smackdown_LOGO--c8e0b09904cb1356d309a8ea2acb0422.png" group-title="Boxing: Friday Night SmackDown (SmackDown vs SmackDown)", WWE LIVE HD [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9tZWxhbmNob2x5LmZyb210aHloZWFydC5zaXRlL2RhaWx5bW90aW9uL2xpdmUvcGxheWxpc3QvMS5tM3U4
+#EXTINF:-1 tvg-logo="https://www.wwe.com/f/styles/wwe_show_logo_l/public/all/2024/09/Smackdown_LOGO--c8e0b09904cb1356d309a8ea2acb0422.png" group-title="Boxing: Friday Night SmackDown (SmackDown vs SmackDown)", SD SERVER [SD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cDovLzE5My40Ny42Mi40NC9obHMvWlpaWloubTN1OD8=|Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", FOX ONE FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=f6564ec2aee819046328a0e153be574d:ff46a8a1031eb27ef22576a077c98ab7
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2JvbS1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvYWpmb2VkZGtiei9vdXQvdjEvYjc4ODAwYjliMjMwNDg3OWIxNTg0M2Y0NTU4MzY4MjkvY2VuYy5tcGQ=|User-Agent=Mozilla/5.0
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", TSN SPORTS FHD [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9odWdoLmNkbi5ydW1ibGUuY2xvdWQvbGl2ZS9lNnB2MjFubS9zbG90LTI5LzVodXQtZnlnbl8xMDgwcC9jaHVua2xpc3QubTN1OA==
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", FAST [NO Comment] [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9wdWxsdHguY3FzeWN3LmNvbS9saXZlL3NkLTZNdllNUlRHd0RqVWEyQkVadC5tM3U4P3R4U2VjcmV0PWNhODQ1Y2NhYTgyOWZhN2EyYzA3ZTgwM2YwMGVjMjdmJnR4VGltZT02QTU4MDAxMA==
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", SPANISH FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=aa78205160ef4b5c972d5e815a8fe6e4:338b545591e45469e71dae3a8fb8dbb0
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly90ZWxlYW1hem9uYXNiLmNkbi5tZHN0cm0uY29tL2xpdmUtc3RyZWFtLW1wL2RmenUyamNrY3MzaGUvYTVlN2EyNzc3ZWEyNGI4Y2E0OWIzMjZiNTM2Zjg3YjIvNmEwY2Q5MGViMzg1MjQyN2ZjZGVkMTk3L21hbmlmZXN0Lm1wZA==
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", TSN SPORTS HD [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://gooz.aapmains.net
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9jaGF0Z3B0LmhlcmVpc21hbi5uZXQvcGxheWxpc3QvNTMzNzIvbG9hZC1wbGF5bGlzdD8mLm0zdTg=|Referer=https://gooz.aapmains.net
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", BBC SPORTS HD [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://gooz.aapmains.net
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9jaGF0Z3B0LmhlcmVpc21hbi5uZXQvcGxheWxpc3QvNTMzNzMvbG9hZC1wbGF5bGlzdD8mLm0zdTg=|Referer=https://gooz.aapmains.net
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", TSN4 SPORTS FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=abc5b2883121012850ebda05b528c5ec:e5250924f4b738905f7163a0134587a7
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2JvbS1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvaWh5czhudzR3di9vdXQvdjEvZmRlMTkwZjM2OTQ4NGJjNmI2MTE3Y2MxNmNkODJhOWYvY2VuYy5tcGQ=|User-Agent=Mozilla/5.0
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", CTV SPORTS FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=51a4a5ab615c381304b8dd795282fd7e:1e6f4096000b31668c11d5cd339d8cac
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2JvbS1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvZnlmY3dkYnRtci9vdXQvdjEvMDI0MTFjMzc3NzI3NGM5ZWI1ZDU3MmEwZmIyMmE1YjQvY2VuYy5tcGQ=|User-Agent=Mozilla/5.0
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", ISCREEN BD FHD [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://iscreen.com.bd/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9sZDU4ZHF6OGFqajgucm9ja3N0cmVhbWVyLmNvbS9pc2Nfc3NhaS9pc2Nfc3NhaV9hZHMvbWFpbjIvaXNjX3NzYWlfMTA4MHAvY2h1bmtzLm0zdTg=|Referer=https://iscreen.com.bd/
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", TOFFEE FHD (BD) [FHD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9wcm9kLWNkbjAxLWxpdmUudG9mZmVlbGl2ZS5jb20vbGl2ZS9GSUZBLTIwMjYvc3N0L2luZGV4Lm0zdTg/ZWRnZS1jYWNoZS10b2tlbj1FeHBpcmVzPTE3ODQxNDc1MDl+U3RhcnRzPTE3ODQxNDAzMDl+VVJMUHJlZml4PWFIUjBjSE02THk5d2NtOWtMV05rYmpBeExXeHBkbVV1ZEc5bVptVmxiR2wyWlM1amIyMH5EYXRhPWV5SnpkV0p6WTNKcFltVnlYMmxrSWpvaU9HWTVZVGd4TURZdE1UaGxNaTAwWVRGakxXSTFNMkV0WkRrMVlUYzRNbVU0TTJSakluMH5TaWduYXR1cmU9ckZmYnl1WTRXdkRjSHN1ZGFjbVpXRmxCOEp0VWkzaUZhMVQzSk9uUllocUhHLVFRUno1U3NCcEcyNGdZN3B0cDZ4RW5iM0hicy0wNElORFVTYlhFQ0E=
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", UNITE8 HINDI [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9odWdoLmNkbi5ydW1ibGUuY2xvdWQvbGl2ZS9oZDM3Zm04Zy9zbG90LTU5L3JlNGItZG0zNi9jaHVua2xpc3QubTN1OA==
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", beIN SPORTS HD [FHD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9wcm9kLWZhc3RseS1ldS13ZXN0LTEudmlkZW8ucHNjcC50di9UcmFuc2NvZGluZy92MS9obHMvUk5FV2hWSERWbEVLd3ozMGZRenUyUXFhTHlZbW0tWXpUVDRJcGJDcWZwcGpVaEh0MWdTWWp5MFJxcEZMOWthSk5aZ2xiM3BqbWF5bUVJczJWTGNqTmcvbm9uX3RyYW5zY29kZS9ldS13ZXN0LTEvcGVyaXNjb3BlLXJlcGxheS1kaXJlY3QtcHJvZC1ldS13ZXN0LTEtcHVibGljL21hc3Rlcl9keW5hbWljX2RlbHRhLm0zdTg/dHlwZT1saXZl
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", RTE SPORTS FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=d816287e21496989eae1312925a423c5:00da00f13180e7e6cd5ce87d1c974e8d
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9kYWkuZ29vZ2xlLmNvbS9saW5lYXIvZGFzaC9wYS9ldmVudC9hbnR3YTBFaVFtMlBvSHR4NHJCdFZ3L3N0cmVhbS82OGE4N2FiOS00MDk3LTQxYWUtOTk0My1iOWU5MjY0NzJlYmQ6QlJVL21hbmlmZXN0Lm1wZA==
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", FAST SERVER [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9wdWxsdHguY3FzeWN3LmNvbS9saXZlL2hkLWVuLTZNdllNUlRHd0RqVWEyQkVadC5tM3U4P3R4U2VjcmV0PThjMjMzMzgxMGRiZWY4YWQzNWYwNzQ0NmEyMjgwNDBjJnR4VGltZT02QTU4MDAxMA==
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", TELEMUNDO HD [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://streamscenter.online/&Origin=https://streamscenter.online
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9lZGdlc3RyZWFtMi5wcm8vaGxzL2IwaDVmTndES0gubTN1OD8=|Referer=https://streamscenter.online/&Origin=https://streamscenter.online
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", CANAL5 FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=d695093ea3e66d75a4d213a3e2cbf360:01be3f645e89a067d2786c295f68dde4
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2lhZC1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvbnRrZGw2OGVvYi9vdXQvdjEvYmQ1ZGZiNzY3Njk5NDM4Mzg4MWJjNmU3MTg3N2QyOWQvY2VuYy5tcGQ=|User-Agent=Mozilla/5.0
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", TVE La 1 FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=745cd6ec34a58f2f7ac2af35dc3da6d2:ae008f1e47e6567fe4201a6ff8f1ae54
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2xoci1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvYzdkaTd6a2Rvci9vdXQvdjEvZjdkNWIzNTZlMDQ4NDk0YTgzMjU1NjNlODkxNmQ1MGIvY2VuYy5tcGQ=|User-Agent=Mozilla/5.0
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", TSN SPORTS FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=14eeabf30c14b7fbf3008c03099ce011:17d2ac8dbc5429bd70af3433aa12158d
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2JvbS1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvdzByZWhqanJ3ZS9vdXQvdjEvNjlhMmE3MDQxMzk1NDA2Yjk3MDU5OGY2MTY4MGU3Y2YvY2VuYy5tcGQ=|User-Agent=Mozilla/5.0
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", D SPORTS FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=f836853d8eac19446ed9535f5fc568b1:b3bc5ef00602b29abac7e482d3d9fbf3
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2lhZC1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvejVveXh6c3hkay9vdXQvdjEvNzY5NWEwZjY0YTBlNDI0Yjk3M2Q1YjA5YTJhM2ViOTEvY2VuYy5tcGQ=|User-Agent=Mozilla/5.0
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", CAZE TV FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=1223d5105392cabf1bb9c2c1fdf6539a:340b409f4b8f78a343e0363a7938df38
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2dydS1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvaWF5ZzBreXJvZi9vdXQvdjEvOTFkYzA0OTA3ZjU2NDE1Yjg5N2ZhY2NmYTlkMjUyZGEvY2VuYy5tcGQ=|User-Agent=Mozilla/5.0
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", TUDN MEXICO [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=763ce1ebcaf23502c8cf357c6ef423e1:0c5e6c0820a1ea28753721db00272411
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2dydS1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvbzJ2eTRhYWhzaC9vdXQvdjEvZTI5M2M5MzI3NDVhNDRkY2FmODk3NTczZGZjNTM1MzIvY2VuYy5tcGQ=|User-Agent=Mozilla/5.0
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", SporTV BR FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=51c0ef23b17297e5c01cd7f36dd0a6ce:8823f713ba6fdb9bbe0a2ad82d309a4b
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2JvbS1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvdzhrd2RmbWxncy9vdXQvdjEvM2FhMzIxZTQ3NzUwNDkzN2E0MzliNjAyZTA3OGViMTgvY2VuYy5tcGQ=|User-Agent=Mozilla/5.0
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", FOX ONE HDR [HDR]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=48afc63fa0ecccc3a71f46d3fda20249:c7cd8801e238a263fe4349a95682b83b
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2JvbS1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvcmdtdzE5cWp1eC9vdXQvdjEvYzZhYzdlNjM4YTlkNDk5ODg5MWFlODVhYmEzNzdjNTkvY2VuYy5tcGQ=|User-Agent=Mozilla/5.0
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", FOX SPORTS 4K [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=1f68713028d439ec03be07f56c1d6213:20093db6455160fffed4c394def3193d
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2lhZC1uaXRyby9saXZlL2NsaWVudHMvZW5jL3hwZXJ1Nml4dTkvb3V0L3YxLzMxZDMwYzkxZmM2NTQ1ODc4OWI4NDIwOWQzZmEyMmU0L2NlbmMubXBk|User-Agent=Mozilla/5.0
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", FOX ONE HD [HD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=d0f2e537aa6d576e355c271b22caeaca:d5869f84abacfe205c524c59e62d3803
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmNhY2hlLmFpdi1jZG4ubmV0L2JvbS1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvYmMzeTR0MXJway9vdXQvdjEvZGYyYjcxYTk0ODdhNGMzNjljOTc0MmU3ZWE2MmEyZTIvY2VuYy5tcGQ=|User-Agent=Mozilla/5.0
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", FAST SERVER 1 [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9wdWwtdGVubS5na3lrcC5jb20vbGl2ZS9oZC1lbi0xLTQ0NTk4MTMubTN1OD90eFNlY3JldD03YTI4ZGU1YjIyZWE2ZDBlNDljNjY4NWRmYWE4MThiNCZ0eFRpbWU9NkE1OTFCQTg=
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", IRIB 4K [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9uY2RuLnRlbGV3ZWJpb24uaXIvZmFyYXRhci9saXZlL3BsYXlsaXN0Lm0zdTg=
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", FOX SPORTS HD [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://gooz.aapmains.net
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9jaGF0Z3B0LmhlcmVpc21hbi5uZXQvcGxheWxpc3QvNTMzNzAvbG9hZC1wbGF5bGlzdD8mLm0zdTg=|Referer=https://gooz.aapmains.net
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", TSN SPORTS HD [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://gooz.aapmains.net
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9jaGF0Z3B0LmhlcmVpc21hbi5uZXQvcGxheWxpc3QvNTMzNzEvbG9hZC1wbGF5bGlzdD8mLm0zdTg=|Referer=https://gooz.aapmains.net
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", TSN SPORTS [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly8yMDItMjE4LTE5My0xOTkudHdpdGNhc3RpbmcudHYvdGMubGl2ZWhscy92MS9zdHJlYW1zLzgzODE5NzQ3OC9obHMvMTAwOC45Ni9tZWRpYS5tM3U4P3VzZVFTUz0x
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", FIFA LIVE HD [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://instream.click/&Origin=https://instream.click
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9pbnN0cmVhbXMucHJvL0VVL0hEV0MxL3RyYWNrcy12MWExL21vbm8ubTN1OA==|Referer=https://instream.click/&Origin=https://instream.click
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", HD SERVER ENG [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0&Referer=https://streame.center&Origin=https://streame.center
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9lZGdlc3RyZWFtMy5wcm8vaGxzLzI0U0RBWkZjc3FuajI0Lm0zdTg=|User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0&Referer=https://streame.center&Origin=https://streame.center
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", HD SERVER AR [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0&Referer=https://streame.center&Origin=https://streame.center
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9lZGdlc3RyZWFtMi5wcm8vaGxzL2dyaW9nb2Vodm4yLm0zdTg=|User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0&Referer=https://streame.center&Origin=https://streame.center
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", HD SERVER ES [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0&Referer=https://streame.center&Origin=https://streame.center
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9lZGdlc3RyZWFtMS5wcm8vaGxzL2IwaDVmTndES0gubTN1OA==|User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0&Referer=https://streame.center&Origin=https://streame.center
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", TAPMAD FHD [PAK] [HD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=https://www.tapmad.com/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9wcmVtaWVybGVhZ2VwbG5ldzIuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMTA3MTA5L1RhcG1hZC0xMDI5M2o3NnI0L21hc3Rlci5tM3U4|Referer=https://www.tapmad.com/
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", PTV SPORTS [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9saXZlLmluY2FibGVpbnRlcm5ldC5jb20vdi9rb29rZXJfcHR2c3BvcnRzaGQva29va2VyX3B0dnNwb3J0c2hkLm0zdTg=
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", CCTV SPORTS HD [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9wdWxsc2dwLnl5emI0NTYudG9wL2xpdmUvc3RyZWFtLTc1ODYxMV9saGQubTN1OA==
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", BBC SPORTS SD [SD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cDovLzE5My40Ny42Mi40Ny9obHMvRkVDWnpzc3MubTN1OD8=|Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", TV4 SPORTS SD [SD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cDovLzE5My40Ny42Mi40Ny9obHMvRkVDWmNra2txcS5tM3U4Pw==|Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", TELEMUNDO SD [SD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cDovLzE5My40Ny42Mi40Ny9obHMvRkVDWmNra2txcXEubTN1OD8=|Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", beiN SPORTS FR [SD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cDovLzE5My40Ny42Mi40Ny9obHMvRkVDWmNra2txLm0zdTg/|Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", beiN ARABIC SD [SD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cDovLzE5My40Ny42Mi41NS9obHMvWVlZWVkubTN1OD8=|Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", AZAM SPORTS SD [SD]
+#KODIPROP:inputstream.adaptive.stream_headers=Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cDovLzE5My40Ny42Mi41NS9obHMvRkhISEgubTN1OD8=|Referer=http://www.fawanews.sc/&Origin=http://www.fawanews.sc/
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", FOX SPORTS (ALT) [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=f6564ec2aee819046328a0e153be574d:ff46a8a1031eb27ef22576a077c98ab7
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9hYmdoM2ZiYWFhYWFhYWFtYnlscGZmNzJnNnVwNi50YS5iaWEtY2YubGl2ZS5wdi1jZG4ubmV0L2lhZC1uaXRyby9saXZlL2Rhc2gvZW5jL2FqZm9lZGRrYnovb3V0L3YxL2I3ODgwMGI5YjIzMDQ4NzliMTU4NDNmNDU1ODM2ODI5L2NlbmMubXBk
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", TSN SPORTS (ALT) [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=14eeabf30c14b7fbf3008c03099ce011:17d2ac8dbc5429bd70af3433aa12158d
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9hYmdoM2ZiYWFhYWFhYWFtYnlscGZmNzJnNnVwNi50YS5iaWEtY2YubGl2ZS5wdi1jZG4ubmV0L2lhZC1uaXRyby9saXZlL2Rhc2gvZW5jL3cwcmVoampyd2Uvb3V0L3YxLzY5YTJhNzA0MTM5NTQwNmI5NzA1OThmNjE2ODBlN2NmL2NlbmMubXBk
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", FUSSBALL TV (GER) [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=1cb20afcd9d979c833cfd208c7d3eeb2:fef0c15b4a523370892edd5e4133c269
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9zdmM0NS5tYWluLnNsLnQtb25saW5lLmRlL2Jway10di9LSUQwMTAzN19GVVNTQkFMTFRWMV9oZC9EQVNIL2luZGV4Lm1wZA==
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", ZDF (GERMAN IP) [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=c1a0ac1044a433d0856ccdc08f245084:7f0e8800a6d63d7915ac181bb88ce813
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9zaW1wbGl0di1saXZlLm1kbi5vcnMuYXQvbGl2ZS9lZHMvemRmX2hkL2Rhc2g0aC96ZGZfaGQubXBk
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", ORF (GERMAN IP) [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=429bcf031bbf3146a67f3f583e4c4355:d1b92aba5a38a518c8b8a1fd2bca4398
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9zaW1wbGl0di1saXZlLm1kbi5vcnMuYXQvbGl2ZS9lZHMvb3JmXzFfaGQtMS9kYXNoNGgvb3JmXzFfaGQtMS5tcGQ=
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", TELEMUNDO ES (USA) [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=7d6bb9f86e133e4cb33440b493b6b672:584ad285dcb9e7d42cf3e93f1cc3fe11
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9saXZlLW9uZWFwcC1wcmQtbmV3cy5ha2FtYWl6ZWQubmV0L0NvbnRlbnQvQ01BRl9PTDItQ1RSLTRzL0xpdmUvY2hhbm5lbChXU05TKS9tYXN0ZXIubXBk
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", TELEMUNDO (USA) [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=ce7ab3022e753307997f58afe001bac4:72d631a66e635c60829a0fe7705516c1
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9saXZlLW9uZWFwcC1wcmQtbmV3cy5ha2FtYWl6ZWQubmV0L0NvbnRlbnQvQ01BRl9PTDItQ1RSLTRzLXYyL0xpdmUvY2hhbm5lbChrdmVhKS9tYXN0ZXIubXBk
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", MF [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9uLTEyMS03LmlsLmNkbi1yZWRnZS5tZWRpYS9saXZlaGxzL29pbC9rYW5jZG4tbGl2ZS9saXZlL2thbjExL2xpdmUubGl2eC9wbGF5bGlzdC5tM3U4
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", T SPORTS HD [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cDovLzEwMy4xNjUuOTMuMzE6ODA5NS90c3BvcnRzL3RyYWNrcy12MWExL21vbm8ubTN1OA==
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", BTV BDIX HD [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cDovLzEwMy4xNjUuOTMuMzE6ODA5NS9idHYvdHJhY2tzLXYxYTEvbW9uby5tM3U4
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16/image/dark" group-title="Football: World Championship Final (Argentina vs Spain)", SOMOY TV HD [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cDovLzEwMy4xNjUuOTMuMzE6ODA5NS9zb21veVR2L3RyYWNrcy12MWExL21vbm8ubTN1OA==
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16365/image/dark" group-title="Cricket: Lanka Premier League (DS vs JK)", WILLOW FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=287f5d409978b84086c6428b6acb73c1:bad025076475daec87e62ec1016e8cec
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9vdHRlLmxpdmUuZmx5Lnd3LmFpdi1jZG4ubmV0L2lhZC1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMveHk3aWdidmJydy9vdXQvdjEvZWJkMjVkOGViM2M2NDM4NThkOGRkNTVkODhkNjc3YWMvY2VuYy5tcGQ=
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16365/image/dark" group-title="Cricket: Lanka Premier League (DS vs JK)", WILLOW ALT [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=287f5d409978b84086c6428b6acb73c1:bad025076475daec87e62ec1016e8cec
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9hYmZqazRoYWFhYWFhYWFta2l0YzU0NDVyeWJtNi5iaWEtY2YubGl2ZS5wdi1jZG4ubmV0L2lhZC1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMveHk3aWdidmJydy9vdXQvdjEvZWJkMjVkOGViM2M2NDM4NThkOGRkNTVkODhkNjc3YWMvY2VuYy5tcGQ=
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16365/image/dark" group-title="Cricket: Lanka Premier League (DS vs JK)", FANCODE (IND) [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9pbi1tYy1wZGxpdmUuZmFuY29kZS5jb20vbXVtYmFpLzQyNDY3MTdfZW5nbGlzaF9obHNfOWRlZTI5MGYwMDkwNDYzXzF0YS1kaV9oMjY0L2luZGV4Lm0zdTg=
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/16365/image/dark" group-title="Cricket: Lanka Premier League (DS vs JK)", FANCODE (BD) [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9iZC1tYy1wZGxpdmUuZmFuY29kZS5jb20vbXVtYmFpLzQyNDY3MTdfZW5nbGlzaF9obHNfOWRlZTI5MGYwMDkwNDYzXzF0YS1kaV9oMjY0L2luZGV4Lm0zdTg=
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/2289/image/dark" group-title="Football: Calcutta Premier Division (Calcutta Customs vs Sangbad Pratidin Bhawanipore)", HD SERVER [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9saXZlLW4xMC52aWRlb3N0ZWNoLmNsb3VkL21hdGNoL2NhbGN1dHRhY3VzdG9tc2NsdWJfdnNfc3BiaGF3YW5pcG9yZWZjL0hMUy9tYXN0ZXIubTN1OA==
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/2289/image/dark" group-title="Football: Calcutta Premier Division (Patha Chakra vs Bidhannagar Msa)", HD SERVER [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9saXZlLW4xMC52aWRlb3N0ZWNoLmNsb3VkL21hdGNoL21vbW9uaWdyb3VwcGF0aGFjaGFrcmFfdnNfYmlkaGFubmFnYXJtc2EvSExTL21hc3Rlci5tM3U4
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/2289/image/dark" group-title="Football: Calcutta Premier Division (George Telegraph FC vs Kidderpore SC)", HD SERVER [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9saXZlLW4xMC52aWRlb3N0ZWNoLmNsb3VkL21hdGNoL3RhbWx1a2toZWxhZ2hhcmdlb3JnZXRlbGVncmFwaHNjX3ZzX2x1eHVyeWxpdmluZ2tpZGRlcnBvcmVzcG9ydGluZ2NsdWIvSExTL21hc3Rlci5tM3U4
+#EXTINF:-1 tvg-logo="http://api.sofascore.com/api/v1/unique-tournament/2289/image/dark" group-title="Football: Calcutta Premier Division (Mohun Bagan SG Reserves vs Kalighat MS)", HD SERVER [HD]
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9saXZlLW4xMC52aWRlb3N0ZWNoLmNsb3VkL21hdGNoL21vaHVuYmFnYW5zdXBlcmdpYW50X3ZzX2thbGlnaGF0bWlsYW5zYW5naGEvSExTL21hc3Rlci5tM3U4
+#EXTINF:-1 tvg-logo="https://www.sofascore.com/static/images/cycling/tour-de-france-dark.png" group-title="Tennis: Tour de France (Tour de France vs Tour de France)", EUROSPORT1 FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=11223344556677889900112233445566:4b80724d0ef86bcb2c21f7999d67739d
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9kYXNoMi5hbnRpay5zay9zdHJlYW0vbnZpZGlhX2V1cm9zcG9ydDEvcGxheWxpc3RfY2VuYy5tcGQ=
+#EXTINF:-1 tvg-logo="https://www.sofascore.com/static/images/cycling/tour-de-france-dark.png" group-title="Tennis: Tour de France (Tour de France vs Tour de France)", EUROSPORT2 FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=11223344556677889900112233445566:4b80724d0ef86bcb2c21f7999d67739d
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9kYXNoMi5hbnRpay5zay9zdHJlYW0vbnZpZGlhX2V1cm9zcG9ydDIvcGxheWxpc3RfY2VuYy5tcGQ=
+#EXTINF:-1 tvg-logo="https://www.sofascore.com/static/images/cycling/tour-de-france-dark.png" group-title="Tennis: Tour de France (Tour de France vs Tour de France)", EUROSPORT1 FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=0f4751abc997473d9138d17b5944be04:a0aefedd2376a54b8b50f9b7c2d50ac7
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9jYWNoZTAxLnphcGl0di5jb20vbGl2ZS9lZHNfYzIvZXVyb3Nwb3J0XzFfaGQvZGFzaF9saXZlX2V6L2V1cm9zcG9ydF8xX2hkLm1wZA==
+#EXTINF:-1 tvg-logo="https://www.sofascore.com/static/images/cycling/tour-de-france-dark.png" group-title="Tennis: Tour de France (Tour de France vs Tour de France)", EUROSPORT2 FHD [FHD]
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=e369d9ab101d4b60ba13c0384f503528:041e35e31381521b3398af5c6dd99414
+https://cricfy.allinonereborn.workers.dev/play?id=995xon&stream=aHR0cHM6Ly9jYWNoZTAxLnphcGl0di5jb20vbGl2ZS9lZHNfYzIvZXVyb3Nwb3J0XzJfaGQvZGFzaF9saXZlX2V6L2V1cm9zcG9ydF8yX2hkLm1wZA==

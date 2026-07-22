@@ -1,0 +1,2715 @@
+"fifa-world-cup-2026": {
+    "name": "FIFA™",
+    "channels": [
+        {
+            "id": "tipik-1-fifa-reborn",
+            "name": "Tipik 1 🇧🇪",
+            "url": "https://c9851ec-rbm-hilv-fsly.cdn.redbee.live/L26/6b640fa2/a765d074.isml/.mpd",
+            "logo": "https://i.ibb.co.com/M6sxvYN/eulabel.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "adca25b8779e4168a0cd710f59f61ccf",
+                "key": "be5383ed3cd8079f4ffe78ad067f476a"
+            }
+        },
+        {
+            "id": "tsn-1-fifa-reborn",
+            "name": "TSN 1 🇨🇦",
+            "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/w0rehjjrwe/out/v1/69a2a7041395406b970598f61680e7cf/cenc.mpd",
+            "logo": "https://mimipipi22.github.io/logo/png/tsn1.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "14eeabf30c14b7fbf3008c03099ce011",
+                "key": "17d2ac8dbc5429bd70af3433aa12158d"
+            }
+        },
+        {
+            "id": "tsn-2-fifa-reborn",
+            "name": "TSN 2 🇨🇦",
+            "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/3n6slkgh54/out/v1/8977baf175da4b94873194613dd3fe55/cenc.mpd",
+            "logo": "https://mimipipi22.github.io/logo/png/tsn2.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/140.0"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "daa8ea92553fd16cd6bfae2b8c582715",
+                "key": "4042e041b5639b79b69ae07a872eef9b"
+            }
+        },
+        {
+            "id": "itv-1-fifa-reborn",
+            "name": "ITV 1",
+            "url": "https://tmaxapp.site/itv1.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "iscreen-bd-aq-fifa-reborn",
+            "name": "ISCREEN BD - AQ",
+            "url": "https://m3u-tvb.pages.dev/ics.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "Referer": "https://iscreen.com.bd/"
+            }
+        },
+        {
+            "id": "telemundo-hd-fifa-reborn",
+            "name": "TELEMUNDO HD",
+            "url": "https://instreams.pro/US/NFLHD3/tracks-v1a1/mono.m3u8?",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "Referer": "https://instream.click/",
+                "Origin": "https://instream.click"
+            }
+        },
+        {
+            "id": "t-sports-hd-fifa-reborn",
+            "name": "T SPORTS - HD",
+            "url": "https://trs1.aynaott.com/tsports/index.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "unite8-sports-1-hd-aq-fifa-reborn",
+            "name": "Unite8 Sports 1 HD AQ",
+            "url": "https://zati5.hasanhabibmottakin.workers.dev/0-9-zeecafehd/index.m3u8",
+            "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSacQQMAkiDOnmSYsfhVh-9a2f2bHyigVKYNIKm4jbTw8uhGYuS5tAmijxV&s=10",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "unite8-sports-s2-fifa-reborn",
+            "name": "Unite8 Sports S2",
+            "url": "http://starhub.pro/live/farhat-3379/67897-913379/741567.ts",
+            "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSacQQMAkiDOnmSYsfhVh-9a2f2bHyigVKYNIKm4jbTw8uhGYuS5tAmijxV&s=10",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "unite8-sports-1-fhd-fifa-reborn",
+            "name": "Unite8 Sports 1 FHD",
+            "url": "https://ads-27727.icu/un.php?id=373312",
+            "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSacQQMAkiDOnmSYsfhVh-9a2f2bHyigVKYNIKm4jbTw8uhGYuS5tAmijxV&s=10",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "andriod"
+            }
+        },
+        {
+            "id": "unite8-sports-2-hd-aq-fifa-reborn",
+            "name": "Unite8 Sports 2 HD AQ",
+            "url": "https://zati5.hasanhabibmottakin.workers.dev/0-9-channel_2105335046/index.m3u8",
+            "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSacQQMAkiDOnmSYsfhVh-9a2f2bHyigVKYNIKm4jbTw8uhGYuS5tAmijxV&s=10",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "unite8-sports-2-hd-fifa-reborn",
+            "name": "Unite8 Sports 2 HD",
+            "url": "https://ads-27727.icu/un.php?id=373343",
+            "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSacQQMAkiDOnmSYsfhVh-9a2f2bHyigVKYNIKm4jbTw8uhGYuS5tAmijxV&s=10",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "andriod"
+            }
+        },
+        {
+            "id": "unite8-sports-1-s2-fifa-reborn",
+            "name": "Unite8 Sports 1 S2",
+            "url": "https://ads-27727.icu/un.php?id=372989",
+            "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSacQQMAkiDOnmSYsfhVh-9a2f2bHyigVKYNIKm4jbTw8uhGYuS5tAmijxV&s=10",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "andriod"
+            }
+        },
+        {
+            "id": "unite8-sports-2-fhd-s2-fifa-reborn",
+            "name": "Unite8 Sports 2 FHD S2",
+            "url": "http://starhub.pro/live/farhat-3379/67897-913379/98841.ts",
+            "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSacQQMAkiDOnmSYsfhVh-9a2f2bHyigVKYNIKm4jbTw8uhGYuS5tAmijxV&s=10",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "unite8-sports-1-fhd-backup-fifa-reborn",
+            "name": "Unite8 Sports 1 FHD (Backup)",
+            "url": "http://datahub11.com:8080/live/Jen12345/Jen54321/741567.ts",
+            "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSacQQMAkiDOnmSYsfhVh-9a2f2bHyigVKYNIKm4jbTw8uhGYuS5tAmijxV&s=10",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "irib-4k-fifa-reborn",
+            "name": "IRIB 4K",
+            "url": "https://ncdn.telewebion.ir/faratar/live/playlist.m3u8",
+            "logo": "https://ivTZ8fjF/wc26nw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0"
+            }
+        },
+        {
+            "id": "npo-1-hd-nl-fifa-reborn",
+            "name": "NPO 1 HD [NL]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745078.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "npo-2-hd-nl-fifa-reborn",
+            "name": "NPO 2 HD [NL]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745079.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "npo-3-hd-nl-fifa-reborn",
+            "name": "NPO 3 HD [NL]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745080.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "vrt-1-hd-be-fifa-reborn",
+            "name": "VRT 1 HD [BE]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745081.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "tipik-hd-be-fifa-reborn",
+            "name": "TIPIK HD [BE]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745082.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "das-erste-hd-de-fifa-reborn",
+            "name": "DAS ERSTE HD [DE]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745090.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "zdf-hd-de-fifa-reborn",
+            "name": "ZDF HD [DE]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745091.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "servus-tv-hd-at-fifa-reborn",
+            "name": "SERVUS TV HD [AT]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745098.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "fussballtv-1-hd-de-fifa-reborn",
+            "name": "FUSSBALL.TV 1 HD [DE]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745092.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "fussballtv-2-hd-de-fifa-reborn",
+            "name": "FUSSBALL.TV 2 HD [DE]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745093.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "fussballtv-3-hd-de-fifa-reborn",
+            "name": "FUSSBALL.TV 3 HD [DE]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745094.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "fussballtv-1-uhd-de-fifa-reborn",
+            "name": "FUSSBALL.TV 1 UHD [DE]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745095.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "fussballtv-2-uhd-de-fifa-reborn",
+            "name": "FUSSBALL.TV 2 UHD [DE]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745096.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "fussballtv-3-uhd-de-fifa-reborn",
+            "name": "FUSSBALL.TV 3 UHD [DE]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745097.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "bein-sports-max-1-hd-ar-fifa-reborn",
+            "name": "BEIN SPORTS MAX 1 HD [AR]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745083.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "bein-sports-max-2-hd-ar-fifa-reborn",
+            "name": "BEIN SPORTS MAX 2 HD [AR]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745084.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "bein-sports-max-3-hd-en-fifa-reborn",
+            "name": "BEIN SPORTS MAX 3 HD [EN]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745085.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "bein-sports-max-4-hd-en-fifa-reborn",
+            "name": "BEIN SPORTS MAX 4 HD [EN]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745086.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "bein-sports-max-5-hd-fr-fifa-reborn",
+            "name": "BEIN SPORTS MAX 5 HD [FR]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745087.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "bein-sports-max-6-hd-fr-fifa-reborn",
+            "name": "BEIN SPORTS MAX 6 HD [FR]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745088.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "m6-hd-fr-fifa-reborn",
+            "name": "M6 HD [FR]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745089.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "bbc-1-hd-uk-fifa-reborn",
+            "name": "BBC 1 HD [UK]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745114.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "itv-1-hd-uk-fifa-reborn",
+            "name": "ITV 1 HD [UK]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745115.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "ept-1-hd-gr-fifa-reborn",
+            "name": "EPT 1 HD [GR]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745107.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "trt-1-hd-tr-fifa-reborn",
+            "name": "TRT 1 HD [TR]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745100.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "tabii-spor-hd-tr-fifa-reborn",
+            "name": "TABII SPOR HD [TR]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745101.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "rtk-1-hd-al-fifa-reborn",
+            "name": "RTK 1 HD [AL]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745102.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "klan-tv-hd-al-fifa-reborn",
+            "name": "KLAN TV HD [AL]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745103.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "rai-1-hd-it-fifa-reborn",
+            "name": "RAI 1 HD [IT]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745099.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "dazn-mundial-1-hd-es-fifa-reborn",
+            "name": "DAZN MUNDIAL 1 HD [ES]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745110.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "dazn-mundial-2-hd-es-fifa-reborn",
+            "name": "DAZN MUNDIAL 2 HD [ES]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745111.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "dazn-mundial-3-hd-es-fifa-reborn",
+            "name": "DAZN MUNDIAL 3 HD [ES]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745112.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "dazn-mundial-4-hd-es-fifa-reborn",
+            "name": "DAZN MUNDIAL 4 HD [ES]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745113.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "tvp-1-hd-pl-fifa-reborn",
+            "name": "TVP 1 HD [PL]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745105.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "tvp-2-hd-pl-fifa-reborn",
+            "name": "TVP 2 HD [PL]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745106.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "tvp-sport-hd-pl-fifa-reborn",
+            "name": "TVP SPORT HD [PL]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745104.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "sport-tv-hd-pt-fifa-reborn",
+            "name": "SPORT TV+ HD [PT]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745116.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "sport-tv-1-hd-pt-fifa-reborn",
+            "name": "SPORT TV 1 HD [PT]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745117.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "sport-tv-2-hd-pt-fifa-reborn",
+            "name": "SPORT TV 2 HD [PT]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745118.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "sport-tv-3-hd-pt-fifa-reborn",
+            "name": "SPORT TV 3 HD [PT]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745119.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "sport-tv-4-hd-pt-fifa-reborn",
+            "name": "SPORT TV 4 HD [PT]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745120.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "fox-sports-1-hd-usa-fifa-reborn",
+            "name": "FOX SPORTS 1 HD [USA]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745108.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "fox-sports-2-hd-usa-fifa-reborn",
+            "name": "FOX SPORTS 2 HD [USA]",
+            "url": "https://ads-27727.icu/fxc.php?id=1745109.m3u8",
+            "logo": "http://picon.tivi-ott.net:25461/picon/WORLD CUP 2026/WORLD CUP 2026.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "super-sports-fifa-fifa-reborn",
+            "name": "SUPER SPORTS FIFA",
+            "url": "http://starhub.pro:80/live/farhat-3379/67897-913379/741566.ts",
+            "logo": "https://i.ibb.co/GfMp5MTJ/Chat-GPT-Image-Jun-5-2026-07-28-11-PM.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "unite8-sports-1-hd-fifa-reborn",
+            "name": "Unite8 Sports 1 HD",
+            "url": "http://starhub.pro:80/live/farhat-3379/67897-913379/741567.ts",
+            "logo": "https://i.ibb.co/GfMp5MTJ/Chat-GPT-Image-Jun-5-2026-07-28-11-PM.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "ss-world-cup-central-fifa-reborn",
+            "name": "SS World Cup Central",
+            "url": "http://starhub.pro:80/live/farhat-3379/67897-913379/745149.ts",
+            "logo": "https://i.ibb.co/GfMp5MTJ/Chat-GPT-Image-Jun-5-2026-07-28-11-PM.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "ss-world-cup-pass-fifa-reborn",
+            "name": "SS World Cup Pass",
+            "url": "http://starhub.pro:80/live/farhat-3379/67897-913379/745195.ts",
+            "logo": "https://i.ibb.co/GfMp5MTJ/Chat-GPT-Image-Jun-5-2026-07-28-11-PM.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "unite8-sports-2-hd-fifa-reborn",
+            "name": "Unite8 Sports 2 HD",
+            "url": "http://starhub.pro:80/live/farhat-3379/67897-913379/745202.ts",
+            "logo": "https://i.ibb.co/GfMp5MTJ/Chat-GPT-Image-Jun-5-2026-07-28-11-PM.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "de-fussballtv1-uhd4k-fifa-reborn",
+            "name": "(DE) Fussball.TV1 (UHD/4K)",
+            "url": "http://starhub.pro:80/live/farhat-3379/67897-913379/745269.ts",
+            "logo": "https://i.ibb.co/fzbsY6CP/Chat-GPT-Image-Jun-11-2026-11-41-22-PM.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "hk-now-sports-616-uhd4k-fifa-reborn",
+            "name": "(HK) Now Sports 616 (UHD/4K)",
+            "url": "http://starhub.pro:80/live/farhat-3379/67897-913379/745270.ts",
+            "logo": "https://i.ibb.co/fzbsY6CP/Chat-GPT-Image-Jun-11-2026-11-41-22-PM.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "bein-sport-max-4k-fifa-reborn",
+            "name": "BEIN SPORT MAX 4K",
+            "url": "http://starhub.pro:80/live/farhat-3379/67897-913379/747283.ts",
+            "logo": "https://i.ibb.co/fzbsY6CP/Chat-GPT-Image-Jun-11-2026-11-41-22-PM.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "tsn-1-fifa-reborn",
+            "name": "TSN 1",
+            "url": "http://starhub.pro:80/live/farhat-3379/67897-913379/748388.ts",
+            "logo": "https://i.ibb.co/GfMp5MTJ/Chat-GPT-Image-Jun-5-2026-07-28-11-PM.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "fox-sports-1-fs1-english-fifa-reborn",
+            "name": "Fox Sports 1 (FS1) [English]",
+            "url": "http://starhub.pro:80/live/farhat-3379/67897-913379/751354.ts",
+            "logo": "https://i.ibb.co/GfMp5MTJ/Chat-GPT-Image-Jun-5-2026-07-28-11-PM.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "fox-sports-2-fs2-english-fifa-reborn",
+            "name": "Fox Sports 2 (FS2) [English]",
+            "url": "http://starhub.pro:80/live/farhat-3379/67897-913379/751355.ts",
+            "logo": "https://i.ibb.co/GfMp5MTJ/Chat-GPT-Image-Jun-5-2026-07-28-11-PM.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "telemundo-deportes-fifa-reborn",
+            "name": "TELEMUNDO DEPORTES",
+            "url": "https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s-v2/Live/channel(kvea)/master.mpd",
+            "logo": "",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:149.0) Gecko/20100101 Firefox/149.0"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "ce7ab3022e753307997f58afe001bac4",
+                "key": "72d631a66e635c60829a0fe7705516c1"
+            }
+        },
+        {
+            "id": "caze-tv-1-fifa-reborn",
+            "name": "CAZE TV 1",
+            "url": "https://dfr80qz435crc.cloudfront.net/MNOP/Amagi/Caze/Caze_TV_BR/Caze_TV.m3u8",
+            "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCOzchAkDiIxwY9tbX-GXVS5UFx_lCeUeFTJ3_9iYG04syYmryQRY7XnhjXqEPIYF0rldOjyOJ3yBQgDkuRdjU3TtiFS8W_DyyvlkQHQ6pQvCTlLeRyBj2x5iVXZpywuiD2y5H7DeCiVdsgwSCUn_OWULmgMuK9-jp69aEYwxSTSsAWZczvcMcgg-epIkB/s700/CAZE%20TV.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "caze-tv-2-fifa-reborn",
+            "name": "CAZE TV 2",
+            "url": "https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash/enc/3ynrpdanq2/out/v1/81fd4c26584044d2b1a1cc5b32fa9af0/cenc.mpd?amznDtid=AOAGZA014O5RE&encoding=segmentBase",
+            "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCOzchAkDiIxwY9tbX-GXVS5UFx_lCeUeFTJ3_9iYG04syYmryQRY7XnhjXqEPIYF0rldOjyOJ3yBQgDkuRdjU3TtiFS8W_DyyvlkQHQ6pQvCTlLeRyBj2x5iVXZpywuiD2y5H7DeCiVdsgwSCUn_OWULmgMuK9-jp69aEYwxSTSsAWZczvcMcgg-epIkB/s700/CAZE%20TV.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "34475edab991ad5e92548aebd710410a",
+                "key": "501b209cccd323ac00bf5ac15b406cb4"
+            }
+        },
+        {
+            "id": "caze-tv-3-fifa-reborn",
+            "name": "CAZE TV 3",
+            "url": "https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash-sd/enc/iy79zu8tb9/out/v1/e86df8b45c0f452daf49ca6e3d27103e/cenc-sd.mpd?amznDtid=AOAGZA014O5RE&encoding=segmentBase",
+            "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCOzchAkDiIxwY9tbX-GXVS5UFx_lCeUeFTJ3_9iYG04syYmryQRY7XnhjXqEPIYF0rldOjyOJ3yBQgDkuRdjU3TtiFS8W_DyyvlkQHQ6pQvCTlLeRyBj2x5iVXZpywuiD2y5H7DeCiVdsgwSCUn_OWULmgMuK9-jp69aEYwxSTSsAWZczvcMcgg-epIkB/s700/CAZE%20TV.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "0a29e3b7dc26ced80114da99266ea636",
+                "key": "9f1e4034545fed90b5ce7a8f8925e621"
+            }
+        },
+        {
+            "id": "fussball-tv-1-fifa-reborn",
+            "name": "FUSSBALL TV 1 🇩🇪",
+            "url": "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_uhd/DASH/index.mpd",
+            "logo": "https://i.ibb.co.com/GvTZ8fjF/wc26nw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "1f09d5788fbbb03a053d03cc731f31a9",
+                "key": "d493d5a70c793362324638f61d1726ac"
+            }
+        },
+        {
+            "id": "fussball-tv-2-fifa-reborn",
+            "name": "FUSSBALL TV 2 🇩🇪",
+            "url": "https://svc45.main.sl.t-online.de/bpk-tv/KID01064_FUSSBALLTV2_uhd/DASH/index.mpd",
+            "logo": "https://i.ibb.co.com/GvTZ8fjF/wc26nw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "1b98a0f2de7784c6e132942385a089f3",
+                "key": "546eae09a8d81c498dfd08532dcd68a5"
+            }
+        },
+        {
+            "id": "616-hk-now-4k-fifa-reborn",
+            "name": "616 HK NOW 4K",
+            "url": "https://nowp.wasabih.net/channel/616/master.mpd",
+            "logo": "https://static.promediateknologi.id/crop/0x0:0x0/1200x0/webp/photo/p1/04/2026/06/10/Piala-Dunia-2026-akan-menjadi-edisi-pertama-3193264271.jpeg",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "91ba752a446148c68400d78374b178b4",
+                "key": "a01d7dc4edf582496b7e73d67e9e6899"
+            }
+        },
+        {
+            "id": "618-hk-now-fifa-reborn",
+            "name": "618 HK NOW",
+            "url": "https://nowp.wasabih.net/channel/618/master.mpd",
+            "logo": "https://static.promediateknologi.id/crop/0x0:0x0/1200x0/webp/photo/p1/04/2026/06/10/Piala-Dunia-2026-akan-menjadi-edisi-pertama-3193264271.jpeg",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "91ba752a446148c68400d78374b178b4",
+                "key": "a01d7dc4edf582496b7e73d67e9e6899"
+            }
+        },
+        {
+            "id": "tipik-2-fifa-reborn",
+            "name": "Tipik 2 🇧🇪",
+            "url": "https://daiconnect.com/live/dash/rtbf/tipik-56dfkkh-0epa3m40q/.mpd",
+            "logo": "https://i.ibb.co.com/M6sxvYN/eulabel.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "3c736e5c8f5a4d1a8eb8af1e63aa2005",
+                "key": "d1729111efdfb7727ee3e6fcbc7586e1"
+            }
+        },
+        {
+            "id": "sportv-bra-1-fifa-reborn",
+            "name": "SPORTV BRA 1",
+            "url": "https://a123aivottepl-a.akamaihd.net/gru-nitro/live/clients/dash/enc/m7duvnk2bu/out/v1/d1ad69118b5647309b1eb7213affdb3d/cenc.mpd",
+            "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/SporTV_logo_2011.png/800px-SporTV_logo_2011.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "4bbcff3289d457b4dd5dbdd21221de9a",
+                "key": "c4906b9a9f8dda3c0725bddb8c497733"
+            }
+        },
+        {
+            "id": "sportv-bra-2-fifa-reborn",
+            "name": "SPORTV BRA 2",
+            "url": "https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash-sd/enc/4yiko4it8k/out/v1/b77dd424c745443aba2f3f88d418f797/cenc-sd.mpd",
+            "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/SporTV_2_2017_logo.svg/250px-SporTV_2_2017_logo.svg.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "9009b7189e3e68cc09d17811f2beb55a",
+                "key": "dd3f96a94c909da48ff40c92aabf8cf3"
+            }
+        },
+        {
+            "id": "sportv-bra-3-fifa-reborn",
+            "name": "SPORTV BRA 3",
+            "url": "https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash/enc/6otiglnptp/out/v1/add7499679b0422cb6791f7701f95ecc/cenc.mpd?amznDtid=AOAGZA014O5RE&encoding=segmentBase",
+            "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/SporTV_3_logo_2011.png/800px-SporTV_3_logo_2011.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "902e5ec0e3d05e665daa32fc23f4f59e",
+                "key": "7b2322a273843921a43e2c61dac7cae3"
+            }
+        },
+        {
+            "id": "bein-sports-1-france-fifa-reborn",
+            "name": "beIN Sports 1 (France)",
+            "url": "https://api-proxad.dc2.oqee.net/playlist/v1/live/966/1/live.mpd",
+            "logo": "https://object-streamo.emonaja.com/img/beinsports.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "org.w3.clearkey",
+            "drm": {
+                "kid": "{\"3acea01244785a6363fc04b25d696392\"",
+                "key": " \"f0b8f84dbd93407af6ab0b41fc774249\", \"9d8b1b819cfdcff845625b86cc4968f3\""
+            }
+        },
+        {
+            "id": "bein-sports-2-france-fifa-reborn",
+            "name": "beIN Sports 2 (France)",
+            "url": "https://api-proxad.dc2.oqee.net/playlist/v1/live/970/1/live.mpd",
+            "logo": "https://object-streamo.emonaja.com/img/beinsports2.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "org.w3.clearkey",
+            "drm": {
+                "kid": "{\"85ac9362e89354ef5341fe4dbee0dd6a\"",
+                "key": " \"e556276599c55bdee169f39eab8e56bc\", \"71fcdcfd58c608662db317fcf4411c19\""
+            }
+        },
+        {
+            "id": "bein-sports-3-france-fifa-reborn",
+            "name": "beIN Sports 3 (France)",
+            "url": "https://api-proxad.dc2.oqee.net/playlist/v1/live/971/1/live.mpd",
+            "logo": "https://object-streamo.emonaja.com/img/beinsports3.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "org.w3.clearkey",
+            "drm": {
+                "kid": "{\"4281ee112555097325058cb7355035b4\"",
+                "key": " \"1a88899547f7fd4a5c22ee8150d89208\", \"b4023d3a71316ed3cd06af7e43988d31\""
+            }
+        },
+        {
+            "id": "channel-5-fifa-reborn",
+            "name": "Channel 5",
+            "url": "https://tglmp02.akamaized.net/out/v1/a32e566460eb41ce9295b9c45fe25825/manifest.mpd",
+            "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Mediacorp_Channel_5_2023.svg/960px-Mediacorp_Channel_5_2023.svg.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/90.0"
+            },
+            "drmSystem": "org.w3.clearkey",
+            "drm": {
+                "kid": "cc3767ece98a4bdeb39b9ad6b7b8d2fe",
+                "key": "769e78dc02d8f73811c97e0f9d5f12fe"
+            }
+        },
+        {
+            "id": "tudn-mexico-fifa-reborn",
+            "name": "TUDN (Mexico)",
+            "url": "https://otte.live.fly.ww.aiv-cdn.net/iad-nitro/live/clients/dash/enc/8u9cregwlt/out/v1/687f6b2a559943549be271504a948ffd/cenc.mpd",
+            "logo": "https://i.imgur.com/oT5CAvd.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "1710ac2bbfcd3032d0f6533850968f47",
+                "key": "d2548dacc8efcd1cd0af0373060c82dc"
+            }
+        },
+        {
+            "id": "tv-j-fifa-reborn",
+            "name": "Tv J 🇯🇲",
+            "url": "https://vod2live.univtec.com/manifest/a99a1804-dc83-411f-8c1c-b62f08cdfa59.m3u8",
+            "logo": "https://i.ibb.co.com/GvTZ8fjF/wc26nw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "d-sports-fifa-reborn",
+            "name": "D SPORTS 🇦🇷",
+            "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/x0srg3jjpz/out/v1/f779c49314394d61886d63f58d9d52e4/cenc.mpd",
+            "logo": "https://i.ibb.co.com/GvTZ8fjF/wc26nw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "4f4c3a9912ea752e88f4497864a1bc8b",
+                "key": "278128004fe8c6ffb2cd2a0c154a241a"
+            }
+        },
+        {
+            "id": "d-sports-2-fifa-reborn",
+            "name": "D SPORTS 2 🇦🇷",
+            "url": "https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash-sd/enc/hufm7lgnhx/out/v1/5045630288d44123ba85427b2c36f29f/cenc-sd.mpd",
+            "logo": "https://i.ibb.co.com/GvTZ8fjF/wc26nw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "18044a84b7e6c1bbf852591797e53a2c",
+                "key": "38b3b6f8810917d89636927bddb79294"
+            }
+        },
+        {
+            "id": "d-sports-fifa-reborn",
+            "name": "D SPORTS+ 🇦🇷",
+            "url": "https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash-sd/enc/kp7qfx2tly/out/v1/bbfb730b45b74d4ea875d75786ea3f13/cenc-sd.mpd",
+            "logo": "https://i.ibb.co.com/GvTZ8fjF/wc26nw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "8afa490e1640be969729fb459182e4ec",
+                "key": "6f129820cdd5b6978a98c604c72cf05b"
+            }
+        },
+        {
+            "id": "fs1-4k-fifa-reborn",
+            "name": "FS1 4K",
+            "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/ype1m7rkkf/out/v1/4ef90d78cd004a668bc0377f3884575b/cenc.mpd",
+            "logo": "httpss/0bdffa47-d6.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "com.widevine.alpha",
+            "drm": {
+                "kid": "a6164ea0967b4bbbb51fdd6c4f83a64f",
+                "key": "b431d9ed821ca93df596168601ae5b00"
+            }
+        },
+        {
+            "id": "fox-4k-fifa-reborn",
+            "name": "FOX 4K",
+            "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/znlxmhkktl/out/v1/fc40f22f10374517a2784e1d97cb23f4/cenc.mpd",
+            "logo": "https:/w.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "1f68713028d439ec03be07f56c1d6213",
+                "key": "20093db6455160fffed4c394def3193d"
+            }
+        },
+        {
+            "id": "canal-5-fifa-reborn",
+            "name": "Canal 5",
+            "url": "https://live-pv-ta.amazon.fastly-edge.com/iad-nitro/live/clients/dash/enc/ntkdl68eob/out/v1/bd5dfb7676994383881bc6e71877d29d/cenc.mpd",
+            "logo": "https://i.imghippo.com/files/KPD6826YGk.jpg",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "d695093ea3e66d75a4d213a3e2cbf360",
+                "key": "01be3f645e89a067d2786c295f68dde4"
+            }
+        },
+        {
+            "id": "rtv-sport-fifa-reborn",
+            "name": "RTV SPORT",
+            "url": "https://dash2.antik.sk/stream/nvidia_rtvs_sport/playlist_cenc.mpd",
+            "logo": "ht8fjF/wc26nw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "11223344556677889900112233445566",
+                "key": "4b80724d0ef86bcb2c21f7999d67739d"
+            }
+        },
+        {
+            "id": "ct-sport-fifa-reborn",
+            "name": "CT SPORT",
+            "url": "https://dash2.antik.sk/stream/nvidia_ct_sport/playlist_cenc.mpd",
+            "logo": "ht8fjF/wc26nw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "11223344556677889900112233445566",
+                "key": "4b80724d0ef86bcb2c21f7999d67739d"
+            }
+        },
+        {
+            "id": "tvri-sports-world-cup-fifa-reborn",
+            "name": "TVRI SPORTS WORLD CUP",
+            "url": "https://tencent-css.byteplaycdn.com/0b3ac0d9e956a77cb058d9e2f780ccf5/6A2E46AB/Content/DASH_ENC2/Live/channel(tselwc2)/master.mpd",
+            "logo": "https://static.promediateknologi.id/crop/0x0:0x0/1200x0/webp/photo/p1/04/2026/06264271.jpeg",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "618880fd141330378cf6aff5d48a252c",
+                "key": "835e5fc97bfec870d8ac7e3d145e14ad"
+            }
+        },
+        {
+            "id": "fox-sports-4k-fifa-reborn",
+            "name": "FOX SPORTS 4K",
+            "url": "https://otte-tim.live.pv-cdn.net/pdx-nitro/live/clients/dash/enc/ifz2pnwgbv/out/v1/31d30c91fc65458789b84209d3fa22e4/cenc.mpd",
+            "logo": "https://static.promediateknologi.id/crop/0x0:0x0/1200x0/webp/photo/p1/04/2026/06/10/Piala-Dunia-2026-akan-menjadi-edisi-pertama-3193264271.jpeg",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "1f68713028d439ec03be07f56c1d6213",
+                "key": "20093db6455160fffed4c394def3193d"
+            }
+        },
+        {
+            "id": "tvri-sports-wc-fifa-reborn",
+            "name": "TVRI SPORTS WC",
+            "url": "http://103.148.44.38:8000/play/a05u/index.m3u8",
+            "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhnHtM20QGYDSezSI9xCQzo6-G5Zo0cNSPasC9gVLq7TMH7G7jurfiI9vXlpsjcSVp5s3UCQ7WCpTL9qXPVghiAHoezld19CXUDTos4vFlrdLUPksQN3OAYsCN7sXnSRZTPD_fj9pNrV5kw8KvCC_QNTAp0NNgBCu2mEQ3qVXEuGtAWLwdzWj396LBzBdol/s700/TVRI%20SPORT.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "tvri-nasional-wc-fifa-reborn",
+            "name": "TVRI NASIONAL WC",
+            "url": "http://103.148.44.38:8000/play/a03t/index.m3u8",
+            "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhnHtM20QGYDSezSI9xCQzo6-G5Zo0cNSPasC9gVLq7TMH7G7jurfiI9vXlpsjcSVp5s3UCQ7WCpTL9qXPVghiAHoezld19CXUDTos4vFlrdLUPksQN3OAYsCN7sXnSRZTPD_fj9pNrV5kw8KvCC_QNTAp0NNgBCu2mEQ3qVXEuGtAWLwdzWj396LBzBdol/s700/TVRI%20SPORT.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "rtb-aneka-fifa-reborn",
+            "name": "RTB ANEKA 🇧🇳",
+            "url": "https://cors-everywhere-wc8b4.ondigitalocean.app/https://d1211whpimeups.cloudfront.net/smil:rtb2/chunklist.m3u8",
+            "logo": "https://i.ibb.co.com/7tFY7tC/rtbaneka.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "RTBGo/2.0.21 (Linux;Android 15.0.0;) ExoPlayerLib/2.19.1"
+            }
+        },
+        {
+            "id": "itv-1-fifa-reborn",
+            "name": "ITV 1",
+            "url": "https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/enc/slc1dkcymj/out/v1/dd17af8835fe4bd087d1a4e359b635d7/cenc.mpd",
+            "logo": "https://static.promediateknologi.id/crop/0x0:0x0/1200x0/webp/photo/p1/04/2026/06/10/Piala-Dunia-2026-akan-menjadi-edisi-pertama-3193264271.jpeg",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "b6c1c527303bc577b85eb849cbab75d2",
+                "key": "ec533d484c550a892ff162e4a5f4dbc3"
+            }
+        },
+        {
+            "id": "rtb-go-live-fifa-reborn",
+            "name": "RTB GO LIVE",
+            "url": "https://cors-everywhere-wc8b4.ondigitalocean.app/https://d1211whpimeups.cloudfront.net/smil:rtbgo/chunklist.m3u8",
+            "logo": "https://i.ibb.co.com/GvTZ8fjF/wc26nw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "RTBGo/2.0.21 (Linux;Android 15.0.0;) ExoPlayerLib/2.19.1"
+            }
+        },
+        {
+            "id": "world-cup-2026-1-fifa-reborn",
+            "name": "World Cup 2026 1 🇵🇭",
+            "url": "https://qp-pldt-live-bpk-ucd-prod.akamaized.net/bpk-tv/fifa_ppv1/default/index.mpd",
+            "logo": "https://i.ibb.co.com/GvTZ8fjF/wc26nw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "2c338a117d434ce4bbe3569231af90f1",
+                "key": "a9633d901ee8a3f4f58ac314b5c5f4fb"
+            }
+        },
+        {
+            "id": "world-cup-2026-2-fifa-reborn",
+            "name": "World Cup 2026 2 🇵🇭",
+            "url": "https://qp-pldt-live-bpk-02-prod.akamaized.net/bpk-tv/pp_ch2_pri/default/index.mpd",
+            "logo": "https://i.ibb.co.com/GvTZ8fjF/wc26nw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "4fef00332d7e4fbc8f7005dfbf851a59",
+                "key": "a6368c181358f3e527411a6c452c6a1a"
+            }
+        },
+        {
+            "id": "bbc-fifa-reborn",
+            "name": "BBC",
+            "url": "https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash/enc/dxhd2i96mn/out/v1/c622abb40a8143d08135f5d8a5fccdc9/cenc.mpd",
+            "logo": "https://static.promediateknologi.id/crop/0x0:0x0/1200x0/webp/photo/p1/04/2026/06/10/Piala-Dunia-2026-akan-menjadi-edisi-pertama-3193264271.jpeg",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "7dc3abc5027b234af5af237d9ba1fb16",
+                "key": "2542140d96078c87eca2a2b2fd7529aa"
+            }
+        },
+        {
+            "id": "m6-fifa-reborn",
+            "name": "M6",
+            "url": "https://origin-m6web.live.6cloud.fr/out/v1/6play/6play-m6/cmaf_cenc00/dash-short-hd.mpd",
+            "logo": "https://static.promediateknologi.id/crop/0x0:0x0/1200x0/webp/photo/p1/04/2026/06/10/Piala-Dunia-2026-akan-menjadi-edisi-pertama-3193264271.jpeg",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "433ffba670963e70857859a9dff4be04",
+                "key": "51ede3a821229fe81e71282c8eff80e3"
+            }
+        },
+        {
+            "id": "ndtv-englis-fifa-reborn",
+            "name": "NDTV ENGLIS",
+            "url": "https://ndtv24x7elemarchana.akamaized.net/hls/live/2003678/ndtv24x7/master.m3u8",
+            "logo": "https://raisely-images.imgix.net/uploads/ca-5-be-4-b-0-33-d-7-47-e-8-8-af-8-35-f-7-c-419-cbec-png-099577.png?fm=jpg",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) MPF.Players/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
+            }
+        },
+        {
+            "id": "vix-mundial-90-fifa-reborn",
+            "name": "VIX MUNDIAL 90",
+            "url": "https://vod-cua-orbit2-s2.izzigo.tv/out/u/startover/dash/VIX-MUNDIAL-90-HD/default.mpd",
+            "logo": "https:///b/R29vZ2xl/AVvXsEhwoNz6L9nDGTphcEIYSC7A4olw4XaV5IeH4KV5vKOAVFUosU1pJ0bD4Bq/s700/FIFA%20WC%202026%201.gif",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "75074a0cbd83f5b72fb3e5c1495252a9",
+                "key": "a4a0df04b2d28f2160cead2ecdeb7203"
+            }
+        },
+        {
+            "id": "las-estrellas-mexico-fifa-reborn",
+            "name": "Las Estrellas (Mexico)",
+            "url": "https://channel01-onlymex.akamaized.net/hls/live/2022749/event01/index.m3u8",
+            "logo": "https://i.imgur.com/g5ShxZ7.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "rtm-sukan-fifa-reborn",
+            "name": "RTM SUKAN+",
+            "url": "https://bintangstreaming.my.id/1kds/kds_tes.php/.m3u8?id=rtm-sports-hd",
+            "logo": "https://rtm-images.glueapi.io/320x0/system/SukanDolby.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "ExoPlayerDemo/2.15.1 (Linux; Android 12) ExoPlayerLib/2.15.1"
+            }
+        },
+        {
+            "id": "rtm-okey-fifa-reborn",
+            "name": "RTM Okey",
+            "url": "https://d25tgymtnqzu8s.cloudfront.net/live/media0/okey/DASH/okey.mpd",
+            "logo": "https://rtm-images.glueapi.io/320x0/system/OkeyDolby.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "tv-azteca-fifa-reborn",
+            "name": "TV AZTECA 🇲🇽",
+            "url": "https://live1-ott.izzigo.tv/14/out/u/dash/AZTECA-7-HD/default.mpd",
+            "logo": "https://i.ibb.co.com/GvTZ8fjF/wc26nw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "55b8f0b9ea3b5cd21cd1859cc82b16f3",
+                "key": "d3b260e8628214b49394801d75c88e8e"
+            }
+        },
+        {
+            "id": "tudn-2-fifa-reborn",
+            "name": "TUDN 2 🇲🇽",
+            "url": "https://live-pv-ta.amazon.fastly-edge.com/iad-nitro/live/clients/dash/enc/skz7pgjdyp/out/v1/8e7377f4d3154738b7f48baa996b35a5/cenc.mpd",
+            "logo": "https://i.ibb.co.com/GvTZ8fjF/wc26nw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "79737d20a3eaa862f8cb77c61cb3b58c",
+                "key": "41df11a0be44fd7272538728cec38bc6"
+            }
+        },
+        {
+            "id": "fs1-wc-2026-fifa-reborn",
+            "name": "FS1 WC 2026",
+            "url": "https://cors-everywhere-wc8b4.ondigitalocean.app/https://otte.live.fly.ww.aiv-cdn.net/iad-nitro/live/clients/dash/enc/tmpzbbdj9y/out/v1/962736723a534ba294e7592fef49827b/cenc.mpd",
+            "logo": "https://i.ibb.co.com/GvTZ8fjng",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "5466ebd70704bdeb657f0abf3c5ca4ef",
+                "key": "bdd79b72d8e48ed483aa623cc38a8a16"
+            }
+        },
+        {
+            "id": "fox-26-fifa-reborn",
+            "name": "FOX 26",
+            "url": "https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash/enc/worucjnctz/out/v1/20ac5ecdc9b848dc92e7f1188bdf6ff6/cenc.mpd",
+            "logo": "https://i.ibb.cow.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "8ec2e6248abe2e10e16e439c9b85ffd8",
+                "key": "f121b015c2a5197828355fb6a874c297"
+            }
+        },
+        {
+            "id": "bbc-one-kilatlive-fifa-reborn",
+            "name": "BBC ONE KILATLIVE",
+            "url": "https://rr4---sn-8pxuuxa-on.googlecdncloudsg.com/UK_BBC_1_TV/index.m3u8",
+            "logo": "https://www.unontent/u/07/digi-sport.jpg",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (iPhone14,6; U; CPU iPhone OS 15_4 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/19E241 Safari/602.1"
+            }
+        },
+        {
+            "id": "sporza-live-fifa-reborn",
+            "name": "SPORZA LIVE",
+            "url": "https://live.vrtcdn.be/groupd/live/0761024f-37fe-4254-bc37-e95d7c62b2d1/live.isml/.mpd",
+            "logo": "https://i.im/GvTZ8fjF/wc26nw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "893bc63340876605f52886a42e0ccce5",
+                "key": "d6c46d2d691056fbd091bf1f01b21a91"
+            }
+        },
+        {
+            "id": "itv-1-kilatlive-fifa-reborn",
+            "name": "ITV 1 KILATLIVE",
+            "url": "https://rr4---sn-8pxuuxa-on.googlecdncloudsg.com/UK_ITV_1_TV/index.m3u8",
+            "logo": "https://blogger.googleusercontent.com/img/b/R2902026%201.gif",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (iPhone14,6; U; CPU iPhone OS 15_4 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/19E241 Safari/602.1"
+            }
+        },
+        {
+            "id": "tvri-maxstream-uzbekistan-vs-kolombia-fifa-reborn",
+            "name": "TVRI Maxstream Uzbekistan vs Kolombia",
+            "url": "https://tencent-css.byteplaycdn.com/6c5cb4121e8c5c9191ae7abf87c9819e/6A33E892/Content/DASH_ENC2/Live/channel(tselwc2)/master.mpd",
+            "logo": "httpss/0bdffa47-dfb0-4627-85-53177389b930_f8037f07-216.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "https",
+                "key": "//bintangstreaming.my.id/all_clearkey/clearkey.json"
+            }
+        },
+        {
+            "id": "qazsport-fifa-reborn",
+            "name": "Qazsport",
+            "url": "https://fo03-bkm.beetv.kz/bpk-tv/000003038/tve/index.mpd",
+            "logo": "httpss/0bdffa47-d6.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleCoreMedia/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+            },
+            "drmSystem": "com.widevine.alpha",
+            "drm": {
+                "kid": "912bca702ad54daf89839a1d91f0a460",
+                "key": "89906fa33624855dd4a6d9395979c5ae"
+            }
+        },
+        {
+            "id": "qazaqstan-fifa-reborn",
+            "name": "QAZAQSTAN",
+            "url": "https://vs137.vcdn.biz/6aa0d03eb8d337c5a12c8275477af53a_megogo/live/hls/b/700_2490_4000/u_sid/0/o/229009131/rsid/15fbd560-a86a-45ca-8058-baf9f5f61c8e/u_uid/0/u_vod/0/u_device/cms_webandroid/u_devicekey/_site_mobile/lip/45.80.208.174*asn/u_srvc/84416/u_did/web_MjE7M10AtBKsWN3CHzhzNBgiG7LkULPx/type.live/playlist.m3u8",
+            "logo": "https://i.ibb.co.26nw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0"
+            }
+        },
+        {
+            "id": "toffee-1-fifa-reborn",
+            "name": "Toffee 1",
+            "url": "https://cdn-tt.pages.dev/ch1.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "toffee-2-fifa-reborn",
+            "name": "Toffee 2",
+            "url": "https://cdn-tt.pages.dev/ch2.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "toffee-3-fifa-reborn",
+            "name": "Toffee 3",
+            "url": "https://cdn-tt.pages.dev/ch3.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "toffee-4-fifa-reborn",
+            "name": "Toffee 4",
+            "url": "https://cdn-tt.pages.dev/ch4.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "toffee-5-fifa-reborn",
+            "name": "Toffee 5",
+            "url": "https://cdn-tt.pages.dev/ch5.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "m-crop-fifa-reborn",
+            "name": "M Crop",
+            "url": "https://aps11.playlist.ttvnw.net/v1/playlist/CrcEuSZnnRBRmdDIH99aRiIerBFMmQ7uy1VJUkuswKPFGip9KG2tE06JFEe5Axt4jbf5MbaV5bEWLO8aDwlK0_UpobZx_1aN0V3ccJGrvzzlG_O-XxEUfUNJ-MUzHVpqjt_6JTnR5psMMjNDfrQ3eTT6Nwlf3gMXxxj74DACl_yI0TfhfCNE619UgXDIK6SuvXkiE9YdfGNKu4fM_nMO-VHoYmubSR-0fQbXR0RWGhriCn3rXK-f89weHHUPcNO-G-nYruoG5S5EV3W_WM4YVhRnxe0tLqsgZcXozVE7qWqIQNt1sEpmY4o9dl3pScLeKpIKBmTp0VP5xLDM2Qhc0jn8WfdWIQ9HPTWNMLRCCBRCCxPl5k-ejWSxWO9V0VzxM_qWzzplV4AOkHe3oXsoNn7y5NOUmmwjPTnu_Ss7sUAniqzyLFqN9Z7eOJnjRMXa810RwQlOT0vFoUTHLSFM4vCQBt6p10m_nLK3Jt6aOOm0a7P34nUkxOwasIZDgEsvH4PCnvP0KzDIC5F4oR2jMuA6idoL2uUbvgB7talga1mA2ZyxSCXAfmONRHnhMZVsPp4ObzgXkcLviGNrBWvHRJcdmpR_jEi5AhQ4x-K71-K_vuLbieDbqblojLGzROeZZ-a8aNh0YQ4CKDVAbetOh-IlHW-o1i7DTyqDNCCajfL5jN3JYmqaqaT-2kZV_yyGahsg9MNdvpa5O1jAxV7lyzVlo50zaGAqkwOET0y2fiS-DdRYzGWKATt5GgxysCV9aAytSfz9gKIgASoJdXMtd2VzdC0yML0P.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "fox-fhd-fifa-reborn",
+            "name": "FOX FHD",
+            "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/dcwbm4iztn/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "f6564ec2aee819046328a0e153be574d",
+                "key": "ff46a8a1031eb27ef22576a077c98ab7"
+            }
+        },
+        {
+            "id": "fox-uhd-fifa-reborn",
+            "name": "Fox UHD",
+            "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/znlxmhkktl/out/v1/fc40f22f10374517a2784e1d97cb23f4/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "1f68713028d439ec03be07f56c1d6213",
+                "key": "20093db6455160fffed4c394def3193d"
+            }
+        },
+        {
+            "id": "fussball-tv-1-hevc-h265-dvhe-fifa-reborn",
+            "name": "Fussball TV 1 HEVC H.265 dvhe",
+            "url": "https://svc.flyins.my.id/bpk-tv/KID01037_FUSSBALLTV1_uhd/DASH/index.mpd",
+            "logo": "https://img.bolatv.my.id/group/fussball.jpg",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "1f09d5788fbbb03a053d03cc731f31a9",
+                "key": "d493d5a70c793362324638f61d1726ac"
+            }
+        },
+        {
+            "id": "ct-sports-aq-fifa-reborn",
+            "name": "CT SPORTS - AQ",
+            "url": "https://dash2.antik.sk/stream/nvidia_ct_sport/playlist_cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "11223344556677889900112233445566",
+                "key": "4b80724d0ef86bcb2c21f7999d67739d"
+            }
+        },
+        {
+            "id": "tsn-sports-aq-fifa-reborn",
+            "name": "TSN SPORTS - AQ",
+            "url": "https://otte-qw.live.pv-cdn.net/pdx-nitro/live/clients/dash/enc/cjglydxghe/out/v1/8977baf175da4b94873194613dd3fe55/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "85b277daf5aae05833fe43a68f587968",
+                "key": "d52d7e9bc0bcd98787efd547ac91eca0"
+            }
+        },
+        {
+            "id": "toffe-bdix-bd-fifa-reborn",
+            "name": "TOFFE BDIX (BD)",
+            "url": "https://cdn-tt.pages.dev/ch6.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "ctv-english-aq-fifa-reborn",
+            "name": "CTV ENGLISH - AQ",
+            "url": "https://otte.cache.aiv-cdn.net/lhr-nitro/live/clients/dash/enc/72sjo8hygl/out/v1/3079be34d72a4985852d299a02406a0c/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "d185684e2330de5bea436daa094a5e86",
+                "key": "014f0116154f5bf0050e03a6b0a23157"
+            }
+        },
+        {
+            "id": "caze-tv-fhd-fifa-reborn",
+            "name": "CAZE TV FHD",
+            "url": "https://otte-qw.live.pv-cdn.net/gru-nitro/live/clients/dash/enc/iayg0kyrof/out/v1/91dc04907f56415b897faccfa9d252da/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "1223d5105392cabf1bb9c2c1fdf6539a",
+                "key": "340b409f4b8f78a343e0363a7938df38"
+            }
+        },
+        {
+            "id": "tve-la1-spanish-fifa-reborn",
+            "name": "TVE La1 SPANISH",
+            "url": "https://otte-qw.live.pv-cdn.net/fra-nitro/live/clients/dash/enc/c7di7zkdor/out/v1/f7d5b356e048494a8325563e8916d50b/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "745cd6ec34a58f2f7ac2af35dc3da6d2",
+                "key": "ae008f1e47e6567fe4201a6ff8f1ae54"
+            }
+        },
+        {
+            "id": "canal5-fhd-fifa-reborn",
+            "name": "CANAL5 FHD",
+            "url": "https://otte-qw.live.pv-cdn.net/lhr-nitro/live/clients/dash/enc/ntkdl68eob/out/v1/bd5dfb7676994383881bc6e71877d29d/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "d695093ea3e66d75a4d213a3e2cbf360",
+                "key": "01be3f645e89a067d2786c295f68dde4"
+            }
+        },
+        {
+            "id": "m6-france-fhd-fifa-reborn",
+            "name": "M6 FRANCE FHD",
+            "url": "https://edge-fastly-m6web.live.6cloud.fr/out/v1/6play/6play-m6/cmaf_cenc00/dash-short-hd.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "1c285ebc98483383b938f2aac331410c",
+                "key": "10accd30d969402cf0bb0fb99ad09283"
+            }
+        },
+        {
+            "id": "tipik-fr-fhd-fifa-reborn",
+            "name": "TIPIK FR FHD",
+            "url": "https://c9851ec-rbm-hilv-fsly.cdn.redbee.live/L26/6b640fa2/a765d074.isml/dash/.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "adca25b8779e4168a0cd710f59f61ccf",
+                "key": "be5383ed3cd8079f4ffe78ad067f476a"
+            }
+        },
+        {
+            "id": "sportv-aq-fifa-reborn",
+            "name": "SporTV - AQ",
+            "url": "https://otte.cache.aiv-cdn.net/lhr-nitro/live/clients/dash/enc/dsa3hwuhd1/out/v1/631b48c8d9ea437e8309d1a4b55acef5/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "3de028eafb3b2caffec03be1c1c818b3",
+                "key": "8fbdd8a9ae6748696bb13e547bb093fc"
+            }
+        },
+        {
+            "id": "toffe-bdix-bd-alt-fifa-reborn",
+            "name": "TOFFE BDIX (BD) Alt",
+            "url": "https://cdn-tt.pages.dev/ch4.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "hd-stream-fifa-reborn",
+            "name": "HD STREAM",
+            "url": "https://instreams.pro/EU/HDWC3/index.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "Referer": "https://instream.click/jwp-eu.php?stream=HDWC3",
+                "Origin": "https://instream.click/jwp-eu.php?stream=HDWC3",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0"
+            }
+        },
+        {
+            "id": "dsports-aq-fifa-reborn",
+            "name": "DSports - AQ",
+            "url": "https://otte-qw.live.pv-cdn.net/bom-nitro/live/clients/dash/enc/rgilyeubta/out/v1/09a67027b18f4fd78aaa3794a2aacfe8/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "03f12d6a3dbfd3a6fa7dd7f6417e0c11",
+                "key": "ea07b87acdf2e45be824cde4a1cf3504"
+            }
+        },
+        {
+            "id": "fox-sport-hd-fifa-reborn",
+            "name": "FOX SPORT HD",
+            "url": "https://chatgpt.hereisman.net/playlist/52579/load-playlist?",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "Referer": "https://gooz.aapmains.net"
+            }
+        },
+        {
+            "id": "itv-sports-fhd-fifa-reborn",
+            "name": "ITV SPORTS FHD",
+            "url": "https://otte-qw.live.pv-cdn.net/pdx-nitro/live/clients/dash/enc/ffwqzsa0zr/out/v1/752ac25588ff4607b45f3876a8e89223/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "ea178e28af00ed57e7101255f977c222",
+                "key": "f29602a280f41950d1935f0c6816dc12"
+            }
+        },
+        {
+            "id": "fox-sports-hd-fifa-reborn",
+            "name": "FOX SPORTS HD",
+            "url": "https://otte-qw.live.pv-cdn.net/gru-nitro/live/clients/dash/enc/cizlveblk4/out/v1/e5c36c41621e4384b80427d87199433a/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "d7d78ea2021a29541136bd5dc8352fe7",
+                "key": "6425ac4c0cdf906fe0cce5cf40dc8933"
+            }
+        },
+        {
+            "id": "tvp-sports-hd-fifa-reborn",
+            "name": "TVP SPORTS HD",
+            "url": "https://estreams.tv.nej.cz/dash/CH_TVP_SPORT_Portable.ism/playlist.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "95620bdd974041409d4674ab629e22d4",
+                "key": "c6c226ca1689f528a6f91e86da618f64"
+            }
+        },
+        {
+            "id": "binge-bd-aq-fifa-reborn",
+            "name": "BINGE+ BD - AQ",
+            "url": "https://tc-sg.rockstreamer.com/v1/019ed91616121ea540a8171c8e801f/019ed92ac80315fc600b1796d4ad8b/main.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "Referer": "https://iscreen.com.bd/"
+            }
+        },
+        {
+            "id": "irib-4k-fifa-reborn",
+            "name": "IRIB 4K",
+            "url": "https://ncdn.telewebion.ir/faratar/live/playlist.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "vix-mundial-fhd-fifa-reborn",
+            "name": "VIX MUNDIAL FHD",
+            "url": "https://cun-live1-ott.izzigo.tv/11/out/u/dash/VIX-MUNDIAL-91-HD/default.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "36a78e9664836d8d1b882c7772ef2119",
+                "key": "4911f93d4a347873b3c2f187793dffb0"
+            }
+        },
+        {
+            "id": "fussball-tv-4k-fifa-reborn",
+            "name": "FUSSBALL TV 4K",
+            "url": "https://da-50f11b292a028381000001120000000000000009.id.vx.tentcdn.eu/wp/at-live-7.tentcdn.eu/bpk-tv/WM_TV_1_UHD/default/index.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "4f558eae1b005126b2ac6e9eb1a7849e",
+                "key": "17aea325d91b5e66f06a8c574f2f0b03"
+            }
+        },
+        {
+            "id": "fussball-tv2-4k-fifa-reborn",
+            "name": "FUSSBALL TV2 4K",
+            "url": "https://da-50f11b292a028381000001120000000000000009.id.vx.tentcdn.eu/wp/at-live-7.tentcdn.eu/bpk-tv/WM_TV_2_UHD/default/index.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "ccdf9f3d9bbf5c508adf04f81918a285",
+                "key": "66cf0524fcc2eb0c7dab8bbbf8829827"
+            }
+        },
+        {
+            "id": "tsn-sports-hd-fifa-reborn",
+            "name": "TSN SPORTS HD",
+            "url": "https://lb.xyzcloud3.xyz/tsn2/index.m3u8?",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "Referer": "https://xyzstreams.st/"
+            }
+        },
+        {
+            "id": "fast-server-fifa-reborn",
+            "name": "FAST SERVER",
+            "url": "https://pulltx.jdnzrgm.com/live/hd-en-6MvZ6BDgdks5QcZSYn.m3u8?txSecret=0d7bd0c3dd1da49b68b0f0e75f3e1735&txTime=6A3F3530",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "fox-sports-4k-fifa-reborn",
+            "name": "FOX SPORTS 4K",
+            "url": "https://lb.xyzcloud3.xyz/fs14k/index.m3u8?",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "Referer": "https://xyzstreams.st/"
+            }
+        },
+        {
+            "id": "arabic-live-hd-fifa-reborn",
+            "name": "ARABIC LIVE HD",
+            "url": "https://lb.xyzcloud3.xyz/bein2/index.m3u8?",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "Referer": "https://xyzstreams.st/"
+            }
+        },
+        {
+            "id": "rte-english-aq-fifa-reborn",
+            "name": "RTE ENGLISH - AQ",
+            "url": "https://dai.google.com/linear/dash/pa/event/antwa0EiQm2PoHtx4rBtVw/stream/9217f1b8-7d77-4590-8a52-4917bcfaeed2:GRQ/manifest.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "d816287e21496989eae1312925a423c5",
+                "key": "00da00f13180e7e6cd5ce87d1c974e8d"
+            }
+        },
+        {
+            "id": "tsn-english-aq-fifa-reborn",
+            "name": "TSN ENGLISH - AQ",
+            "url": "https://otte-qw.live.pv-cdn.net/bom-nitro/live/clients/dash/enc/w0rehjjrwe/out/v1/69a2a7041395406b970598f61680e7cf/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "14eeabf30c14b7fbf3008c03099ce011",
+                "key": "17d2ac8dbc5429bd70af3433aa12158d"
+            }
+        },
+        {
+            "id": "tv4-sweden-aq-fifa-reborn",
+            "name": "TV4 SWEDEN - AQ",
+            "url": "https://director.streaming.telia.com/tvm-packager-prod/group2/61a4859b79019af4abf1009d/manifest.mpd?adap=default",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "b09d157d18ab51b9923a3d5abdeefd52",
+                "key": "5a29bb3c705edea6941a5b1d575ac316"
+            }
+        },
+        {
+            "id": "itv-english-aq-fifa-reborn",
+            "name": "ITV ENGLISH - AQ",
+            "url": "https://otte-qw.live.pv-cdn.net/pdx-nitro/live/clients/dash/enc/0eiyyz8qzm/out/v1/dd17af8835fe4bd087d1a4e359b635d7/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "30089c52924f037b225b82c616fee2a5",
+                "key": "f55dc8b66ed4fc6753d6035ae7e17144"
+            }
+        },
+        {
+            "id": "caze-tv-br-aq-fifa-reborn",
+            "name": "CAZE TV BR - AQ",
+            "url": "https://otte-qw.live.pv-cdn.net/pdx-nitro/live/clients/dash/enc/3ynrpdanq2/out/v1/81fd4c26584044d2b1a1cc5b32fa9af0/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+            },
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "34475edab991ad5e92548aebd710410a",
+                "key": "501b209cccd323ac00bf5ac15b406cb4"
+            }
+        },
+        {
+            "id": "d-sports-aq-es-fifa-reborn",
+            "name": "D SPORTS - AQ [ES]",
+            "url": "https://otte-qw.live.pv-cdn.net/iad-nitro/live/clients/dash/enc/x0srg3jjpz/out/v1/f779c49314394d61886d63f58d9d52e4/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "4f4c3a9912ea752e88f4497864a1bc8b",
+                "key": "278128004fe8c6ffb2cd2a0c154a241a"
+            }
+        },
+        {
+            "id": "fox-english-aq-fifa-reborn",
+            "name": "FOX ENGLISH - AQ",
+            "url": "https://otte-qw.live.pv-cdn.net/pdx-nitro/live/clients/dash/enc/ajfoeddkbz/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "f6564ec2aee819046328a0e153be574d",
+                "key": "ff46a8a1031eb27ef22576a077c98ab7"
+            }
+        },
+        {
+            "id": "iscreen-bd-aq-fifa-reborn",
+            "name": "ISCREEN BD - AQ",
+            "url": "https://m3u-tvb.pages.dev/ics.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "Referer": "https://iscreen.com.bd/"
+            }
+        },
+        {
+            "id": "telemundo-hd-fifa-reborn",
+            "name": "TELEMUNDO HD",
+            "url": "https://instreams.pro/US/NFLHD3/tracks-v1a1/mono.m3u8?",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "headers": {
+                "Referer": "https://instream.click/",
+                "Origin": "https://instream.click"
+            }
+        },
+        {
+            "id": "t-sports-hd-fifa-reborn",
+            "name": "T SPORTS - HD",
+            "url": "https://trs1.aynaott.com/tsports/index.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "telemundo-fhd-fifa-reborn",
+            "name": "TELEMUNDO FHD",
+            "url": "https://cun-live1-ott.izzigo.tv/out/u/dash/NOG1/TELEMUNDO-ARIZONA-USA-TCS-HD/default.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "1efe4add8fdf327c5f8d2a1c195e5c71",
+                "key": "4f50e6f011e60ca01ee561f27187e78f"
+            }
+        },
+        {
+            "id": "footboll-russia-fifa-reborn",
+            "name": "FOOTBOLL RUSSIA",
+            "url": "https://video.beeline.tv/live/d/channel319.isml/manifest-stb.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "9145a6e0f778e61866f573d4944dd533",
+                "key": "d02173d40515fea5c83944f21d0f3114"
+            }
+        },
+        {
+            "id": "match-tv-hd-fifa-reborn",
+            "name": "Match TV HD",
+            "url": "https://bl.video.matchtv.ru/media/playlist/free_d46d0cf1712c0542ec7fd4f0808f600a_hd/17_89756005/1080/e6bef86de8a133cd7b27deb040758a00/4796141934.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "telemundo-es-usa-fifa-reborn",
+            "name": "TELEMUNDO ES USA",
+            "url": "https://live-oneapp-prd-news.akamaized.net/Content/CMAF_OL2-CTR-4s/Live/channel(WSNS)/master.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "7d6bb9f86e133e4cb33440b493b6b672",
+                "key": "584ad285dcb9e7d42cf3e93f1cc3fe11"
+            }
+        },
+        {
+            "id": "fox-prime-eng-usa-vpn-fifa-reborn",
+            "name": "FOX PRIME ENG [USA VPN]",
+            "url": "https://otte-azion.live.pv-cdn.net/iad-nitro/live/clients/enc/pp9fyo4pdg/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "f6564ec2aee819046328a0e153be574d",
+                "key": "ff46a8a1031eb27ef22576a077c98ab7"
+            }
+        },
+        {
+            "id": "fox-sports-4k-usa-vpn-fifa-reborn",
+            "name": "FOX SPORTS 4k [USA VPN]",
+            "url": "https://otte.live.fly.ww.aiv-cdn.net/bom-nitro/live/clients/dash/enc/buf9inoetu/out/v1/31d30c91fc65458789b84209d3fa22e4/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "1f68713028d439ec03be07f56c1d6213",
+                "key": "20093db6455160fffed4c394def3193d"
+            }
+        },
+        {
+            "id": "fox-4k-hdr-1-fifa-reborn",
+            "name": "Fox 4K HDR 1",
+            "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/wjottsmv62/out/v1/31d30c91fc65458789b84209d3fa22e4/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "1f68713028d439ec03be07f56c1d6213",
+                "key": "20093db6455160fffed4c394def3193d"
+            }
+        },
+        {
+            "id": "fox-4k-hdr-2-fifa-reborn",
+            "name": "Fox 4K HDR 2",
+            "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/za6vgrmhmb/out/v1/4ef90d78cd004a668bc0377f3884575b/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "a6164ea0967b4bbbb51fdd6c4f83a64f",
+                "key": "b431d9ed821ca93df596168601ae5b00"
+            }
+        },
+        {
+            "id": "fox-4k-hdr-3-fifa-reborn",
+            "name": "Fox 4K HDR 3",
+            "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/ss5dhni9dm/out/v1/fc40f22f10374517a2784e1d97cb23f4/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "1f68713028d439ec03be07f56c1d6213",
+                "key": "20093db6455160fffed4c394def3193d"
+            }
+        },
+        {
+            "id": "fox-hd-1-fifa-reborn",
+            "name": "Fox HD 1",
+            "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/ng45k16ryt/out/v1/9e895e2c1c894a75ac6d21a4deddd5d3/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "f6564ec2aee819046328a0e153be574d",
+                "key": "ff46a8a1031eb27ef22576a077c98ab7"
+            }
+        },
+        {
+            "id": "fox-hd-2-fifa-reborn",
+            "name": "Fox HD 2",
+            "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/z3tqtb02pl/out/v1/79e41681b80248788032c6880a06e7d3/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "996d39be9ee1c8e65d94d7bb973bdf0f",
+                "key": "5306cdc1e410bc6ddb2530608c42b11b"
+            }
+        },
+        {
+            "id": "fox-hd-3-fifa-reborn",
+            "name": "Fox HD 3",
+            "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/sqre7hvpl8/out/v1/e8f0a2204c5c4490b338a9c2165dd92a/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "996d39be9ee1c8e65d94d7bb973bdf0f",
+                "key": "5306cdc1e410bc6ddb2530608c42b11b"
+            }
+        },
+        {
+            "id": "fox-hd-4-fifa-reborn",
+            "name": "Fox HD 4",
+            "url": "https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/enc/jkib0oinbi/out/v1/b78800b9b2304879b15843f455836829/cenc.mpd",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true,
+            "drmSystem": "clearkey",
+            "drm": {
+                "kid": "f6564ec2aee819046328a0e153be574d",
+                "key": "ff46a8a1031eb27ef22576a077c98ab7"
+            }
+        },
+        {
+            "id": "bbc-1-fifa-reborn",
+            "name": "BBC 1",
+            "url": "https://tmaxapp.site/bbc1.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "bbc-2-fifa-reborn",
+            "name": "BBC 2",
+            "url": "https://tmaxapp.site/bbc2.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "bbc-3-fifa-reborn",
+            "name": "BBC 3",
+            "url": "https://tmaxapp.site/bbc3.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "bbc-4-fifa-reborn",
+            "name": "BBC 4",
+            "url": "https://tmaxapp.site/bbc4.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "bein-max-1-fifa-reborn",
+            "name": "Bein Max 1",
+            "url": "https://tmaxapp.site/beinmax1.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "bein-max-2-fifa-reborn",
+            "name": "Bein Max 2",
+            "url": "https://tmaxapp.site/beinmax2.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "bein-sports-fr-1-fifa-reborn",
+            "name": "Bein Sports FR 1",
+            "url": "https://tmaxapp.site/beinsportsfr1.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "bein-sports-fr-2-fifa-reborn",
+            "name": "Bein Sports FR 2",
+            "url": "https://tmaxapp.site/beinsportsfr2.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "bein-xtra-fifa-reborn",
+            "name": "Bein Xtra",
+            "url": "https://tmaxapp.site/beinxtra.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "dazn-2-de-fifa-reborn",
+            "name": "DAZN 2 DE",
+            "url": "https://tmaxapp.site/dazn2de.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "dazn-laliga-fifa-reborn",
+            "name": "DAZN LaLiga",
+            "url": "https://tmaxapp.site/daznlaliga.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "eleven-2-fifa-reborn",
+            "name": "Eleven 2",
+            "url": "https://tmaxapp.site/eleven2.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "eleven-3-fifa-reborn",
+            "name": "Eleven 3",
+            "url": "https://tmaxapp.site/eleven3.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "espn-1-nl-fifa-reborn",
+            "name": "ESPN 1 NL",
+            "url": "https://tmaxapp.site/espn1nl.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "espn-2-nl-fifa-reborn",
+            "name": "ESPN 2 NL",
+            "url": "https://tmaxapp.site/espn2nl.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "espn-3-nl-fifa-reborn",
+            "name": "ESPN 3 NL",
+            "url": "https://tmaxapp.site/espn3nl.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "espn-4-nl-fifa-reborn",
+            "name": "ESPN 4 NL",
+            "url": "https://tmaxapp.site/espn4nl.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "espn-u-fifa-reborn",
+            "name": "ESPN U",
+            "url": "https://tmaxapp.site/espnu.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "fox-soccer-plus-fifa-reborn",
+            "name": "Fox Soccer Plus",
+            "url": "https://tmaxapp.site/foxsoccerplus.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "itv-1-fifa-reborn",
+            "name": "ITV 1",
+            "url": "https://tmaxapp.site/itv1.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "itv-2-fifa-reborn",
+            "name": "ITV 2",
+            "url": "https://tmaxapp.site/itv2.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "itv-3-fifa-reborn",
+            "name": "ITV 3",
+            "url": "https://tmaxapp.site/itv3.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "itv-4-fifa-reborn",
+            "name": "ITV 4",
+            "url": "https://tmaxapp.site/itv4.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "nba-fifa-reborn",
+            "name": "NBA",
+            "url": "https://tmaxapp.site/nba.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "nova-sports-1-fifa-reborn",
+            "name": "Nova Sports 1",
+            "url": "https://tmaxapp.site/novasports1.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "nova-sports-2-fifa-reborn",
+            "name": "Nova Sports 2",
+            "url": "https://tmaxapp.site/novasports2.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "nova-sports-3-fifa-reborn",
+            "name": "Nova Sports 3",
+            "url": "https://tmaxapp.site/novasports3.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "nova-sports-4-fifa-reborn",
+            "name": "Nova Sports 4",
+            "url": "https://tmaxapp.site/novasports4.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "nova-sports-5-fifa-reborn",
+            "name": "Nova Sports 5",
+            "url": "https://tmaxapp.site/novasports5.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "nova-sports-6-fifa-reborn",
+            "name": "Nova Sports 6",
+            "url": "https://tmaxapp.site/novasports6.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "rds-fifa-reborn",
+            "name": "RDS",
+            "url": "https://tmaxapp.site/rds.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "rds-2-fifa-reborn",
+            "name": "RDS 2",
+            "url": "https://tmaxapp.site/rds2.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "rtl-de-fifa-reborn",
+            "name": "RTL DE",
+            "url": "https://tmaxapp.site/rtlde.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "sky-action-fifa-reborn",
+            "name": "Sky Action",
+            "url": "https://tmaxapp.site/skyaction.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "sky-mix-fifa-reborn",
+            "name": "Sky Mix",
+            "url": "https://tmaxapp.site/skymix.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "sky-news-fifa-reborn",
+            "name": "Sky News",
+            "url": "https://tmaxapp.site/skynews.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "sky-top-event-fifa-reborn",
+            "name": "Sky Top Event",
+            "url": "https://tmaxapp.site/skytopevent.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "sony-ten-1-fifa-reborn",
+            "name": "Sony Ten 1",
+            "url": "https://tmaxapp.site/sonyten1.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "sportsnet-360-fifa-reborn",
+            "name": "Sportsnet 360",
+            "url": "https://tmaxapp.site/sportsnet360.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "sportsnet-west-fifa-reborn",
+            "name": "Sportsnet West",
+            "url": "https://tmaxapp.site/sportsnetwest.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "sport-tv-2-fifa-reborn",
+            "name": "Sport TV 2",
+            "url": "https://tmaxapp.site/sporttv2.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "sport-tv-3-fifa-reborn",
+            "name": "Sport TV 3",
+            "url": "https://tmaxapp.site/sporttv3.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "tnt-sports-1-fifa-reborn",
+            "name": "TNT Sports 1",
+            "url": "https://tmaxapp.site/tntsports1.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "tnt-sports-2-fifa-reborn",
+            "name": "TNT Sports 2",
+            "url": "https://tmaxapp.site/tntsports2.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "tnt-sports-3-fifa-reborn",
+            "name": "TNT Sports 3",
+            "url": "https://tmaxapp.site/tntsports3.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "tnt-sports-4-fifa-reborn",
+            "name": "TNT Sports 4",
+            "url": "https://tmaxapp.site/tntsports4.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "tnt-sports-5-fifa-reborn",
+            "name": "TNT Sports 5",
+            "url": "https://tmaxapp.site/tntsports5.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "tva-sports-fifa-reborn",
+            "name": "TVA Sports",
+            "url": "https://tmaxapp.site/tvasports.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "usa-network-fifa-reborn",
+            "name": "USA Network",
+            "url": "https://tmaxapp.site/usanetwork.m3u8",
+            "logo": "https://i.postimg.cc/0NYVSnkr/Gemini-Generated-Image-ykkw2cykkw2cykkw.png",
+            "resolution": "HD",
+            "proxy": true
+        }
+    ]
+},
+"sports": {
+    "name": "Sports",
+    "channels": [
+        {
+            "id": "toffee-sports-vip",
+            "name": "TOFFEE Sports VIP",
+            "url": "https://sm-monirul.top/toffee/play/sports_highlights.m3u8",
+            "logo": "https://images.toffeelive.com/images/program/19779/logo/240x240/mobile_logo_975410001725875598.png",
+            "resolution": "HD",
+            "proxy": false
+        },
+        {
+            "id": "euro-sport-hd",
+            "name": "Euro Sport HD",
+            "url": "https://sm-monirul.top/toffee/play/euro_sports_hd.m3u8",
+            "logo": "https://images.toffeelive.com/images/program/4388/logo/240x240/mobile_logo_422191001674119624.png",
+            "resolution": "HD",
+            "proxy": false
+        },
+        {
+            "id": "icc-test-championship-highlights",
+            "name": "ICC Test Championship Highlights",
+            "url": "https://sm-monirul.top/toffee/play/icc_wtc_final.m3u8",
+            "logo": "https://assets-prod.services.toffeelive.com/f_webp group-title=",
+            "resolution": "HD",
+            "proxy": false
+        },
+        {
+            "id": "t-sports-hd-2",
+            "name": "T Sports HD 2",
+            "url": "http://198.195.239.50:8095/tsports/index.m3u8",
+            "logo": "https://i.postimg.cc/x8sgjYtH/resized-300x180-ffffff-12.jpg",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "t-sports",
+            "name": "T Sports 🇧🇩",
+            "url": "http://114.130.57.233:8080/TsportHD/tracks-v1a1/mono.m3u8?token=SkQuhAXZxgBan1",
+            "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "unite-8-sports-1-hd-hindi",
+            "name": "Unite 8 Sports 1 HD 🇮🇳 Hindi",
+            "url": "http://starhub.pro/live/farhat-3379/67897-913379/741567.ts",
+            "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "616-sports-4k",
+            "name": "616 Sports 4K",
+            "url": "http://starhub.pro/live/farhat-3379/67897-913379/745270.ts",
+            "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+            "resolution": "4K",
+            "proxy": true
+        },
+        {
+            "id": "go-live-sports",
+            "name": "Go Live Sports",
+            "url": "https://d1211whpimeups.cloudfront.net/smil:rtbgo/chunklist.m3u8",
+            "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+            "resolution": "HD",
+            "proxy": false
+        },
+        {
+            "id": "go-live-sports-b",
+            "name": "Go Live Sports B",
+            "url": "https://d1211whpimeups.cloudfront.net/smil:rtbgo/chunklist_b4096000_slENG.m3u8",
+            "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+            "resolution": "HD",
+            "proxy": false
+        },
+        {
+            "id": "s-football",
+            "name": "S Football",
+            "url": "http://rgkkw.live/live/1Aoen7elp5/IgMJ60tmAa/745149.ts",
+            "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "bein-sports-1-max-arabic",
+            "name": "Bein Sports 1 Max Arabic",
+            "url": "http://starhub.pro/live/farhat-3379/67897-913379/744517.ts",
+            "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "bein-sports",
+            "name": "Bein Sports",
+            "url": "https://1nyaler.streamhostingcdn.top/stream/23/index.m3u8",
+            "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "ptv-sports-b",
+            "name": "PTV Sports B 🇵🇰",
+            "url": "http://stalker.hakunamata.workers.dev/play/1099/index.m3u8",
+            "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "ptv-sports-c",
+            "name": "PTV Sports C 🇵🇰",
+            "url": "http://premiumtvs.space/live/jen12345/Jen54321/89.ts",
+            "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "m6-sports",
+            "name": "M6 Sports",
+            "url": "https://tv.beyondtaxconsultants.com/api/robi/lps/http://151.80.18.177:86/M6_HD/index.m3u8",
+            "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+            "resolution": "HD",
+            "proxy": false
+        },
+        {
+            "id": "caze-tv-brazil",
+            "name": "Caze Tv 🇧🇷 Brazil",
+            "url": "https://dfr80qz435crc.cloudfront.net/MNOP/Amagi/Caze/Caze_TV_BR/1080p-vtt/index.m3u8",
+            "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+            "resolution": "HD",
+            "proxy": false
+        },
+        {
+            "id": "win-sports",
+            "name": "Win Sports",
+            "url": "https://1nyaler.streamhostingcdn.top/stream/32/index.m3u8",
+            "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "dazn-direct",
+            "name": "Dazn Direct",
+            "url": "https://1nyaler.streamhostingcdn.top/stream/94/index.m3u8",
+            "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "tvp-sports",
+            "name": "TVP Sports",
+            "url": "https://1nyaler.streamhostingcdn.top/stream/89/index.m3u8",
+            "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "d-sports",
+            "name": "D Sports",
+            "url": "https://1nyaler.streamhostingcdn.top/stream/106/index.m3u8",
+            "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "tyc-sports",
+            "name": "TYC Sports",
+            "url": "https://1nyaler.streamhostingcdn.top/stream/84/index.m3u8",
+            "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "tudn-sports",
+            "name": "Tudn Sports 🇲🇽",
+            "url": "https://1nyaler.streamhostingcdn.top/stream/52/index.m3u8",
+            "logo": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "t-sports-1",
+            "name": "T sports",
+            "url": "https://tv.emnetbd.com/flussonic/Tsports1/tracks-v1a1/mono.m3u8?nocache=1782578566351",
+            "logo": "https://www.jagobd.com/wp-content/uploads/2019/12/t-sports.jpg",
+            "resolution": "HD",
+            "proxy": false
+        },
+        {
+            "id": "euro-sport-hd-1",
+            "name": "Euro Sport HD",
+            "url": "https://mflixott.com/tv/toffee-by-maruf/live.php?id=8yradhCZRM6o8LXpH6&e=.m3u8",
+            "logo": "https://images.toffeelive.com/images/program/4388/logo/240x240/mobile_logo_422191001674119624.png",
+            "resolution": "HD",
+            "proxy": false
+        },
+        {
+            "id": "star-sports-select-1",
+            "name": "Star Sports select  1",
+            "url": "https://cdn1.ctgiptv.com/star-select-1/tracks-v1a1/mono.ts.m3u8",
+            "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/200/-/Star_Sports_Select_HD_1.png",
+            "resolution": "HD",
+            "proxy": false
+        },
+        {
+            "id": "star-sports-select-2",
+            "name": "Star Sports select  2",
+            "url": "https://cdn1.ctgiptv.com/star-select-2/tracks-a1/mono.ts.m3u8",
+            "logo": "https://multireach.in/wp-content/uploads/2020/11/Star-Sports-Select-HD-2-1.png",
+            "resolution": "HD",
+            "proxy": false
+        },
+        {
+            "id": "star-sports-1",
+            "name": "Star Sports 1",
+            "url": "https://mxonlive.xyz/universal_restream/play/810/stream.m3u8",
+            "logo": "https://wclegends.uk/wp-content/uploads/2025/07/star-sports-hindi-hd-WCL-2025-Broadcaster.webp",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "star-sports-2",
+            "name": "Star Sports 2",
+            "url": "https://mxonlive.xyz/universal_restream/play/805/stream.m3u8",
+            "logo": "https://medianet.mv/media/channel/179x0-icon.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "ptv-sports",
+            "name": "PTV Sports",
+            "url": "https://tvsen5.aynaott.com/PtvSports/playlist.m3u8",
+            "logo": "https://upload.wikimedia.org/wikipedia/en/e/e4/PTV_Sports.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "gazi-tv-g-tv",
+            "name": "Gazi TV / G tv",
+            "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/gazibdz.stream/playlist.m3u8",
+            "logo": "https://i.postimg.cc/pdDTZFjr/image.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "sports-tennis",
+            "name": "Sports Tennis",
+            "url": "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/sportstak/SPORTSTAK_SCTE.m3u8",
+            "logo": "",
+            "resolution": "HD",
+            "proxy": false
+        },
+        {
+            "id": "trace-sports",
+            "name": "Trace Sports",
+            "url": "https://lightning-tracesport-samsungau.amagi.tv/playlist.m3u8",
+            "logo": "",
+            "resolution": "HD",
+            "proxy": false
+        },
+        {
+            "id": "cy-dubai",
+            "name": "CY Dubai",
+            "url": "https://dmitwlvvll.cdn.mangomolo.com/dubaisportshd/smil:dubaisportshd.smil/chunklist_b1300000.m3u8",
+            "logo": "",
+            "resolution": "HD",
+            "proxy": false
+        },
+        {
+            "id": "moto-racing",
+            "name": "Moto Racing",
+            "url": "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/motorracing/master.m3u8",
+            "logo": "",
+            "resolution": "HD",
+            "proxy": false
+        },
+        {
+            "id": "court-sports-network",
+            "name": "Court Sports Network",
+            "url": "https://d35j504z0x2vu2.cloudfront.net/v1/manifest/0bc8e8376bd8417a1b6761138aa41c26c7309312/court-sports-network/7c96e8a8-9be8-487f-9509-cb2fa31f35d4/1.m3u8",
+            "logo": "",
+            "resolution": "HD",
+            "proxy": false
+        },
+        {
+            "id": "kik-sports",
+            "name": "KIK Sports",
+            "url": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI2/kiksp.stream/playlist.m3u8",
+            "logo": "",
+            "resolution": "HD",
+            "proxy": true
+        }
+    ]
+},
+"sky-sports": {
+    "name": "Sky Sports",
+    "channels": []
+},
+"sky-sport-nz": {
+    "name": "Sky Sport NZ",
+    "channels": []
+},
+"tnt-sports": {
+    "name": "TNT Sports",
+    "channels": []
+},
+"premier-sports": {
+    "name": "Premier Sports",
+    "channels": []
+},
+"willow": {
+    "name": "Willow Sports",
+    "channels": [
+        {
+            "id": "willow",
+            "name": "Willow",
+            "url": "https://tvsen5.aynaott.com/willowhd/index.m3u8",
+            "logo": "https://raw.githubusercontent.com/abusaeeidx/Tv-Channel-Logo/heads/main/CricHD/runded/38-by-xfireflix.png",
+            "resolution": "HD",
+            "proxy": true
+        },
+        {
+            "id": "willow-hd-2",
+            "name": "Willow HD 2",
+            "url": "https://mxonlive.xyz/universal_restream/play/808/stream.m3u8",
+            "logo": "https://raw.githubusercontent.com/abusaeeidx/Tv-Channel-Logo/heads/main/CricHD/runded/8-by-xfireflix.png",
+            "resolution": "HD",
+            "proxy": true
+        }
+    ]
+},

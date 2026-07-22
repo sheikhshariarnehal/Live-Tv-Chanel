@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../core/theme.dart';
 import '../../models/channel.dart';
 import '../../services/local_proxy.dart';
 import '../../services/playback/playback_state.dart';
 import '../../services/playback/playback_state_machine.dart';
 import '../../services/playback/connectivity_service.dart';
 import '../../services/playback/playback_telemetry.dart';
+import '../tv_focus_wrapper.dart';
 import 'channel_video_player.dart';
 
 Widget getChannelVideoPlayer({
@@ -597,9 +599,18 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
 
   // ─── Widget lifecycle ────────────────────────────────────────────
 
+  late final FocusNode _focusNode;
+
   @override
   void initState() {
     super.initState();
+
+    _focusNode = FocusNode(debugLabel: 'PlayerFocusNode');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _focusNode.requestFocus();
+      }
+    });
 
     // Initialize the connectivity service and state machine
     _connectivityService = ConnectivityService();
@@ -673,9 +684,108 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
     }
   }
 
+  Timer? _osdTimer;
+  String? _osdText;
+  IconData? _osdIcon;
+
+  void _showOsd(String text, IconData icon) {
+    _osdTimer?.cancel();
+    if (mounted) {
+      setState(() {
+        _osdText = text;
+        _osdIcon = icon;
+      });
+    }
+    _osdTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _osdText = null;
+          _osdIcon = null;
+        });
+      }
+    });
+  }
+
+  void _seekRelative(int seconds) {
+    final newPos = _position + Duration(seconds: seconds);
+    final target = newPos < Duration.zero
+        ? Duration.zero
+        : (newPos > _duration ? _duration : newPos);
+    _seekTo(target);
+    _showOsd(
+      seconds > 0 ? '+${seconds}s' : '${seconds}s',
+      seconds > 0 ? Icons.fast_forward_rounded : Icons.fast_rewind_rounded,
+    );
+    if (!widget.showControls) {
+      widget.onTap?.call();
+    }
+    widget.onInteract?.call();
+  }
+
+  void _togglePlayPause() {
+    if (_isPlaying) {
+      _methodChannel?.invokeMethod('pause');
+      _showOsd('Pause', Icons.pause_rounded);
+    } else {
+      _methodChannel?.invokeMethod('resume');
+      _showOsd('Play', Icons.play_arrow_rounded);
+    }
+    if (!widget.showControls) {
+      widget.onTap?.call();
+    }
+    widget.onInteract?.call();
+  }
+
+  KeyEventResult _handlePlayerKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent || event is KeyRepeatEvent) {
+      final key = event.logicalKey;
+      if (key == LogicalKeyboardKey.select ||
+          key == LogicalKeyboardKey.enter ||
+          key == LogicalKeyboardKey.space ||
+          key == LogicalKeyboardKey.gameButtonA ||
+          key == LogicalKeyboardKey.mediaPlayPause ||
+          key == LogicalKeyboardKey.mediaPlay ||
+          key == LogicalKeyboardKey.mediaPause) {
+        _togglePlayPause();
+        return KeyEventResult.handled;
+      }
+      if (key == LogicalKeyboardKey.arrowLeft ||
+          key == LogicalKeyboardKey.mediaRewind ||
+          key == LogicalKeyboardKey.mediaStepBackward) {
+        _seekRelative(-10);
+        return KeyEventResult.handled;
+      }
+      if (key == LogicalKeyboardKey.arrowRight ||
+          key == LogicalKeyboardKey.mediaFastForward ||
+          key == LogicalKeyboardKey.mediaStepForward) {
+        _seekRelative(10);
+        return KeyEventResult.handled;
+      }
+      if (key == LogicalKeyboardKey.arrowUp ||
+          key == LogicalKeyboardKey.channelUp) {
+        if (widget.onPreviousChannel != null) {
+          _showOsd('Previous Channel', Icons.skip_previous_rounded);
+          widget.onPreviousChannel!();
+          return KeyEventResult.handled;
+        }
+      }
+      if (key == LogicalKeyboardKey.arrowDown ||
+          key == LogicalKeyboardKey.channelDown) {
+        if (widget.onNextChannel != null) {
+          _showOsd('Next Channel', Icons.skip_next_rounded);
+          widget.onNextChannel!();
+          return KeyEventResult.handled;
+        }
+      }
+    }
+    return KeyEventResult.ignored;
+  }
+
   @override
   void dispose() {
+    _osdTimer?.cancel();
     _stopProgressTimer();
+    _focusNode.dispose();
     _stateMachine.removeListener(_onStateMachineChanged);
     _stateMachine.dispose();
     _connectivityService.dispose();
@@ -692,73 +802,90 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
   Widget build(BuildContext context) {
     if (_hasError) return _buildErrorWidget();
 
-    return ColoredBox(
-      color: Colors.black,
-      child: SizedBox.expand(
-        child: Stack(
-          children: [
-            // Native ExoPlayer view
-            AndroidView(
-              viewType: 'com.goplay/native_player',
-              creationParams: _getCreationParams(),
-              creationParamsCodec: const StandardMessageCodec(),
-              onPlatformViewCreated: _onPlatformViewCreated,
-            ),
+    return Focus(
+      focusNode: _focusNode,
+      autofocus: true,
+      onKeyEvent: _handlePlayerKeyEvent,
+      child: ColoredBox(
+        color: Colors.black,
+        child: SizedBox.expand(
+          child: Stack(
+            children: [
+              // Native ExoPlayer view — disabled from taking D-Pad focus
+              Focus(
+                canRequestFocus: false,
+                child: AndroidView(
+                  viewType: 'com.goplay/native_player',
+                  creationParams: _getCreationParams(),
+                  creationParamsCodec: const StandardMessageCodec(),
+                  onPlatformViewCreated: _onPlatformViewCreated,
+                ),
+              ),
 
-            // Buffering indicator (isolated — when controls are hidden)
-            if (_isBuffering && !widget.showControls)
-              const Center(
-                child: RepaintBoundary(
-                  child: SizedBox(
-                    width: 28,
-                    height: 28,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
+              // Buffering indicator (isolated — when controls are hidden)
+              if (_isBuffering && !widget.showControls)
+                const Center(
+                  child: RepaintBoundary(
+                    child: SizedBox(
+                      width: 28,
+                      height: 28,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  ),
+                ),
+
+              // Tap overlay to show/hide controls
+              Positioned.fill(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: widget.onTap,
+                  child: const SizedBox.shrink(),
+                ),
+              ),
+
+              // Controls UI layer
+              Positioned.fill(
+                child: IgnorePointer(
+                  ignoring: !widget.showControls,
+                  child: Listener(
+                    onPointerDown: (_) {
+                      widget.onInteract?.call();
+                    },
+                    child: AnimatedOpacity(
+                      opacity: widget.showControls ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 200),
+                      child: _isLocked
+                          ? _buildLockedControls()
+                          : _buildUnlockedControls(),
                     ),
                   ),
                 ),
               ),
 
-            // Tap overlay to show/hide controls
-            Positioned.fill(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: widget.onTap,
-                child: const SizedBox.shrink(),
+              // ── State machine status overlay ──
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: widget.isFullscreen ? 80 : 56,
+                child: Center(
+                  child: _StateMachineOverlay(stateMachine: _stateMachine),
+                ),
               ),
-            ),
 
-            // Controls UI layer
-            Positioned.fill(
-              child: IgnorePointer(
-                ignoring: !widget.showControls,
-                child: Listener(
-                  onPointerDown: (_) {
-                    widget.onInteract?.call();
-                  },
-                  child: AnimatedOpacity(
-                    opacity: widget.showControls ? 1.0 : 0.0,
-                    duration: const Duration(milliseconds: 200),
-                    child: _isLocked
-                        ? _buildLockedControls()
-                        : _buildUnlockedControls(),
+              // ── Android TV Remote OSD Feedback ──
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: _TvPlayerOsd(
+                    message: _osdText,
+                    icon: _osdIcon,
                   ),
                 ),
               ),
-            ),
-
-            // ── State machine status overlay (retrying / skipping / waiting) ──
-            // Rendered outside the IgnorePointer so it's always visible.
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: widget.isFullscreen ? 80 : 56,
-              child: Center(
-                child: _StateMachineOverlay(stateMachine: _stateMachine),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -930,72 +1057,107 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // Aspect Ratio Button
-        IconButton(
-          onPressed: _toggleAspectRatio,
-          icon: const Icon(Icons.fit_screen, color: Colors.white),
-          iconSize: 28,
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          constraints: const BoxConstraints(),
-          tooltip: _aspectLabels[_aspectRatioIndex],
-        ),
-        // Volume Button
-        IconButton(
-          onPressed: _toggleMute,
-          icon: Icon(
-            _isMuted || _volume == 0
-                ? Icons.volume_off
-                : (_volume < 0.5 ? Icons.volume_down : Icons.volume_up),
-            color: Colors.white,
+        TvFocusable(
+          isCircle: true,
+          onTap: _toggleAspectRatio,
+          child: IconButton(
+            onPressed: _toggleAspectRatio,
+            icon: const Icon(Icons.fit_screen, color: Colors.white),
+            iconSize: 28,
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(),
+            tooltip: _aspectLabels[_aspectRatioIndex],
           ),
-          iconSize: 28,
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          constraints: const BoxConstraints(),
         ),
+        const SizedBox(width: 4),
+        // Volume Button
+        TvFocusable(
+          isCircle: true,
+          onTap: _toggleMute,
+          child: IconButton(
+            onPressed: _toggleMute,
+            icon: Icon(
+              _isMuted || _volume == 0
+                  ? Icons.volume_off
+                  : (_volume < 0.5 ? Icons.volume_down : Icons.volume_up),
+              color: Colors.white,
+            ),
+            iconSize: 28,
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(),
+          ),
+        ),
+        const SizedBox(width: 4),
         // Lock Button
-        IconButton(
-          onPressed: () {
+        TvFocusable(
+          isCircle: true,
+          onTap: () {
             setState(() {
               _isLocked = true;
             });
           },
-          icon: const Icon(Icons.lock_open, color: Colors.white),
-          iconSize: 28,
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          constraints: const BoxConstraints(),
-        ),
-        // PiP Button
-        IconButton(
-          onPressed: _enterPiP,
-          icon: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
-          iconSize: 28,
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          constraints: const BoxConstraints(),
-        ),
-        // Settings / Quality Button
-        GestureDetector(
-          onTapDown: (details) => _showQualityMenu(details),
-          behavior: HitTestBehavior.opaque,
-          child: IgnorePointer(
-            child: IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.settings, color: Colors.white),
-              iconSize: 28,
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              constraints: const BoxConstraints(),
-            ),
+          child: IconButton(
+            onPressed: () {
+              setState(() {
+                _isLocked = true;
+              });
+            },
+            icon: const Icon(Icons.lock_open, color: Colors.white),
+            iconSize: 28,
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(),
           ),
         ),
+        const SizedBox(width: 4),
+        // PiP Button
+        TvFocusable(
+          isCircle: true,
+          onTap: _enterPiP,
+          child: IconButton(
+            onPressed: _enterPiP,
+            icon: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
+            iconSize: 28,
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(),
+          ),
+        ),
+        const SizedBox(width: 4),
+        // Settings / Quality Button
+        TvFocusable(
+          isCircle: true,
+          onTap: () {
+            final renderBox = context.findRenderObject() as RenderBox?;
+            final offset = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
+            _showQualityMenu(TapDownDetails(globalPosition: offset));
+          },
+          child: IconButton(
+            onPressed: () {
+              final renderBox = context.findRenderObject() as RenderBox?;
+              final offset = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
+              _showQualityMenu(TapDownDetails(globalPosition: offset));
+            },
+            icon: const Icon(Icons.settings, color: Colors.white),
+            iconSize: 28,
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(),
+          ),
+        ),
+        const SizedBox(width: 4),
         // Fullscreen Toggle Button
         if (widget.onFullscreenToggle != null)
-          IconButton(
-            onPressed: widget.onFullscreenToggle,
-            icon: Icon(
-              widget.isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
-              color: Colors.white,
+          TvFocusable(
+            isCircle: true,
+            onTap: widget.onFullscreenToggle,
+            child: IconButton(
+              onPressed: widget.onFullscreenToggle,
+              icon: Icon(
+                widget.isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
+                color: Colors.white,
+              ),
+              iconSize: 28,
+              padding: const EdgeInsets.all(6),
+              constraints: const BoxConstraints(),
             ),
-            iconSize: 28,
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            constraints: const BoxConstraints(),
           ),
       ],
     );
@@ -1433,31 +1595,44 @@ class _CentralControls extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        IconButton(
-          onPressed: onPrev,
-          padding: const EdgeInsets.all(4),
-          constraints: const BoxConstraints(),
-          icon: Icon(
-            Icons.skip_previous_rounded,
-            color: onPrev != null ? Colors.white : Colors.white24,
+        if (onPrev != null)
+          TvFocusable(
+            isCircle: true,
+            onTap: onPrev,
+            child: IconButton(
+              onPressed: onPrev,
+              padding: const EdgeInsets.all(6),
+              constraints: const BoxConstraints(),
+              icon: const Icon(
+                Icons.skip_previous_rounded,
+                color: Colors.white,
+              ),
+              iconSize: iconSize,
+            ),
           ),
-          iconSize: iconSize,
+        if (onPrev != null) SizedBox(width: spacing),
+        TvFocusable(
+          isCircle: true,
+          onTap: onRewind,
+          child: IconButton(
+            onPressed: onRewind,
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(),
+            icon: const Icon(Icons.replay_10_rounded, color: Colors.white),
+            iconSize: iconSize,
+          ),
         ),
         SizedBox(width: spacing),
-        IconButton(
-          onPressed: onRewind,
-          padding: const EdgeInsets.all(4),
-          constraints: const BoxConstraints(),
-          icon: const Icon(Icons.replay_10_rounded, color: Colors.white),
-          iconSize: iconSize,
-        ),
-        SizedBox(width: spacing),
-        GestureDetector(
+        TvFocusable(
+          isCircle: true,
           onTap: onPlayPause,
-          behavior: HitTestBehavior.opaque,
-          child: SizedBox(
+          child: Container(
             width: playSize,
             height: playSize,
+            decoration: const BoxDecoration(
+              color: Colors.black38,
+              shape: BoxShape.circle,
+            ),
             child: Center(
               child: isBuffering
                   ? SizedBox(
@@ -1471,30 +1646,39 @@ class _CentralControls extends StatelessWidget {
                   : Icon(
                       isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
                       color: Colors.white,
-                      size: playSize,
+                      size: playSize * 0.75,
                     ),
             ),
           ),
         ),
         SizedBox(width: spacing),
-        IconButton(
-          onPressed: onForward,
-          padding: const EdgeInsets.all(4),
-          constraints: const BoxConstraints(),
-          icon: const Icon(Icons.forward_10_rounded, color: Colors.white),
-          iconSize: iconSize,
-        ),
-        SizedBox(width: spacing),
-        IconButton(
-          onPressed: onNext,
-          padding: const EdgeInsets.all(4),
-          constraints: const BoxConstraints(),
-          icon: Icon(
-            Icons.skip_next_rounded,
-            color: onNext != null ? Colors.white : Colors.white24,
+        TvFocusable(
+          isCircle: true,
+          onTap: onForward,
+          child: IconButton(
+            onPressed: onForward,
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(),
+            icon: const Icon(Icons.forward_10_rounded, color: Colors.white),
+            iconSize: iconSize,
           ),
-          iconSize: iconSize,
         ),
+        if (onNext != null) SizedBox(width: spacing),
+        if (onNext != null)
+          TvFocusable(
+            isCircle: true,
+            onTap: onNext,
+            child: IconButton(
+              onPressed: onNext,
+              padding: const EdgeInsets.all(6),
+              constraints: const BoxConstraints(),
+              icon: const Icon(
+                Icons.skip_next_rounded,
+                color: Colors.white,
+              ),
+              iconSize: iconSize,
+            ),
+          ),
       ],
     );
   }
@@ -1635,5 +1819,49 @@ class _ProgressBarPainter extends CustomPainter {
     return old.position != position ||
         old.duration != duration ||
         old.bufferedPosition != bufferedPosition;
+  }
+}
+
+class _TvPlayerOsd extends StatelessWidget {
+  final String? message;
+  final IconData? icon;
+
+  const _TvPlayerOsd({this.message, this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    if (message == null) return const SizedBox.shrink();
+
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.black87,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: GoPlayTheme.primary.withValues(alpha: 0.6), width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: GoPlayTheme.primary.withValues(alpha: 0.3),
+              blurRadius: 16,
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) Icon(icon, color: GoPlayTheme.primary, size: 24),
+            if (icon != null) const SizedBox(width: 10),
+            Text(
+              message!,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
