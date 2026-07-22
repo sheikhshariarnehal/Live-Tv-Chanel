@@ -56,11 +56,34 @@ class _TvFocusableState extends State<TvFocusable> {
 
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
     if (event is KeyDownEvent || event is KeyRepeatEvent) {
-      final key = event.logicalKey;
-      if (key == LogicalKeyboardKey.select ||
-          key == LogicalKeyboardKey.enter ||
-          key == LogicalKeyboardKey.space ||
-          key == LogicalKeyboardKey.gameButtonA) {
+      final lKey = event.logicalKey;
+      final pKey = event.physicalKey;
+
+      bool isSelect = lKey == LogicalKeyboardKey.select ||
+          lKey == LogicalKeyboardKey.enter ||
+          lKey == LogicalKeyboardKey.space ||
+          lKey == LogicalKeyboardKey.gameButtonA ||
+          lKey == LogicalKeyboardKey.accept ||
+          lKey == LogicalKeyboardKey.numpadEnter ||
+          pKey == PhysicalKeyboardKey.select ||
+          pKey == PhysicalKeyboardKey.enter ||
+          pKey == PhysicalKeyboardKey.space ||
+          pKey == PhysicalKeyboardKey.numpadEnter ||
+          lKey.keyId == 0x00000017 || // Android KEYCODE_DPAD_CENTER
+          lKey.keyId == 0x00000042 || // Android KEYCODE_ENTER
+          lKey.keyId == 0x00000060;   // Android KEYCODE_BUTTON_A
+
+      if (!isSelect) {
+        final name = lKey.debugName?.toLowerCase() ?? '';
+        if (name.contains('dpad') ||
+            name.contains('select') ||
+            name.contains('enter') ||
+            name.contains('center')) {
+          isSelect = true;
+        }
+      }
+
+      if (isSelect) {
         if (widget.onTap != null) {
           widget.onTap!();
           return KeyEventResult.handled;
@@ -98,6 +121,7 @@ class _TvFocusableState extends State<TvFocusable> {
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOutCubic,
           child: Stack(
+            alignment: Alignment.center,
             clipBehavior: Clip.none,
             children: [
               widget.child,

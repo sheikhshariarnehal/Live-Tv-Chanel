@@ -64,8 +64,8 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> with TickerProv
 
     final titleStyle = theme.appBarTheme.titleTextStyle ?? const TextStyle();
 
-    const appBarGlassDeco = BoxDecoration(
-      color: GoPlayTheme.surfaceContainer,
+    final appBarGlassDeco = BoxDecoration(
+      color: theme.colorScheme.surface,
     );
 
     // Sync selectedCategoryProvider changes back to the TabController
@@ -106,8 +106,9 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> with TickerProv
           });
         }
 
-        return Scaffold(
-          body: SafeArea(
+        return Material(
+          color: GoPlayTheme.surface,
+          child: SafeArea(
             top: false,
             bottom: false,
             child: CustomScrollView(
@@ -116,7 +117,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> with TickerProv
                 SliverAppBar(
                   floating: false,
                   pinned: true,
-                  backgroundColor: Colors.transparent,
+                  backgroundColor: theme.colorScheme.surface,
                   elevation: 0,
                   leadingWidth: 0,
                   leading: const SizedBox.shrink(),
@@ -218,14 +219,6 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> with TickerProv
                       height: 48,
                       decoration: BoxDecoration(
                         color: theme.colorScheme.surface,
-                        border: Border(
-                          bottom: BorderSide(
-                            color: theme.brightness == Brightness.dark
-                                ? Colors.white.withValues(alpha: 0.08)
-                                : Colors.black.withValues(alpha: 0.08),
-                            width: 1.0,
-                          ),
-                        ),
                       ),
                       child: _CategoryFilterBar(
                         tabController: _tabController!,
@@ -256,26 +249,29 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> with TickerProv
           ),
         );
       },
-      loading: () => Scaffold(
-        appBar: AppBar(
-          title: Text('Channels', style: titleStyle),
-          backgroundColor: theme.colorScheme.surface,
-          elevation: 0,
-        ),
-        body: GridView.builder(
-          padding: const EdgeInsets.all(10),
-          gridDelegate: _gridDelegate(context),
-          itemCount: 12,
-          itemBuilder: (ctx, i) => const _ShimmerCard(),
+      loading: () => Material(
+        color: theme.colorScheme.surface,
+        child: Column(
+          children: [
+            AppBar(
+              title: Text('Channels', style: titleStyle),
+              backgroundColor: theme.colorScheme.surface,
+              elevation: 0,
+            ),
+            Expanded(
+              child: GridView.builder(
+                padding: const EdgeInsets.all(10),
+                gridDelegate: _gridDelegate(context),
+                itemCount: 12,
+                itemBuilder: (ctx, i) => const _ShimmerCard(),
+              ),
+            ),
+          ],
         ),
       ),
-      error: (e, s) => Scaffold(
-        appBar: AppBar(
-          title: Text('Channels', style: titleStyle),
-          backgroundColor: theme.colorScheme.surface,
-          elevation: 0,
-        ),
-        body: Center(
+      error: (e, s) => Material(
+        color: theme.colorScheme.surface,
+        child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

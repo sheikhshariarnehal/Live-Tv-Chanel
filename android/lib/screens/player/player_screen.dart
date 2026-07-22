@@ -277,7 +277,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       if (key == LogicalKeyboardKey.select ||
           key == LogicalKeyboardKey.enter ||
           key == LogicalKeyboardKey.space ||
-          key == LogicalKeyboardKey.gameButtonA) {
+          key == LogicalKeyboardKey.gameButtonA ||
+          key == LogicalKeyboardKey.accept ||
+          key == LogicalKeyboardKey.numpadEnter) {
         _onPlayerTap();
         return KeyEventResult.handled;
       } else if (key == LogicalKeyboardKey.arrowUp ||

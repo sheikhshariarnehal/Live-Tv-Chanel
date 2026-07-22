@@ -20,8 +20,9 @@ class UpcomingScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final groupedAsync = ref.watch(groupedUpcomingEventsProvider);
 
-    return Scaffold(
-      body: Stack(
+    return Material(
+      color: GoPlayTheme.surface,
+      child: Stack(
         children: [
           // Solid background — cheapest possible widget.
           const ColoredBox(

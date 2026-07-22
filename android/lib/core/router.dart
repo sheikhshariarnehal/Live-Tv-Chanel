@@ -25,32 +25,34 @@ final appRouter = GoRouter(
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) => const SettingsScreen(),
     ),
-    ShellRoute(
-      navigatorKey: shellNavigatorKey,
-      builder: (context, state, child) => ShellScreen(child: child),
-      routes: [
-        GoRoute(
-          path: '/home',
-          pageBuilder: (context, state) => CustomTransitionPage<void>(
-            key: state.pageKey,
-            child: const HomeScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            transitionDuration: const Duration(milliseconds: 400),
-          ),
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) {
+        return ShellScreen(navigationShell: navigationShell);
+      },
+      branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/home',
+              builder: (context, state) => const HomeScreen(),
+            ),
+          ],
         ),
-        GoRoute(
-          path: '/channels',
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: ChannelsScreen(),
-          ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/channels',
+              builder: (context, state) => const ChannelsScreen(),
+            ),
+          ],
         ),
-        GoRoute(
-          path: '/upcoming',
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: UpcomingScreen(),
-          ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/upcoming',
+              builder: (context, state) => const UpcomingScreen(),
+            ),
+          ],
         ),
       ],
     ),

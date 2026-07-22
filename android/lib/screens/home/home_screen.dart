@@ -34,17 +34,17 @@ class HomeScreen extends ConsumerWidget {
     if (localChannels.isEmpty) {
       return syncState.when(
         data: (_) => _buildMainContent(context, ref),
-        loading: () => const Scaffold(
-          backgroundColor: GoPlayTheme.surface,
-          body: Center(
+        loading: () => const Material(
+          color: GoPlayTheme.surface,
+          child: Center(
             child: CircularProgressIndicator(
               color: GoPlayTheme.primary,
             ),
           ),
         ),
-        error: (error, stack) => Scaffold(
-          backgroundColor: GoPlayTheme.surface,
-          body: Center(
+        error: (error, stack) => Material(
+          color: GoPlayTheme.surface,
+          child: Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32.0),
               child: Column(
@@ -117,8 +117,9 @@ class HomeScreen extends ConsumerWidget {
       color: Colors.white,
     );
 
-    return Scaffold(
-      body: CustomScrollView(
+    return Material(
+      color: GoPlayTheme.surface,
+      child: CustomScrollView(
         slivers: [
           // Collapsing Dark-Themed App Bar
           SliverAppBar(

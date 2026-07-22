@@ -743,6 +743,8 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
           key == LogicalKeyboardKey.enter ||
           key == LogicalKeyboardKey.space ||
           key == LogicalKeyboardKey.gameButtonA ||
+          key == LogicalKeyboardKey.accept ||
+          key == LogicalKeyboardKey.numpadEnter ||
           key == LogicalKeyboardKey.mediaPlayPause ||
           key == LogicalKeyboardKey.mediaPlay ||
           key == LogicalKeyboardKey.mediaPause) {
