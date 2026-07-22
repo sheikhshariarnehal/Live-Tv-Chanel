@@ -3,7 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../widgets/tv_focus_wrapper.dart';
 
-/// Main shell screen with bottom navigation bar
+/// Main shell screen with bottom navigation bar.
+///
+/// Performance notes:
+/// - MediaQuery accessed once, results passed down (avoids multiple rebuild subscriptions).
+/// - Bottom nav wrapped in RepaintBoundary (isolated from page scroll repaints).
+/// - Mobile nav items use lightweight InkWell with splash + haptic (no TvFocusable overhead).
+/// - TV rail items keep TvFocusable for D-Pad focus visuals.
 class ShellScreen extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
   const ShellScreen({super.key, required this.navigationShell});
@@ -19,8 +25,12 @@ class ShellScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final index = navigationShell.currentIndex;
-    final isTv = MediaQuery.of(context).navigationMode == NavigationMode.directional;
-    final isDesktop = isTv || MediaQuery.of(context).size.width >= 800;
+
+    // Single MediaQuery read — avoids multiple rebuild subscriptions.
+    final mq = MediaQuery.of(context);
+    final isTv = mq.navigationMode == NavigationMode.directional;
+    final isDesktop = isTv || mq.size.width >= 800;
+    final bottomPadding = mq.padding.bottom;
 
     Widget content;
 
@@ -28,46 +38,48 @@ class ShellScreen extends StatelessWidget {
       content = Scaffold(
         body: Row(
           children: [
-            // Side Navigation Rail — custom D-Pad friendly
-            Container(
-              width: 72,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                border: Border(
-                  right: BorderSide(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.12),
-                    width: 0.5,
+            // Side Navigation Rail — D-Pad friendly
+            RepaintBoundary(
+              child: Container(
+                width: 72,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  border: Border(
+                    right: BorderSide(
+                      color: theme.colorScheme.outline.withValues(alpha: 0.12),
+                      width: 0.5,
+                    ),
                   ),
                 ),
-              ),
-              child: SafeArea(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _RailNavItem(
-                      icon: Icons.home_outlined,
-                      selectedIcon: Icons.home_rounded,
-                      label: 'Home',
-                      isSelected: index == 0,
-                      onTap: () => _goBranch(0),
-                    ),
-                    const SizedBox(height: 8),
-                    _RailNavItem(
-                      icon: Icons.live_tv_outlined,
-                      selectedIcon: Icons.live_tv_rounded,
-                      label: 'Channels',
-                      isSelected: index == 1,
-                      onTap: () => _goBranch(1),
-                    ),
-                    const SizedBox(height: 8),
-                    _RailNavItem(
-                      icon: Icons.schedule_outlined,
-                      selectedIcon: Icons.schedule_rounded,
-                      label: 'Upcoming',
-                      isSelected: index == 2,
-                      onTap: () => _goBranch(2),
-                    ),
-                  ],
+                child: SafeArea(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _RailNavItem(
+                        icon: Icons.grid_view_outlined,
+                        selectedIcon: Icons.grid_view_rounded,
+                        label: 'Home',
+                        isSelected: index == 0,
+                        onTap: () => _goBranch(0),
+                      ),
+                      const SizedBox(height: 8),
+                      _RailNavItem(
+                        icon: Icons.smart_display_outlined,
+                        selectedIcon: Icons.smart_display_rounded,
+                        label: 'Channels',
+                        isSelected: index == 1,
+                        onTap: () => _goBranch(1),
+                      ),
+                      const SizedBox(height: 8),
+                      _RailNavItem(
+                        icon: Icons.schedule_outlined,
+                        selectedIcon: Icons.schedule_rounded,
+                        label: 'Upcoming',
+                        isSelected: index == 2,
+                        onTap: () => _goBranch(2),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -79,46 +91,46 @@ class ShellScreen extends StatelessWidget {
       );
     } else {
       content = Scaffold(
-        extendBody: false, // Solid bottom nav doesn't require transparent overlay
+        extendBody: false,
         body: navigationShell,
-        bottomNavigationBar: Container(
-          height: 64 + MediaQuery.of(context).padding.bottom,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            border: Border(
-              top: BorderSide(
-                color: theme.colorScheme.outline.withValues(alpha: 0.12),
-                width: 0.8,
+        bottomNavigationBar: RepaintBoundary(
+          child: Container(
+            height: 64 + bottomPadding,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              border: Border(
+                top: BorderSide(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.12),
+                  width: 0.8,
+                ),
               ),
             ),
-          ),
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.bottom,
-          ),
-          child: Row(
-            children: [
-              _NavItem(
-                icon: Icons.home_outlined,
-                selectedIcon: Icons.home_rounded,
-                label: 'Home',
-                isSelected: index == 0,
-                onTap: () => _goBranch(0),
-              ),
-              _NavItem(
-                icon: Icons.live_tv_outlined,
-                selectedIcon: Icons.live_tv_rounded,
-                label: 'Channels',
-                isSelected: index == 1,
-                onTap: () => _goBranch(1),
-              ),
-              _NavItem(
-                icon: Icons.schedule_outlined,
-                selectedIcon: Icons.schedule_rounded,
-                label: 'Upcoming',
-                isSelected: index == 2,
-                onTap: () => _goBranch(2),
-              ),
-            ],
+            padding: EdgeInsets.only(bottom: bottomPadding),
+            child: Row(
+              children: [
+                _NavItem(
+                  icon: Icons.grid_view_outlined,
+                  selectedIcon: Icons.grid_view_rounded,
+                  label: 'Home',
+                  isSelected: index == 0,
+                  onTap: () => _goBranch(0),
+                ),
+                _NavItem(
+                  icon: Icons.smart_display_outlined,
+                  selectedIcon: Icons.smart_display_rounded,
+                  label: 'Channels',
+                  isSelected: index == 1,
+                  onTap: () => _goBranch(1),
+                ),
+                _NavItem(
+                  icon: Icons.schedule_outlined,
+                  selectedIcon: Icons.schedule_rounded,
+                  label: 'Upcoming',
+                  isSelected: index == 2,
+                  onTap: () => _goBranch(2),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -150,6 +162,10 @@ class ShellScreen extends StatelessWidget {
   }
 }
 
+// ─── Mobile Bottom Nav Item ──────────────────────────────────────
+// Lightweight: InkWell with splash + haptic feedback.
+// No TvFocusable overhead (Focus/Stack/AnimatedScale) on mobile.
+
 class _NavItem extends StatelessWidget {
   final IconData icon;
   final IconData selectedIcon;
@@ -165,6 +181,9 @@ class _NavItem extends StatelessWidget {
     required this.onTap,
   });
 
+  // Cached border radius — avoids per-build allocation.
+  static final _borderRadius = BorderRadius.circular(10);
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -172,28 +191,31 @@ class _NavItem extends StatelessWidget {
     final inactiveColor = theme.colorScheme.onSurfaceVariant;
 
     return Expanded(
-      child: TvFocusable(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        borderRadius: _borderRadius,
+        splashColor: activeColor.withValues(alpha: 0.12),
+        highlightColor: activeColor.withValues(alpha: 0.06),
         child: SizedBox.expand(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Icon(
                 isSelected ? selectedIcon : icon,
                 color: isSelected ? activeColor : inactiveColor,
-                size: 22,
+                size: 24,
               ),
               const SizedBox(height: 3),
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected
-                      ? theme.colorScheme.onSurface
-                      : inactiveColor,
-                  fontSize: 10.5,
+                  color: isSelected ? activeColor : inactiveColor,
+                  fontSize: 11,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  letterSpacing: 0.2,
                 ),
               ),
             ],
@@ -205,6 +227,7 @@ class _NavItem extends StatelessWidget {
 }
 
 // ─── TV Side Rail Nav Item ────────────────────────────────────────
+// Keeps TvFocusable for D-Pad focus ring on TV/desktop.
 
 class _RailNavItem extends StatelessWidget {
   final IconData icon;
@@ -221,6 +244,8 @@ class _RailNavItem extends StatelessWidget {
     required this.onTap,
   });
 
+  static final _borderRadius = BorderRadius.circular(12);
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -229,7 +254,7 @@ class _RailNavItem extends StatelessWidget {
 
     return TvFocusable(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: _borderRadius,
       child: Container(
         width: 64,
         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -237,7 +262,7 @@ class _RailNavItem extends StatelessWidget {
           color: isSelected
               ? activeColor.withValues(alpha: 0.12)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: _borderRadius,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -251,11 +276,10 @@ class _RailNavItem extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color: isSelected
-                    ? theme.colorScheme.onSurface
-                    : inactiveColor,
+                color: isSelected ? activeColor : inactiveColor,
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                letterSpacing: 0.2,
               ),
             ),
           ],
