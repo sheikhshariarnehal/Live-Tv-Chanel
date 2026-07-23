@@ -712,10 +712,6 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
         ? Duration.zero
         : (newPos > _duration ? _duration : newPos);
     _seekTo(target);
-    _showOsd(
-      seconds > 0 ? '+${seconds}s' : '${seconds}s',
-      seconds > 0 ? Icons.fast_forward_rounded : Icons.fast_rewind_rounded,
-    );
     if (!widget.showControls) {
       widget.onTap?.call();
     }
@@ -725,10 +721,8 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
   void _togglePlayPause() {
     if (_isPlaying) {
       _methodChannel?.invokeMethod('pause');
-      _showOsd('Pause', Icons.pause_rounded);
     } else {
       _methodChannel?.invokeMethod('resume');
-      _showOsd('Play', Icons.play_arrow_rounded);
     }
     if (!widget.showControls) {
       widget.onTap?.call();
@@ -736,50 +730,71 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
     widget.onInteract?.call();
   }
 
+  /// Single authoritative key handler for all player remote/keyboard input.
+  ///
+  /// Key mapping (TV remote style):
+  ///  OK / Select / Enter / Space → Toggle play/pause
+  ///  Up / Channel Up             → Previous channel
+  ///  Down / Channel Down         → Next channel
+  ///  Left                        → Seek −10 s
+  ///  Right                       → Seek +10 s
+  ///  Media keys (play, pause, rewind, ff) → Direct action
+  ///  F                           → Fullscreen toggle (handled by parent)
   KeyEventResult _handlePlayerKeyEvent(FocusNode node, KeyEvent event) {
-    if (event is KeyDownEvent || event is KeyRepeatEvent) {
-      final key = event.logicalKey;
-      if (key == LogicalKeyboardKey.select ||
-          key == LogicalKeyboardKey.enter ||
-          key == LogicalKeyboardKey.space ||
-          key == LogicalKeyboardKey.gameButtonA ||
-          key == LogicalKeyboardKey.accept ||
-          key == LogicalKeyboardKey.numpadEnter ||
-          key == LogicalKeyboardKey.mediaPlayPause ||
-          key == LogicalKeyboardKey.mediaPlay ||
-          key == LogicalKeyboardKey.mediaPause) {
-        _togglePlayPause();
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+
+    final key = event.logicalKey;
+
+    // ── Play / Pause ──
+    if (key == LogicalKeyboardKey.select ||
+        key == LogicalKeyboardKey.enter ||
+        key == LogicalKeyboardKey.space ||
+        key == LogicalKeyboardKey.gameButtonA ||
+        key == LogicalKeyboardKey.accept ||
+        key == LogicalKeyboardKey.numpadEnter ||
+        key == LogicalKeyboardKey.mediaPlayPause ||
+        key == LogicalKeyboardKey.mediaPlay ||
+        key == LogicalKeyboardKey.mediaPause) {
+      _togglePlayPause();
+      return KeyEventResult.handled;
+    }
+
+    // ── Seek backward ──
+    if (key == LogicalKeyboardKey.arrowLeft ||
+        key == LogicalKeyboardKey.mediaRewind ||
+        key == LogicalKeyboardKey.mediaStepBackward) {
+      _seekRelative(-10);
+      return KeyEventResult.handled;
+    }
+
+    // ── Seek forward ──
+    if (key == LogicalKeyboardKey.arrowRight ||
+        key == LogicalKeyboardKey.mediaFastForward ||
+        key == LogicalKeyboardKey.mediaStepForward) {
+      _seekRelative(10);
+      return KeyEventResult.handled;
+    }
+
+    // ── Previous channel ──
+    if (key == LogicalKeyboardKey.arrowUp ||
+        key == LogicalKeyboardKey.channelUp) {
+      if (widget.onPreviousChannel != null) {
+        widget.onPreviousChannel!();
         return KeyEventResult.handled;
-      }
-      if (key == LogicalKeyboardKey.arrowLeft ||
-          key == LogicalKeyboardKey.mediaRewind ||
-          key == LogicalKeyboardKey.mediaStepBackward) {
-        _seekRelative(-10);
-        return KeyEventResult.handled;
-      }
-      if (key == LogicalKeyboardKey.arrowRight ||
-          key == LogicalKeyboardKey.mediaFastForward ||
-          key == LogicalKeyboardKey.mediaStepForward) {
-        _seekRelative(10);
-        return KeyEventResult.handled;
-      }
-      if (key == LogicalKeyboardKey.arrowUp ||
-          key == LogicalKeyboardKey.channelUp) {
-        if (widget.onPreviousChannel != null) {
-          _showOsd('Previous Channel', Icons.skip_previous_rounded);
-          widget.onPreviousChannel!();
-          return KeyEventResult.handled;
-        }
-      }
-      if (key == LogicalKeyboardKey.arrowDown ||
-          key == LogicalKeyboardKey.channelDown) {
-        if (widget.onNextChannel != null) {
-          _showOsd('Next Channel', Icons.skip_next_rounded);
-          widget.onNextChannel!();
-          return KeyEventResult.handled;
-        }
       }
     }
+
+    // ── Next channel ──
+    if (key == LogicalKeyboardKey.arrowDown ||
+        key == LogicalKeyboardKey.channelDown) {
+      if (widget.onNextChannel != null) {
+        widget.onNextChannel!();
+        return KeyEventResult.handled;
+      }
+    }
+
     return KeyEventResult.ignored;
   }
 

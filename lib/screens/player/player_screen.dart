@@ -271,38 +271,38 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     }
   }
 
+  /// Handles only screen-level keys that the inner player widget does NOT own:
+  ///  - F key  → toggle full-view mode
+  ///  - Escape / Back → exit full-view or hide controls
+  ///
+  /// All other keys (arrows, select, media) are left `ignored` so they
+  /// bubble down to the inner ChannelVideoPlayerNative Focus node which
+  /// owns seek, play/pause, and channel-zap behaviour.
   KeyEventResult _handlePlayerKeyEvent(FocusNode node, KeyEvent event) {
-    if (event is KeyDownEvent || event is KeyRepeatEvent) {
-      final key = event.logicalKey;
-      if (key == LogicalKeyboardKey.select ||
-          key == LogicalKeyboardKey.enter ||
-          key == LogicalKeyboardKey.space ||
-          key == LogicalKeyboardKey.gameButtonA ||
-          key == LogicalKeyboardKey.accept ||
-          key == LogicalKeyboardKey.numpadEnter) {
-        _onPlayerTap();
-        return KeyEventResult.handled;
-      } else if (key == LogicalKeyboardKey.arrowUp ||
-                 key == LogicalKeyboardKey.arrowDown) {
-        if (!_controlsVisible) {
-          setState(() => _controlsVisible = true);
-          _startControlsTimer();
-          return KeyEventResult.handled;
-        }
-      } else if (key == LogicalKeyboardKey.arrowLeft ||
-                 key == LogicalKeyboardKey.arrowRight) {
-        if (!_controlsVisible) {
-          setState(() => _controlsVisible = true);
-        }
-        _startControlsTimer();
-      } else if (key == LogicalKeyboardKey.goBack ||
-                 key == LogicalKeyboardKey.escape) {
-        if (_controlsVisible) {
-          setState(() => _controlsVisible = false);
-          return KeyEventResult.handled;
-        }
-      }
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
     }
+
+    final lKey = event.logicalKey;
+    final pKey = event.physicalKey;
+
+    // F key → toggle full-view mode
+    if (lKey == LogicalKeyboardKey.keyF ||
+        pKey == PhysicalKeyboardKey.keyF) {
+      _toggleFullscreen();
+      return KeyEventResult.handled;
+    }
+
+    // Escape / Back → exit full-view first, then hide controls
+    if (lKey == LogicalKeyboardKey.goBack ||
+        lKey == LogicalKeyboardKey.escape) {
+      if (_isFullViewMode) {
+        _toggleFullscreen();
+        return KeyEventResult.handled;
+      }
+      // Don't handle — let it pop the route normally
+    }
+
     return KeyEventResult.ignored;
   }
 
@@ -328,7 +328,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
         }
       },
       child: Focus(
-        autofocus: true,
+        canRequestFocus: false,
         onKeyEvent: _handlePlayerKeyEvent,
         child: Scaffold(
           backgroundColor: const Color(0xFF070709),
