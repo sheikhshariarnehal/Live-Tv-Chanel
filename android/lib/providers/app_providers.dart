@@ -104,12 +104,16 @@ final eventsProvider = FutureProvider<List<SportEvent>>((ref) async {
 
 final liveEventsProvider = FutureProvider<List<SportEvent>>((ref) async {
   final events = await ref.watch(eventsProvider.future);
-  return events.where((e) => e.isLive).toList();
+  final list = events.where((e) => e.isLive && e.channels.isNotEmpty).toList();
+  list.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+  return list;
 });
 
 final upcomingEventsProvider = FutureProvider<List<SportEvent>>((ref) async {
   final events = await ref.watch(eventsProvider.future);
-  return events.where((e) => e.isUpcoming).toList();
+  final list = events.where((e) => e.isUpcoming).toList();
+  list.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+  return list;
 });
 
 final featuredEventsProvider = Provider<AsyncValue<List<SportEvent>>>((ref) {
@@ -126,9 +130,12 @@ final todayEventsProvider = Provider<AsyncValue<List<SportEvent>>>((ref) {
     final today = DateTime(now.year, now.month, now.day);
     return events.where((e) {
       final localStart = e.startTime.toLocal();
-      return localStart.year == today.year &&
+      final isToday = localStart.year == today.year &&
           localStart.month == today.month &&
           localStart.day == today.day;
+      // Filter out any live event that does not have active channels added
+      if (e.isLive && e.channels.isEmpty) return false;
+      return isToday;
     }).toList();
   });
 });
@@ -286,4 +293,17 @@ class SelectedTabNotifier extends Notifier<int> {
   int build() => 0;
 
   void select(int tab) => state = tab;
+}
+
+// ─── Selected Sport Filter ────────────────────────────────────
+final selectedSportFilterProvider =
+    NotifierProvider<SelectedSportFilterNotifier, String>(
+  SelectedSportFilterNotifier.new,
+);
+
+class SelectedSportFilterNotifier extends Notifier<String> {
+  @override
+  String build() => 'All';
+
+  void select(String sport) => state = sport;
 }
