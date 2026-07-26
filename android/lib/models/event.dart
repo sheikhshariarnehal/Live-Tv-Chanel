@@ -27,6 +27,7 @@ class SportEvent {
   final List<String> channels;
   final String? banner;
   final bool isFeatured;
+  final int sortOrder;
 
   const SportEvent({
     required this.id,
@@ -39,6 +40,7 @@ class SportEvent {
     this.channels = const [],
     this.banner,
     this.isFeatured = false,
+    this.sortOrder = 0,
   });
 
   bool get isLive =>
@@ -47,12 +49,12 @@ class SportEvent {
               status.toLowerCase().contains('upcoming')) &&
           DateTime.now().isAfter(startTime));
   bool get isUpcoming =>
-      (status.toLowerCase() == 'upcoming' ||
-          status.toLowerCase().contains('upcoming') ||
-          (status.toLowerCase() != 'live' &&
+      status.toLowerCase() == 'upcoming' ||
+      status.toLowerCase().contains('upcoming') ||
+      ((status.toLowerCase() != 'live' &&
               status.toLowerCase() != 'finished' &&
-              status.toLowerCase() != 'completed')) &&
-      DateTime.now().isBefore(startTime);
+              status.toLowerCase() != 'completed') &&
+          DateTime.now().isBefore(startTime));
   bool get isFinished =>
       status.toLowerCase() == 'finished' ||
       status.toLowerCase() == 'completed';
@@ -78,6 +80,7 @@ class SportEvent {
           : [],
       banner: json['banner'] as String?,
       isFeatured: json['is_featured'] as bool? ?? false,
+      sortOrder: json['sort_order'] as int? ?? 0,
     );
   }
 
@@ -92,5 +95,6 @@ class SportEvent {
         'channels': channels,
         'banner': banner,
         'is_featured': isFeatured,
+        'sort_order': sortOrder,
       };
 }
