@@ -111,7 +111,7 @@ class SupabaseService {
     final response = await _client
         .from('events')
         .select()
-        .order('start_time', ascending: true);
+        .order('sort_order', ascending: true);
     return (response as List).map((e) => SportEvent.fromJson(e)).toList();
   }
 
@@ -120,7 +120,7 @@ class SupabaseService {
         .from('events')
         .select()
         .eq('status', 'live')
-        .order('start_time', ascending: true);
+        .order('sort_order', ascending: true);
     return (response as List).map((e) => SportEvent.fromJson(e)).toList();
   }
 
@@ -129,7 +129,7 @@ class SupabaseService {
         .from('events')
         .select()
         .eq('status', 'upcoming')
-        .order('start_time', ascending: true);
+        .order('sort_order', ascending: true);
     return (response as List).map((e) => SportEvent.fromJson(e)).toList();
   }
 
@@ -138,7 +138,7 @@ class SupabaseService {
         .from('events')
         .select()
         .eq('is_featured', true)
-        .order('start_time', ascending: true);
+        .order('sort_order', ascending: true);
     return (response as List).map((e) => SportEvent.fromJson(e)).toList();
   }
 
