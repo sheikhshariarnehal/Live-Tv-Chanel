@@ -128,8 +128,8 @@ class EventListTile extends ConsumerStatefulWidget {
 
 class _EventListTileState extends ConsumerState<EventListTile> {
   // Cached values derived from event — recomputed only when event changes.
-  late String _homeAbbr;
-  late String _awayAbbr;
+  late String _homeName;
+  late String _awayName;
   late String _timeLabel;
   late bool _isToday;
 
@@ -147,8 +147,8 @@ class _EventListTileState extends ConsumerState<EventListTile> {
 
   void _updateCache() {
     final event = widget.event;
-    _homeAbbr = _abbreviate(event.homeTeam.name);
-    _awayAbbr = _abbreviate(event.awayTeam.name);
+    _homeName = event.homeTeam.name;
+    _awayName = event.awayTeam.name;
     _timeLabel = _formatTime(event.startTime);
 
     final now = DateTime.now();
@@ -244,9 +244,9 @@ class _EventListTileState extends ConsumerState<EventListTile> {
                               TeamFlagWidget(flag: event.homeTeam.flag, size: 24),
                               const SizedBox(height: 4),
                               Text(
-                                _homeAbbr,
+                                _homeName,
                                 style: _kTeamNameStyle,
-                                maxLines: 1,
+                                maxLines: 2,
                                 textAlign: TextAlign.center,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -256,7 +256,7 @@ class _EventListTileState extends ConsumerState<EventListTile> {
 
                         // Centre: score / time / countdown
                         Expanded(
-                          flex: 4,
+                          flex: 3,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -294,9 +294,9 @@ class _EventListTileState extends ConsumerState<EventListTile> {
                               TeamFlagWidget(flag: event.awayTeam.flag, size: 24),
                               const SizedBox(height: 4),
                               Text(
-                                _awayAbbr,
+                                _awayName,
                                 style: _kTeamNameStyle,
-                                maxLines: 1,
+                                maxLines: 2,
                                 textAlign: TextAlign.center,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -313,11 +313,6 @@ class _EventListTileState extends ConsumerState<EventListTile> {
         ),
       ),
     );
-  }
-
-  static String _abbreviate(String name) {
-    if (name.length <= 3) return name.toUpperCase();
-    return name.substring(0, 3).toUpperCase();
   }
 
   static String _formatTime(DateTime time) {
