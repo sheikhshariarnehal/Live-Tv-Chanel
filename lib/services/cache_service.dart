@@ -27,9 +27,11 @@ class CacheService {
     final box = Hive.box(AppConstants.eventsBox);
     final List<dynamic>? rawList = box.get('events');
     if (rawList == null) return [];
-    return rawList
+    final events = rawList
         .map((e) => SportEvent.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList();
+    events.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    return events;
   }
 
   Future<void> saveLocalEvents(List<SportEvent> events) async {
