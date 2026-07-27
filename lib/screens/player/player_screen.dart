@@ -187,7 +187,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       });
     }
 
-    _pipChannel.invokeMethod('setPlayerActive', true);
+    // Only enable PiP on app minimize when in Full View mode
+    _pipChannel.invokeMethod('setPlayerActive', widget.forceFullscreen);
     _pipChannel.setMethodCallHandler((call) async {
       if (call.method == 'onPiPModeChanged') {
         final isInPiP = call.arguments as bool? ?? false;
@@ -228,6 +229,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       _isFullViewMode = !_isFullViewMode;
       _controlsVisible = true;
     });
+
+    // Toggle PiP mode on minimize — only active in Full View mode
+    _pipChannel.invokeMethod('setPlayerActive', _isFullViewMode);
 
     if (_isFullViewMode) {
       _applyFullscreenOrientation();

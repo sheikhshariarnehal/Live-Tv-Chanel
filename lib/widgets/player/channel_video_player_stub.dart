@@ -88,6 +88,63 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
   double _prevVolume = 1.0;
   bool _isMuted = false;
 
+  double _brightness = 0.5;
+  bool _isBrightnessDragging = false;
+  bool _isVolumeDragging = false;
+  Timer? _osdHideTimer;
+
+  final ValueNotifier<double?> _brightnessOsdNotifier = ValueNotifier<double?>(null);
+  final ValueNotifier<double?> _volumeOsdNotifier = ValueNotifier<double?>(null);
+
+  void _onVerticalDragStart(DragStartDetails details) {
+    if (!widget.isFullscreen || _isLocked) return;
+    final screenWidth = MediaQuery.of(context).size.width;
+    _isBrightnessDragging = details.globalPosition.dx < screenWidth / 2;
+    _isVolumeDragging = !_isBrightnessDragging;
+    _osdHideTimer?.cancel();
+
+    if (_isBrightnessDragging) {
+      _brightnessOsdNotifier.value = _brightness;
+    } else {
+      _volumeOsdNotifier.value = _volume;
+    }
+  }
+
+  void _onVerticalDragUpdate(DragUpdateDetails details) {
+    if (!widget.isFullscreen || _isLocked) return;
+    final screenHeight = MediaQuery.of(context).size.height;
+    if (screenHeight <= 0) return;
+
+    final delta = -details.primaryDelta! / (screenHeight * 0.7);
+
+    if (_isBrightnessDragging) {
+      _brightness = (_brightness + delta).clamp(0.01, 1.0);
+      _methodChannel?.invokeMethod('setBrightness', _brightness);
+      _brightnessOsdNotifier.value = _brightness;
+    } else if (_isVolumeDragging) {
+      _volume = (_volume + delta).clamp(0.0, 1.0);
+      _isMuted = _volume == 0;
+      _methodChannel?.invokeMethod('setVolume', _volume);
+      _volumeOsdNotifier.value = _volume;
+    }
+  }
+
+  void _onVerticalDragEnd(DragEndDetails details) {
+    _isBrightnessDragging = false;
+    _isVolumeDragging = false;
+    _startOsdHideTimer();
+  }
+
+  void _startOsdHideTimer() {
+    _osdHideTimer?.cancel();
+    _osdHideTimer = Timer(const Duration(milliseconds: 1200), () {
+      if (mounted) {
+        _brightnessOsdNotifier.value = null;
+        _volumeOsdNotifier.value = null;
+      }
+    });
+  }
+
   // ignore: unused_field
   String _currentQuality = 'Auto';
   int _aspectRatioIndex = 0;
@@ -954,6 +1011,10 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
             behavior: HitTestBehavior.opaque,
             onTap: widget.onTap,
             onDoubleTap: widget.onFullscreenToggle,
+            onVerticalDragStart: widget.isFullscreen ? _onVerticalDragStart : null,
+            onVerticalDragUpdate: widget.isFullscreen ? _onVerticalDragUpdate : null,
+            onVerticalDragEnd: widget.isFullscreen ? _onVerticalDragEnd : null,
+            onVerticalDragCancel: widget.isFullscreen ? () => _onVerticalDragEnd(DragEndDetails()) : null,
             child: DecoratedBox(
               decoration: widget.isFullscreen
                   ? _kGradientOverlayFS
@@ -961,6 +1022,142 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
             ),
           ),
         ),
+
+        // Brightness OSD Indicator (Left Side) — isolated repaint boundary
+        if (widget.isFullscreen)
+          Positioned(
+            left: 36,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: RepaintBoundary(
+                child: ValueListenableBuilder<double?>(
+                  valueListenable: _brightnessOsdNotifier,
+                  builder: (context, value, child) {
+                    if (value == null) return const SizedBox.shrink();
+                    final percentage = (value * 100).round();
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 18),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1.0),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            value > 0.6 ? Icons.wb_sunny_rounded : (value > 0.3 ? Icons.wb_sunny_outlined : Icons.brightness_3_rounded),
+                            color: GoPlayTheme.primary,
+                            size: 24,
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: 6,
+                            height: 90,
+                            child: Stack(
+                              alignment: Alignment.bottomCenter,
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.2),
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
+                                ),
+                                FractionallySizedBox(
+                                  heightFactor: value,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: GoPlayTheme.primary,
+                                      borderRadius: BorderRadius.circular(3),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            '$percentage%',
+                            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+
+        // Volume OSD Indicator (Right Side) — isolated repaint boundary
+        if (widget.isFullscreen)
+          Positioned(
+            right: 36,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: RepaintBoundary(
+                child: ValueListenableBuilder<double?>(
+                  valueListenable: _volumeOsdNotifier,
+                  builder: (context, value, child) {
+                    if (value == null) return const SizedBox.shrink();
+                    final percentage = (value * 100).round();
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 18),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1.0),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            value == 0
+                                ? Icons.volume_off_rounded
+                                : (value < 0.5 ? Icons.volume_down_rounded : Icons.volume_up_rounded),
+                            color: GoPlayTheme.primary,
+                            size: 24,
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: 6,
+                            height: 90,
+                            child: Stack(
+                              alignment: Alignment.bottomCenter,
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.2),
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
+                                ),
+                                FractionallySizedBox(
+                                  heightFactor: value,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: GoPlayTheme.primary,
+                                      borderRadius: BorderRadius.circular(3),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            '$percentage%',
+                            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
 
         // Central Playback Controls — isolated from seek-bar repaints
         Center(

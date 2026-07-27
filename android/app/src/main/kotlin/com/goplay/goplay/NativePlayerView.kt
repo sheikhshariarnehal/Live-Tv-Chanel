@@ -187,6 +187,20 @@ class NativePlayerView(
                 player?.volume = volume
                 result.success(true)
             }
+            "setBrightness" -> {
+                val brightness = (call.arguments as? Double)?.toFloat() ?: -1.0f
+                val activity = getActivity(context)
+                if (activity != null) {
+                    activity.runOnUiThread {
+                        val lp = activity.window.attributes
+                        lp.screenBrightness = if (brightness < 0) -1.0f else brightness.coerceIn(0.01f, 1.0f)
+                        activity.window.attributes = lp
+                    }
+                    result.success(true)
+                } else {
+                    result.success(false)
+                }
+            }
             "setQuality" -> {
                 val height = call.arguments as? Int ?: -1
                 val exoPlayer = player
