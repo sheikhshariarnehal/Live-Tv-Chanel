@@ -7,7 +7,7 @@ import '../tv_focus_wrapper.dart';
 
 // ─── Pre-cached card decoration — never reallocated ──────────
 const _cardDeco = BoxDecoration(
-  gradient: GoPlayTheme.cardGradient,
+  color: GoPlayTheme.darkSurfaceContainer,
   borderRadius: BorderRadius.all(Radius.circular(8)),
   border: Border.fromBorderSide(
     BorderSide(color: GoPlayTheme.cardBorder, width: 0.8),

@@ -168,6 +168,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   Timer? _controlsTimer;
   String? _lastHistoryChannelId;
   static const _pipChannel = MethodChannel('com.goplay/pip');
+  bool _isTvDevice = false; // Set once in first build, used to skip orientation locks
 
   @override
   void initState() {
@@ -180,11 +181,10 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
     if (widget.forceFullscreen) {
       _isFullViewMode = true;
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      // Orientation lock deferred to first build() where we can detect TV
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _applyFullscreenOrientation();
+      });
     }
 
     _pipChannel.invokeMethod('setPlayerActive', true);
@@ -230,16 +230,33 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     });
 
     if (_isFullViewMode) {
-      SystemChrome.setPreferredOrientations([
+      _applyFullscreenOrientation();
+    } else {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      _safeSetOrientation(DeviceOrientation.values);
+    }
+    _startControlsTimer();
+  }
+
+  /// Apply fullscreen orientation lock — skipped on TV devices (always landscape)
+  void _applyFullscreenOrientation() {
+    if (!_isTvDevice) {
+      _safeSetOrientation([
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
       ]);
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    } else {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-      SystemChrome.setPreferredOrientations(DeviceOrientation.values);
     }
-    _startControlsTimer();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  }
+
+  /// Wraps setPreferredOrientations in try-catch — some TV dongles/sticks
+  /// throw PlatformException when you try to lock orientation.
+  void _safeSetOrientation(List<DeviceOrientation> orientations) {
+    try {
+      SystemChrome.setPreferredOrientations(orientations);
+    } catch (_) {
+      // Silently ignore on TV devices that don't support orientation changes
+    }
   }
 
   @override
@@ -249,7 +266,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     _pipChannel.setMethodCallHandler(null);
     // Allow screen to sleep again when leaving the player
     WakelockPlus.disable();
-    SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+    _safeSetOrientation(DeviceOrientation.values);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     
     // Stop tracking active channel
@@ -310,7 +327,12 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   Widget build(BuildContext context) {
     final channelsAsync = ref.watch(channelsProvider);
     final mq = MediaQuery.of(context);
-    final isTv = mq.navigationMode == NavigationMode.directional;
+    // TV detection: matches improved logic from ShellScreen
+    final isTv = mq.navigationMode == NavigationMode.directional ||
+        FocusManager.instance.highlightMode == FocusHighlightMode.traditional ||
+        mq.size.shortestSide >= 960;
+    // Cache TV detection for orientation logic (only set once)
+    if (!_isTvDevice && isTv) _isTvDevice = true;
     final isLandscape = mq.orientation == Orientation.landscape || mq.size.width > mq.size.height;
     final isWide = isTv || isLandscape || mq.size.width >= 600;
     final isFullscreen = _isFullViewMode || widget.forceFullscreen;

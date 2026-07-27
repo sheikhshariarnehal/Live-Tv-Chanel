@@ -37,6 +37,7 @@ import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.StandardMessageCodec
+import android.view.LayoutInflater
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -64,7 +65,7 @@ class NativePlayerView(
     }
 
     private val container: FrameLayout = FrameLayout(context)
-    private val playerView: PlayerView = PlayerView(context)
+    private val playerView: PlayerView = LayoutInflater.from(context).inflate(R.layout.player_view_layout, container, false) as PlayerView
     private var player: ExoPlayer? = null
     private val methodChannel: MethodChannel
     private var fallbackStage = 0
@@ -72,12 +73,7 @@ class NativePlayerView(
 
     init {
         // Setup PlayerView
-        playerView.useController = false // Flutter handles its own controls
         playerView.keepScreenOn = true // Keep screen awake while video is playing
-        playerView.layoutParams = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT,
-            FrameLayout.LayoutParams.MATCH_PARENT
-        )
         container.addView(playerView)
 
         // Setup MethodChannel for this view instance
@@ -529,10 +525,22 @@ class NativePlayerView(
         }
 
         // --- Start playback ---
-        exoPlayer.setMediaSource(mediaSource)
-        exoPlayer.prepare()
-        exoPlayer.playWhenReady = true
-        Log.d(TAG, "Player prepared and starting playback")
+        try {
+            exoPlayer.setMediaSource(mediaSource)
+            exoPlayer.prepare()
+            exoPlayer.playWhenReady = true
+            Log.d(TAG, "Player prepared and starting playback")
+        } catch (e: Throwable) {
+            Log.e(TAG, "Native player initialization error: ${e.message}", e)
+            methodChannel.invokeMethod("onError", mapOf(
+                "code" to -1,
+                "message" to (e.message ?: "Failed to initialize video decoder"),
+                "errorCodeName" to "NATIVE_INIT_ERROR",
+                "isDrmError" to false,
+                "causeName" to (e.javaClass.simpleName),
+                "causeMessage" to (e.message ?: "")
+            ))
+        }
     }
 
     private fun sendPlayerState() {

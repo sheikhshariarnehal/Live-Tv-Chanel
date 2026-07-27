@@ -46,11 +46,17 @@ class AnalyticsService with WidgetsBindingObserver {
           _osVersion = 'Web';
         } else {
           if (Platform.isAndroid) {
-            final androidInfo = await deviceInfo.androidInfo;
-            // Use Android hardware ID as fallback if stable, or generate UUID
-            _deviceId = androidInfo.id.isNotEmpty ? androidInfo.id : _generateUuid();
-            _deviceName = '${androidInfo.brand} ${androidInfo.model}';
-            _osVersion = 'Android ${androidInfo.version.release}';
+            try {
+              final androidInfo = await deviceInfo.androidInfo;
+              _deviceId = androidInfo.id.isNotEmpty ? androidInfo.id : _generateUuid();
+              _deviceName = '${androidInfo.brand} ${androidInfo.model}';
+              _osVersion = 'Android ${androidInfo.version.release}';
+            } catch (e) {
+              debugPrint('Failed to get Android device info: $e');
+              _deviceId = _generateUuid();
+              _deviceName = 'Android TV Device';
+              _osVersion = 'Android TV';
+            }
           } else if (Platform.isIOS) {
             final iosInfo = await deviceInfo.iosInfo;
             _deviceId = iosInfo.identifierForVendor ?? _generateUuid();

@@ -76,4 +76,13 @@ class CacheService {
     final box = Hive.box(AppConstants.settingsBox);
     await box.put('events_version', version);
   }
+
+  Future<void> clearAllCache() async {
+    await Hive.box(AppConstants.channelsBox).clear();
+    await Hive.box(AppConstants.eventsBox).clear();
+    await Hive.box(AppConstants.categoriesBox).clear();
+    final settingsBox = Hive.box(AppConstants.settingsBox);
+    await settingsBox.delete('channels_version');
+    await settingsBox.delete('events_version');
+  }
 }

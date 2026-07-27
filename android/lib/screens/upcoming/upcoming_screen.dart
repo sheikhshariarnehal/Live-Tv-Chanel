@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
 import '../../models/event.dart';
-import '../../widgets/cards/event_list_tile.dart';
+import '../../widgets/cards/event_card.dart';
 
 final groupedUpcomingEventsProvider = Provider.autoDispose<AsyncValue<Map<String, List<SportEvent>>>>((ref) {
   final eventsAsync = ref.watch(upcomingEventsProvider);
@@ -267,14 +267,14 @@ class _DateGroup extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
-                mainAxisExtent: 110,
-                crossAxisSpacing: 12,
+                mainAxisExtent: 100,
+                crossAxisSpacing: 8,
                 mainAxisSpacing: 0,
               ),
               itemCount: events.length,
               itemBuilder: (context, index) {
                 final event = events[index];
-                return EventListTile(
+                return EventCard(
                   key: ValueKey(event.id),
                   event: event,
                   onTap: () => onEventTap(event),
@@ -283,7 +283,7 @@ class _DateGroup extends StatelessWidget {
             )
           else
             ...events.map(
-              (event) => EventListTile(
+              (event) => EventCard(
                 key: ValueKey(event.id),
                 event: event,
                 onTap: () => onEventTap(event),
