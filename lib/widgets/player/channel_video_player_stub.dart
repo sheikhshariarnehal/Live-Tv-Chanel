@@ -1127,40 +1127,6 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
           ),
         ),
         const SizedBox(width: 4),
-        // PiP Button
-        TvFocusable(
-          isCircle: true,
-          onTap: _enterPiP,
-          child: IconButton(
-            onPressed: _enterPiP,
-            icon: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
-            iconSize: 28,
-            padding: const EdgeInsets.all(6),
-            constraints: const BoxConstraints(),
-          ),
-        ),
-        const SizedBox(width: 4),
-        // Settings / Quality Button
-        TvFocusable(
-          isCircle: true,
-          onTap: () {
-            final renderBox = context.findRenderObject() as RenderBox?;
-            final offset = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
-            _showQualityMenu(TapDownDetails(globalPosition: offset));
-          },
-          child: IconButton(
-            onPressed: () {
-              final renderBox = context.findRenderObject() as RenderBox?;
-              final offset = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
-              _showQualityMenu(TapDownDetails(globalPosition: offset));
-            },
-            icon: const Icon(Icons.settings, color: Colors.white),
-            iconSize: 28,
-            padding: const EdgeInsets.all(6),
-            constraints: const BoxConstraints(),
-          ),
-        ),
-        const SizedBox(width: 4),
         // Fullscreen Toggle Button
         if (widget.onFullscreenToggle != null)
           TvFocusable(
@@ -1203,34 +1169,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
             constraints: const BoxConstraints(),
           ),
         ),
-        // Settings Button
-        TvFocusable(
-          isCircle: true,
-          onTap: () {
-            final renderBox = context.findRenderObject() as RenderBox?;
-            final offset = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
-            _showQualityMenu(TapDownDetails(globalPosition: offset));
-          },
-          child: IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.settings, color: Colors.white),
-            iconSize: 24,
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            constraints: const BoxConstraints(),
-          ),
-        ),
-        // PiP Button
-        TvFocusable(
-          isCircle: true,
-          onTap: _enterPiP,
-          child: IconButton(
-            onPressed: _enterPiP,
-            icon: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
-            iconSize: 24,
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            constraints: const BoxConstraints(),
-          ),
-        ),
+        const SizedBox(width: 4),
         // Fullscreen Toggle Button
         if (widget.onFullscreenToggle != null)
           TvFocusable(
