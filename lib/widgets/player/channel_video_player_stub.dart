@@ -1037,12 +1037,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                     if (value == null) return const SizedBox.shrink();
                     final percentage = (value * 100).round();
                     return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 18),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.8),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1.0),
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -1050,17 +1045,18 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                             value > 0.6 ? Icons.wb_sunny_rounded : (value > 0.3 ? Icons.wb_sunny_outlined : Icons.brightness_3_rounded),
                             color: GoPlayTheme.primary,
                             size: 24,
+                            shadows: const [Shadow(color: Colors.black87, blurRadius: 4)],
                           ),
                           const SizedBox(height: 12),
                           SizedBox(
-                            width: 6,
+                            width: 5,
                             height: 90,
                             child: Stack(
                               alignment: Alignment.bottomCenter,
                               children: [
                                 Container(
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.2),
+                                    color: Colors.white.withValues(alpha: 0.25),
                                     borderRadius: BorderRadius.circular(3),
                                   ),
                                 ),
@@ -1070,6 +1066,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                                     decoration: BoxDecoration(
                                       color: GoPlayTheme.primary,
                                       borderRadius: BorderRadius.circular(3),
+                                      boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 3)],
                                     ),
                                   ),
                                 ),
@@ -1079,7 +1076,12 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                           const SizedBox(height: 10),
                           Text(
                             '$percentage%',
-                            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              shadows: [Shadow(color: Colors.black87, blurRadius: 4)],
+                            ),
                           ),
                         ],
                       ),
@@ -1104,12 +1106,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                     if (value == null) return const SizedBox.shrink();
                     final percentage = (value * 100).round();
                     return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 18),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.8),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1.0),
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -1119,17 +1116,18 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                                 : (value < 0.5 ? Icons.volume_down_rounded : Icons.volume_up_rounded),
                             color: GoPlayTheme.primary,
                             size: 24,
+                            shadows: const [Shadow(color: Colors.black87, blurRadius: 4)],
                           ),
                           const SizedBox(height: 12),
                           SizedBox(
-                            width: 6,
+                            width: 5,
                             height: 90,
                             child: Stack(
                               alignment: Alignment.bottomCenter,
                               children: [
                                 Container(
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.2),
+                                    color: Colors.white.withValues(alpha: 0.25),
                                     borderRadius: BorderRadius.circular(3),
                                   ),
                                 ),
@@ -1139,6 +1137,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                                     decoration: BoxDecoration(
                                       color: GoPlayTheme.primary,
                                       borderRadius: BorderRadius.circular(3),
+                                      boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 3)],
                                     ),
                                   ),
                                 ),
@@ -1148,7 +1147,12 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                           const SizedBox(height: 10),
                           Text(
                             '$percentage%',
-                            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              shadows: [Shadow(color: Colors.black87, blurRadius: 4)],
+                            ),
                           ),
                         ],
                       ),
