@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- App dark background matching GoPlayTheme.surface (#090D16) -->
-    <color name="splash_bg">#090D16</color>
+    <!-- App dark background matching GoPlayTheme.darkSurface (#0E0F11) -->
+    <color name="splash_bg">#0E0F11</color>
 </resources>

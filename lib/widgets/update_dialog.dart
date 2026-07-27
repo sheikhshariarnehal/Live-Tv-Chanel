@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -29,100 +28,95 @@ class UpdateDialog extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         insetPadding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xE617181C), // Translucent Carbon Black (90%)
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  width: 1.0,
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+        // GPU-safe: no BackdropFilter (crashes budget TV GPUs like Mali-G31)
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xF217181C), // Solid dark background (95% opacity)
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.08),
+              width: 1.0,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header
+                Row(
                   children: [
-                    // Header
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(11),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(14), // Premium Telegram-style Adaptive Icon Squircle
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: isForce
-                                  ? [
-                                      const Color(0xFFFF5A5F), // Bright soft red
-                                      GoPlayTheme.error,       // iOS dark red
-                                    ]
-                                  : [
-                                      const Color(0xFF33C2C8), // Lighter Cyan
-                                      GoPlayTheme.primary,     // Cyan primary
-                                    ],
-                            ),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.2),
-                              width: 1,
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.system_update_rounded,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                isForce ? 'CRITICAL UPDATE' : 'UPDATE AVAILABLE',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w900,
-                                  color: isForce ? GoPlayTheme.error : GoPlayTheme.primary,
-                                  letterSpacing: 1,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                isForce ? 'You must update to continue' : 'A new version is ready',
-                                style: TextStyle(
-                                  fontSize: 11.5,
-                                  color: GoPlayTheme.onSurfaceVariant.withValues(alpha: 0.7),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    
                     Container(
-                      margin: const EdgeInsets.symmetric(vertical: 20),
-                      height: 1,
-                      color: Colors.white.withValues(alpha: 0.06),
+                      padding: const EdgeInsets.all(11),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: isForce
+                              ? [
+                                  const Color(0xFFFF5A5F),
+                                  GoPlayTheme.error,
+                                ]
+                              : [
+                                  const Color(0xFF33C2C8),
+                                  GoPlayTheme.primary,
+                                ],
+                        ),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.system_update_rounded,
+                        color: Colors.white,
+                        size: 22,
+                      ),
                     ),
-
-                    // Dynamic Body based on download/check status
-                    _buildDialogBody(context, updateState),
-
-                    const SizedBox(height: 24),
-
-                    // Action Buttons
-                    _buildActionButtons(context, updateState, notifier),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isForce ? 'CRITICAL UPDATE' : 'UPDATE AVAILABLE',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900,
+                              color: isForce ? GoPlayTheme.error : GoPlayTheme.primary,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            isForce ? 'You must update to continue' : 'A new version is ready',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: GoPlayTheme.onSurfaceVariant.withValues(alpha: 0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-              ),
+                
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 20),
+                  height: 1,
+                  color: Colors.white.withValues(alpha: 0.06),
+                ),
+
+                // Dynamic Body based on download/check status
+                _buildDialogBody(context, updateState),
+
+                const SizedBox(height: 24),
+
+                // Action Buttons
+                _buildActionButtons(context, updateState, notifier),
+              ],
             ),
           ),
         ),
@@ -506,6 +500,7 @@ class UpdateDialog extends ConsumerWidget {
         if (!isForce) const SizedBox(width: 12),
         Expanded(
           child: ElevatedButton(
+            autofocus: true, // TV remote: auto-focus primary action
             onPressed: () {
               notifier.startDownload();
             },

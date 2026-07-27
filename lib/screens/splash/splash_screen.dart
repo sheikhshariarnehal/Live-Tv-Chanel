@@ -14,209 +14,174 @@ class SplashScreen extends ConsumerStatefulWidget {
 }
 
 class _SplashScreenState extends ConsumerState<SplashScreen>
-    with TickerProviderStateMixin {
-  late final AnimationController _pulseController;
-  late final AnimationController _bounceController;
-  late final AnimationController _fadeController;
-
-  late final Animation<double> _pulseScale;
-  late final Animation<double> _pulseOpacity;
-  late final Animation<double> _bounceScale;
-  late final Animation<double> _textFade;
-
-  // Cached static decorations — not recreated per-frame
-  static final _pulseRingDecoration = BoxDecoration(
-    shape: BoxShape.circle,
-    border: Border.all(color: GoPlayTheme.primary, width: 3),
-    boxShadow: [
-      BoxShadow(
-        color: GoPlayTheme.primary.withAlpha(76),
-        blurRadius: 20,
-        spreadRadius: 2,
-      ),
-    ],
-  );
-
-  static final _innerCircleDecoration = BoxDecoration(
-    shape: BoxShape.circle,
-    gradient: const LinearGradient(
-      colors: [GoPlayTheme.primary, GoPlayTheme.primaryDark],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    ),
-    boxShadow: [
-      BoxShadow(
-        color: GoPlayTheme.primary.withAlpha(128),
-        blurRadius: 30,
-      ),
-    ],
-  );
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animController;
+  late final Animation<double> _logoScale;
+  late final Animation<double> _logoOpacity;
+  late final Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    // ── Pulse Ring: scale 0.6→1.4, opacity 1→0, 1.8s loop ──
-    _pulseController = AnimationController(
+    _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
-    )..repeat();
-
-    final pulseCurve = CurvedAnimation(
-      parent: _pulseController,
-      curve: const Cubic(0.24, 0, 0.38, 1),
+      duration: const Duration(milliseconds: 700),
     );
-    _pulseScale = Tween<double>(begin: 0.6, end: 1.4).animate(pulseCurve);
-    _pulseOpacity = Tween<double>(begin: 1.0, end: 0.0).animate(pulseCurve);
 
-    // ── Inner Circle Bounce: scale 1.0→0.92→1.0, 1.8s loop ──
-    _bounceController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1800),
-    )..repeat();
-
-    _bounceScale = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.92), weight: 50),
-      TweenSequenceItem(tween: Tween(begin: 0.92, end: 1.0), weight: 50),
-    ]).animate(CurvedAnimation(
-      parent: _bounceController,
-      curve: Curves.easeInOut,
-    ));
-
-    // ── Text fade-in: 600ms ──
-    _fadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
+    _logoScale = Tween<double>(begin: 0.90, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animController,
+        curve: const Interval(0.0, 0.7, curve: Curves.easeOutCubic),
+      ),
     );
-    _textFade = CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
-    _fadeController.forward();
 
-    // ── Navigate when BOTH conditions are met:
-    //    (a) appInitFuture completes (Hive+Supabase+Proxy ready)
-    //    (b) minimum 900ms has elapsed (≥1 full animation cycle)
-    //    Whichever is LAST wins — no artificial blocking if init is fast.
+    _logoOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animController,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+      ),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animController,
+        curve: const Interval(0.2, 1.0, curve: Curves.easeOut),
+      ),
+    );
+
+    _animController.forward();
+
+    // Navigate when appInitFuture completes and min duration elapses
     Future.wait([
-      appInitFuture,
-      Future.delayed(const Duration(milliseconds: 900)),
+      appInitFuture.catchError((e) {
+        debugPrint('appInitFuture error in Splash: $e');
+      }),
+      Future.delayed(const Duration(milliseconds: 750)),
     ]).then((_) {
       if (!mounted) return;
-      
-      // Initialize analytics service
-      ref.read(analyticsServiceProvider).initialize();
-      
+
+      unawaited(ref.read(analyticsServiceProvider).initialize().catchError((e) {
+        debugPrint('Analytics init error: $e');
+      }));
+
       context.go('/home');
+    }).catchError((_) {
+      if (mounted) {
+        context.go('/home');
+      }
     });
   }
 
   @override
   void dispose() {
-    _pulseController.dispose();
-    _bounceController.dispose();
-    _fadeController.dispose();
+    _animController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF17181C), // Carbon Black
-      body: SizedBox.expand(
-        child: DecoratedBox(
-          decoration: const BoxDecoration(
-            gradient: RadialGradient(
-              colors: [Color(0xFF222326), Color(0xFF17181C)],
-              center: Alignment.center,
-              radius: 1.0,
-            ),
-          ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // ── Animated Logo ──────────────────────────────
-                SizedBox(
-                  width: 150,
-                  height: 150,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Pulsing outer ring
-                      AnimatedBuilder(
-                        animation: _pulseController,
-                        builder: (_, child) => Transform.scale(
-                          scale: _pulseScale.value,
-                          child: Opacity(
-                            opacity: _pulseOpacity.value,
-                            child: child,
-                          ),
-                        ),
-                        child: DecoratedBox(
-                          decoration: _pulseRingDecoration,
-                          child: const SizedBox(width: 90, height: 90),
-                        ),
-                      ),
-                      // Bouncing inner circle
-                      AnimatedBuilder(
-                        animation: _bounceController,
-                        builder: (_, child) => Transform.scale(
-                          scale: _bounceScale.value,
-                          child: child,
-                        ),
-                        child: DecoratedBox(
-                          decoration: _innerCircleDecoration,
-                          child: const SizedBox(
-                            width: 54,
-                            height: 54,
-                            child: Icon(
-                              Icons.play_arrow_rounded,
-                              size: 32,
-                              color: Color(0xFF17181C), // Carbon Black
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
+      backgroundColor: GoPlayTheme.darkSurface, // Solid Carbon Black #17181C
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(flex: 3),
 
-                // ── Fading Text ────────────────────────────────
-                FadeTransition(
-                  opacity: _textFade,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ShaderMask(
-                        shaderCallback: (bounds) => const LinearGradient(
-                          colors: [Color(0xFFFFFFFF), GoPlayTheme.primary],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ).createShader(bounds),
-                        child: const Text(
-                          'GoPlay',
-                          style: TextStyle(
-                            fontSize: 36,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: 5.0,
-                          ),
+              // Clean Logo Display (No heavy gradients or glow halos)
+              AnimatedBuilder(
+                animation: _animController,
+                builder: (context, child) {
+                  return Opacity(
+                    opacity: _logoOpacity.value,
+                    child: Transform.scale(
+                      scale: _logoScale.value,
+                      child: child,
+                    ),
+                  );
+                },
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    width: 104,
+                    height: 104,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: 104,
+                        height: 104,
+                        decoration: BoxDecoration(
+                          color: GoPlayTheme.primary,
+                          borderRadius: BorderRadius.circular(24),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'LIVE SPORTS STREAMING',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF71768E), // Alabaster Grey
-                          letterSpacing: 6.0,
+                        child: const Icon(
+                          Icons.play_arrow_rounded,
+                          size: 52,
+                          color: Colors.white,
                         ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ),
-              ],
-            ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Minimalist Branding Text
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Text(
+                      'GoPlay',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        letterSpacing: 2.0,
+                      ),
+                    ),
+                    SizedBox(height: 6),
+                    Text(
+                      'LIVE SPORTS STREAMING',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: GoPlayTheme.darkOnSurfaceVariant, // Alabaster Grey #71768E
+                        letterSpacing: 4.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const Spacer(flex: 2),
+
+              // Clean Lightweight Progress Indicator
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.0,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          GoPlayTheme.primary.withAlpha(220),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 48),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

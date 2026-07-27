@@ -10,7 +10,7 @@ import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
 import '../../models/event.dart';
 
-import '../../widgets/cards/event_list_tile.dart';
+import '../../widgets/cards/event_card.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/live_badge.dart';
 import '../../widgets/team_flag.dart';
@@ -120,6 +120,7 @@ class HomeScreen extends ConsumerWidget {
     return Material(
       color: GoPlayTheme.surface,
       child: CustomScrollView(
+        cacheExtent: 120.0,
         slivers: [
           // Collapsing Dark-Themed App Bar
           SliverAppBar(
@@ -332,6 +333,12 @@ class HomeScreen extends ConsumerWidget {
               onAction: () => context.go('/upcoming'),
             ),
           ),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 12),
+              child: RepaintBoundary(child: _SportCategoryFilterChips()),
+            ),
+          ),
           const _TodaySchedule(),
 
           // Recently Watched
@@ -409,8 +416,7 @@ class _HeroBannerState extends ConsumerState<_HeroBanner> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(events.length, (index) {
                       final bool active = currentPage == index;
-                      return AnimatedContainer(
-                        duration: const Duration(milliseconds: 250),
+                      return Container(
                         margin: const EdgeInsets.symmetric(horizontal: 4),
                         width: active ? 16 : 6,
                         height: 6,
@@ -867,21 +873,133 @@ class _CountdownButton extends StatelessWidget {
   }
 }
 // â”€â”€â”€ Today's Schedule â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Minimal Sport Category Filter Chips ───────────────────────────────────────
+class _SportCategoryFilterChips extends ConsumerWidget {
+  const _SportCategoryFilterChips();
+
+  static const List<String> _popularSportsPriority = [
+    'Cricket',
+    'Football',
+    'Motorsports',
+    'Motorsport',
+    'Formula 1',
+    'Tennis',
+    'Golf',
+    'Volleyball',
+    'Basketball',
+    'Boxing',
+    'Baseball',
+    'Rugby',
+    'American Football',
+    'Cycling',
+  ];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final eventsAsync = ref.watch(eventsProvider);
+    final selectedSport = ref.watch(selectedSportFilterProvider);
+
+    return eventsAsync.when(
+      data: (events) {
+        // Dynamically extract unique categories present in database events
+        final rawSports = events
+            .map((e) => e.sport.trim())
+            .where((s) => s.isNotEmpty)
+            .toSet();
+
+        int getPriority(String sport) {
+          final lower = sport.toLowerCase();
+          for (int i = 0; i < _popularSportsPriority.length; i++) {
+            if (_popularSportsPriority[i].toLowerCase() == lower) {
+              return i;
+            }
+          }
+          return 999;
+        }
+
+        final sortedSports = rawSports.toList()
+          ..sort((a, b) {
+            final pA = getPriority(a);
+            final pB = getPriority(b);
+            if (pA != pB) return pA.compareTo(pB);
+            return a.compareTo(b);
+          });
+
+        final sportsList = ['All', ...sortedSports];
+
+        return SizedBox(
+          height: 32,
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            scrollDirection: Axis.horizontal,
+            addRepaintBoundaries: false,
+            addAutomaticKeepAlives: false,
+            itemCount: sportsList.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 8),
+            itemBuilder: (context, index) {
+              final sport = sportsList[index];
+              final isSelected = selectedSport.toLowerCase() == sport.toLowerCase();
+
+              return TvFocusable(
+                borderRadius: BorderRadius.circular(8),
+                onTap: () {
+                  ref.read(selectedSportFilterProvider.notifier).select(sport);
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? Colors.white
+                        : GoPlayTheme.darkSurfaceContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Text(
+                      sport,
+                      style: GoogleFonts.inter(
+                        color: isSelected
+                            ? const Color(0xFF0F0F0F)
+                            : Colors.white,
+                        fontSize: 13,
+                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
 class _TodaySchedule extends ConsumerWidget {
   const _TodaySchedule();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final eventsAsync = ref.watch(todayEventsProvider);
+    final selectedSport = ref.watch(selectedSportFilterProvider);
 
     return eventsAsync.when(
-      data: (todayEvents) {
+      data: (allEvents) {
+        final todayEvents = selectedSport.toLowerCase() == 'all'
+            ? allEvents
+            : allEvents
+                .where((e) => e.sport.toLowerCase() == selectedSport.toLowerCase())
+                .toList();
+
         if (todayEvents.isEmpty) {
           return const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               child: Text(
-                'No events scheduled for today',
+                'No events scheduled for this category today',
                 style: TextStyle(color: GoPlayTheme.onSurfaceVariant),
               ),
             ),
@@ -915,14 +1033,14 @@ class _TodaySchedule extends ConsumerWidget {
             sliver: SliverGrid.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
-                mainAxisExtent: 110,
-                crossAxisSpacing: 12,
+                mainAxisExtent: 100,
+                crossAxisSpacing: 8,
                 mainAxisSpacing: 0,
               ),
               itemCount: todayEvents.length,
               itemBuilder: (context, index) {
                 final event = todayEvents[index];
-                return EventListTile(
+                return EventCard(
                   key: ValueKey(event.id),
                   event: event,
                   onTap: () => handleTap(event),
@@ -932,13 +1050,14 @@ class _TodaySchedule extends ConsumerWidget {
           );
         }
 
-        return SliverList.builder(
+        return SliverFixedExtentList.builder(
+          itemExtent: 100.0,
           itemCount: todayEvents.length,
           itemBuilder: (context, index) {
             final event = todayEvents[index];
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: EventListTile(
+              child: EventCard(
                 key: ValueKey(event.id),
                 event: event,
                 onTap: () => handleTap(event),
@@ -978,6 +1097,7 @@ class _TrendingChannels extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: channels.length,
             addAutomaticKeepAlives: false,
+            addRepaintBoundaries: false,
             itemBuilder: (context, index) {
               final ch = channels[index];
               return _ChannelItem(
@@ -1016,6 +1136,7 @@ class _RecentlyWatched extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: history.length,
             addAutomaticKeepAlives: false,
+            addRepaintBoundaries: false,
             itemBuilder: (context, index) {
               final ch = history[index];
               return _ChannelItem(

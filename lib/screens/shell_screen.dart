@@ -28,7 +28,12 @@ class ShellScreen extends StatelessWidget {
 
     // Single MediaQuery read — avoids multiple rebuild subscriptions.
     final mq = MediaQuery.of(context);
-    final isTv = mq.navigationMode == NavigationMode.directional;
+    // TV detection: check directional nav mode, OR traditional focus highlight
+    // mode (catches AOSP TV boxes that don't report directional), OR wide
+    // screens >= 960px (typical TV resolution).
+    final isTv = mq.navigationMode == NavigationMode.directional ||
+        FocusManager.instance.highlightMode == FocusHighlightMode.traditional ||
+        mq.size.shortestSide >= 960;
     final isDesktop = isTv || mq.size.width >= 800;
     final bottomPadding = mq.padding.bottom;
 

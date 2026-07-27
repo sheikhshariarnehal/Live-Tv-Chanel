@@ -953,6 +953,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: widget.onTap,
+            onDoubleTap: widget.onFullscreenToggle,
             child: DecoratedBox(
               decoration: widget.isFullscreen
                   ? _kGradientOverlayFS
@@ -1186,51 +1187,65 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // Volume Button
-        IconButton(
-          onPressed: _toggleMute,
-          icon: Icon(
-            _isMuted || _volume == 0
-                ? Icons.volume_off
-                : (_volume < 0.5 ? Icons.volume_down : Icons.volume_up),
-            color: Colors.white,
-          ),
-          iconSize: 24,
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          constraints: const BoxConstraints(),
-        ),
-        // Settings Button
-        GestureDetector(
-          onTapDown: (details) => _showQualityMenu(details),
-          behavior: HitTestBehavior.opaque,
-          child: IgnorePointer(
-            child: IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.settings, color: Colors.white),
-              iconSize: 24,
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              constraints: const BoxConstraints(),
-            ),
-          ),
-        ),
-        // PiP Button
-        IconButton(
-          onPressed: _enterPiP,
-          icon: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
-          iconSize: 24,
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          constraints: const BoxConstraints(),
-        ),
-        // Fullscreen Toggle Button
-        if (widget.onFullscreenToggle != null)
-          IconButton(
-            onPressed: widget.onFullscreenToggle,
+        TvFocusable(
+          isCircle: true,
+          onTap: _toggleMute,
+          child: IconButton(
+            onPressed: _toggleMute,
             icon: Icon(
-              widget.isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
+              _isMuted || _volume == 0
+                  ? Icons.volume_off
+                  : (_volume < 0.5 ? Icons.volume_down : Icons.volume_up),
               color: Colors.white,
             ),
             iconSize: 24,
             padding: const EdgeInsets.symmetric(horizontal: 6),
             constraints: const BoxConstraints(),
+          ),
+        ),
+        // Settings Button
+        TvFocusable(
+          isCircle: true,
+          onTap: () {
+            final renderBox = context.findRenderObject() as RenderBox?;
+            final offset = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
+            _showQualityMenu(TapDownDetails(globalPosition: offset));
+          },
+          child: IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.settings, color: Colors.white),
+            iconSize: 24,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            constraints: const BoxConstraints(),
+          ),
+        ),
+        // PiP Button
+        TvFocusable(
+          isCircle: true,
+          onTap: _enterPiP,
+          child: IconButton(
+            onPressed: _enterPiP,
+            icon: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
+            iconSize: 24,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            constraints: const BoxConstraints(),
+          ),
+        ),
+        // Fullscreen Toggle Button
+        if (widget.onFullscreenToggle != null)
+          TvFocusable(
+            isCircle: true,
+            onTap: widget.onFullscreenToggle,
+            child: IconButton(
+              onPressed: widget.onFullscreenToggle,
+              icon: Icon(
+                widget.isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
+                color: Colors.white,
+              ),
+              iconSize: 24,
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              constraints: const BoxConstraints(),
+            ),
           ),
       ],
     );

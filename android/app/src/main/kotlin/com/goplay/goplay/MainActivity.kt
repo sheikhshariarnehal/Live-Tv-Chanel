@@ -1,5 +1,6 @@
 package com.goplay.goplay
 
+import android.content.pm.PackageManager
 import android.app.PictureInPictureParams
 import android.os.Build
 import android.os.Bundle
@@ -13,6 +14,11 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
     private var pipChannel: MethodChannel? = null
     private var isPlayerActive = false
+
+    private fun supportsPiP(): Boolean {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+                packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -30,7 +36,7 @@ class MainActivity : FlutterActivity() {
         pipChannel?.setMethodCallHandler { call, result ->
             when (call.method) {
                 "enterPiP" -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    if (supportsPiP()) {
                         try {
                             val builder = PictureInPictureParams.Builder()
                             builder.setAspectRatio(Rational(16, 9))
@@ -40,7 +46,7 @@ class MainActivity : FlutterActivity() {
                             result.error("PIP_FAILED", e.message, null)
                         }
                     } else {
-                        result.error("UNSUPPORTED", "PiP not supported on this version of Android", null)
+                        result.error("UNSUPPORTED", "PiP not supported on this device", null)
                     }
                 }
                 "setPlayerActive" -> {
@@ -54,7 +60,7 @@ class MainActivity : FlutterActivity() {
 
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
-        if (isPlayerActive && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (isPlayerActive && supportsPiP()) {
             try {
                 val builder = PictureInPictureParams.Builder()
                 builder.setAspectRatio(Rational(16, 9))
