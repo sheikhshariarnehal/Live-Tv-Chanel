@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../core/theme.dart';
 
-/// Wraps any widget to make it fully navigable via Android TV / D-Pad remote control,
-/// featuring visual focus indicators (glow, border highlight, scale up) AND
-/// instant Facebook/Telegram-style touch responsiveness (haptics + 0ms pointer-down press scale).
+/// Platform-aware interaction wrapper.
+///
+/// On Android TV / D-Pad devices, lazily provisions FocusNodes and Focus widgets
+/// with visual focus indicators (glow, border highlight, scale up) and key handlers.
+///
+/// On Mobile touch devices (phones/tablets), completely BYPASSES FocusNode allocation
+/// and focus tree registration, providing instant Facebook/Telegram-style touch responsiveness
+/// (haptics + 0ms pointer-down press scale down).
 class TvFocusable extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
@@ -32,26 +37,27 @@ class TvFocusable extends StatefulWidget {
 }
 
 class _TvFocusableState extends State<TvFocusable> {
-  late FocusNode _focusNode;
+  FocusNode? _focusNode;
   bool _isFocused = false;
   bool _isPressed = false;
   bool _ownsFocusNode = false;
 
-  @override
-  void initState() {
-    super.initState();
-    if (widget.focusNode != null) {
-      _focusNode = widget.focusNode!;
-    } else {
-      _focusNode = FocusNode();
-      _ownsFocusNode = true;
+  void _ensureFocusNode() {
+    if (_focusNode == null) {
+      if (widget.focusNode != null) {
+        _focusNode = widget.focusNode!;
+        _ownsFocusNode = false;
+      } else {
+        _focusNode = FocusNode();
+        _ownsFocusNode = true;
+      }
     }
   }
 
   @override
   void dispose() {
-    if (_ownsFocusNode) {
-      _focusNode.dispose();
+    if (_ownsFocusNode && _focusNode != null) {
+      _focusNode!.dispose();
     }
     super.dispose();
   }
@@ -124,20 +130,84 @@ class _TvFocusableState extends State<TvFocusable> {
 
   @override
   Widget build(BuildContext context) {
-    final focusColor = widget.focusColor ?? GoPlayTheme.primary;
+    final mq = MediaQuery.of(context);
     final isDpadOrKey = FocusManager.instance.highlightMode == FocusHighlightMode.traditional ||
-        MediaQuery.of(context).navigationMode == NavigationMode.directional;
-    final showVisuals = _isFocused && isDpadOrKey && FocusManager.instance.highlightMode != FocusHighlightMode.touch;
+        mq.navigationMode == NavigationMode.directional ||
+        mq.size.shortestSide >= 960;
+
+    final isTvMode = isDpadOrKey || widget.autoFocus || widget.focusNode != null;
 
     final shape = widget.isCircle ? BoxShape.circle : BoxShape.rectangle;
     final borderRadius = widget.isCircle ? null : (widget.borderRadius ?? BorderRadius.circular(12));
+    final focusColor = widget.focusColor ?? GoPlayTheme.primary;
 
     final double scale = _isPressed
         ? 0.97
-        : (showVisuals ? widget.focusedScale : 1.0);
+        : (_isFocused ? widget.focusedScale : 1.0);
+
+    final Widget content = Listener(
+      onPointerDown: _onPointerDown,
+      onPointerUp: _onPointerUp,
+      onPointerCancel: _onPointerCancel,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedScale(
+          scale: scale,
+          duration: Duration(milliseconds: _isPressed ? 60 : 180),
+          curve: _isPressed ? Curves.decelerate : Curves.easeOutCubic,
+          child: Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.none,
+            children: [
+              widget.child,
+
+              // Instant touch-down press overlay (Facebook/Telegram style)
+              if (_isPressed)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: shape,
+                        borderRadius: borderRadius,
+                        color: Colors.white.withValues(alpha: 0.06),
+                      ),
+                    ),
+                  ),
+                ),
+
+              // TV D-Pad Focus Visuals
+              if (isTvMode && _isFocused)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: shape,
+                        borderRadius: borderRadius,
+                        color: focusColor.withValues(alpha: 0.12),
+                        border: Border.all(
+                          color: focusColor,
+                          width: 2.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // On mobile touch-based devices, completely BYPASS Focus widget & FocusNode registration!
+    if (!isTvMode) {
+      return content;
+    }
+
+    _ensureFocusNode();
 
     return Focus(
-      focusNode: _focusNode,
+      focusNode: _focusNode!,
       autofocus: widget.autoFocus,
       onFocusChange: (focused) {
         if (mounted) {
@@ -147,59 +217,7 @@ class _TvFocusableState extends State<TvFocusable> {
         }
       },
       onKeyEvent: _handleKeyEvent,
-      child: Listener(
-        onPointerDown: _onPointerDown,
-        onPointerUp: _onPointerUp,
-        onPointerCancel: _onPointerCancel,
-        child: GestureDetector(
-          onTap: widget.onTap,
-          behavior: HitTestBehavior.opaque,
-          child: AnimatedScale(
-            scale: scale,
-            duration: Duration(milliseconds: _isPressed ? 60 : 180),
-            curve: _isPressed ? Curves.decelerate : Curves.easeOutCubic,
-            child: Stack(
-              alignment: Alignment.center,
-              clipBehavior: Clip.none,
-              children: [
-                widget.child,
-
-                // Instant touch-down press overlay (Facebook/Telegram style)
-                if (_isPressed)
-                  Positioned.fill(
-                    child: IgnorePointer(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: shape,
-                          borderRadius: borderRadius,
-                          color: Colors.white.withValues(alpha: 0.06),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                // TV D-Pad Focus Visuals
-                if (showVisuals)
-                  Positioned.fill(
-                    child: IgnorePointer(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: shape,
-                          borderRadius: borderRadius,
-                          color: focusColor.withValues(alpha: 0.12),
-                          border: Border.all(
-                            color: focusColor,
-                            width: 2.0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
+      child: content,
     );
   }
 }
