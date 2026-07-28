@@ -1764,25 +1764,31 @@ class _CentralControls extends StatelessWidget {
     final double playSize = isFullscreen ? 60 : 44;
     final double spacing = isFullscreen ? 20 : 12;
 
+    final hasPrev = onPrev != null;
+    final hasNext = onNext != null;
+
     return Row(
+      mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (onPrev != null)
-          TvFocusable(
-            isCircle: true,
-            onTap: onPrev,
-            child: IconButton(
-              onPressed: onPrev,
-              padding: const EdgeInsets.all(6),
-              constraints: const BoxConstraints(),
-              icon: const Icon(
-                Icons.skip_previous_rounded,
-                color: Colors.white,
-              ),
-              iconSize: iconSize,
+        // 1. Previous Channel Button (Fixed Position)
+        TvFocusable(
+          isCircle: true,
+          onTap: onPrev,
+          child: IconButton(
+            onPressed: onPrev,
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(),
+            icon: Icon(
+              Icons.skip_previous_rounded,
+              color: hasPrev ? Colors.white : Colors.white38,
             ),
+            iconSize: iconSize,
           ),
-        if (onPrev != null) SizedBox(width: spacing),
+        ),
+        SizedBox(width: spacing),
+
+        // 2. Rewind 10s Button (Fixed Position)
         TvFocusable(
           isCircle: true,
           onTap: onRewind,
@@ -1795,6 +1801,8 @@ class _CentralControls extends StatelessWidget {
           ),
         ),
         SizedBox(width: spacing),
+
+        // 3. Play / Pause Button (Fixed Position)
         TvFocusable(
           isCircle: true,
           onTap: onPlayPause,
@@ -1824,6 +1832,8 @@ class _CentralControls extends StatelessWidget {
           ),
         ),
         SizedBox(width: spacing),
+
+        // 4. Forward 10s Button (Fixed Position)
         TvFocusable(
           isCircle: true,
           onTap: onForward,
@@ -1835,22 +1845,23 @@ class _CentralControls extends StatelessWidget {
             iconSize: iconSize,
           ),
         ),
-        if (onNext != null) SizedBox(width: spacing),
-        if (onNext != null)
-          TvFocusable(
-            isCircle: true,
-            onTap: onNext,
-            child: IconButton(
-              onPressed: onNext,
-              padding: const EdgeInsets.all(6),
-              constraints: const BoxConstraints(),
-              icon: const Icon(
-                Icons.skip_next_rounded,
-                color: Colors.white,
-              ),
-              iconSize: iconSize,
+        SizedBox(width: spacing),
+
+        // 5. Next Channel Button (Fixed Position)
+        TvFocusable(
+          isCircle: true,
+          onTap: onNext,
+          child: IconButton(
+            onPressed: onNext,
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(),
+            icon: Icon(
+              Icons.skip_next_rounded,
+              color: hasNext ? Colors.white : Colors.white38,
             ),
+            iconSize: iconSize,
           ),
+        ),
       ],
     );
   }
