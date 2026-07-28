@@ -120,7 +120,8 @@ class HomeScreen extends ConsumerWidget {
     return Material(
       color: GoPlayTheme.surface,
       child: CustomScrollView(
-        cacheExtent: 120.0,
+        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+        cacheExtent: 250.0,
         slivers: [
           // Collapsing Dark-Themed App Bar
           SliverAppBar(
