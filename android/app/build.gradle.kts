@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.goplay.goplay"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "26.1.10909125"
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -29,14 +29,21 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        ndk {
-            abiFilters.addAll(setOf("armeabi-v7a", "arm64-v8a", "x86_64"))
-        }
+        // NDK ABI splits are configured below in splits.abi
     }
 
     packaging {
         jniLibs {
             useLegacyPackaging = true
+        }
+    }
+
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86_64")
+            isUniversalApk = false
         }
     }
 
@@ -51,7 +58,12 @@ android {
     applicationVariants.all {
         outputs.all {
             val output = this as? com.android.build.gradle.internal.api.ApkVariantOutputImpl
-            output?.outputFileName = "goplay-${versionName}.apk"
+            val abiFilter = output?.getFilter(com.android.build.OutputFile.ABI)
+            if (abiFilter != null) {
+                output.outputFileName = "goplay-${versionName}-${abiFilter}.apk"
+            } else {
+                output?.outputFileName = "goplay-${versionName}.apk"
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ import '../core/constants.dart';
 import '../models/channel.dart';
 import '../models/event.dart';
 import '../models/category.dart';
+import '../models/announcement.dart';
 
 /// Service for managing local Hive cache operations for channels, categories, events, and sync versions.
 class CacheService {
@@ -84,5 +85,21 @@ class CacheService {
     final settingsBox = Hive.box(AppConstants.settingsBox);
     await settingsBox.delete('channels_version');
     await settingsBox.delete('events_version');
+  }
+
+  // ─── Announcements ──────────────────────────────────────────
+  List<Announcement> getLocalAnnouncements() {
+    final box = Hive.box(AppConstants.announcementsBox);
+    final List<dynamic>? rawList = box.get('announcements');
+    if (rawList == null) return [];
+    return rawList
+        .map((e) => Announcement.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
+  }
+
+  Future<void> saveLocalAnnouncements(List<Announcement> announcements) async {
+    final box = Hive.box(AppConstants.announcementsBox);
+    final rawList = announcements.map((a) => a.toJson()).toList();
+    await box.put('announcements', rawList);
   }
 }
