@@ -26,4 +26,15 @@ class Announcement {
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'body': body,
+      'type': type,
+      'active': active,
+      'created_at': createdAt.toIso8601String(),
+    };
+  }
 }

@@ -86,6 +86,14 @@ class SyncService {
         _ref.invalidate(eventsProvider);
       }
 
+      // 5. Sync announcements (lightweight — no version check, always refresh)
+      try {
+        final remoteAnnouncements = await supabase.getAnnouncements();
+        await cache.saveLocalAnnouncements(remoteAnnouncements);
+      } catch (e) {
+        debugPrint('SyncService: Announcements sync failed (non-fatal): $e');
+      }
+
       debugPrint('SyncService: Background sync check completed successfully.');
     } catch (e, stackTrace) {
       debugPrint('SyncService: Error occurred during synchronization: $e\n$stackTrace');

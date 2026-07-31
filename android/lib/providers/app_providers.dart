@@ -140,6 +140,53 @@ final todayEventsProvider = Provider<AsyncValue<List<SportEvent>>>((ref) {
   });
 });
 
+// ─── Sorted Sport Categories (cached, not recomputed on chip tap) ─────
+const List<String> _popularSportsPriority = [
+  'Cricket', 'Football', 'Motorsports', 'Motorsport', 'Formula 1',
+  'Tennis', 'Golf', 'Volleyball', 'Basketball', 'Boxing',
+  'Baseball', 'Rugby', 'American Football', 'Cycling',
+];
+
+final sortedSportCategoriesProvider = Provider<AsyncValue<List<String>>>((ref) {
+  final eventsState = ref.watch(eventsProvider);
+  return eventsState.whenData((events) {
+    final rawSports = events
+        .map((e) => e.sport.trim())
+        .where((s) => s.isNotEmpty)
+        .toSet();
+
+    int getPriority(String sport) {
+      final lower = sport.toLowerCase();
+      for (int i = 0; i < _popularSportsPriority.length; i++) {
+        if (_popularSportsPriority[i].toLowerCase() == lower) return i;
+      }
+      return 999;
+    }
+
+    final sortedSports = rawSports.toList()
+      ..sort((a, b) {
+        final pA = getPriority(a);
+        final pB = getPriority(b);
+        if (pA != pB) return pA.compareTo(pB);
+        return a.compareTo(b);
+      });
+
+    return ['All', ...sortedSports];
+  });
+});
+
+// ─── Filtered Today Events by Sport (cached per sport key) ────────────
+final filteredTodayEventsProvider =
+    Provider.family<AsyncValue<List<SportEvent>>, String>((ref, sport) {
+  final todayState = ref.watch(todayEventsProvider);
+  return todayState.whenData((allEvents) {
+    if (sport.toLowerCase() == 'all') return allEvents;
+    return allEvents
+        .where((e) => e.sport.toLowerCase() == sport.toLowerCase())
+        .toList();
+  });
+});
+
 // ─── Categories ───────────────────────────────────────────────
 final categoriesProvider = FutureProvider<List<Category>>((ref) async {
   final cache = ref.watch(cacheServiceProvider);
@@ -186,10 +233,14 @@ final activeCategoriesWithCountsProvider = Provider<AsyncValue<List<(Category, i
   return AsyncValue.data(list);
 });
 
-// ─── Announcements ────────────────────────────────────────────
+// ─── Announcements (cache-first, background refresh) ─────────
 final announcementsProvider = FutureProvider<List<Announcement>>((ref) async {
-  final service = ref.read(supabaseServiceProvider);
-  return service.getAnnouncements();
+  final cache = ref.read(cacheServiceProvider);
+  final local = cache.getLocalAnnouncements();
+  if (local.isNotEmpty) return local;
+  // If cache is empty, wait for sync to populate it
+  await ref.watch(appSyncProvider.future);
+  return cache.getLocalAnnouncements();
 });
 
 // ─── Search ───────────────────────────────────────────────────
