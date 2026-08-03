@@ -151,17 +151,17 @@ class EventCard extends ConsumerWidget {
     final timeLabel = _formatTime(event.startTime);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 4),
       child: RepaintBoundary(
         child: TvFocusable(
           borderRadius: BorderRadius.circular(12),
           onTap: onTap,
           child: SizedBox(
-            height: 92,
+            height: 96,
             child: DecoratedBox(
               decoration: isLive ? _kLiveCardDecoration : _kUpcomingCardDecoration,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -225,8 +225,8 @@ class EventCard extends ConsumerWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            TeamFlagWidget(flag: event.homeTeam.flag, size: 24),
-                            const SizedBox(height: 4),
+                            TeamFlagWidget(flag: event.homeTeam.flag, size: 22),
+                            const SizedBox(height: 2),
                             Text(
                               event.homeTeam.name,
                               style: _kTeamNameStyle,
@@ -273,8 +273,8 @@ class EventCard extends ConsumerWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            TeamFlagWidget(flag: event.awayTeam.flag, size: 24),
-                            const SizedBox(height: 4),
+                            TeamFlagWidget(flag: event.awayTeam.flag, size: 22),
+                            const SizedBox(height: 2),
                             Text(
                               event.awayTeam.name,
                               style: _kTeamNameStyle,

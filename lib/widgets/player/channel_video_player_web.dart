@@ -12,6 +12,8 @@ Widget getChannelVideoPlayer({
   VoidCallback? onPreviousChannel,
   VoidCallback? onNextChannel,
   VoidCallback? onInteract,
+  VoidCallback? onFocusChannelPanel, // unused on web
+  bool isTvDevice = false,           // unused on web
 }) {
   return ChannelVideoPlayerWeb(
     channel: channel,
@@ -46,6 +48,11 @@ class ChannelVideoPlayerWeb extends StatefulWidget implements ChannelVideoPlayer
   final VoidCallback? onNextChannel;
   @override
   final VoidCallback? onInteract;
+  // TV-panel focus routing — not used on web but required by interface
+  @override
+  final VoidCallback? onFocusChannelPanel;
+  @override
+  final bool isTvDevice;
 
   const ChannelVideoPlayerWeb({
     super.key,
@@ -57,6 +64,8 @@ class ChannelVideoPlayerWeb extends StatefulWidget implements ChannelVideoPlayer
     this.onPreviousChannel,
     this.onNextChannel,
     this.onInteract,
+    this.onFocusChannelPanel,
+    this.isTvDevice = false,
   });
 
   @override

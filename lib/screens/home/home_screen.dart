@@ -1030,7 +1030,7 @@ class _TrendingChannels extends ConsumerWidget {
         if (channels.isEmpty) return const SizedBox.shrink();
 
         return SizedBox(
-          height: 90,
+          height: 100,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1220,13 +1220,14 @@ class _ChannelItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(4),
+          padding: const EdgeInsets.all(2),
           child: SizedBox(
             width: 72,
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 ChannelAvatar(channel: channel, showBorder: showBorder),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
                   channel.name,
                   style: nameStyle,

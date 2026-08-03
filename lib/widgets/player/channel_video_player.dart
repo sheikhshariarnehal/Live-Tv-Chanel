@@ -12,6 +12,11 @@ abstract class ChannelVideoPlayer extends StatefulWidget {
   final VoidCallback? onPreviousChannel;
   final VoidCallback? onNextChannel;
   final VoidCallback? onInteract;
+  /// TV-only: called when D-Pad Right is pressed to shift focus to the
+  /// channel-list side panel. Null on non-TV layouts.
+  final VoidCallback? onFocusChannelPanel;
+  final bool isTvDevice;
+  final FocusNode? playPauseFocusNode;
 
   const ChannelVideoPlayer({
     super.key,
@@ -23,6 +28,9 @@ abstract class ChannelVideoPlayer extends StatefulWidget {
     this.onPreviousChannel,
     this.onNextChannel,
     this.onInteract,
+    this.onFocusChannelPanel,
+    this.isTvDevice = false,
+    this.playPauseFocusNode,
   });
 
   static Widget create({
@@ -34,6 +42,9 @@ abstract class ChannelVideoPlayer extends StatefulWidget {
     VoidCallback? onPreviousChannel,
     VoidCallback? onNextChannel,
     VoidCallback? onInteract,
+    VoidCallback? onFocusChannelPanel,
+    bool isTvDevice = false,
+    FocusNode? playPauseFocusNode,
   }) {
     return getChannelVideoPlayer(
       channel: channel,
@@ -44,6 +55,9 @@ abstract class ChannelVideoPlayer extends StatefulWidget {
       onPreviousChannel: onPreviousChannel,
       onNextChannel: onNextChannel,
       onInteract: onInteract,
+      onFocusChannelPanel: onFocusChannelPanel,
+      isTvDevice: isTvDevice,
+      playPauseFocusNode: playPauseFocusNode,
     );
   }
 }

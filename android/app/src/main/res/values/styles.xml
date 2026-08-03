@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Theme.NoTitleBar prevents white flash on TV cold start (dark app theme) -->
-    <style name="LaunchTheme" parent="@android:style/Theme.NoTitleBar">
-        <!-- Show a splash screen on the activity. Automatically removed when
-             the Flutter engine draws its first frame -->
+    <!-- Theme.Black.NoTitleBar.Fullscreen prevents black border overscan padding on TV -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar.Fullscreen">
         <item name="android:windowBackground">@drawable/launch_background</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowOverscan">true</item>
+        <item name="android:windowContentOverlay">@null</item>
     </style>
     <!-- Theme applied to the Android Window as soon as the process has started. -->
-    <style name="NormalTheme" parent="@android:style/Theme.NoTitleBar">
+    <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar.Fullscreen">
         <item name="android:windowBackground">?android:colorBackground</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowOverscan">true</item>
+        <item name="android:windowContentOverlay">@null</item>
     </style>
 </resources>

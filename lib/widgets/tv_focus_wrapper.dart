@@ -19,6 +19,8 @@ class TvFocusable extends StatefulWidget {
   final bool isCircle;
   final double focusedScale;
   final Color? focusColor;
+  final ValueChanged<bool>? onFocusChange;
+  final FocusOnKeyEventCallback? onKeyEvent;
 
   const TvFocusable({
     super.key,
@@ -30,6 +32,8 @@ class TvFocusable extends StatefulWidget {
     this.isCircle = false,
     this.focusedScale = 1.0,
     this.focusColor,
+    this.onFocusChange,
+    this.onKeyEvent,
   });
 
   @override
@@ -63,6 +67,12 @@ class _TvFocusableState extends State<TvFocusable> {
   }
 
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (widget.onKeyEvent != null) {
+      final res = widget.onKeyEvent!(node, event);
+      if (res != KeyEventResult.ignored) {
+        return res;
+      }
+    }
     if (event is KeyDownEvent || event is KeyRepeatEvent) {
       final lKey = event.logicalKey;
       final pKey = event.physicalKey;
@@ -130,13 +140,6 @@ class _TvFocusableState extends State<TvFocusable> {
 
   @override
   Widget build(BuildContext context) {
-    final mq = MediaQuery.of(context);
-    final isDpadOrKey = FocusManager.instance.highlightMode == FocusHighlightMode.traditional ||
-        mq.navigationMode == NavigationMode.directional ||
-        mq.size.shortestSide >= 960;
-
-    final isTvMode = isDpadOrKey || widget.autoFocus || widget.focusNode != null;
-
     final shape = widget.isCircle ? BoxShape.circle : BoxShape.rectangle;
     final borderRadius = widget.isCircle ? null : (widget.borderRadius ?? BorderRadius.circular(12));
     final focusColor = widget.focusColor ?? GoPlayTheme.primary;
@@ -176,15 +179,15 @@ class _TvFocusableState extends State<TvFocusable> {
                   ),
                 ),
 
-              // TV D-Pad Focus Visuals
-              if (isTvMode && _isFocused)
+              // TV D-Pad Focus Visuals — clean simple border highlight
+              if (_isFocused)
                 Positioned.fill(
                   child: IgnorePointer(
                     child: Container(
                       decoration: BoxDecoration(
                         shape: shape,
                         borderRadius: borderRadius,
-                        color: focusColor.withValues(alpha: 0.12),
+                        color: focusColor.withValues(alpha: 0.15),
                         border: Border.all(
                           color: focusColor,
                           width: 2.0,
@@ -199,11 +202,6 @@ class _TvFocusableState extends State<TvFocusable> {
       ),
     );
 
-    // On mobile touch-based devices, completely BYPASS Focus widget & FocusNode registration!
-    if (!isTvMode) {
-      return content;
-    }
-
     _ensureFocusNode();
 
     return Focus(
@@ -214,6 +212,7 @@ class _TvFocusableState extends State<TvFocusable> {
           setState(() {
             _isFocused = focused;
           });
+          widget.onFocusChange?.call(focused);
         }
       },
       onKeyEvent: _handleKeyEvent,
