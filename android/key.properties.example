@@ -1,0 +1,6 @@
+# Example key.properties file for release signing
+# Copy this file to key.properties and update the values with your keystore details.
+storePassword=goplay123456
+keyPassword=goplay123456
+keyAlias=goplay
+storeFile=app/goplay-release-key.jks
