@@ -36,6 +36,11 @@ void main() {
 
   // System UI — synchronous, no cost.
   try {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,

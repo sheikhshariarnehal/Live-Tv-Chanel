@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/android/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/android/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/android/build" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/app_links/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/app_links/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/app_links/build" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/app_links/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/app_links/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/app_links/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/device_info_plus/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/device_info_plus/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/device_info_plus/build" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/device_info_plus/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/device_info_plus/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/device_info_plus/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/jni/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/jni/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/jni/build" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/jni/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/jni/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/jni/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/package_info_plus/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/package_info_plus/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/package_info_plus/build" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/package_info_plus/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/package_info_plus/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/package_info_plus/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/path_provider_windows/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/path_provider_windows/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/path_provider_windows/build" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/path_provider_windows/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/path_provider_windows/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/path_provider_windows/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/permission_handler_windows/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/permission_handler_windows/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/permission_handler_windows/build" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/permission_handler_windows/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/permission_handler_windows/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/permission_handler_windows/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/shared_preferences_windows/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/shared_preferences_windows/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/shared_preferences_windows/build" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/shared_preferences_windows/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/shared_preferences_windows/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/shared_preferences_windows/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/url_launcher_windows/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/url_launcher_windows/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/url_launcher_windows/build" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/url_launcher_windows/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/url_launcher_windows/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/url_launcher_windows/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/wakelock_plus/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/wakelock_plus/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/wakelock_plus/build" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/wakelock_plus/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/wakelock_plus/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/android/windows/flutter/ephemeral/.plugin_symlinks/wakelock_plus/example/build" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

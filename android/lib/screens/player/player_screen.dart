@@ -170,6 +170,16 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   static const _pipChannel = MethodChannel('com.goplay/pip');
   bool _isTvDevice = false; // Set once in first build, used to skip orientation locks
 
+  // ── TV Panel Focus Routing ──────────────────────────────────────
+  // Dedicated focus scope for the channel-list side panel.
+  // When the user presses D-Pad Right from the player, focus shifts here.
+  // When the user presses D-Pad Left from the channel list, focus returns to player.
+  final FocusScopeNode _channelPanelFocusScope = FocusScopeNode(debugLabel: 'ChannelPanelScope');
+  final FocusNode _playPauseFocusNode = FocusNode(debugLabel: 'PlayPauseFocusNode');
+  // Exposed to the inner ChannelVideoPlayerNative so it can call
+  // _channelPanelFocusScope.requestFocus() when D-Pad Right is pressed.
+  bool _channelPanelHasFocus = false;
+
   @override
   void initState() {
     super.initState();
@@ -203,7 +213,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
   void _startControlsTimer() {
     _controlsTimer?.cancel();
-    _controlsTimer = Timer(const Duration(seconds: 4), () {
+    // Use a longer hide delay on TV — remote navigation is slower than touch
+    final delay = _isTvDevice ? const Duration(seconds: 8) : const Duration(seconds: 4);
+    _controlsTimer = Timer(delay, () {
       if (mounted) setState(() => _controlsVisible = false);
     });
   }
@@ -240,6 +252,12 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       _safeSetOrientation(DeviceOrientation.values);
     }
     _startControlsTimer();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _playPauseFocusNode.requestFocus();
+      }
+    });
   }
 
   /// Apply fullscreen orientation lock — skipped on TV devices (always landscape)
@@ -266,6 +284,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   @override
   void dispose() {
     _controlsTimer?.cancel();
+    _channelPanelFocusScope.dispose();
+    _playPauseFocusNode.dispose();
     _pipChannel.invokeMethod('setPlayerActive', false);
     _pipChannel.setMethodCallHandler(null);
     // Allow screen to sleep again when leaving the player
@@ -292,16 +312,31 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     }
   }
 
-  /// Handles only screen-level keys that the inner player widget does NOT own:
-  ///  - F key  → toggle full-view mode
-  ///  - Escape / Back → exit full-view or hide controls
+  /// Screen-level key handler.
   ///
-  /// All other keys (arrows, select, media) are left `ignored` so they
-  /// bubble down to the inner ChannelVideoPlayerNative Focus node which
-  /// owns seek, play/pause, and channel-zap behaviour.
+  /// Handles:
+  ///  - F key          → toggle full-view mode
+  ///  - Escape / Back  → exit full-view or pop
+  ///
+  /// All other keys bubble to the inner ChannelVideoPlayerNative FocusNode.
   KeyEventResult _handlePlayerKeyEvent(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
+    }
+
+    // TV Remote Wake-Up: If player controls have auto-hidden, ANY remote key press
+    // immediately shows all controls, focuses Play/Pause, and starts the 8s timer.
+    if (!_controlsVisible) {
+      setState(() {
+        _controlsVisible = true;
+      });
+      _startControlsTimer();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _playPauseFocusNode.requestFocus();
+        }
+      });
+      return KeyEventResult.handled;
     }
 
     final lKey = event.logicalKey;
@@ -314,17 +349,41 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       return KeyEventResult.handled;
     }
 
-    // Escape / Back → exit full-view first, then hide controls
+    // Escape / Back → exit full-view first, then pop
     if (lKey == LogicalKeyboardKey.goBack ||
         lKey == LogicalKeyboardKey.escape) {
       if (_isFullViewMode) {
         _toggleFullscreen();
         return KeyEventResult.handled;
       }
-      // Don't handle — let it pop the route normally
     }
 
     return KeyEventResult.ignored;
+  }
+
+  /// Called by [ChannelVideoPlayerNative] when D-Pad Right is pressed
+  /// and the user wants to shift focus to the channel list panel.
+  void _focusChannelPanel() {
+    if (!_channelPanelHasFocus) {
+      // Make controls visible so the panel is visible
+      setState(() {
+        _controlsVisible = true;
+        _channelPanelHasFocus = true;
+      });
+      _controlsTimer?.cancel();
+      // Request focus on the side-panel scope
+      _channelPanelFocusScope.requestFocus();
+    }
+  }
+
+  /// Called by the channel panel's FocusScope when it loses focus back to player.
+  void _focusPlayer() {
+    if (_channelPanelHasFocus) {
+      setState(() {
+        _channelPanelHasFocus = false;
+      });
+      _startControlsTimer();
+    }
   }
 
   @override
@@ -344,14 +403,12 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     final responsivePlayerHeight = (mq.size.width * 9 / 16).clamp(maxPlayerH < 180.0 ? maxPlayerH : 180.0, maxPlayerH);
 
     return PopScope(
-      canPop: !isFullscreen || widget.forceFullscreen,
+      // Always allow pop — we handle full-view exit manually below
+      canPop: !_isFullViewMode,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        if (widget.forceFullscreen) {
-          Navigator.of(context).pop();
-        } else {
-          _toggleFullscreen();
-        }
+        // canPop==false means we're in full-view mode — collapse it
+        _toggleFullscreen();
       },
       child: Focus(
         canRequestFocus: false,
@@ -425,6 +482,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
               if (isWide && !isFullscreen) {
                 return Row(
                   children: [
+                    // ── Player panel ──────────────────────────────
                     Expanded(
                       flex: 7,
                       child: _PlayerContainer(
@@ -437,6 +495,10 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                         onPreviousChannel: onPrev,
                         onNextChannel: onNext,
                         onInteract: _onPlayerInteract,
+                        // TV: D-Pad Right from player → shift focus to channel panel
+                        onFocusChannelPanel: isTv ? _focusChannelPanel : null,
+                        isTvDevice: isTv,
+                        playPauseFocusNode: _playPauseFocusNode,
                       ),
                     ),
                     const VerticalDivider(
@@ -444,26 +506,62 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                       thickness: 0.8,
                       color: Color(0x14FFFFFF),
                     ),
-                    SizedBox(
-                      width: mq.size.width > 1100 ? 380 : 320,
-                      child: DecoratedBox(
-                        decoration: _kSidePanelDeco,
-                        child: SafeArea(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const _SectionLabel(text: 'SWITCH CHANNEL'),
-                              Expanded(
-                                child: _RelatedChannelsList(
-                                  category: channel.category ?? '',
-                                  currentChannelId: channel.id,
-                                  isScrollable: true,
-                                  onChannelSelected: (id) =>
-                                      setState(() => _currentChannelId = id),
-                                  eventChannels: widget.eventChannels,
-                                ),
+
+                    // ── Channel list side panel ────────────────────
+                    // Wrapped in a FocusScope so we can route focus in/out cleanly.
+                    FocusScope(
+                      node: _channelPanelFocusScope,
+                      onFocusChange: (hasFocus) {
+                        // When the panel LOSES focus back to the player area
+                        if (!hasFocus && _channelPanelHasFocus) {
+                          _focusPlayer();
+                        }
+                      },
+                      child: KeyboardListener(
+                        focusNode: FocusNode(canRequestFocus: false),
+                        onKeyEvent: (event) {
+                          // D-Pad Left from channel list → return focus to player
+                          if ((event is KeyDownEvent || event is KeyRepeatEvent) &&
+                              event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+                            // Move focus back to player — find nearest sibling
+                            FocusScope.of(context).previousFocus();
+                            _focusPlayer();
+                          }
+                        },
+                        child: SizedBox(
+                          width: mq.size.width > 1100 ? 380 : 320,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            decoration: _channelPanelHasFocus
+                                ? BoxDecoration(
+                                    color: GoPlayTheme.surfaceContainerLow,
+                                    border: const Border(
+                                      left: BorderSide(color: GoPlayTheme.primary, width: 1.5),
+                                    ),
+                                  )
+                                : _kSidePanelDeco,
+                            child: SafeArea(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const _SectionLabel(text: 'SWITCH CHANNEL'),
+                                  Expanded(
+                                    child: _RelatedChannelsList(
+                                      category: channel.category ?? '',
+                                      currentChannelId: channel.id,
+                                      isScrollable: true,
+                                      onChannelSelected: (id) {
+                                        setState(() => _currentChannelId = id);
+                                        // Return focus to player after switching channel
+                                        if (isTv) _focusPlayer();
+                                      },
+                                      eventChannels: widget.eventChannels,
+                                      panelHasFocus: _channelPanelHasFocus && isTv,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       ),
@@ -540,10 +638,17 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                               onChannelSelected: (id) {
                                 setState(() => _currentChannelId = id);
                                 _startControlsTimer();
+                                // didUpdateWidget in ChannelVideoPlayer will
+                                // auto-focus play/pause after channel change.
                               },
                               eventChannels: widget.eventChannels,
+                              onFocusDown: () {
+                                _playPauseFocusNode.requestFocus();
+                              },
+                              onInteract: _onPlayerInteract,
                             )
                           : null,
+                      playPauseFocusNode: _playPauseFocusNode,
                     ),
                   ),
                 ],
@@ -583,6 +688,10 @@ class _PlayerContainer extends StatelessWidget {
   final VoidCallback? onPreviousChannel;
   final VoidCallback? onNextChannel;
   final VoidCallback? onInteract;
+  // TV-only: called when D-Pad Right is pressed to shift focus to channel list
+  final VoidCallback? onFocusChannelPanel;
+  final bool isTvDevice;
+  final FocusNode? playPauseFocusNode;
 
   const _PlayerContainer({
     required this.channel,
@@ -596,11 +705,18 @@ class _PlayerContainer extends StatelessWidget {
     this.onPreviousChannel,
     this.onNextChannel,
     this.onInteract,
+    this.onFocusChannelPanel,
+    this.isTvDevice = false,
+    this.playPauseFocusNode,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    // In fullscreen: wrap the entire stack in a FocusTraversalGroup so the
+    // top bar (Back + channel chips) and the player controls (center + bottom)
+    // all participate in ONE unified focus tree. ReadingOrderTraversalPolicy
+    // traverses naturally top→bottom so D-Pad Up/Down moves between the 3 rows.
+    final stack = SizedBox(
       height: isFullscreen ? double.infinity : (height ?? double.infinity),
       width: double.infinity,
       child: ColoredBox(
@@ -618,6 +734,9 @@ class _PlayerContainer extends StatelessWidget {
                 onPreviousChannel: onPreviousChannel,
                 onNextChannel: onNextChannel,
                 onInteract: onInteract,
+                onFocusChannelPanel: onFocusChannelPanel,
+                isTvDevice: isTvDevice,
+                playPauseFocusNode: playPauseFocusNode,
               ),
             ),
 
@@ -654,6 +773,16 @@ class _PlayerContainer extends StatelessWidget {
           ],
         ),
       ),
+    );
+
+    if (!isFullscreen) return stack;
+
+    // Fullscreen: wrap in a single FocusTraversalGroup so the top bar and
+    // the player center/bottom controls are one contiguous focus scope that
+    // Flutter can traverse with D-Pad Up/Down/Left/Right.
+    return FocusTraversalGroup(
+      policy: ReadingOrderTraversalPolicy(),
+      child: stack,
     );
   }
 }
@@ -763,32 +892,41 @@ class _ChannelAvatar extends StatelessWidget {
   }
 }
 
-// ─── Related Channels List ──────────────────────────────────────
-
-class _RelatedChannelsList extends ConsumerWidget {
+class _RelatedChannelsList extends ConsumerStatefulWidget {
   final String category;
   final String currentChannelId;
   final bool isScrollable;
   final Function(String) onChannelSelected;
   final List<String>? eventChannels;
+  /// When true (TV + panel has focus), the current playing or last-focused channel item gets autofocus
+  final bool panelHasFocus;
 
   const _RelatedChannelsList({
+    super.key,
     required this.category,
     required this.currentChannelId,
     required this.isScrollable,
     required this.onChannelSelected,
     this.eventChannels,
+    this.panelHasFocus = false,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_RelatedChannelsList> createState() => _RelatedChannelsListState();
+}
+
+class _RelatedChannelsListState extends ConsumerState<_RelatedChannelsList> {
+  String? _lastFocusedChannelId;
+
+  @override
+  Widget build(BuildContext context) {
     final channelsAsync = ref.watch(channelsProvider);
 
     return channelsAsync.when(
       data: (channels) {
         final List<Channel> related;
-        if (eventChannels != null) {
-          related = eventChannels!
+        if (widget.eventChannels != null) {
+          related = widget.eventChannels!
               .map((id) {
                 final match = channels.where((c) => c.id == id);
                 return match.isNotEmpty ? match.first : null;
@@ -796,7 +934,7 @@ class _RelatedChannelsList extends ConsumerWidget {
               .whereType<Channel>()
               .toList();
         } else {
-          related = channels.where((c) => c.category == category).toList();
+          related = channels.where((c) => c.category == widget.category).toList();
         }
 
         if (related.isEmpty) {
@@ -811,19 +949,33 @@ class _RelatedChannelsList extends ConsumerWidget {
           );
         }
 
-        if (isScrollable) {
+        // Target last focused channel if available; fallback to currently playing channel
+        final targetId = _lastFocusedChannelId ?? widget.currentChannelId;
+        int targetIdx = related.indexWhere((c) => c.id == targetId);
+        if (targetIdx == -1) {
+          targetIdx = related.indexWhere((c) => c.id == widget.currentChannelId);
+        }
+        if (targetIdx == -1) targetIdx = 0;
+
+        final autoFocusIdx = widget.panelHasFocus ? targetIdx : -1;
+
+        if (widget.isScrollable) {
           return ListView.builder(
             padding: const EdgeInsets.only(bottom: 20),
             itemCount: related.length,
             physics: const BouncingScrollPhysics(),
             itemBuilder: (context, index) {
               final ch = related[index];
-              final isCurrent = ch.id == currentChannelId;
+              final isCurrent = ch.id == widget.currentChannelId;
               return _ChannelTile(
                 key: ValueKey(ch.id),
                 channel: ch,
                 isCurrent: isCurrent,
-                onTap: () => onChannelSelected(ch.id),
+                autoFocus: index == autoFocusIdx,
+                onFocused: () {
+                  _lastFocusedChannelId = ch.id;
+                },
+                onTap: () => widget.onChannelSelected(ch.id),
               );
             },
           );
@@ -835,8 +987,8 @@ class _RelatedChannelsList extends ConsumerWidget {
             for (final ch in related)
               _ChannelTile(
                 channel: ch,
-                isCurrent: ch.id == currentChannelId,
-                onTap: () => onChannelSelected(ch.id),
+                isCurrent: ch.id == widget.currentChannelId,
+                onTap: () => widget.onChannelSelected(ch.id),
               ),
           ],
         );
@@ -861,12 +1013,16 @@ class _ChannelTile extends StatefulWidget {
   final Channel channel;
   final bool isCurrent;
   final VoidCallback onTap;
+  final bool autoFocus;
+  final VoidCallback? onFocused;
 
   const _ChannelTile({
     super.key,
     required this.channel,
     required this.isCurrent,
     required this.onTap,
+    this.autoFocus = false,
+    this.onFocused,
   });
 
   @override
@@ -875,6 +1031,42 @@ class _ChannelTile extends StatefulWidget {
 
 class _ChannelTileState extends State<_ChannelTile> {
   bool _isHovered = false;
+  late final FocusNode _tileFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _tileFocusNode = FocusNode(debugLabel: 'TileFocus-${widget.channel.name}');
+    _tileFocusNode.addListener(_onFocusChange);
+    if (widget.autoFocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _tileFocusNode.requestFocus();
+      });
+    }
+  }
+
+  void _onFocusChange() {
+    if (_tileFocusNode.hasFocus) {
+      widget.onFocused?.call();
+    }
+  }
+
+  @override
+  void didUpdateWidget(_ChannelTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.autoFocus && !oldWidget.autoFocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _tileFocusNode.requestFocus();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _tileFocusNode.removeListener(_onFocusChange);
+    _tileFocusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -884,8 +1076,10 @@ class _ChannelTileState extends State<_ChannelTile> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: TvFocusable(
+        focusNode: _tileFocusNode,
         borderRadius: BorderRadius.circular(16),
-        onTap: isCurrent ? null : widget.onTap,
+        autoFocus: widget.autoFocus,
+        onTap: widget.onTap,
         child: MouseRegion(
           onEnter: (_) => setState(() => _isHovered = true),
           onExit: (_) => setState(() => _isHovered = false),
@@ -1001,6 +1195,10 @@ class _FullscreenTopBar extends ConsumerWidget {
   final VoidCallback onBackPressed;
   final Function(String) onChannelSelected;
   final List<String>? eventChannels;
+  /// Called when D-Pad Down is pressed in the top bar, allowing the parent
+  /// to move focus explicitly to the center player controls.
+  final VoidCallback? onFocusDown;
+  final VoidCallback? onInteract;
 
   const _FullscreenTopBar({
     required this.category,
@@ -1008,13 +1206,15 @@ class _FullscreenTopBar extends ConsumerWidget {
     required this.onBackPressed,
     required this.onChannelSelected,
     this.eventChannels,
+    this.onFocusDown,
+    this.onInteract,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final channelsAsync = ref.watch(channelsProvider);
 
-    return DecoratedBox(
+    final bar = DecoratedBox(
       decoration: _kTopBarGradient,
       child: SafeArea(
         top: true,
@@ -1031,15 +1231,13 @@ class _FullscreenTopBar extends ConsumerWidget {
                 TvFocusable(
                   isCircle: true,
                   onTap: onBackPressed,
-                  child: IconButton(
-                    onPressed: onBackPressed,
-                    icon: const Icon(
+                  child: const Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Icon(
                       Icons.arrow_back_rounded,
                       color: Colors.white,
+                      size: 24,
                     ),
-                    iconSize: 28,
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    constraints: const BoxConstraints(),
                   ),
                 ),
 
@@ -1074,6 +1272,7 @@ class _FullscreenTopBar extends ConsumerWidget {
                             label: ch.name,
                             isCurrent: isCurrent,
                             onTap: () => onChannelSelected(ch.id),
+                            onFocusDown: onFocusDown,
                           );
                         },
                       );
@@ -1088,6 +1287,30 @@ class _FullscreenTopBar extends ConsumerWidget {
         ),
       ),
     );
+
+    if (onFocusDown == null) return bar;
+
+    // Wrap bar in a Focus that intercepts D-Pad Down → move focus to
+    // center controls explicitly, bypassing any Stack-traversal ambiguity.
+    return Focus(
+      canRequestFocus: false,
+      onKeyEvent: (node, event) {
+        if (event is KeyDownEvent || event is KeyRepeatEvent) {
+          onInteract?.call();
+          final key = event.logicalKey;
+          if (key == LogicalKeyboardKey.arrowDown) {
+            onFocusDown!();
+            return KeyEventResult.handled;
+          }
+          if (key == LogicalKeyboardKey.arrowUp) {
+            // Prevent focus loss when pressing Up on top-most row!
+            return KeyEventResult.handled;
+          }
+        }
+        return KeyEventResult.ignored;
+      },
+      child: bar,
+    );
   }
 }
 
@@ -1095,11 +1318,14 @@ class _ServerChip extends StatefulWidget {
   final String label;
   final bool isCurrent;
   final VoidCallback onTap;
+  /// Optional: called when D-Pad Down is pressed while this chip is focused.
+  final VoidCallback? onFocusDown;
 
   const _ServerChip({
     required this.label,
     required this.isCurrent,
     required this.onTap,
+    this.onFocusDown,
   });
 
   @override

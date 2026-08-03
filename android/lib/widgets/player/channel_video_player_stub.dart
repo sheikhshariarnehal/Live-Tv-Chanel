@@ -20,6 +20,9 @@ Widget getChannelVideoPlayer({
   VoidCallback? onPreviousChannel,
   VoidCallback? onNextChannel,
   VoidCallback? onInteract,
+  VoidCallback? onFocusChannelPanel,
+  bool isTvDevice = false,
+  FocusNode? playPauseFocusNode,
 }) {
   return ChannelVideoPlayerNative(
     channel: channel,
@@ -30,6 +33,9 @@ Widget getChannelVideoPlayer({
     onPreviousChannel: onPreviousChannel,
     onNextChannel: onNextChannel,
     onInteract: onInteract,
+    onFocusChannelPanel: onFocusChannelPanel,
+    isTvDevice: isTvDevice,
+    playPauseFocusNode: playPauseFocusNode,
   );
 }
 
@@ -50,6 +56,12 @@ class ChannelVideoPlayerNative extends StatefulWidget implements ChannelVideoPla
   final VoidCallback? onNextChannel;
   @override
   final VoidCallback? onInteract;
+  @override
+  final VoidCallback? onFocusChannelPanel;
+  @override
+  final bool isTvDevice;
+  @override
+  final FocusNode? playPauseFocusNode;
 
   const ChannelVideoPlayerNative({
     super.key,
@@ -61,6 +73,9 @@ class ChannelVideoPlayerNative extends StatefulWidget implements ChannelVideoPla
     this.onPreviousChannel,
     this.onNextChannel,
     this.onInteract,
+    this.onFocusChannelPanel,
+    this.isTvDevice = false,
+    this.playPauseFocusNode,
   });
 
   @override
@@ -657,17 +672,23 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
   // ─── Widget lifecycle ────────────────────────────────────────────
 
   late final FocusNode _focusNode;
+  // GlobalKey used to find the play/pause TvFocusable's FocusNode so we can
+  // explicitly request focus when controls are shown via remote.
+  final GlobalKey _playPauseKey = GlobalKey();
+
+  // Explicit FocusNodes for Row 3a (Seek Bar) and Row 3b (Bottom Buttons)
+  // to ensure 100% deterministic D-Pad Up/Down navigation between all 4 control rows.
+  final FocusNode _seekBarFocusNode = FocusNode(debugLabel: 'SeekBarFocusNode');
+  final FocusNode _bottomControlsFocusNode = FocusNode(debugLabel: 'BottomControlsFocusNode');
 
   @override
   void initState() {
     super.initState();
 
     _focusNode = FocusNode(debugLabel: 'PlayerFocusNode');
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _focusNode.requestFocus();
-      }
-    });
+    // NOTE: The play/pause TvFocusable button has autoFocus:true so it
+    // grabs focus first within the player scope. The outer _focusNode then
+    // acts as a passive event-bubbling catcher for media keys.
 
     // Initialize the connectivity service and state machine
     _connectivityService = ConnectivityService();
@@ -738,6 +759,20 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
       });
 
       _methodChannel?.invokeMethod('play', _getCreationParams());
+
+      // In fullscreen, after a channel switch (e.g. from chip selection in the
+      // top bar), autoFocus does NOT re-fire (it only fires on first insert).
+      // Explicitly move focus back to play/pause so the user is not stuck on
+      // the top-bar chip and can reach all center/bottom controls via D-Pad.
+      if (widget.isFullscreen) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          final ctx = _playPauseKey.currentContext;
+          if (ctx != null) {
+            Focus.of(ctx).requestFocus();
+          }
+        });
+      }
     }
   }
 
@@ -787,16 +822,16 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
     widget.onInteract?.call();
   }
 
-  /// Single authoritative key handler for all player remote/keyboard input.
+  /// D-Pad key mapping on TV remote:
   ///
-  /// Key mapping (TV remote style):
-  ///  OK / Select / Enter / Space → Toggle play/pause
-  ///  Up / Channel Up             → Previous channel
-  ///  Down / Channel Down         → Next channel
-  ///  Left                        → Seek −10 s
-  ///  Right                       → Seek +10 s
-  ///  Media keys (play, pause, rewind, ff) → Direct action
-  ///  F                           → Fullscreen toggle (handled by parent)
+  ///  OK / Select / Enter / Space → Show controls if hidden, then activate
+  ///                                  focused button or toggle play/pause.
+  ///  Up / Down (non-fullscreen)   → Previous / next channel.
+  ///  Up / Down (fullscreen)       → Ignored — Flutter traversal moves focus
+  ///                                  between rows (top bar → center → bottom).
+  ///  Left / Right                 → Ignored — Flutter traversal moves focus
+  ///                                  between buttons in the same row.
+  ///  Media keys                   → Play, pause, rewind, fast-forward.
   KeyEventResult _handlePlayerKeyEvent(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
@@ -804,7 +839,31 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
 
     final key = event.logicalKey;
 
-    // ── Play / Pause ──
+    // Any key press → ensure controls are visible and timer is refreshed.
+    // This is the TV "wake up controls" behaviour.
+    if (!widget.showControls) {
+      widget.onTap?.call(); // toggles controls visible in parent
+      // After showing controls, move focus to play/pause so the user can
+      // immediately navigate with D-Pad without an extra key press.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (widget.playPauseFocusNode != null) {
+          widget.playPauseFocusNode!.requestFocus();
+        } else {
+          final ctx = _playPauseKey.currentContext;
+          if (ctx != null) {
+            Focus.of(ctx).requestFocus();
+          }
+        }
+      });
+      return KeyEventResult.handled;
+    } else {
+      widget.onInteract?.call(); // just resets the hide timer
+    }
+
+    // ── Play / Pause (fallback when no child button is focused) ──
+    // TvFocusable buttons handle OK themselves; this covers the case where
+    // the outer node has focus (e.g. error state, buffering).
     if (key == LogicalKeyboardKey.select ||
         key == LogicalKeyboardKey.enter ||
         key == LogicalKeyboardKey.space ||
@@ -814,38 +873,49 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
         key == LogicalKeyboardKey.mediaPlayPause ||
         key == LogicalKeyboardKey.mediaPlay ||
         key == LogicalKeyboardKey.mediaPause) {
-      _togglePlayPause();
-      return KeyEventResult.handled;
+      // Only act if the outer node (not a TvFocusable child) has primary focus
+      if (_focusNode.hasPrimaryFocus) {
+        _togglePlayPause();
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored; // let TvFocusable child handle it
     }
 
-    // ── Seek backward ──
-    if (key == LogicalKeyboardKey.arrowLeft ||
-        key == LogicalKeyboardKey.mediaRewind ||
+    // ── Media rewind/fast-forward keys (dedicated remote buttons) ──
+    // These are DISTINCT from D-Pad Left/Right and should always seek.
+    if (key == LogicalKeyboardKey.mediaRewind ||
         key == LogicalKeyboardKey.mediaStepBackward) {
       _seekRelative(-10);
+      _showOsd('-10s', Icons.replay_10_rounded);
       return KeyEventResult.handled;
     }
-
-    // ── Seek forward ──
-    if (key == LogicalKeyboardKey.arrowRight ||
-        key == LogicalKeyboardKey.mediaFastForward ||
+    if (key == LogicalKeyboardKey.mediaFastForward ||
         key == LogicalKeyboardKey.mediaStepForward) {
       _seekRelative(10);
+      _showOsd('+10s', Icons.forward_10_rounded);
       return KeyEventResult.handled;
     }
 
-    // ── Previous channel ──
-    if (key == LogicalKeyboardKey.arrowUp ||
-        key == LogicalKeyboardKey.channelUp) {
+    // ── D-Pad Left / Right ──
+    // Return `ignored` — Flutter's directional traversal policy will move
+    // focus to the prev/next TvFocusable button automatically.
+    if (key == LogicalKeyboardKey.arrowLeft ||
+        key == LogicalKeyboardKey.arrowRight) {
+      return KeyEventResult.ignored;
+    }
+
+    // ── Up / Down ──
+    // Return `ignored` so Flutter's directional traversal can move focus
+    // smoothly between all control buttons (Play/Pause, Fullscreen Toggle, etc.).
+    // Dedicated physical channel +/- buttons on TV remotes handle channel switching.
+    if (key == LogicalKeyboardKey.channelUp) {
       if (widget.onPreviousChannel != null) {
         widget.onPreviousChannel!();
         return KeyEventResult.handled;
       }
     }
 
-    // ── Next channel ──
-    if (key == LogicalKeyboardKey.arrowDown ||
-        key == LogicalKeyboardKey.channelDown) {
+    if (key == LogicalKeyboardKey.channelDown) {
       if (widget.onNextChannel != null) {
         widget.onNextChannel!();
         return KeyEventResult.handled;
@@ -860,6 +930,8 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
     _osdTimer?.cancel();
     _stopProgressTimer();
     _focusNode.dispose();
+    _seekBarFocusNode.dispose();
+    _bottomControlsFocusNode.dispose();
     _stateMachine.removeListener(_onStateMachineChanged);
     _stateMachine.dispose();
     _connectivityService.dispose();
@@ -878,7 +950,10 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
 
     return Focus(
       focusNode: _focusNode,
-      autofocus: true,
+      // autofocus: false — the play/pause TvFocusable inside has autoFocus:true.
+      // This outer Focus only serves as an event-bubbling catcher for Up/Down
+      // channel switching. It must NOT steal focus from the child buttons.
+      autofocus: false,
       onKeyEvent: _handlePlayerKeyEvent,
       child: ColoredBox(
         color: Colors.black,
@@ -1169,6 +1244,8 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
             child: _CentralControls(
               isPlaying: _isPlaying,
               isBuffering: _isBuffering,
+              playPauseKey: _playPauseKey,
+              playPauseFocusNode: widget.playPauseFocusNode,
               onPlayPause: () {
                 if (_isPlaying) {
                   _methodChannel?.invokeMethod('pause');
@@ -1187,6 +1264,9 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                 _seekTo(newPos > _duration ? _duration : newPos);
               },
               isFullscreen: widget.isFullscreen,
+              autoFocus: widget.isFullscreen,
+              onFocusDown: () => _seekBarFocusNode.requestFocus(),
+              onInteract: widget.onInteract,
             ),
           ),
         ),
@@ -1219,14 +1299,26 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Seek Bar / Timeline
+                  // Seek Bar / Timeline — wrapped in focusable seek widget
                   RepaintBoundary(
-                    child: PlayerProgressBar(
+                    child: _FocusableSeekBar(
                       position: _position,
                       duration: _duration,
                       bufferedPosition: _bufferedPosition,
                       onSeek: _seekTo,
                       isFullscreen: widget.isFullscreen,
+                      onSeekRelative: _seekRelative,
+                      onInteract: widget.onInteract,
+                      focusNode: _seekBarFocusNode,
+                      onFocusDown: () => _bottomControlsFocusNode.requestFocus(),
+                      onFocusUp: () {
+                        if (widget.playPauseFocusNode != null) {
+                          widget.playPauseFocusNode!.requestFocus();
+                        } else {
+                          final ctx = _playPauseKey.currentContext;
+                          if (ctx != null) Focus.of(ctx).requestFocus();
+                        }
+                      },
                     ),
                   ),
 
@@ -1271,21 +1363,36 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
   }
 
   Widget _buildFullscreenRightControls() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // Aspect Ratio Button
-        TvFocusable(
-          isCircle: true,
-          onTap: _toggleAspectRatio,
-          child: IconButton(
-            onPressed: _toggleAspectRatio,
-            icon: const Icon(Icons.fit_screen, color: Colors.white),
-            iconSize: 28,
-            padding: const EdgeInsets.all(6),
-            constraints: const BoxConstraints(),
-            tooltip: _aspectLabels[_aspectRatioIndex],
+    return Focus(
+      canRequestFocus: false,
+      onKeyEvent: (node, event) {
+        if ((event is KeyDownEvent || event is KeyRepeatEvent) &&
+            widget.isFullscreen) {
+          widget.onInteract?.call();
+          final key = event.logicalKey;
+          if (key == LogicalKeyboardKey.arrowUp) {
+            _seekBarFocusNode.requestFocus();
+            return KeyEventResult.handled;
+          }
+          if (key == LogicalKeyboardKey.arrowDown) {
+            // Prevent focus loss when pressing Down on the bottom-most row!
+            return KeyEventResult.handled;
+          }
+        }
+        return KeyEventResult.ignored;
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Aspect Ratio Button
+          TvFocusable(
+            focusNode: _bottomControlsFocusNode,
+            isCircle: true,
+            onTap: _toggleAspectRatio,
+          child: const Padding(
+            padding: EdgeInsets.all(8),
+            child: Icon(Icons.fit_screen, color: Colors.white, size: 24),
           ),
         ),
         const SizedBox(width: 4),
@@ -1293,17 +1400,15 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
         TvFocusable(
           isCircle: true,
           onTap: _toggleMute,
-          child: IconButton(
-            onPressed: _toggleMute,
-            icon: Icon(
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Icon(
               _isMuted || _volume == 0
                   ? Icons.volume_off
                   : (_volume < 0.5 ? Icons.volume_down : Icons.volume_up),
               color: Colors.white,
+              size: 24,
             ),
-            iconSize: 28,
-            padding: const EdgeInsets.all(6),
-            constraints: const BoxConstraints(),
           ),
         ),
         const SizedBox(width: 4),
@@ -1315,16 +1420,9 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
               _isLocked = true;
             });
           },
-          child: IconButton(
-            onPressed: () {
-              setState(() {
-                _isLocked = true;
-              });
-            },
-            icon: const Icon(Icons.lock_open, color: Colors.white),
-            iconSize: 28,
-            padding: const EdgeInsets.all(6),
-            constraints: const BoxConstraints(),
+          child: const Padding(
+            padding: EdgeInsets.all(8),
+            child: Icon(Icons.lock_open, color: Colors.white, size: 24),
           ),
         ),
         const SizedBox(width: 4),
@@ -1333,18 +1431,17 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
           TvFocusable(
             isCircle: true,
             onTap: widget.onFullscreenToggle,
-            child: IconButton(
-              onPressed: widget.onFullscreenToggle,
-              icon: Icon(
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Icon(
                 widget.isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
                 color: Colors.white,
+                size: 24,
               ),
-              iconSize: 28,
-              padding: const EdgeInsets.all(6),
-              constraints: const BoxConstraints(),
             ),
           ),
       ],
+    ),
     );
   }
 
@@ -1357,17 +1454,15 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
         TvFocusable(
           isCircle: true,
           onTap: _toggleMute,
-          child: IconButton(
-            onPressed: _toggleMute,
-            icon: Icon(
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Icon(
               _isMuted || _volume == 0
                   ? Icons.volume_off
                   : (_volume < 0.5 ? Icons.volume_down : Icons.volume_up),
               color: Colors.white,
+              size: 24,
             ),
-            iconSize: 24,
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            constraints: const BoxConstraints(),
           ),
         ),
         const SizedBox(width: 4),
@@ -1376,15 +1471,13 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
           TvFocusable(
             isCircle: true,
             onTap: widget.onFullscreenToggle,
-            child: IconButton(
-              onPressed: widget.onFullscreenToggle,
-              icon: Icon(
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Icon(
                 widget.isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
                 color: Colors.white,
+                size: 24,
               ),
-              iconSize: 24,
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              constraints: const BoxConstraints(),
             ),
           ),
       ],
@@ -1746,6 +1839,15 @@ class _CentralControls extends StatelessWidget {
   final VoidCallback onRewind;
   final VoidCallback onForward;
   final bool isFullscreen;
+  /// When true, the play/pause button requests autofocus so it's the first
+  /// button reachable by D-Pad when the player opens.
+  final bool autoFocus;
+  /// Key placed on the play/pause TvFocusable so its FocusNode can be looked
+  /// up from the parent state to auto-focus when controls appear.
+  final GlobalKey? playPauseKey;
+  final FocusNode? playPauseFocusNode;
+  final VoidCallback? onFocusDown;
+  final VoidCallback? onInteract;
 
   const _CentralControls({
     required this.isPlaying,
@@ -1756,61 +1858,71 @@ class _CentralControls extends StatelessWidget {
     required this.onRewind,
     required this.onForward,
     required this.isFullscreen,
+    this.autoFocus = false,
+    this.playPauseKey,
+    this.playPauseFocusNode,
+    this.onFocusDown,
+    this.onInteract,
   });
 
   @override
   Widget build(BuildContext context) {
     final double iconSize = isFullscreen ? 34 : 24;
     final double playSize = isFullscreen ? 60 : 44;
+    final double buttonSize = isFullscreen ? 48 : 36;
     final double spacing = isFullscreen ? 20 : 12;
 
     final hasPrev = onPrev != null;
     final hasNext = onNext != null;
 
-    return Row(
+    final row = Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // 1. Previous Channel Button (Fixed Position)
+        // 1. Previous Channel Button
         TvFocusable(
           isCircle: true,
           onTap: onPrev,
-          child: IconButton(
-            onPressed: onPrev,
-            padding: const EdgeInsets.all(6),
-            constraints: const BoxConstraints(),
-            icon: Icon(
+          child: SizedBox(
+            width: buttonSize,
+            height: buttonSize,
+            child: Icon(
               Icons.skip_previous_rounded,
               color: hasPrev ? Colors.white : Colors.white38,
+              size: iconSize,
             ),
-            iconSize: iconSize,
           ),
         ),
         SizedBox(width: spacing),
 
-        // 2. Rewind 10s Button (Fixed Position)
+        // 2. Rewind 10s Button
         TvFocusable(
           isCircle: true,
           onTap: onRewind,
-          child: IconButton(
-            onPressed: onRewind,
-            padding: const EdgeInsets.all(6),
-            constraints: const BoxConstraints(),
-            icon: const Icon(Icons.replay_10_rounded, color: Colors.white),
-            iconSize: iconSize,
+          child: SizedBox(
+            width: buttonSize,
+            height: buttonSize,
+            child: Icon(
+              Icons.replay_10_rounded,
+              color: Colors.white,
+              size: iconSize,
+            ),
           ),
         ),
         SizedBox(width: spacing),
 
-        // 3. Play / Pause Button (Fixed Position)
+        // 3. Play / Pause Button — autofocus so D-Pad starts here
         TvFocusable(
+          key: playPauseKey,
+          focusNode: playPauseFocusNode,
           isCircle: true,
+          autoFocus: autoFocus,
           onTap: onPlayPause,
           child: Container(
             width: playSize,
             height: playSize,
             decoration: const BoxDecoration(
-              color: Colors.black38,
+              color: Colors.black45,
               shape: BoxShape.circle,
             ),
             child: Center(
@@ -1833,33 +1945,157 @@ class _CentralControls extends StatelessWidget {
         ),
         SizedBox(width: spacing),
 
-        // 4. Forward 10s Button (Fixed Position)
+        // 4. Forward 10s Button
         TvFocusable(
           isCircle: true,
           onTap: onForward,
-          child: IconButton(
-            onPressed: onForward,
-            padding: const EdgeInsets.all(6),
-            constraints: const BoxConstraints(),
-            icon: const Icon(Icons.forward_10_rounded, color: Colors.white),
-            iconSize: iconSize,
+          child: SizedBox(
+            width: buttonSize,
+            height: buttonSize,
+            child: Icon(
+              Icons.forward_10_rounded,
+              color: Colors.white,
+              size: iconSize,
+            ),
           ),
         ),
         SizedBox(width: spacing),
 
-        // 5. Next Channel Button (Fixed Position)
+        // 5. Next Channel Button
         TvFocusable(
           isCircle: true,
           onTap: onNext,
-          child: IconButton(
-            onPressed: onNext,
-            padding: const EdgeInsets.all(6),
-            constraints: const BoxConstraints(),
-            icon: Icon(
+          child: SizedBox(
+            width: buttonSize,
+            height: buttonSize,
+            child: Icon(
               Icons.skip_next_rounded,
               color: hasNext ? Colors.white : Colors.white38,
+              size: iconSize,
             ),
-            iconSize: iconSize,
+          ),
+        ),
+      ],
+    );
+
+    if (onFocusDown == null) return row;
+
+    return Focus(
+      canRequestFocus: false,
+      onKeyEvent: (node, event) {
+        if (event is KeyDownEvent || event is KeyRepeatEvent) {
+          onInteract?.call();
+          if (event.logicalKey == LogicalKeyboardKey.arrowDown && isFullscreen) {
+            onFocusDown?.call();
+            return KeyEventResult.handled;
+          }
+        }
+        return KeyEventResult.ignored;
+      },
+      child: row,
+    );
+  }
+}
+
+// ─── Focusable Seek Bar ──────────────────────────────────────────
+
+/// TV-focusable wrapper around [PlayerProgressBar].
+/// When focused, D-Pad Left seeks -10s and D-Pad Right seeks +10s.
+class _FocusableSeekBar extends StatefulWidget {
+  final Duration position;
+  final Duration duration;
+  final Duration bufferedPosition;
+  final ValueChanged<Duration> onSeek;
+  final bool isFullscreen;
+  final void Function(int seconds) onSeekRelative;
+  final VoidCallback? onInteract;
+  final FocusNode? focusNode;
+  final VoidCallback? onFocusDown;
+  final VoidCallback? onFocusUp;
+
+  const _FocusableSeekBar({
+    required this.position,
+    required this.duration,
+    required this.bufferedPosition,
+    required this.onSeek,
+    required this.isFullscreen,
+    required this.onSeekRelative,
+    this.onInteract,
+    this.focusNode,
+    this.onFocusDown,
+    this.onFocusUp,
+  });
+
+  @override
+  State<_FocusableSeekBar> createState() => _FocusableSeekBarState();
+}
+
+class _FocusableSeekBarState extends State<_FocusableSeekBar> {
+  bool _isFocused = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Focused label
+        if (_isFocused && widget.isFullscreen)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 2),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Icon(Icons.keyboard_arrow_left, color: Colors.white54, size: 14),
+                SizedBox(width: 2),
+                Text(
+                  '← Seek →',
+                  style: TextStyle(color: Colors.white54, fontSize: 10, letterSpacing: 0.5),
+                ),
+                SizedBox(width: 2),
+                Icon(Icons.keyboard_arrow_right, color: Colors.white54, size: 14),
+              ],
+            ),
+          ),
+        TvFocusable(
+          focusNode: widget.focusNode,
+          borderRadius: BorderRadius.circular(4),
+          onFocusChange: (focused) {
+            setState(() {
+              _isFocused = focused;
+            });
+          },
+          onKeyEvent: (node, event) {
+            if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+              return KeyEventResult.ignored;
+            }
+            final key = event.logicalKey;
+            if (key == LogicalKeyboardKey.arrowLeft) {
+              widget.onSeekRelative(-10);
+              widget.onInteract?.call();
+              return KeyEventResult.handled;
+            }
+            if (key == LogicalKeyboardKey.arrowRight) {
+              widget.onSeekRelative(10);
+              widget.onInteract?.call();
+              return KeyEventResult.handled;
+            }
+            if (key == LogicalKeyboardKey.arrowDown && widget.isFullscreen) {
+              widget.onFocusDown?.call();
+              return KeyEventResult.handled;
+            }
+            if (key == LogicalKeyboardKey.arrowUp && widget.isFullscreen) {
+              widget.onFocusUp?.call();
+              return KeyEventResult.handled;
+            }
+            return KeyEventResult.ignored;
+          },
+          onTap: () {},
+          child: PlayerProgressBar(
+            position: widget.position,
+            duration: widget.duration,
+            bufferedPosition: widget.bufferedPosition,
+            onSeek: widget.onSeek,
+            isFullscreen: widget.isFullscreen,
           ),
         ),
       ],
