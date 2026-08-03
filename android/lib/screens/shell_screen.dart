@@ -10,21 +10,45 @@ import '../widgets/tv_focus_wrapper.dart';
 /// - Bottom nav wrapped in RepaintBoundary (isolated from page scroll repaints).
 /// - Mobile nav items use lightweight InkWell with splash + haptic (no TvFocusable overhead).
 /// - TV rail items keep TvFocusable for D-Pad focus visuals.
-class ShellScreen extends StatelessWidget {
+class ShellScreen extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
   const ShellScreen({super.key, required this.navigationShell});
 
+  @override
+  State<ShellScreen> createState() => _ShellScreenState();
+}
+
+class _ShellScreenState extends State<ShellScreen> {
+  late final List<FocusNode> _navFocusNodes;
+
+  @override
+  void initState() {
+    super.initState();
+    _navFocusNodes = List.generate(
+      3,
+      (i) => FocusNode(debugLabel: 'NavMenu_$i'),
+    );
+  }
+
+  @override
+  void dispose() {
+    for (final node in _navFocusNodes) {
+      node.dispose();
+    }
+    super.dispose();
+  }
+
   void _goBranch(int index) {
-    navigationShell.goBranch(
+    widget.navigationShell.goBranch(
       index,
-      initialLocation: index == navigationShell.currentIndex,
+      initialLocation: index == widget.navigationShell.currentIndex,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final index = navigationShell.currentIndex;
+    final index = widget.navigationShell.currentIndex;
 
     // Single MediaQuery read — avoids multiple rebuild subscriptions.
     final mq = MediaQuery.of(context);
@@ -61,6 +85,7 @@ class ShellScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       _RailNavItem(
+                        focusNode: _navFocusNodes[0],
                         icon: Icons.grid_view_outlined,
                         selectedIcon: Icons.grid_view_rounded,
                         label: 'Home',
@@ -69,6 +94,7 @@ class ShellScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       _RailNavItem(
+                        focusNode: _navFocusNodes[1],
                         icon: Icons.smart_display_outlined,
                         selectedIcon: Icons.smart_display_rounded,
                         label: 'Channels',
@@ -77,6 +103,7 @@ class ShellScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       _RailNavItem(
+                        focusNode: _navFocusNodes[2],
                         icon: Icons.schedule_outlined,
                         selectedIcon: Icons.schedule_rounded,
                         label: 'Upcoming',
@@ -90,14 +117,14 @@ class ShellScreen extends StatelessWidget {
             ),
 
             // Main Content Area
-            Expanded(child: navigationShell),
+            Expanded(child: widget.navigationShell),
           ],
         ),
       );
     } else {
       content = Scaffold(
         extendBody: false,
-        body: navigationShell,
+        body: widget.navigationShell,
         bottomNavigationBar: RepaintBoundary(
           child: Container(
             height: 64 + bottomPadding,
@@ -114,6 +141,7 @@ class ShellScreen extends StatelessWidget {
             child: Row(
               children: [
                 _NavItem(
+                  focusNode: _navFocusNodes[0],
                   icon: Icons.grid_view_outlined,
                   selectedIcon: Icons.grid_view_rounded,
                   label: 'Home',
@@ -121,6 +149,7 @@ class ShellScreen extends StatelessWidget {
                   onTap: () => _goBranch(0),
                 ),
                 _NavItem(
+                  focusNode: _navFocusNodes[1],
                   icon: Icons.smart_display_outlined,
                   selectedIcon: Icons.smart_display_rounded,
                   label: 'Channels',
@@ -128,6 +157,7 @@ class ShellScreen extends StatelessWidget {
                   onTap: () => _goBranch(1),
                 ),
                 _NavItem(
+                  focusNode: _navFocusNodes[2],
                   icon: Icons.schedule_outlined,
                   selectedIcon: Icons.schedule_rounded,
                   label: 'Upcoming',
@@ -144,7 +174,7 @@ class ShellScreen extends StatelessWidget {
     return Focus(
       canRequestFocus: false,
       onKeyEvent: (node, event) {
-        if (event is KeyDownEvent) {
+        if (event is KeyDownEvent || event is KeyRepeatEvent) {
           final key = event.logicalKey;
           if (key == LogicalKeyboardKey.digit1 ||
               key == LogicalKeyboardKey.numpad1) {
@@ -158,6 +188,25 @@ class ShellScreen extends StatelessWidget {
                      key == LogicalKeyboardKey.numpad3) {
             _goBranch(2);
             return KeyEventResult.handled;
+          }
+
+          // TV Remote D-Pad LEFT: Move left on page first.
+          // ONLY jump to Navigation Menu when at the left-most edge of the page!
+          if (key == LogicalKeyboardKey.arrowLeft) {
+            final primary = FocusManager.instance.primaryFocus;
+            if (primary != null && !_navFocusNodes.contains(primary)) {
+              if (primary.context != null) {
+                final moved = FocusTraversalGroup.of(primary.context!).inDirection(
+                  primary,
+                  TraversalDirection.left,
+                );
+                if (moved) {
+                  return KeyEventResult.handled;
+                }
+              }
+              _navFocusNodes[widget.navigationShell.currentIndex].requestFocus();
+              return KeyEventResult.handled;
+            }
           }
         }
         return KeyEventResult.ignored;
@@ -177,6 +226,7 @@ class _NavItem extends StatelessWidget {
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
+  final FocusNode? focusNode;
 
   const _NavItem({
     required this.icon,
@@ -184,9 +234,9 @@ class _NavItem extends StatelessWidget {
     required this.label,
     required this.isSelected,
     required this.onTap,
+    this.focusNode,
   });
 
-  // Cached border radius — avoids per-build allocation.
   static final _borderRadius = BorderRadius.circular(10);
 
   @override
@@ -196,34 +246,43 @@ class _NavItem extends StatelessWidget {
     final inactiveColor = theme.colorScheme.onSurfaceVariant;
 
     return Expanded(
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.selectionClick();
-          onTap();
-        },
-        borderRadius: _borderRadius,
-        splashColor: activeColor.withValues(alpha: 0.12),
-        highlightColor: activeColor.withValues(alpha: 0.06),
-        child: SizedBox.expand(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                isSelected ? selectedIcon : icon,
-                color: isSelected ? activeColor : inactiveColor,
-                size: 24,
-              ),
-              const SizedBox(height: 3),
-              Text(
-                label,
-                style: TextStyle(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        child: TvFocusable(
+          focusNode: focusNode,
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
+          borderRadius: _borderRadius,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? activeColor.withValues(alpha: 0.12)
+                  : Colors.transparent,
+              borderRadius: _borderRadius,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  isSelected ? selectedIcon : icon,
                   color: isSelected ? activeColor : inactiveColor,
-                  fontSize: 11,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  letterSpacing: 0.2,
+                  size: 24,
                 ),
-              ),
-            ],
+                const SizedBox(height: 3),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: isSelected ? activeColor : inactiveColor,
+                    fontSize: 11,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -240,6 +299,7 @@ class _RailNavItem extends StatelessWidget {
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
+  final FocusNode? focusNode;
 
   const _RailNavItem({
     required this.icon,
@@ -247,6 +307,7 @@ class _RailNavItem extends StatelessWidget {
     required this.label,
     required this.isSelected,
     required this.onTap,
+    this.focusNode,
   });
 
   static final _borderRadius = BorderRadius.circular(12);
@@ -258,6 +319,7 @@ class _RailNavItem extends StatelessWidget {
     final inactiveColor = theme.colorScheme.onSurfaceVariant;
 
     return TvFocusable(
+      focusNode: focusNode,
       onTap: onTap,
       borderRadius: _borderRadius,
       child: Container(
