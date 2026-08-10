@@ -11,6 +11,7 @@ export const prerender = true;
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
 <style is:global>
   :root {
     --pitch: #17181c;
@@ -93,7 +94,93 @@ export const prerender = true;
     transition: padding 0.3s ease;
   }
 
-  /* ---------- ambient glows ---------- */
+  /* Pure CSS - Skeuomorphic Button */
+  .skeuo-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px 42px;
+    border-radius: 9999px;
+    background-image: linear-gradient(180deg, #2d2d30, #18181b);
+    border: none;
+    box-shadow: 
+      0 8px 20px -4px rgba(0, 0, 0, 0.6),
+      0 2px 6px -1px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+    text-decoration: none;
+    line-height: 1;
+  }
+
+  .skeuo-button::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    box-shadow: inset 0 1px 0px 0 rgba(255, 255, 255, 0.25);
+  }
+
+  .skeuo-button:hover {
+    filter: brightness(115%);
+    transform: scale(1.02);
+  }
+
+  .skeuo-button:active {
+    transform: scale(0.95);
+    box-shadow: 
+      0 2px 4px -1px rgba(0, 0, 0, 0.7),
+      inset 0 2px 4px 0 rgba(0, 0, 0, 0.5);
+  }
+
+  .skeuo-button-icon {
+    width: 22px;
+    height: 22px;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+
+  /* Skeuomorphic Color & Size Variations */
+  .skeuo-button-primary {
+    background-image: linear-gradient(180deg, #00f2fe, #008c94) !important;
+    color: #02181a !important;
+    font-weight: 700;
+    box-shadow: 
+      0 10px 25px -4px rgba(0, 173, 181, 0.55),
+      0 4px 12px -2px rgba(0, 0, 0, 0.6),
+      0 0 0 1px rgba(255, 255, 255, 0.4) !important;
+  }
+
+  .skeuo-button-primary::before {
+    box-shadow: inset 0 1px 0px 0 rgba(255, 255, 255, 0.6) !important;
+  }
+
+  .skeuo-button-sm {
+    padding: 10px 22px;
+    font-size: 14px;
+  }
+
+  .skeuo-button-sm .skeuo-button-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+  }
+
+  .skeuo-button-telegram {
+    background-image: linear-gradient(180deg, #1fa8ec, #0077b5);
+    color: #ffffff;
+    box-shadow: 
+      0 10px 25px -4px rgba(0, 136, 204, 0.5),
+      0 4px 10px -2px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.2);
+  }
+
   .glow {
     position: absolute;
     width: 600px;
@@ -109,7 +196,6 @@ export const prerender = true;
   .glow-3 { bottom: 800px; right: -200px; }
   .glow-4 { bottom: -200px; left: 10%; }
 
-  /* ---------- pitch line texture ---------- */
   .field-lines {
     position: fixed;
     inset: 0;
@@ -121,15 +207,15 @@ export const prerender = true;
     opacity: 0.7;
   }
 
-  /* ---------- nav ---------- */
   header {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(23, 24, 28, 0.7);
-    -webkit-backdrop-filter: blur(20px);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--line);
+    padding: 12px 0;
+    background: rgba(23, 24, 28, 0.65);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     transition: all 0.3s ease;
   }
   
@@ -137,16 +223,9 @@ export const prerender = true;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px var(--container-padding);
+    padding: 0 var(--container-padding);
     max-width: var(--max-content-width);
     margin: 0 auto;
-    transition: padding 0.3s ease;
-  }
-  
-  @media (min-width: 1024px) {
-    nav {
-      padding: 24px var(--container-padding);
-    }
   }
   
   .logo {
@@ -154,12 +233,15 @@ export const prerender = true;
     align-items: center;
     gap: 10px;
     font-family: 'Teko', sans-serif;
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 700;
-    letter-spacing: 1px;
-    background: linear-gradient(135deg, var(--chalk) 60%, var(--signal) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    letter-spacing: 1.5px;
+    color: var(--chalk);
+    transition: opacity 0.2s ease;
+  }
+
+  .logo:hover {
+    opacity: 0.9;
   }
   
   .logo .dot {
@@ -167,65 +249,44 @@ export const prerender = true;
     height: 8px;
     border-radius: 50%;
     background: var(--signal);
-    box-shadow: 0 0 15px var(--signal), 0 0 5px var(--signal);
+    box-shadow: 0 0 12px var(--signal);
     display: inline-block;
   }
   
   .nav-links {
     display: flex;
-    gap: 36px;
-    font-size: 14px;
-    color: var(--chalk-dim);
-    font-weight: 500;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 4px;
+    border-radius: 999px;
+    backdrop-filter: blur(10px);
   }
   
   .nav-links a {
-    transition: color 0.2s ease, text-shadow 0.2s ease;
+    font-size: 13.5px;
+    color: var(--chalk-dim);
+    font-weight: 500;
+    padding: 6px 18px;
+    border-radius: 999px;
+    transition: all 0.2s ease;
     position: relative;
-    padding: 4px 0;
   }
 
   .nav-links a::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    width: 0;
-    height: 1px;
-    background: var(--signal);
-    transition: width 0.3s ease, left 0.3s ease;
+    display: none;
   }
 
-  .nav-links a:hover::after {
-    width: 100%;
-    left: 0;
-  }
-  
   .nav-links a:hover {
-    color: var(--signal);
-  }
-  
-  .nav-cta {
-    background: linear-gradient(135deg, var(--signal) 0%, var(--signal-dim) 100%);
-    color: var(--pitch);
-    padding: 10px 22px;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 14px;
-    box-shadow: 0 4px 15px rgba(0, 173, 181, 0.2);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  
-  .nav-cta:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 173, 181, 0.4);
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.06);
   }
 
   @media(max-width:768px) {
     .nav-links { display: none; }
   }
 
-  /* ---------- hero ---------- */
   .hero {
     position: relative;
     z-index: 10;
@@ -366,121 +427,6 @@ export const prerender = true;
       width: 100%;
     }
   }
-  
-  .btn-primary {
-    position: relative;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(23, 24, 28, 0.7);
-    border: 1px solid rgba(0, 173, 181, 0.35);
-    color: var(--chalk);
-    padding: 16px 32px;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 15px;
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    overflow: hidden;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 
-      inset 0 1px 1px 0 rgba(255, 255, 255, 0.15),
-      0 4px 12px rgba(0, 0, 0, 0.5),
-      0 0 0 1px rgba(0, 0, 0, 0.8),
-      0 0 25px rgba(0, 173, 181, 0.1);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .btn-primary svg {
-    color: var(--signal);
-    transition: transform 0.3s ease;
-  }
-
-  .btn-primary::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -150%;
-    width: 60%;
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.15) 50%,
-      rgba(255, 255, 255, 0) 100%
-    );
-    transform: skewX(-20deg);
-    transition: left 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    pointer-events: none;
-    z-index: 1;
-  }
-  
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    border-color: rgba(0, 173, 181, 0.6);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%), rgba(34, 35, 38, 0.85);
-    box-shadow: 
-      inset 0 1px 1px 0 rgba(255, 255, 255, 0.25),
-      0 8px 24px rgba(0, 0, 0, 0.6),
-      0 0 0 1px rgba(0, 0, 0, 0.8),
-      0 0 35px rgba(0, 173, 181, 0.2);
-  }
-
-  .btn-primary:hover svg {
-    transform: translateY(1px);
-  }
-
-  .btn-primary:hover::before {
-    left: 150%;
-  }
-
-  .btn-primary:active {
-    transform: translateY(0);
-    box-shadow: 
-      inset 0 1px 1px 0 rgba(255, 255, 255, 0.1),
-      0 2px 8px rgba(0, 0, 0, 0.5),
-      0 0 0 1px rgba(0, 0, 0, 0.8),
-      0 0 15px rgba(0, 173, 181, 0.15);
-  }
-  
-  .btn-secondary {
-    position: relative;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%), rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: var(--chalk-dim);
-    padding: 16px 32px;
-    border-radius: 12px;
-    font-weight: 500;
-    font-size: 15px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 
-      inset 0 1px 1px 0 rgba(255, 255, 255, 0.05),
-      0 4px 12px rgba(0, 0, 0, 0.4),
-      0 0 0 1px rgba(0, 0, 0, 0.5);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  
-  .btn-secondary:hover {
-    transform: translateY(-2px);
-    color: var(--chalk);
-    border-color: rgba(255, 255, 255, 0.2);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%), rgba(255, 255, 255, 0.04);
-    box-shadow: 
-      inset 0 1px 1px 0 rgba(255, 255, 255, 0.1),
-      0 8px 24px rgba(0, 0, 0, 0.5),
-      0 0 0 1px rgba(0, 0, 0, 0.5);
-  }
-
-  .btn-secondary:active {
-    transform: translateY(0);
-    box-shadow: 
-      inset 0 1px 1px 0 rgba(255, 255, 255, 0.03),
-      0 2px 8px rgba(0, 0, 0, 0.4),
-      0 0 0 1px rgba(0, 0, 0, 0.5);
-  }
 
   .trust-row {
     display: flex;
@@ -531,7 +477,6 @@ export const prerender = true;
     text-shadow: 0 0 8px rgba(0, 173, 181, 0.3);
   }
 
-  /* ---------- interactive slider mockup ---------- */
   .mockup-container {
     position: relative;
     width: 100%;
@@ -544,8 +489,6 @@ export const prerender = true;
     z-index: 20;
   }
 
-
-  /* ---------- marquee ---------- */
   .marquee-section {
     border-top: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
@@ -591,7 +534,6 @@ export const prerender = true;
     to { transform: translateX(-50%); }
   }
 
-  /* ---------- sections ---------- */
   section.block {
     padding: 120px 0;
     position: relative;
@@ -619,7 +561,6 @@ export const prerender = true;
     line-height: 1.65;
   }
 
-  /* ---------- features ---------- */
   .feature-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -693,7 +634,6 @@ export const prerender = true;
     line-height: 1.6;
   }
 
-  /* ---------- staggered 3d showcase ---------- */
   .showcase {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -818,42 +758,6 @@ export const prerender = true;
       transform: translateX(-50px) rotate(-8deg) scale(0.85);
     }
   }
-  /* Hover expand values */
-  @media (hover: hover) {
-    .phone-stack-container.state-0:hover .phone-schedule {
-      transform: scale(1.05) translateY(-5px);
-    }
-    .phone-stack-container.state-0:hover .phone-home {
-      transform: translateX(200px) rotate(6deg) scale(0.9);
-      filter: drop-shadow(0 20px 30px rgba(0,0,0,0.65)) brightness(0.85);
-    }
-    .phone-stack-container.state-0:hover .phone-stream {
-      transform: translateX(290px) rotate(9deg) scale(0.8);
-    }
-
-    .phone-stack-container.state-1:hover .phone-schedule {
-      transform: translateX(-200px) rotate(-6deg) scale(0.9);
-      filter: drop-shadow(0 20px 30px rgba(0,0,0,0.65)) brightness(0.85);
-    }
-    .phone-stack-container.state-1:hover .phone-home {
-      transform: scale(1.05) translateY(-5px);
-    }
-    .phone-stack-container.state-1:hover .phone-stream {
-      transform: translateX(200px) rotate(6deg) scale(0.9);
-      filter: drop-shadow(0 20px 30px rgba(0,0,0,0.65)) brightness(0.9);
-    }
-
-    .phone-stack-container.state-2:hover .phone-schedule {
-      transform: translateX(-290px) rotate(-9deg) scale(0.8);
-    }
-    .phone-stack-container.state-2:hover .phone-home {
-      transform: translateX(-200px) rotate(-6deg) scale(0.9);
-      filter: drop-shadow(0 20px 30px rgba(0,0,0,0.65)) brightness(0.85);
-    }
-    .phone-stack-container.state-2:hover .phone-stream {
-      transform: scale(1.05) translateY(-5px);
-    }
-  }
 
   .showcase-copy .checklist {
     margin-top: 32px;
@@ -920,7 +824,6 @@ export const prerender = true;
     margin-bottom: 2px;
   }
 
-  /* ---------- stats strip ---------- */
   .stats-strip {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -979,7 +882,6 @@ export const prerender = true;
     font-weight: 600;
   }
 
-  /* ---------- cta download ---------- */
   .cta-block {
     text-align: center;
     padding: 80px 32px;
@@ -1027,52 +929,53 @@ export const prerender = true;
     justify-content: center;
     flex-wrap: wrap;
   }
-  
-  .store-badge {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 14px 26px;
-    border-radius: 10px;
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1), 0 4px 10px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  }
-  
-  .store-badge:hover {
-    border-color: rgba(0, 173, 181, 0.5);
-    background: rgba(0, 173, 181, 0.08);
-    transform: translateY(-2px);
-    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), 0 10px 20px rgba(0, 173, 181, 0.05), 0 6px 15px rgba(0, 0, 0, 0.3);
-  }
 
-  .store-badge svg {
-    color: var(--signal);
+  .store-badge {
+    padding: 16px 36px;
+    border-radius: 9999px;
+    gap: 14px;
+    min-width: 240px;
+    justify-content: flex-start;
+  }
+  
+  .store-badge .skeuo-button-icon {
+    width: 26px;
+    height: 26px;
+    margin-right: 0;
     flex-shrink: 0;
   }
-  
+
   .store-badge .store-text {
     text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
 
   .store-badge .store-sub {
     font-size: 10px;
-    color: var(--chalk-dim);
+    color: rgba(255, 255, 255, 0.7);
     display: block;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
+    font-weight: 700;
   }
-  
+
+  .store-badge.skeuo-button-primary .store-sub {
+    color: rgba(2, 24, 26, 0.8) !important;
+  }
+
+  .store-badge.skeuo-button-primary .store-main {
+    color: #02181a !important;
+  }
+
   .store-badge .store-main {
     font-size: 17px;
     font-weight: 700;
-    color: var(--chalk);
+    color: #ffffff;
     font-family: 'Inter', sans-serif;
+    line-height: 1.1;
   }
 
-  /* ---------- footer ---------- */
   footer {
     border-top: 1px solid var(--line);
     padding: 60px 0 40px;
@@ -1158,38 +1061,18 @@ export const prerender = true;
     }
   }
 
-  /* ---------- floating community action button ---------- */
-  .floating-tg {
+  /* Floating Telegram Button Skeuomorphic Styling */
+  .floating-tg-container {
     position: fixed;
     bottom: 24px;
     right: 24px;
     z-index: 100;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: #0088cc;
-    color: white;
-    padding: 14px 22px;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 14px;
-    box-shadow: 0 10px 25px rgba(0, 136, 204, 0.4);
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-  }
-
-  .floating-tg:hover {
-    transform: translateY(-5px) scale(1.03);
-    box-shadow: 0 15px 30px rgba(0, 136, 204, 0.6);
-  }
-
-  .floating-tg svg {
-    flex-shrink: 0;
   }
 
   @media (max-width: 600px) {
-    .floating-tg span { display: none; }
-    .floating-tg { padding: 14px; border-radius: 50%; }
+    .floating-tg-container .skeuo-button span { display: none; }
+    .floating-tg-container .skeuo-button { padding: 14px; }
+    .floating-tg-container .skeuo-button-icon { margin-right: 0; }
   }
 
   /* reveal-on-scroll */
@@ -1205,7 +1088,6 @@ export const prerender = true;
     transform: translateY(0);
   }
 
-  /* Disable transition on transform once revealed so parallax scrolling is instant */
   .phone-stack-container.reveal.in {
     transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   }
@@ -1239,7 +1121,9 @@ export const prerender = true;
       <a href="#stats">Coverage</a>
       <a href="#download">Download</a>
     </div>
-    <a href="#download" class="nav-cta">Get the App</a>
+    <a href="#download" class="skeuo-button skeuo-button-sm skeuo-button-primary">
+      Get the App
+    </a>
   </nav>
 </header>
 
@@ -1251,15 +1135,22 @@ export const prerender = true;
       <span class="mobile-only"><span style="white-space: nowrap;">Watch FIFA World Cup</span><br><span class="highlight">Live.</span></span>
     </h1>
     <p class="sub">GoPlay tracks and streams matches across football, cricket, and more. Instantly access real-time scores, countdown schedules, and live video streams with multiple high-quality source links to bypass buffering — completely free.</p>
+    
     <div class="hero-actions">
-      <a href="https://cdn.ntechbd.app/app-release.apk" class="btn-primary" download>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+      <!-- Primary Skeuomorphic Button -->
+      <a href="https://cdn.ntechbd.app/app-release.apk" class="skeuo-button skeuo-button-primary" download>
+        <svg class="skeuo-button-icon" viewBox="0 0 24 24" fill="currentColor">
           <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
         </svg>
         Download APK
       </a>
-      <a href="#app" class="btn-secondary">Explore the app</a>
+      
+      <!-- Secondary Dark Skeuomorphic Button -->
+      <a href="#app" class="skeuo-button">
+        Explore the app
+      </a>
     </div>
+
     <div class="trust-row">
       <div class="trust-badge"><b>40+</b> leagues</div>
       <div class="trust-badge"><b>100%</b> Free to watch</div>
@@ -1392,9 +1283,10 @@ export const prerender = true;
     <div class="eyebrow">Free · Safe · No Signup Required</div>
     <h2 class="display">Ready to watch?<br>Get GoPlay for Android now.</h2>
     <p>Stream matches in crystal-clear definition with no monthly subscriptions. Click below to download the latest secure APK release directly.</p>
+    
     <div class="store-badges">
-      <a href="#" class="store-badge">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <a href="#" class="skeuo-button store-badge">
+        <svg class="skeuo-button-icon" viewBox="0 0 24 24" fill="none" stroke="var(--signal)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <polygon points="5 3 19 12 5 21 5 3"></polygon>
         </svg>
         <div class="store-text">
@@ -1402,8 +1294,9 @@ export const prerender = true;
           <span class="store-main">Google Play</span>
         </div>
       </a>
-      <a href="https://cdn.ntechbd.app/app-release.apk" class="store-badge" download>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+      <a href="https://cdn.ntechbd.app/app-release.apk" class="skeuo-button skeuo-button-primary store-badge" download>
+        <svg class="skeuo-button-icon" viewBox="0 0 24 24" fill="none" stroke="#02181a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
           <polyline points="7 10 12 15 17 10"></polyline>
           <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -1438,16 +1331,17 @@ export const prerender = true;
   </div>
 </footer>
 
-<!-- Floating Telegram Community Button -->
-<a href="https://t.me/goplay_app" target="_blank" class="floating-tg" aria-label="Join Telegram Community">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.24-5.54 3.65-.52.36-.97.54-1.34.53-.41-.01-1.21-.23-1.8-.42-.72-.24-1.3-.37-1.25-.78.03-.21.32-.43.88-.66 3.44-1.5 5.74-2.49 6.88-2.97 3.28-1.37 3.96-1.61 4.41-1.61.1 0 .32.02.46.14.12.1.15.24.17.34.02.1.02.21-.01.32z"/>
-  </svg>
-  <span>Join Telegram</span>
-</a>
+<!-- Floating Skeuomorphic Telegram Button -->
+<div class="floating-tg-container">
+  <a href="https://t.me/goplay_app" target="_blank" class="skeuo-button skeuo-button-telegram" aria-label="Join Telegram Community">
+    <svg class="skeuo-button-icon" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.24-5.54 3.65-.52.36-.97.54-1.34.53-.41-.01-1.21-.23-1.8-.42-.72-.24-1.3-.37-1.25-.78.03-.21.32-.43.88-.66 3.44-1.5 5.74-2.49 6.88-2.97 3.28-1.37 3.96-1.61 4.41-1.61.1 0 .32.02.46.14.12.1.15.24.17.34.02.1.02.21-.01.32z"/>
+    </svg>
+    <span>Join Telegram</span>
+  </a>
+</div>
 
-<script is:inline>
-  // marquee content
+<script>
   const leagues = [
     "FIFA World Cup 2026", "Premier League", "La Liga", "Serie A", 
     "Bundesliga", "Champions League", "Copa América", "IPL Cricket", 
@@ -1455,7 +1349,7 @@ export const prerender = true;
   ];
   const track = document.getElementById('marquee');
   const build = () => leagues.map(l => `<span><i></i>${l}</span>`).join('');
-  track.innerHTML = build() + build();
+  if (track) track.innerHTML = build() + build();
 
   // reveal on scroll
   const io = new IntersectionObserver((entries)=>{
@@ -1474,15 +1368,12 @@ export const prerender = true;
   const showcaseContainer = document.getElementById('showcase-stack');
   const checklistItems = document.querySelectorAll('.check-item');
   const STREAM_IMG_SRC = "https://pub-0440e8e4ec654c10b2471b3b64aa4265.r2.dev/App%20Screen/Goplay%20Screen%203.webp";
-  // index -> which stack state ("state-0/1/2") should be centered; same mapping for hero and showcase.
+  
   const STACK_STATES = ['state-1', 'state-2', 'state-0'];
   const STATE_CLASSES = ['state-0', 'state-1', 'state-2'];
   let currentIndex = 0;
   let autoSlideInterval = null;
 
-  // Swap the centered state class without touching any other classes
-  // already on the element (e.g. preserves the scroll-triggered 'reveal'/'in'
-  // classes on the showcase stack instead of forcing it into view early).
   const applyStackState = (el, index) => {
     if (!el) return;
     el.classList.remove(...STATE_CLASSES);
@@ -1519,8 +1410,6 @@ export const prerender = true;
     });
   });
 
-  // Pause the interval while the tab isn't visible so we're not doing
-  // pointless work (and layout/paint) in the background.
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       stopAutoSlide();
