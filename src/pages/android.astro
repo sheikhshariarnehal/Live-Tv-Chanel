@@ -208,15 +208,25 @@ export const prerender = true;
   }
 
   header {
-    position: sticky;
+    position: fixed;
     top: 0;
-    z-index: 100;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 1000;
+    padding: 16px 0;
+    background: transparent;
+    border-bottom: 1px solid transparent;
+    transition: background 0.3s ease, border-color 0.3s ease, padding 0.3s ease, backdrop-filter 0.3s ease;
+  }
+
+  header.scrolled {
+    background: rgba(23, 24, 28, 0.85);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     padding: 12px 0;
-    background: rgba(23, 24, 28, 0.65);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    backdrop-filter: blur(24px) saturate(180%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   }
   
   nav {
@@ -226,6 +236,7 @@ export const prerender = true;
     padding: 0 var(--container-padding);
     max-width: var(--max-content-width);
     margin: 0 auto;
+    width: 100%;
   }
   
   .logo {
@@ -257,11 +268,12 @@ export const prerender = true;
     display: flex;
     align-items: center;
     gap: 4px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     padding: 4px;
     border-radius: 999px;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
   
   .nav-links a {
@@ -280,17 +292,85 @@ export const prerender = true;
 
   .nav-links a:hover {
     color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mobile-nav-toggle {
+    display: none;
     background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--chalk);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+  }
+
+  .mobile-nav-toggle:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: scale(1.05);
+  }
+
+  .mobile-nav-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: rgba(23, 24, 28, 0.95);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 16px 24px 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    flex-direction: column;
+    gap: 12px;
+    transform: translateY(-10px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .mobile-nav-dropdown.active {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mobile-nav-link {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--chalk-dim);
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: color 0.2s ease;
+  }
+
+  .mobile-nav-link:hover {
+    color: var(--signal);
   }
 
   @media(max-width:768px) {
     .nav-links { display: none; }
+    .mobile-nav-toggle { display: flex; }
+    .mobile-nav-dropdown { display: flex; }
   }
 
   .hero {
     position: relative;
     z-index: 10;
-    padding: 100px var(--container-padding) 80px;
+    padding: 85px var(--container-padding) 60px;
     max-width: var(--max-content-width);
     margin: 0 auto;
     display: grid;
@@ -302,7 +382,7 @@ export const prerender = true;
   
   @media (min-width: 1024px) {
     .hero {
-      padding: 140px var(--container-padding) 100px;
+      padding: 95px var(--container-padding) 80px;
       gap: 80px;
     }
   }
@@ -310,9 +390,9 @@ export const prerender = true;
   @media(max-width:992px) {
     .hero {
       grid-template-columns: 1fr;
-      padding-top: 60px;
+      padding-top: 75px;
       text-align: center;
-      gap: 50px;
+      gap: 40px;
     }
   }
 
@@ -1112,7 +1192,7 @@ export const prerender = true;
   <div class="glow glow-4"></div>
 </div>
 
-<header>
+<header id="main-header">
   <nav>
     <a href="/" class="logo"><span class="dot"></span>GOPLAY</a>
     <div class="nav-links">
@@ -1121,10 +1201,28 @@ export const prerender = true;
       <a href="#stats">Coverage</a>
       <a href="#download">Download</a>
     </div>
-    <a href="#download" class="skeuo-button skeuo-button-sm skeuo-button-primary">
+    <div class="nav-actions">
+      <a href="#download" class="skeuo-button skeuo-button-sm skeuo-button-primary">
+        Get the App
+      </a>
+      <button class="mobile-nav-toggle" id="mobileNavToggleBtn" aria-label="Toggle Navigation Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+  </nav>
+  <div class="mobile-nav-dropdown" id="mobileNavDropdown">
+    <a href="#features" class="mobile-nav-link">Features</a>
+    <a href="#app" class="mobile-nav-link">The App</a>
+    <a href="#stats" class="mobile-nav-link">Coverage</a>
+    <a href="#download" class="mobile-nav-link">Download</a>
+    <a href="#download" class="skeuo-button skeuo-button-primary skeuo-button-sm" style="margin-top: 8px; justify-content: center; width: 100%;">
       Get the App
     </a>
-  </nav>
+  </div>
 </header>
 
 <section class="hero">
@@ -1417,6 +1515,42 @@ export const prerender = true;
       startAutoSlide();
     }
   });
+
+  // Header scroll backdrop effect
+  const mainHeader = document.getElementById('main-header');
+  const updateHeaderScroll = () => {
+    if (window.scrollY > 20) {
+      mainHeader?.classList.add('scrolled');
+    } else {
+      mainHeader?.classList.remove('scrolled');
+    }
+  };
+  window.addEventListener('scroll', updateHeaderScroll, { passive: true });
+  updateHeaderScroll();
+
+  // Mobile navigation dropdown toggle
+  const mobileNavToggleBtn = document.getElementById('mobileNavToggleBtn');
+  const mobileNavDropdown = document.getElementById('mobileNavDropdown');
+  
+  if (mobileNavToggleBtn && mobileNavDropdown) {
+    mobileNavToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      mobileNavDropdown.classList.toggle('active');
+    });
+
+    // Close menu when clicking outside or on links
+    document.addEventListener('click', (e) => {
+      if (!mobileNavDropdown.contains(e.target) && e.target !== mobileNavToggleBtn) {
+        mobileNavDropdown.classList.remove('active');
+      }
+    });
+
+    mobileNavDropdown.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileNavDropdown.classList.remove('active');
+      });
+    });
+  }
 
   // Start sliding automatically
   startAutoSlide();
