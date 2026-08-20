@@ -14,6 +14,7 @@ Widget getChannelVideoPlayer({
   VoidCallback? onInteract,
   VoidCallback? onFocusChannelPanel, // unused on web
   bool isTvDevice = false,           // unused on web
+  FocusNode? playPauseFocusNode,     // unused on web
 }) {
   return ChannelVideoPlayerWeb(
     channel: channel,
@@ -53,6 +54,9 @@ class ChannelVideoPlayerWeb extends StatefulWidget implements ChannelVideoPlayer
   final VoidCallback? onFocusChannelPanel;
   @override
   final bool isTvDevice;
+  // D-Pad play/pause focus routing — not used on web but required by interface
+  @override
+  final FocusNode? playPauseFocusNode;
 
   const ChannelVideoPlayerWeb({
     super.key,
@@ -66,6 +70,7 @@ class ChannelVideoPlayerWeb extends StatefulWidget implements ChannelVideoPlayer
     this.onInteract,
     this.onFocusChannelPanel,
     this.isTvDevice = false,
+    this.playPauseFocusNode,
   });
 
   @override
