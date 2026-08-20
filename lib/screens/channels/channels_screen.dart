@@ -1,14 +1,51 @@
 import 'dart:async';
-// dart:ui import removed — BackdropFilter/ImageFilter no longer used.
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+// `show` is required: flutter/foundation also exports a `Category` annotation
+// class, which would clash with our Category model.
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/cards/channel_card.dart';
 import '../../models/category.dart';
 import '../../models/channel.dart';
+
+const double _kTabStripHeight = 48.0;
+const double _kToolbarHeight = 56.0;
+const double _kGridSpacing = 8.0;
+const double _kGridEdgeInset = 10.0;
+
+/// How many recently visited category pages stay alive in the TabBarView.
+const int _kKeepAliveCount = 3;
+
+/// Shares which page is active, and which pages stay resident, without pushing
+/// the screen through a rebuild.
+///
+/// A tab change used to `setState` on `_ChannelsScreenState`, which re-ran the
+/// AppBar and rebuilt every `Tab` — including one `CachedNetworkImage` per
+/// category icon — on the exact frame the swipe animation settled. Pages now
+/// listen here and react with `updateKeepAlive()` only, so settling a tab costs
+/// zero widget rebuilds.
+class _PageCoordinator extends ChangeNotifier {
+  int _activeIndex = 0;
+  List<String> _residentIds = const <String>[];
+
+  int get activeIndex => _activeIndex;
+
+  bool isResident(String categoryId) => _residentIds.contains(categoryId);
+
+  void update({required int activeIndex, required List<String> residentIds}) {
+    if (_activeIndex == activeIndex && listEquals(_residentIds, residentIds)) {
+      return;
+    }
+    _activeIndex = activeIndex;
+    _residentIds = List<String>.unmodifiable(residentIds);
+    notifyListeners();
+  }
+}
 
 class ChannelsScreen extends ConsumerStatefulWidget {
   const ChannelsScreen({super.key});
@@ -17,300 +54,427 @@ class ChannelsScreen extends ConsumerStatefulWidget {
   ConsumerState<ChannelsScreen> createState() => _ChannelsScreenState();
 }
 
-class _ChannelsScreenState extends ConsumerState<ChannelsScreen> with TickerProviderStateMixin {
+class _ChannelsScreenState extends ConsumerState<ChannelsScreen>
+    with TickerProviderStateMixin {
   final _searchController = TextEditingController();
-  bool _isSearching = false;
   final _searchQueryNotifier = ValueNotifier<String>('');
-  final _scrollController = ScrollController();
   Timer? _debounceTimer;
+  bool _isSearching = false;
 
   TabController? _tabController;
+
+  /// Source of truth for tab index -> category id. Held as a field (not
+  /// captured in a listener closure) so a rebuilt category list can never map a
+  /// tab index onto a stale category.
+  List<String> _categoryIds = const <String>['all'];
+
+  /// Active index and residency, shared with the pages without rebuilding this
+  /// widget. `activeIndex` also distinguishes a re-tap from a new tap, because
+  /// `TabBar` calls `onTap` *after* `animateTo` has already moved
+  /// `controller.index`.
+  final _coordinator = _PageCoordinator();
+
+  final List<String> _recentlyVisited = <String>['all'];
+  final Map<String, ScrollController> _scrollControllers =
+      <String, ScrollController>{};
+
+  Timer? _prefetchTimer;
+  int _prefetchGeneration = 0;
+
+  bool _initialised = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Controller lifecycle is driven by provider updates, not by build().
+    ref.listenManual<AsyncValue<List<(Category, int)>>>(
+      activeCategoriesWithCountsProvider,
+      (previous, next) => _applyCategories(next.value),
+      fireImmediately: true,
+    );
+
+    ref.listenManual<String>(
+      selectedCategoryProvider,
+      (previous, next) => _syncControllerToSelection(next),
+    );
+
+    _initialised = true;
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
     _searchQueryNotifier.dispose();
-    _scrollController.dispose();
     _debounceTimer?.cancel();
+    _prefetchTimer?.cancel();
+    _prefetchGeneration++;
+    _tabController?.removeListener(_onTabControllerChanged);
     _tabController?.dispose();
+    for (final controller in _scrollControllers.values) {
+      controller.dispose();
+    }
+    _scrollControllers.clear();
+    _coordinator.dispose();
     super.dispose();
   }
 
-  void _toggleSearch() {
-    setState(() {
-      _isSearching = !_isSearching;
-      _debounceTimer?.cancel();
-      if (!_isSearching) {
-        _searchController.clear();
-        _searchQueryNotifier.value = '';
-      }
-    });
-  }
+  // ─── Tab controller lifecycle ───────────────────────────────
 
-  void _scrollToTop() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
+  void _applyCategories(List<(Category, int)>? categories) {
+    final ids = <String>['all', ...?categories?.map((e) => e.$1.id)];
+
+    // Keyed on the id list, not its length: two categories swapping in/out in
+    // the same sync kept the old controller *and* the old id mapping alive.
+    if (_tabController != null && listEquals(ids, _categoryIds)) return;
+
+    final selected = ref.read(selectedCategoryProvider);
+    var initialIndex = ids.indexOf(selected);
+    if (initialIndex < 0) initialIndex = 0;
+
+    final previous = _tabController;
+    previous?.removeListener(_onTabControllerChanged);
+
+    final next = TabController(
+      length: ids.length,
+      initialIndex: initialIndex,
+      vsync: this,
+    );
+    next.addListener(_onTabControllerChanged);
+
+    _categoryIds = ids;
+    _tabController = next;
+    _touchRecent(ids[initialIndex]);
+    _pruneScrollControllers(ids);
+    _publishCoordinator(initialIndex);
+
+    // Dispose only after the frame that swaps the new controller into TabBar
+    // and TabBarView, otherwise an in-flight animation touches a dead
+    // controller.
+    if (previous != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => previous.dispose());
+    }
+
+    // Rebuilding here is unavoidable: the tab *count* changed, so TabBar and
+    // TabBarView need new children.
+    if (_initialised && mounted) setState(() {});
+    _schedulePrefetch();
+
+    // The previously selected category no longer exists — reconcile the
+    // provider, deferred so we never write to it from inside a provider update.
+    if (ids[initialIndex] != selected) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(selectedCategoryProvider.notifier).select(ids[initialIndex]);
+      });
     }
   }
+
+  void _onTabControllerChanged() {
+    final controller = _tabController;
+    if (controller == null || controller.indexIsChanging) return;
+
+    final index = controller.index;
+    if (index < 0 || index >= _categoryIds.length) return;
+
+    final id = _categoryIds[index];
+    _touchRecent(id);
+    // No setState: pages observe the coordinator and respond with
+    // `updateKeepAlive()`, so settling a tab does not rebuild the AppBar or the
+    // tab strip.
+    _publishCoordinator(index);
+    _schedulePrefetch();
+
+    if (ref.read(selectedCategoryProvider) != id) {
+      ref.read(selectedCategoryProvider.notifier).select(id);
+    }
+  }
+
+  void _publishCoordinator(int activeIndex) {
+    _coordinator.update(
+      activeIndex: activeIndex,
+      residentIds: _recentlyVisited,
+    );
+  }
+
+  void _syncControllerToSelection(String categoryId) {
+    final controller = _tabController;
+    if (controller == null) return;
+    final index = _categoryIds.indexOf(categoryId);
+    if (index == -1 || index == controller.index) return;
+    controller.animateTo(index);
+  }
+
+  /// Moves [id] to the front of the residency LRU.
+  void _touchRecent(String id) {
+    if (_recentlyVisited.isNotEmpty && _recentlyVisited.last == id) return;
+    _recentlyVisited.remove(id);
+    _recentlyVisited.add(id);
+    while (_recentlyVisited.length > _kKeepAliveCount) {
+      _recentlyVisited.removeAt(0);
+    }
+  }
+
+  // ─── Neighbour prefetch ─────────────────────────────────────
+
+  /// Warms the first screen of logos for the categories either side of the
+  /// active one, a short beat after the swipe settles.
+  ///
+  /// Without this, an incoming page hits cold image decodes for every visible
+  /// card during the transition, which is what made swiping feel heavy. The
+  /// per-page precache only ever warmed logos the user was already looking at.
+  void _schedulePrefetch() {
+    _prefetchTimer?.cancel();
+    _prefetchTimer = Timer(
+      const Duration(milliseconds: 280),
+      _prefetchNeighbours,
+    );
+  }
+
+  void _prefetchNeighbours() {
+    if (!mounted) return;
+
+    final index = _coordinator.activeIndex;
+    final grouped = ref.read(channelsByCategoryMapProvider).value;
+    final allChannels = ref.read(channelsProvider).value;
+    if (grouped == null && allChannels == null) return;
+
+    final urls = <String>[];
+    for (final offset in const [1, -1]) {
+      final neighbour = index + offset;
+      if (neighbour < 0 || neighbour >= _categoryIds.length) continue;
+      final id = _categoryIds[neighbour];
+      final channels = id == 'all' ? allChannels : grouped?[id];
+      if (channels == null) continue;
+      // One screen's worth on the widest phone layout.
+      for (final channel in channels.take(12)) {
+        final logo = channel.logo;
+        if (logo != null && logo.isNotEmpty) urls.add(logo);
+      }
+    }
+    if (urls.isEmpty) return;
+
+    final generation = ++_prefetchGeneration;
+    var offset = 0;
+
+    void runBatch() {
+      if (!mounted || generation != _prefetchGeneration) return;
+      final end = math.min(offset + 4, urls.length);
+      for (var i = offset; i < end; i++) {
+        precacheImage(
+          CachedNetworkImageProvider(urls[i], maxWidth: 108, maxHeight: 108),
+          context,
+          // Dead logo URLs are endemic in scraped playlists (403/404, invalid
+          // image data). Without this, every failure is rethrown into
+          // FlutterError even though the card already falls back to initials.
+          onError: (error, stack) {},
+        );
+      }
+      offset = end;
+      if (offset < urls.length) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => runBatch());
+      }
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => runBatch());
+  }
+
+  // ─── Scroll controllers ─────────────────────────────────────
+
+  ScrollController _scrollControllerFor(String id) =>
+      _scrollControllers.putIfAbsent(id, ScrollController.new);
+
+  void _pruneScrollControllers(List<String> ids) {
+    final keep = ids.toSet();
+    final stale =
+        _scrollControllers.keys.where((k) => !keep.contains(k)).toList();
+    for (final key in stale) {
+      _scrollControllers.remove(key)?.dispose();
+    }
+  }
+
+  /// Scrolls the *visible* category page to the top.
+  ///
+  /// The previous implementation animated the screen-level `CustomScrollView`,
+  /// whose content exactly filled the viewport, so `maxScrollExtent` was always
+  /// zero and this silently did nothing.
+  void _scrollToTop() {
+    final activeIndex = _coordinator.activeIndex;
+    if (activeIndex < 0 || activeIndex >= _categoryIds.length) return;
+    final controller = _scrollControllers[_categoryIds[activeIndex]];
+    if (controller == null || !controller.hasClients) return;
+    if (controller.offset <= 0) return;
+    controller.animateTo(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+  }
+
+  // ─── Search ─────────────────────────────────────────────────
+
+  void _openSearch() => setState(() => _isSearching = true);
+
+  void _closeSearch() {
+    _debounceTimer?.cancel();
+    _searchController.clear();
+    _searchQueryNotifier.value = '';
+    setState(() => _isSearching = false);
+  }
+
+  void _onSearchChanged(String value) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(
+      const Duration(milliseconds: 150),
+      () => _searchQueryNotifier.value = value,
+    );
+  }
+
+  void _onSearchClearPressed() {
+    if (_searchController.text.isEmpty) {
+      _closeSearch();
+      return;
+    }
+    _debounceTimer?.cancel();
+    _searchController.clear();
+    _searchQueryNotifier.value = '';
+  }
+
+  // ─── Build ──────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final selectedCategory = ref.watch(selectedCategoryProvider);
+    final cs = theme.colorScheme;
     final activeCatsAsync = ref.watch(activeCategoriesWithCountsProvider);
+    final controller = _tabController;
+    final categories = activeCatsAsync.value;
 
-    final titleStyle = theme.appBarTheme.titleTextStyle ?? const TextStyle();
-
-    final appBarGlassDeco = BoxDecoration(
-      color: theme.colorScheme.surface,
-    );
-
-    // Sync selectedCategoryProvider changes back to the TabController
-    ref.listen<String>(selectedCategoryProvider, (prev, next) {
-      final activeCatsVal = ref.read(activeCategoriesWithCountsProvider).value;
-      if (activeCatsVal != null && _tabController != null) {
-        final categoryIds = ['all', ...activeCatsVal.map((e) => e.$1.id)];
-        final index = categoryIds.indexOf(next);
-        if (index != -1 && index != _tabController!.index) {
-          _tabController!.animateTo(index);
-        }
-      }
-    });
-
-    return activeCatsAsync.when(
-      data: (activeCats) {
-        final categoryIds = ['all', ...activeCats.map((e) => e.$1.id)];
-        final totalCount = activeCats.fold<int>(0, (sum, e) => sum + e.$2);
-
-        // Dynamic TabController initialization
-        if (_tabController == null || _tabController!.length != categoryIds.length) {
-          _tabController?.dispose();
-          _tabController = TabController(
-            length: categoryIds.length,
-            vsync: this,
-          );
-
-          final initialIndex = categoryIds.indexOf(selectedCategory);
-          if (initialIndex != -1) {
-            _tabController!.index = initialIndex;
-          }
-
-          _tabController!.addListener(() {
-            if (!_tabController!.indexIsChanging) {
-              final newCatId = categoryIds[_tabController!.index];
-              ref.read(selectedCategoryProvider.notifier).select(newCatId);
-            }
-          });
-        }
-
-        return Material(
-          color: GoPlayTheme.surface,
-          child: SafeArea(
-            top: false,
-            bottom: false,
-            child: CustomScrollView(
-              controller: _scrollController,
-              slivers: [
-                SliverAppBar(
-                  floating: false,
-                  pinned: true,
-                  backgroundColor: theme.colorScheme.surface,
-                  elevation: 0,
-                  leadingWidth: 0,
-                  leading: const SizedBox.shrink(),
-                  titleSpacing: 16,
-                  toolbarHeight: 56,
-                  title: _isSearching
-                      ? _SearchField(
-                          controller: _searchController,
-                          onChanged: (val) {
-                            if (_debounceTimer?.isActive ?? false) {
-                              _debounceTimer!.cancel();
-                            }
-                            _debounceTimer = Timer(
-                              const Duration(milliseconds: 150),
-                              () => _searchQueryNotifier.value = val,
-                            );
-                          },
-                          onClose: () {
-                            if (_searchController.text.isEmpty) {
-                              _toggleSearch();
-                            } else {
-                              _searchController.clear();
-                              _debounceTimer?.cancel();
-                              _searchQueryNotifier.value = '';
-                            }
-                          },
-                        )
-                      : Text('Channels', style: titleStyle),
-                  actions: _isSearching
-                      ? null
-                      : [
-                          IconButton(
-                            icon: Icon(
-                              Icons.search_rounded,
-                              color: theme.colorScheme.onSurface,
-                              size: 22,
-                            ),
-                            onPressed: _toggleSearch,
-                          ),
-                          PopupMenuButton<String>(
-                            icon: Icon(
-                              Icons.more_vert_rounded,
-                              color: theme.colorScheme.onSurface,
-                              size: 22,
-                            ),
-                            color: theme.brightness == Brightness.dark
-                                ? GoPlayTheme.darkSurfaceContainerHigh
-                                : GoPlayTheme.lightSurfaceContainerHigh,
-                            elevation: 4,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              side: BorderSide(
-                                color: theme.brightness == Brightness.dark
-                                    ? GoPlayTheme.darkCardBorder
-                                    : GoPlayTheme.lightCardBorder,
-                                width: 0.5,
-                              ),
-                            ),
-                            onSelected: (value) {
-                              if (value == 'settings') {
-                                context.push('/settings');
-                              }
-                            },
-                            itemBuilder: (BuildContext context) => [
-                              PopupMenuItem<String>(
-                                value: 'settings',
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.settings_rounded,
-                                      color: theme.colorScheme.onSurface,
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Text(
-                                      'App Settings',
-                                      style: TextStyle(
-                                        color: theme.colorScheme.onSurface,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(width: 8),
-                        ],
-                  flexibleSpace: DecoratedBox(
-                    decoration: appBarGlassDeco,
-                    child: const SizedBox.expand(),
-                  ),
-                ),
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: _SliverHeaderDelegate(
-                    child: Container(
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                      ),
-                      child: _CategoryFilterBar(
-                        tabController: _tabController!,
-                        activeCatsWithCounts: activeCats,
-                        totalCount: totalCount,
-                        selectedCategory: selectedCategory,
-                        onTabReSelected: _scrollToTop,
-                      ),
-                    ),
-                  ),
-                ),
-                SliverFillRemaining(
-                  hasScrollBody: true,
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: categoryIds.map((catId) {
-                      return _CategoryPageContent(
-                        key: ValueKey(catId),
-                        categoryId: catId,
-                        searchQueryNotifier: _searchQueryNotifier,
-                        tabController: _tabController!,
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
+    return PopScope(
+      // Back closes the search field first instead of leaving the screen with
+      // search still open.
+      canPop: !_isSearching,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && _isSearching) _closeSearch();
       },
-      loading: () => Material(
-        color: theme.colorScheme.surface,
+      child: Material(
+        color: cs.surface,
         child: Column(
           children: [
+            // AppBar handles the status-bar inset itself, so no SafeArea is
+            // needed above it.
             AppBar(
-              title: Text('Channels', style: titleStyle),
-              backgroundColor: theme.colorScheme.surface,
+              automaticallyImplyLeading: false,
+              backgroundColor: cs.surface,
+              surfaceTintColor: Colors.transparent,
               elevation: 0,
+              scrolledUnderElevation: 0,
+              titleSpacing: 16,
+              toolbarHeight: _kToolbarHeight,
+              title: _isSearching
+                  ? _SearchField(
+                      controller: _searchController,
+                      onChanged: _onSearchChanged,
+                      onClear: _onSearchClearPressed,
+                    )
+                  : Text('Channels', style: theme.appBarTheme.titleTextStyle),
+              actions: _isSearching
+                  ? null
+                  : [
+                      IconButton(
+                        tooltip: 'Search channels',
+                        icon: Icon(Icons.search_rounded,
+                            color: cs.onSurface, size: 22),
+                        onPressed: _openSearch,
+                      ),
+                      PopupMenuButton<String>(
+                        tooltip: 'More options',
+                        icon: Icon(Icons.more_vert_rounded,
+                            color: cs.onSurface, size: 22),
+                        onSelected: (value) {
+                          if (value == 'settings') context.push('/settings');
+                        },
+                        itemBuilder: (context) => [
+                          PopupMenuItem<String>(
+                            value: 'settings',
+                            child: Row(
+                              children: [
+                                Icon(Icons.settings_rounded,
+                                    color: cs.onSurface, size: 20),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'App Settings',
+                                  style: TextStyle(
+                                    color: cs.onSurface,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 8),
+                    ],
             ),
-            Expanded(
-              child: GridView.builder(
-                padding: const EdgeInsets.all(10),
-                gridDelegate: _gridDelegate(context),
-                itemCount: 12,
-                itemBuilder: (ctx, i) => const _ShimmerCard(),
-              ),
+
+            // The tab strip occupies the same 48dp in every state, so the grid
+            // no longer jumps down when categories finish loading.
+            SizedBox(
+              height: _kTabStripHeight,
+              child: (controller == null || categories == null)
+                  ? const _TabStripSkeleton()
+                  : _CategoryFilterBar(
+                      tabController: controller,
+                      activeCatsWithCounts: categories,
+                      totalCount:
+                          categories.fold<int>(0, (sum, e) => sum + e.$2),
+                      onTabTapped: (index) {
+                        if (index == _coordinator.activeIndex) _scrollToTop();
+                      },
+                    ),
             ),
+
+            Expanded(child: _buildBody(activeCatsAsync, controller)),
           ],
-        ),
-      ),
-      error: (e, s) => Material(
-        color: theme.colorScheme.surface,
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                size: 48,
-                color: GoPlayTheme.error,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Error loading categories: $e',
-                style: const TextStyle(color: GoPlayTheme.error),
-              ),
-            ],
-          ),
         ),
       ),
     );
   }
 
-  static SliverGridDelegateWithFixedCrossAxisCount _gridDelegate(
-    BuildContext context,
+  Widget _buildBody(
+    AsyncValue<List<(Category, int)>> async,
+    TabController? controller,
   ) {
-    final width = MediaQuery.sizeOf(context).width;
-    final int cols;
-    if (width >= 1200) {
-      cols = 6;
-    } else if (width >= 900) {
-      cols = 5;
-    } else if (width >= 600) {
-      cols = 4;
-    } else {
-      cols = 3;
+    if (async.hasError && !async.hasValue) {
+      return _ErrorState(
+        title: 'Could not load categories',
+        error: async.error,
+        onRetry: () {
+          ref.invalidate(categoriesProvider);
+          ref.invalidate(channelsProvider);
+        },
+      );
     }
-    return SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: cols,
-      childAspectRatio: 1.0,
-      crossAxisSpacing: 8,
-      mainAxisSpacing: 8,
+
+    if (async.value == null || controller == null) {
+      return const _SkeletonGrid(itemCount: 12);
+    }
+
+    return TabBarView(
+      controller: controller,
+      children: [
+        for (var i = 0; i < _categoryIds.length; i++)
+          _CategoryPageContent(
+            key: ValueKey(_categoryIds[i]),
+            categoryId: _categoryIds[i],
+            pageIndex: i,
+            coordinator: _coordinator,
+            scrollController: _scrollControllerFor(_categoryIds[i]),
+            searchQueryNotifier: _searchQueryNotifier,
+          ),
+      ],
     );
   }
 }
@@ -319,45 +483,54 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> with TickerProv
 class _SearchField extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
-  final VoidCallback onClose;
+  final VoidCallback onClear;
 
   const _SearchField({
     required this.controller,
     required this.onChanged,
-    required this.onClose,
+    required this.onClear,
   });
-
-  // Pre-computed borders — avoids expensive theme.copyWith() on every build.
-  static const _borderRadius = BorderRadius.all(Radius.circular(12));
-  static const _borderSide = BorderSide(color: Color(0x14FFFFFF), width: 0.8);
-  static const _focusBorderSide = BorderSide(color: Color(0x40FFFFFF), width: 1.0);
-  static final _border = OutlineInputBorder(borderRadius: _borderRadius, borderSide: _borderSide);
-  static final _focusBorder = OutlineInputBorder(borderRadius: _borderRadius, borderSide: _focusBorderSide);
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    const radius = BorderRadius.all(Radius.circular(12));
+
     return SizedBox(
       height: 40,
       child: TextField(
         controller: controller,
         autofocus: true,
         onChanged: onChanged,
-        cursorColor: Colors.white,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
+        textInputAction: TextInputAction.search,
+        cursorColor: cs.primary,
+        style: TextStyle(color: cs.onSurface, fontSize: 14),
         decoration: InputDecoration(
           filled: true,
-          fillColor: const Color(0xFF222326),
-          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          hintText: 'Search channels by name, country...',
-          hintStyle: const TextStyle(color: Color(0x99FFFFFF), fontSize: 14),
+          fillColor: cs.surfaceContainerHigh,
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          hintText: 'Search by name, country, language…',
+          hintStyle: TextStyle(color: cs.onSurfaceVariant, fontSize: 14),
           isDense: true,
-          border: _border,
-          enabledBorder: _border,
-          focusedBorder: _focusBorder,
-          prefixIcon: const Icon(Icons.search_rounded, color: Colors.white70, size: 20),
+          border: OutlineInputBorder(
+            borderRadius: radius,
+            borderSide: BorderSide(color: cs.outline, width: 0.8),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: radius,
+            borderSide: BorderSide(color: cs.outline, width: 0.8),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: radius,
+            borderSide: BorderSide(color: cs.primary, width: 1.2),
+          ),
+          prefixIcon:
+              Icon(Icons.search_rounded, color: cs.onSurfaceVariant, size: 20),
           suffixIcon: IconButton(
-            icon: const Icon(Icons.close_rounded, color: Colors.white70, size: 18),
-            onPressed: onClose,
+            tooltip: 'Clear search',
+            icon: Icon(Icons.close_rounded, color: cs.onSurfaceVariant, size: 18),
+            onPressed: onClear,
           ),
         ),
       ),
@@ -365,241 +538,203 @@ class _SearchField extends StatelessWidget {
   }
 }
 
-// ─── Empty State — extracted stateless widget ─────────────────
+// ─── Empty State ──────────────────────────────────────────────
 class _EmptyState extends StatelessWidget {
   final bool isSearch;
   final VoidCallback onAction;
 
   const _EmptyState({required this.isSearch, required this.onAction});
 
-  static const _iconDecoration = BoxDecoration(
-    color: Color(0x0DFFFFFF),
-    shape: BoxShape.circle,
-    border: Border.fromBorderSide(
-      BorderSide(color: Color(0x14FFFFFF), width: 0.8),
-    ),
-  );
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 80,
+              height: 80,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHigh,
+                  shape: BoxShape.circle,
+                  border: Border.fromBorderSide(
+                    BorderSide(color: cs.outline, width: 0.8),
+                  ),
+                ),
+                child: Icon(
+                  Icons.live_tv_outlined,
+                  size: 32,
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              isSearch
+                  ? 'No channels match your search'
+                  : 'No channels in this category',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: cs.onSurfaceVariant,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: onAction,
+              child: Text(isSearch ? 'Clear search' : 'View all channels'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Error State ──────────────────────────────────────────────
+class _ErrorState extends StatelessWidget {
+  final String title;
+  final Object? error;
+  final VoidCallback onRetry;
+
+  const _ErrorState({
+    required this.title,
+    required this.error,
+    required this.onRetry,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(
-            width: 80,
-            height: 80,
-            child: DecoratedBox(
-              decoration: _iconDecoration,
-              child: Icon(
-                Icons.live_tv_outlined,
-                size: 32,
-                color: GoPlayTheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            isSearch
-                ? 'No channels match your search'
-                : 'No channels in this category',
-            style: const TextStyle(
-              color: GoPlayTheme.onSurfaceVariant,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: onAction,
-            child: Text(
-              isSearch ? 'Clear Search' : 'View all channels',
-              style: const TextStyle(
-                color: GoPlayTheme.primary,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.wifi_off_rounded, size: 48, color: cs.onSurfaceVariant),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: cs.onSurface,
+                fontSize: 15,
                 fontWeight: FontWeight.w600,
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 6),
+            Text(
+              'Check your connection and try again.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text('Retry'),
+            ),
+            if (error != null) ...[
+              const SizedBox(height: 12),
+              // Diagnostics stay available without being the headline.
+              ExpansionTile(
+                title: Text(
+                  'Technical details',
+                  style: TextStyle(color: cs.onSurfaceVariant, fontSize: 12),
+                ),
+                tilePadding: EdgeInsets.zero,
+                shape: const Border(),
+                collapsedShape: const Border(),
+                children: [
+                  Text(
+                    '$error',
+                    style: TextStyle(color: cs.onSurfaceVariant, fontSize: 11),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
 }
 
 // ─── Category Filter Bar ──────────────────────────────────────
-class _CategoryFilterBar extends StatefulWidget {
+class _CategoryFilterBar extends StatelessWidget {
   final TabController tabController;
   final List<(Category, int)> activeCatsWithCounts;
   final int totalCount;
-  final String selectedCategory;
-  final VoidCallback? onTabReSelected;
+  final ValueChanged<int> onTabTapped;
 
   const _CategoryFilterBar({
     required this.tabController,
     required this.activeCatsWithCounts,
     required this.totalCount,
-    required this.selectedCategory,
-    this.onTabReSelected,
+    required this.onTabTapped,
   });
 
   @override
-  State<_CategoryFilterBar> createState() => _CategoryFilterBarState();
-}
-
-class _CategoryFilterBarState extends State<_CategoryFilterBar> {
-  BoxDecoration? _countSelectedDeco;
-  BoxDecoration? _countUnselectedDeco;
-  TextStyle? _countSelectedTextStyle;
-  TextStyle? _countUnselectedTextStyle;
-  Color? _primaryColor;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final theme = Theme.of(context);
-    final primaryColor = theme.colorScheme.primary;
-    _primaryColor = primaryColor;
-
-    _countSelectedDeco = BoxDecoration(
-      color: primaryColor,
-      borderRadius: const BorderRadius.all(Radius.circular(10)),
-    );
-
-    _countUnselectedDeco = BoxDecoration(
-      color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
-      borderRadius: const BorderRadius.all(Radius.circular(10)),
-    );
-
-    _countSelectedTextStyle = TextStyle(
-      color: theme.colorScheme.onPrimary,
-      fontSize: 11,
-      fontWeight: FontWeight.bold,
-    );
-
-    _countUnselectedTextStyle = TextStyle(
-      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-      fontSize: 11,
-      fontWeight: FontWeight.bold,
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tabs = <Widget>[];
+    final cs = Theme.of(context).colorScheme;
 
-    // 1. "All" tab
-    final isAllSelected = widget.selectedCategory == 'all';
-    tabs.add(
+    final tabs = <Widget>[
       Tab(
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text('All'),
             const SizedBox(width: 6),
-            DecoratedBox(
-              decoration: isAllSelected ? _countSelectedDeco! : _countUnselectedDeco!,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                child: Text(
-                  '${widget.totalCount}',
-                  style: isAllSelected ? _countSelectedTextStyle : _countUnselectedTextStyle,
-                ),
-              ),
+            _CountBadge(
+              animation: tabController.animation,
+              index: 0,
+              count: totalCount,
             ),
           ],
         ),
       ),
-    );
-
-    // 2. Category tabs
-    for (final item in widget.activeCatsWithCounts) {
-      final cat = item.$1;
-      final count = item.$2;
-      final isSelected = widget.selectedCategory == cat.id;
-
-      tabs.add(
+      for (var i = 0; i < activeCatsWithCounts.length; i++)
         Tab(
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (cat.iconUrl != null && cat.iconUrl!.isNotEmpty) ...[
-                SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CachedNetworkImage(
-                    imageUrl: cat.iconUrl!,
-                    width: 16,
-                    height: 16,
-                    fit: BoxFit.cover,
-                    memCacheWidth: 48,
-                    memCacheHeight: 48,
-                    fadeInDuration: const Duration(milliseconds: 100),
-                    imageBuilder: (context, imageProvider) => DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.all(Radius.circular(4)),
-                        image: DecorationImage(
-                          image: imageProvider,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    placeholder: (context, url) => const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: Colors.white10,
-                          borderRadius: BorderRadius.all(Radius.circular(4)),
-                        ),
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => const Icon(
-                      Icons.category_outlined,
-                      size: 12,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
+              if (activeCatsWithCounts[i].$1.iconUrl?.isNotEmpty ?? false) ...[
+                _CategoryIcon(url: activeCatsWithCounts[i].$1.iconUrl!),
                 const SizedBox(width: 6),
               ],
-              Text(cat.name),
+              Text(activeCatsWithCounts[i].$1.name),
               const SizedBox(width: 6),
-              DecoratedBox(
-                decoration: isSelected ? _countSelectedDeco! : _countUnselectedDeco!,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                  child: Text(
-                    '$count',
-                    style: isSelected ? _countSelectedTextStyle : _countUnselectedTextStyle,
-                  ),
-                ),
+              _CountBadge(
+                animation: tabController.animation,
+                index: i + 1,
+                count: activeCatsWithCounts[i].$2,
               ),
             ],
           ),
         ),
-      );
-    }
+    ];
 
     return TabBar(
-      controller: widget.tabController,
+      controller: tabController,
       isScrollable: true,
       tabAlignment: TabAlignment.start,
       physics: const BouncingScrollPhysics(),
       dividerColor: Colors.transparent,
-      onTap: (index) {
-        if (index == widget.tabController.index) {
-          widget.onTabReSelected?.call();
-        }
-      },
+      onTap: onTabTapped,
       indicator: UnderlineTabIndicator(
-        borderSide: BorderSide(color: _primaryColor ?? theme.colorScheme.primary, width: 3.0),
+        borderSide: BorderSide(color: cs.primary, width: 3.0),
         borderRadius: const BorderRadius.all(Radius.circular(1.5)),
       ),
       indicatorSize: TabBarIndicatorSize.label,
       indicatorPadding: const EdgeInsets.only(bottom: 2),
-      labelColor: _primaryColor ?? theme.colorScheme.primary,
-      unselectedLabelColor: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+      labelColor: cs.primary,
+      unselectedLabelColor: cs.onSurface.withValues(alpha: 0.6),
       labelPadding: const EdgeInsets.symmetric(horizontal: 12),
       padding: const EdgeInsets.only(left: 4),
       labelStyle: const TextStyle(
@@ -614,10 +749,11 @@ class _CategoryFilterBarState extends State<_CategoryFilterBar> {
       ),
       overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {
         if (states.contains(WidgetState.hovered)) {
-          return theme.colorScheme.onSurface.withValues(alpha: 0.04);
+          return cs.onSurface.withValues(alpha: 0.04);
         }
-        if (states.contains(WidgetState.focused) || states.contains(WidgetState.pressed)) {
-          return theme.colorScheme.primary.withValues(alpha: 0.08);
+        if (states.contains(WidgetState.focused) ||
+            states.contains(WidgetState.pressed)) {
+          return cs.primary.withValues(alpha: 0.08);
         }
         return null;
       }),
@@ -626,20 +762,144 @@ class _CategoryFilterBarState extends State<_CategoryFilterBar> {
   }
 }
 
+class _CategoryIcon extends StatelessWidget {
+  final String url;
+  const _CategoryIcon({required this.url});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 16,
+      height: 16,
+      child: CachedNetworkImage(
+        imageUrl: url,
+        width: 16,
+        height: 16,
+        fit: BoxFit.cover,
+        memCacheWidth: 48,
+        memCacheHeight: 48,
+        fadeInDuration: const Duration(milliseconds: 100),
+        imageBuilder: (context, imageProvider) => DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(4)),
+            image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+          ),
+        ),
+        placeholder: (context, url) => DecoratedBox(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            borderRadius: const BorderRadius.all(Radius.circular(4)),
+          ),
+        ),
+        errorWidget: (context, url, error) => Icon(
+          Icons.category_outlined,
+          size: 12,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
+}
+
+/// Count pill that tracks the tab *animation* rather than the settled
+/// selection, so its highlight crosses over at the same point as the underline
+/// indicator during a swipe. It rebuilds only when its selected flag flips, not
+/// on every animation tick.
+class _CountBadge extends StatefulWidget {
+  final Animation<double>? animation;
+  final int index;
+  final int count;
+
+  const _CountBadge({
+    required this.animation,
+    required this.index,
+    required this.count,
+  });
+
+  @override
+  State<_CountBadge> createState() => _CountBadgeState();
+}
+
+class _CountBadgeState extends State<_CountBadge> {
+  late bool _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = _resolveSelected();
+    widget.animation?.addListener(_onTick);
+  }
+
+  @override
+  void didUpdateWidget(_CountBadge oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.animation != widget.animation) {
+      oldWidget.animation?.removeListener(_onTick);
+      widget.animation?.addListener(_onTick);
+    }
+    final next = _resolveSelected();
+    if (next != _selected) _selected = next;
+  }
+
+  @override
+  void dispose() {
+    widget.animation?.removeListener(_onTick);
+    super.dispose();
+  }
+
+  bool _resolveSelected() {
+    final value = widget.animation?.value;
+    if (value == null) return widget.index == 0;
+    return (value - widget.index).abs() < 0.5;
+  }
+
+  void _onTick() {
+    final next = _resolveSelected();
+    if (next == _selected || !mounted) return;
+    setState(() => _selected = next);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: _selected ? cs.primary : cs.onSurface.withValues(alpha: 0.08),
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+        child: Text(
+          '${widget.count}',
+          style: TextStyle(
+            color: _selected
+                ? cs.onPrimary
+                : cs.onSurface.withValues(alpha: 0.5),
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // ─── Responsive Grid ──────────────────────────────────────────
 class _ResponsiveGrid extends StatefulWidget {
   final List<Channel> channels;
-  final Set<String> favorites;
-  final WidgetRef ref;
-  final double topPad;
+  final int pageIndex;
+  final _PageCoordinator coordinator;
   final ValueNotifier<String> searchQueryNotifier;
+  final VoidCallback onClearSearch;
+  final VoidCallback onViewAll;
 
   const _ResponsiveGrid({
     required this.channels,
-    required this.favorites,
-    required this.ref,
-    required this.topPad,
+    required this.pageIndex,
+    required this.coordinator,
     required this.searchQueryNotifier,
+    required this.onClearSearch,
+    required this.onViewAll,
   });
 
   @override
@@ -647,7 +907,6 @@ class _ResponsiveGrid extends StatefulWidget {
 }
 
 class _ResponsiveGridState extends State<_ResponsiveGrid> {
-  // Memoized filtered list — only recomputed when query or channels change.
   List<Channel>? _filtered;
   String _lastQuery = '';
   List<Channel>? _lastChannels;
@@ -665,11 +924,6 @@ class _ResponsiveGridState extends State<_ResponsiveGrid> {
       oldWidget.searchQueryNotifier.removeListener(_onSearchChanged);
       widget.searchQueryNotifier.addListener(_onSearchChanged);
     }
-    // Channels list reference changed — invalidate memoized result.
-    if (oldWidget.channels != widget.channels) {
-      _filtered = null;
-      _lastChannels = null;
-    }
   }
 
   @override
@@ -679,55 +933,34 @@ class _ResponsiveGridState extends State<_ResponsiveGrid> {
   }
 
   void _onSearchChanged() {
-    if (mounted) setState(() => _filtered = null); // invalidate cache, rebuild
+    // Only the visible tab re-filters on a keystroke. Off-screen kept-alive
+    // pages recompute lazily when they are next built, because
+    // `_computeFiltered` compares against the query it last ran with.
+    //
+    // Read from the coordinator rather than a widget prop so a tab change never
+    // has to rebuild this grid just to update an `isActive` flag.
+    if (!mounted) return;
+    if (widget.coordinator.activeIndex != widget.pageIndex) return;
+    setState(() => _filtered = null);
   }
 
   List<Channel> _computeFiltered() {
     final query = widget.searchQueryNotifier.value.trim().toLowerCase();
-    // Use memoized result if inputs haven't changed.
     if (_filtered != null &&
         _lastQuery == query &&
-        _lastChannels == widget.channels) {
+        identical(_lastChannels, widget.channels)) {
       return _filtered!;
     }
     _lastQuery = query;
     _lastChannels = widget.channels;
+    // One `contains` against a cached, pre-lowercased index per channel instead
+    // of three fresh `toLowerCase()` allocations.
     _filtered = query.isEmpty
         ? widget.channels
-        : widget.channels.where((ch) {
-            return ch.name.toLowerCase().contains(query) ||
-                (ch.country?.toLowerCase().contains(query) ?? false) ||
-                (ch.language?.toLowerCase().contains(query) ?? false);
-          }).toList();
+        : widget.channels
+            .where((ch) => ch.searchIndex.contains(query))
+            .toList();
     return _filtered!;
-  }
-
-  SliverGridDelegateWithFixedCrossAxisCount? _cachedGridDelegate;
-  double? _lastWidth;
-
-  SliverGridDelegateWithFixedCrossAxisCount _getGridDelegate(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    if (_cachedGridDelegate != null && _lastWidth == width) {
-      return _cachedGridDelegate!;
-    }
-    _lastWidth = width;
-    final int cols;
-    if (width >= 1200) {
-      cols = 6;
-    } else if (width >= 900) {
-      cols = 5;
-    } else if (width >= 600) {
-      cols = 4;
-    } else {
-      cols = 3;
-    }
-    _cachedGridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: cols,
-      childAspectRatio: 1.0,
-      crossAxisSpacing: 8,
-      mainAxisSpacing: 8,
-    );
-    return _cachedGridDelegate!;
   }
 
   @override
@@ -739,372 +972,340 @@ class _ResponsiveGridState extends State<_ResponsiveGrid> {
         hasScrollBody: false,
         child: _EmptyState(
           isSearch: _lastQuery.isNotEmpty,
-          onAction: () {
-            if (_lastQuery.isNotEmpty) {
-              widget.searchQueryNotifier.value = '';
-            } else {
-              widget.ref.read(selectedCategoryProvider.notifier).select('all');
-            }
-          },
+          onAction:
+              _lastQuery.isNotEmpty ? widget.onClearSearch : widget.onViewAll,
         ),
       );
     }
 
-    final bottomPadding = MediaQuery.paddingOf(context).bottom + 80.0;
+    // The Scaffold already insets the body above the bottom nav bar, so the old
+    // `+ 80` was pure dead space under the last row.
+    final bottomInset = MediaQuery.paddingOf(context).bottom + 12.0;
+
     return SliverPadding(
       padding: EdgeInsets.only(
-        left: 10,
-        right: 10,
-        top: 10,
-        bottom: bottomPadding,
+        left: _kGridEdgeInset,
+        right: _kGridEdgeInset,
+        top: _kGridEdgeInset,
+        bottom: bottomInset,
       ),
-      sliver: SliverGrid(
-        gridDelegate: _getGridDelegate(context),
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final channel = filtered[index];
-            // ExcludeSemantics prevents expensive accessibility tree
-            // recalculations during fast scrolling (Semantics.ensureGeometry
-            // spiked to 7.5 s in the trace).
-            return ExcludeSemantics(
-              child: ChannelCard(
-                key: ValueKey(channel.id),
-                channel: channel,
-                isFavorite: widget.favorites.contains(channel.id),
-                onFavoriteTap: () => widget.ref
-                    .read(favoriteChannelIdsProvider.notifier)
-                    .toggle(channel.id),
+      // Sliver-level layout: column count follows the real available width and
+      // is immune to keyboard-driven MediaQuery.size changes.
+      sliver: SliverLayoutBuilder(
+        builder: (context, constraints) {
+          final gridDelegate =
+              _buildGridDelegate(context, constraints.crossAxisExtent);
+          return SliverGrid(
+            gridDelegate: gridDelegate,
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => ChannelCard(
+                key: ValueKey(filtered[index].id),
+                channel: filtered[index],
               ),
-            );
-          },
-          childCount: filtered.length,
-          addAutomaticKeepAlives: false,
-          addRepaintBoundaries: true,
-        ),
+              childCount: filtered.length,
+              addAutomaticKeepAlives: false,
+              addRepaintBoundaries: true,
+              // Semantic index bookkeeping is the expensive part of a large
+              // grid; dropping it keeps cards readable by screen readers while
+              // avoiding the churn that motivated the old ExcludeSemantics.
+              addSemanticIndexes: false,
+            ),
+          );
+        },
       ),
     );
   }
 }
 
-// ─── Sliver Header Delegate ──────────────────────────────────
-class _SliverHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
-  _SliverHeaderDelegate({required this.child});
-
-  @override
-  double get minExtent => 48.0;
-  @override
-  double get maxExtent => 48.0;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return child;
+/// Grid metrics shared by the real grid and the loading skeleton so the two
+/// never disagree on tile size.
+SliverGridDelegateWithFixedCrossAxisCount _buildGridDelegate(
+  BuildContext context,
+  double crossAxisExtent,
+) {
+  final int cols;
+  if (crossAxisExtent >= 1180) {
+    cols = 6;
+  } else if (crossAxisExtent >= 880) {
+    cols = 5;
+  } else if (crossAxisExtent >= 580) {
+    cols = 4;
+  } else {
+    cols = 3;
   }
 
-  @override
-  bool shouldRebuild(covariant _SliverHeaderDelegate oldDelegate) {
-    return oldDelegate.child != child;
-  }
+  final tileWidth =
+      (crossAxisExtent - _kGridSpacing * (cols - 1)) / cols;
+  // Grow the tile when the card cannot fit at the current text scale. A fixed
+  // 1.0 ratio overflowed on 320dp widths and above ~1.15 text scale.
+  final tileHeight = math.max(tileWidth, ChannelCard.measureHeight(context));
+
+  return SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: cols,
+    childAspectRatio: tileWidth <= 0 ? 1.0 : tileWidth / tileHeight,
+    crossAxisSpacing: _kGridSpacing,
+    mainAxisSpacing: _kGridSpacing,
+  );
 }
 
-// ─── Category Page Content (Lazy & Kept-alive Page View Content) ─────────────────
+// ─── Category Page Content ────────────────────────────────────
 class _CategoryPageContent extends ConsumerStatefulWidget {
   final String categoryId;
+  final int pageIndex;
+  final _PageCoordinator coordinator;
+  final ScrollController scrollController;
   final ValueNotifier<String> searchQueryNotifier;
-  final TabController tabController;
 
   const _CategoryPageContent({
     super.key,
     required this.categoryId,
+    required this.pageIndex,
+    required this.coordinator,
+    required this.scrollController,
     required this.searchQueryNotifier,
-    required this.tabController,
   });
 
   @override
-  ConsumerState<_CategoryPageContent> createState() => _CategoryPageContentState();
+  ConsumerState<_CategoryPageContent> createState() =>
+      _CategoryPageContentState();
 }
 
 class _CategoryPageContentState extends ConsumerState<_CategoryPageContent>
     with AutomaticKeepAliveClientMixin {
-  List<Channel>? _lastPrecachedChannels;
-  bool _hasBeenVisible = false;
+  String? _precachedSignature;
+  int _precacheGeneration = 0;
 
-  static final List<String> _recentCategoryIds = [];
-  static final Set<_CategoryPageContentState> _activeStates = {};
+  /// Not `late`: [AutomaticKeepAliveClientMixin.initState] reads
+  /// [wantKeepAlive] from inside `super.initState()`, so this must already hold
+  /// a value by then.
+  bool _resident = false;
+
+  @override
+  bool get wantKeepAlive => _resident;
 
   @override
   void initState() {
+    // Assigned before super.initState(): AutomaticKeepAliveClientMixin reads
+    // wantKeepAlive from inside its own initState, so the value must already be
+    // correct by then.
+    _resident = widget.coordinator.isResident(widget.categoryId);
     super.initState();
-    _activeStates.add(this);
-    widget.tabController.animation?.addListener(_onTabAnimation);
-    _checkIfSettled();
+    widget.coordinator.addListener(_onCoordinatorChanged);
   }
 
   @override
   void didUpdateWidget(_CategoryPageContent oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.tabController != widget.tabController) {
-      oldWidget.tabController.animation?.removeListener(_onTabAnimation);
-      widget.tabController.animation?.addListener(_onTabAnimation);
+    if (oldWidget.coordinator != widget.coordinator) {
+      oldWidget.coordinator.removeListener(_onCoordinatorChanged);
+      widget.coordinator.addListener(_onCoordinatorChanged);
+      _onCoordinatorChanged();
     }
   }
 
   @override
   void dispose() {
-    widget.tabController.animation?.removeListener(_onTabAnimation);
-    _activeStates.remove(this);
+    _precacheGeneration++; // cancels any in-flight precache chain
+    widget.coordinator.removeListener(_onCoordinatorChanged);
     super.dispose();
   }
 
-  void _onTabAnimation() {
-    _checkIfSettled();
+  /// Residency changes are applied without a rebuild — `updateKeepAlive` only
+  /// notifies the enclosing sliver.
+  void _onCoordinatorChanged() {
+    final resident = widget.coordinator.isResident(widget.categoryId);
+    if (resident == _resident) return;
+    _resident = resident;
+    updateKeepAlive();
   }
 
-  void _checkIfSettled() {
-    if (!mounted) return;
-    final animValue = widget.tabController.animation?.value;
-    if (animValue == null) return;
+  /// Warms the rows just below the fold. Keyed on a cheap signature and
+  /// cancellable, so a re-sync or a swipe away stops the chain.
+  void _staggeredPrecache(List<Channel> channels) {
+    final signature =
+        '${channels.length}:${channels.isEmpty ? '' : channels.first.id}';
+    if (_precachedSignature == signature) return;
+    _precachedSignature = signature;
 
-    final activeCatsVal = ref.read(activeCategoriesWithCountsProvider).value;
-    if (activeCatsVal == null) return;
-    final categoryIds = ['all', ...activeCatsVal.map((e) => e.$1.id)];
-    final myIndex = categoryIds.indexOf(widget.categoryId);
-    if (myIndex == -1) return;
-
-    final distance = (animValue - myIndex).abs();
-    final isNowSettled = distance < 0.15;
-
-    if (isNowSettled && !_hasBeenVisible) {
-      setState(() {
-        _hasBeenVisible = true;
-      });
-    }
-  }
-
-  void _markAsVisited() {
-    final catId = widget.categoryId;
-    if (_recentCategoryIds.isEmpty || _recentCategoryIds.last != catId) {
-      if (_recentCategoryIds.contains(catId)) {
-        _recentCategoryIds.remove(catId);
-      }
-      _recentCategoryIds.add(catId);
-      if (_recentCategoryIds.length > 3) {
-        _recentCategoryIds.removeAt(0);
-      }
-      // Schedule keep-alive updates after the current frame to prevent layout/draw phase collisions.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        for (final state in _activeStates) {
-          if (state.mounted) {
-            state.updateKeepAlive();
-          }
-        }
-      });
-    }
-  }
-
-  @override
-  bool get wantKeepAlive => _recentCategoryIds.contains(widget.categoryId);
-
-  /// Staggered precaching — fires 5 logos per frame across multiple frames
-  /// so no single POST_FRAME callback blocks the pipeline.
-  void _staggeredPrecache(BuildContext context, List<Channel> channels) {
+    final generation = ++_precacheGeneration;
     const batchSize = 5;
-    final total = channels.length < 30 ? channels.length : 30;
+    final total = math.min(channels.length, 24);
     var offset = 0;
 
-    void batch() {
-      if (!mounted) return;
-      final end = (offset + batchSize).clamp(0, total);
+    void runBatch() {
+      if (!mounted || generation != _precacheGeneration) return;
+      final end = math.min(offset + batchSize, total);
       for (var i = offset; i < end; i++) {
         final logo = channels[i].logo;
-        if (logo != null && logo.isNotEmpty) {
-          precacheImage(
-            CachedNetworkImageProvider(logo, maxWidth: 108, maxHeight: 108),
-            context,
-          );
-        }
+        if (logo == null || logo.isEmpty) continue;
+        precacheImage(
+          CachedNetworkImageProvider(logo, maxWidth: 108, maxHeight: 108),
+          context,
+          // Swallowed deliberately — see _prefetchNeighbours.
+          onError: (error, stack) {},
+        );
       }
       offset = end;
       if (offset < total) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => batch());
+        WidgetsBinding.instance.addPostFrameCallback((_) => runBatch());
       }
     }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => batch());
+    WidgetsBinding.instance.addPostFrameCallback((_) => runBatch());
   }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Required by AutomaticKeepAliveClientMixin
-    _markAsVisited();
+    super.build(context); // required by AutomaticKeepAliveClientMixin
 
-    if (!_hasBeenVisible) {
-      // Lightweight skeleton placeholder during active tab transition
-      return SafeArea(
-        top: false,
-        bottom: false,
-        child: CustomScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.all(10),
-              sliver: SliverGrid(
-                gridDelegate: _ChannelsScreenState._gridDelegate(context),
-                delegate: SliverChildBuilderDelegate(
-                  (ctx, i) => const _ShimmerCard(),
-                  childCount: 6,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    final channelsAsync = ref.watch(channelsByCategoryProvider(widget.categoryId));
-    final favorites = ref.watch(favoriteChannelIdsProvider);
-    final topPad = MediaQuery.paddingOf(context).top;
+    // No visibility gate. TabBarView builds this page the moment it enters the
+    // viewport (first pixel of a drag, or on tap), so building the real grid
+    // here is a single build during the gesture. The previous gate showed a
+    // shimmer for ~85% of the swipe and then built the whole grid on the frame
+    // the animation settled — double work, landing at the worst moment.
+    final channelsAsync =
+        ref.watch(channelsByCategoryProvider(widget.categoryId));
 
     return channelsAsync.when(
       data: (channels) {
-        if (_lastPrecachedChannels != channels) {
-          _lastPrecachedChannels = channels;
-          _staggeredPrecache(context, channels);
-        }
-
-        return SafeArea(
-          top: false,
-          bottom: false,
-          child: CustomScrollView(
-            key: PageStorageKey<String>(widget.categoryId),
-            cacheExtent: 400, // Increased from 200 to 400 for smoother scrolling flings
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              _ResponsiveGrid(
-                channels: channels,
-                favorites: favorites,
-                ref: ref,
-                topPad: topPad,
-                searchQueryNotifier: widget.searchQueryNotifier,
-              ),
-            ],
-          ),
-        );
-      },
-      loading: () => SafeArea(
-        top: false,
-        bottom: false,
-        child: CustomScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.all(10),
-              sliver: SliverGrid(
-                gridDelegate: _ChannelsScreenState._gridDelegate(context),
-                delegate: SliverChildBuilderDelegate(
-                  (ctx, i) => const _ShimmerCard(),
-                  childCount: 12,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      error: (e, s) => SafeArea(
-        top: false,
-        bottom: false,
-        child: CustomScrollView(
+        _staggeredPrecache(channels);
+        return CustomScrollView(
+          key: PageStorageKey<String>(widget.categoryId),
+          controller: widget.scrollController,
+          cacheExtent: 400,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 48,
-                      color: GoPlayTheme.error,
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Error loading channels',
-                      style: TextStyle(color: GoPlayTheme.error),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '$e',
-                      style: const TextStyle(
-                        color: GoPlayTheme.onSurfaceVariant,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextButton.icon(
-                      onPressed: () => ref.invalidate(
-                        channelsByCategoryProvider(widget.categoryId),
-                      ),
-                      icon: const Icon(Icons.refresh_rounded, size: 18),
-                      label: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              ),
+            _ResponsiveGrid(
+              channels: channels,
+              pageIndex: widget.pageIndex,
+              coordinator: widget.coordinator,
+              searchQueryNotifier: widget.searchQueryNotifier,
+              onClearSearch: () => widget.searchQueryNotifier.value = '',
+              onViewAll: () =>
+                  ref.read(selectedCategoryProvider.notifier).select('all'),
             ),
           ],
+        );
+      },
+      loading: () => const _SkeletonGrid(itemCount: 12, scrollable: false),
+      error: (e, s) => _ErrorState(
+        title: 'Could not load channels',
+        error: e,
+        onRetry: () =>
+            ref.invalidate(channelsByCategoryProvider(widget.categoryId)),
+      ),
+    );
+  }
+}
+
+// ─── Loading Skeletons ────────────────────────────────────────
+class _SkeletonGrid extends StatelessWidget {
+  final int itemCount;
+  final bool scrollable;
+
+  const _SkeletonGrid({required this.itemCount, this.scrollable = true});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      physics: scrollable
+          ? const AlwaysScrollableScrollPhysics()
+          : const NeverScrollableScrollPhysics(),
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(_kGridEdgeInset),
+          sliver: SliverLayoutBuilder(
+            builder: (context, constraints) => SliverGrid(
+              gridDelegate:
+                  _buildGridDelegate(context, constraints.crossAxisExtent),
+              delegate: SliverChildBuilderDelegate(
+                (ctx, i) => const _ShimmerCard(),
+                childCount: itemCount,
+                addAutomaticKeepAlives: false,
+                addSemanticIndexes: false,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TabStripSkeleton extends StatelessWidget {
+  const _TabStripSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return ListView.separated(
+      scrollDirection: Axis.horizontal,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      itemCount: 5,
+      separatorBuilder: (_, _) => const SizedBox(width: 20),
+      itemBuilder: (context, index) => SizedBox(
+        width: index.isEven ? 62 : 48,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: cs.onSurface.withValues(alpha: 0.06),
+            borderRadius: const BorderRadius.all(Radius.circular(6)),
+          ),
         ),
       ),
     );
   }
 }
 
-
-// ─── Shimmer Loading Card — fully const ───────────────────────
 class _ShimmerCard extends StatelessWidget {
   const _ShimmerCard();
 
-  static const _cardDeco = BoxDecoration(
-    color: Color(0x0DFFFFFF),
-    borderRadius: BorderRadius.all(Radius.circular(10)),
-    border: Border.fromBorderSide(
-      BorderSide(color: Color(0x14FFFFFF), width: 0.8),
-    ),
-  );
-
-  static const _circleDeco = BoxDecoration(
-    color: Color(0x1AFFFFFF),
-    shape: BoxShape.circle,
-  );
-
-  static const _barDeco = BoxDecoration(
-    color: Color(0x1AFFFFFF),
-    borderRadius: BorderRadius.all(Radius.circular(4)),
-  );
-
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    // Derived from the color scheme so the skeleton stays visible in a light
+    // theme; the old hardcoded 5%-white fill was invisible on a light surface.
+    final base = cs.onSurface.withValues(alpha: 0.06);
+    final highlight = cs.onSurface.withValues(alpha: 0.10);
+
     return DecoratedBox(
-      decoration: _cardDeco,
-      child: const Column(
+      decoration: BoxDecoration(
+        color: base,
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+        border: Border.fromBorderSide(BorderSide(color: cs.outline, width: 0.8)),
+      ),
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SizedBox(
             width: 44,
             height: 44,
-            child: DecoratedBox(decoration: _circleDeco),
+            child: DecoratedBox(
+              decoration:
+                  BoxDecoration(color: highlight, shape: BoxShape.circle),
+            ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           SizedBox(
             width: 56,
             height: 10,
-            child: DecoratedBox(decoration: _barDeco),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: highlight,
+                borderRadius: const BorderRadius.all(Radius.circular(4)),
+              ),
+            ),
           ),
-          SizedBox(height: 5),
+          const SizedBox(height: 5),
           SizedBox(
             width: 32,
             height: 8,
-            child: DecoratedBox(decoration: _barDeco),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: highlight,
+                borderRadius: const BorderRadius.all(Radius.circular(4)),
+              ),
+            ),
           ),
         ],
       ),
