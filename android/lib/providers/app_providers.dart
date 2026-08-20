@@ -65,18 +65,39 @@ final trendingChannelsProvider = FutureProvider<List<Channel>>((ref) async {
   return channels.where((ch) => ch.isTrending).toList();
 });
 
-final channelsByCategoryProvider =
-    Provider.family<AsyncValue<List<Channel>>, String>((ref, categoryId) {
-  final channelsAsync = ref.watch(channelsProvider);
-  return channelsAsync.when(
-    data: (channels) {
-      if (categoryId == 'all') return AsyncValue.data(channels);
-      final filtered = channels.where((ch) => ch.category == categoryId).toList();
-      return AsyncValue.data(filtered);
-    },
-    error: (err, stack) => AsyncValue.error(err, stack),
-    loading: () => const AsyncValue.loading(),
-  );
+/// Single O(n) grouping pass over the channel list.
+///
+/// Previously `channelsByCategoryProvider` was a non-disposing `Provider.family`
+/// that ran a full `.where()` scan per category, so one channel-list change cost
+/// O(categories x channels) and every filtered list stayed alive for the app
+/// lifetime. `activeCategoriesWithCountsProvider` then walked the list a third
+/// time just to build counts. Both now read this one map.
+final channelsByCategoryMapProvider =
+    Provider<AsyncValue<Map<String, List<Channel>>>>((ref) {
+  return ref.watch(channelsProvider).whenData((channels) {
+    final grouped = <String, List<Channel>>{};
+    for (final ch in channels) {
+      final key = (ch.category == null || ch.category!.isEmpty)
+          ? _uncategorizedKey
+          : ch.category!;
+      (grouped[key] ??= <Channel>[]).add(ch);
+    }
+    return grouped;
+  });
+});
+
+const String _uncategorizedKey = 'uncategorized';
+
+/// Channels for one category tab. `'all'` returns the full list unchanged.
+///
+/// `autoDispose` so leaving a category releases its list instead of retaining
+/// one list per category visited.
+final channelsByCategoryProvider = Provider.autoDispose
+    .family<AsyncValue<List<Channel>>, String>((ref, categoryId) {
+  if (categoryId == 'all') return ref.watch(channelsProvider);
+  return ref
+      .watch(channelsByCategoryMapProvider)
+      .whenData((grouped) => grouped[categoryId] ?? const <Channel>[]);
 });
 
 final channelProvider =
@@ -202,33 +223,34 @@ final categoriesProvider = FutureProvider<List<Category>>((ref) async {
 
 final activeCategoriesWithCountsProvider = Provider<AsyncValue<List<(Category, int)>>>((ref) {
   final categoriesAsync = ref.watch(categoriesProvider);
-  final allChannelsAsync = ref.watch(channelsProvider);
+  final groupedAsync = ref.watch(channelsByCategoryMapProvider);
 
-  if (categoriesAsync.isLoading || allChannelsAsync.isLoading) {
+  if (categoriesAsync.isLoading || groupedAsync.isLoading) {
     return const AsyncValue.loading();
   }
   if (categoriesAsync.hasError) {
     return AsyncValue.error(categoriesAsync.error!, categoriesAsync.stackTrace!);
   }
-  if (allChannelsAsync.hasError) {
-    return AsyncValue.error(allChannelsAsync.error!, allChannelsAsync.stackTrace!);
+  if (groupedAsync.hasError) {
+    return AsyncValue.error(groupedAsync.error!, groupedAsync.stackTrace!);
   }
 
   final categories = categoriesAsync.requireValue;
-  final allChannels = allChannelsAsync.requireValue;
+  final grouped = groupedAsync.requireValue;
 
-  final catCounts = <String, int>{};
-  for (final ch in allChannels) {
-    final cat = ch.category ?? 'uncategorized';
-    catCounts[cat] = (catCounts[cat] ?? 0) + 1;
+  // Counts come straight from the shared grouping map — no extra scan.
+  final list = <(Category, int)>[];
+  for (final cat in categories) {
+    final count = grouped[cat.id]?.length ?? 0;
+    if (count > 0) list.add((cat, count));
   }
 
-  final list = categories
-      .where((cat) => (catCounts[cat.id] ?? 0) > 0)
-      .map((cat) => (cat, catCounts[cat.id] ?? 0))
-      .toList();
-
-  list.sort((a, b) => a.$1.sortOrder.compareTo(b.$1.sortOrder));
+  list.sort((a, b) {
+    final byOrder = a.$1.sortOrder.compareTo(b.$1.sortOrder);
+    // Stable, deterministic ordering when sort_order collides, otherwise the
+    // tab order can shuffle between syncs and desync the TabController.
+    return byOrder != 0 ? byOrder : a.$1.id.compareTo(b.$1.id);
+  });
 
   return AsyncValue.data(list);
 });
@@ -260,12 +282,9 @@ final filteredChannelsProvider =
   if (query.isEmpty) return const [];
   final channels = await ref.watch(channelsProvider.future);
   final lowerQuery = query.toLowerCase();
-  return channels.where((ch) {
-    return ch.name.toLowerCase().contains(lowerQuery) ||
-        (ch.category?.toLowerCase().contains(lowerQuery) ?? false) ||
-        (ch.country?.toLowerCase().contains(lowerQuery) ?? false) ||
-        (ch.language?.toLowerCase().contains(lowerQuery) ?? false);
-  }).toList();
+  // Uses the cached per-channel search index instead of allocating four
+  // lowercase strings per channel on every query.
+  return channels.where((ch) => ch.searchIndex.contains(lowerQuery)).toList();
 });
 
 final filteredEventsProvider =
@@ -294,7 +313,7 @@ class SelectedCategoryNotifier extends Notifier<String> {
   void select(String category) => state = category;
 }
 
-// ─── Favorites ────────────────────────────────────────────────
+// ─── Favorites (persisted to Hive) ────────────────────────────
 final favoriteChannelIdsProvider =
     NotifierProvider<FavoriteNotifier, Set<String>>(
   FavoriteNotifier.new,
@@ -302,14 +321,15 @@ final favoriteChannelIdsProvider =
 
 class FavoriteNotifier extends Notifier<Set<String>> {
   @override
-  Set<String> build() => {};
+  Set<String> build() => ref.read(cacheServiceProvider).getFavoriteChannelIds();
 
   void toggle(String channelId) {
-    if (state.contains(channelId)) {
-      state = {...state}..remove(channelId);
-    } else {
-      state = {...state, channelId};
-    }
+    final next = <String>{...state};
+    if (!next.remove(channelId)) next.add(channelId);
+    state = next;
+    // Fire-and-forget write; the in-memory memo is updated synchronously so a
+    // failed disk write never desyncs the UI within the session.
+    ref.read(cacheServiceProvider).saveFavoriteChannelIds(next);
   }
 
   bool isFavorite(String channelId) => state.contains(channelId);

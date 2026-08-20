@@ -50,16 +50,18 @@ class _ShellScreenState extends State<ShellScreen> {
     final theme = Theme.of(context);
     final index = widget.navigationShell.currentIndex;
 
-    // Single MediaQuery read — avoids multiple rebuild subscriptions.
-    final mq = MediaQuery.of(context);
-    // TV detection: check directional nav mode, OR traditional focus highlight
-    // mode (catches AOSP TV boxes that don't report directional), OR wide
-    // screens >= 960px (typical TV resolution).
-    final isTv = mq.navigationMode == NavigationMode.directional ||
-        FocusManager.instance.highlightMode == FocusHighlightMode.traditional ||
-        mq.size.shortestSide >= 960;
-    final isDesktop = isTv || mq.size.width >= 800;
-    final bottomPadding = mq.padding.bottom;
+    // Scoped MediaQuery reads. `MediaQuery.of(context)` subscribes to every
+    // field — including `viewInsets` — so it rebuilt the whole shell (and every
+    // nav item) each time the keyboard opened.
+    final size = MediaQuery.sizeOf(context);
+    // TV & Landscape detection: TV devices, TV boxes, tablets, or any landscape screen (width > height)
+    // use the Left Side Navigation Rail.
+    // Mobile phones in portrait mode (width <= height) use the Bottom Navigation Bar.
+    final isLandscape = size.width > size.height;
+    final isTv = MediaQuery.navigationModeOf(context) == NavigationMode.directional ||
+        FocusManager.instance.highlightMode == FocusHighlightMode.traditional;
+    final isDesktop = isLandscape || isTv;
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
     Widget content;
 
@@ -257,12 +259,7 @@ class _NavItem extends StatelessWidget {
           borderRadius: _borderRadius,
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 6),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? activeColor.withValues(alpha: 0.12)
-                  : Colors.transparent,
-              borderRadius: _borderRadius,
-            ),
+            color: Colors.transparent,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -272,13 +269,22 @@ class _NavItem extends StatelessWidget {
                   size: 24,
                 ),
                 const SizedBox(height: 3),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: isSelected ? activeColor : inactiveColor,
-                    fontSize: 11,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    letterSpacing: 0.2,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: isSelected ? activeColor : inactiveColor,
+                        fontSize: 11,
+                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -324,7 +330,7 @@ class _RailNavItem extends StatelessWidget {
       borderRadius: _borderRadius,
       child: Container(
         width: 64,
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
         decoration: BoxDecoration(
           color: isSelected
               ? activeColor.withValues(alpha: 0.12)
@@ -340,13 +346,19 @@ class _RailNavItem extends StatelessWidget {
               size: 26,
             ),
             const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? activeColor : inactiveColor,
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                letterSpacing: 0.2,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: isSelected ? activeColor : inactiveColor,
+                  fontSize: 11,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  letterSpacing: 0.2,
+                ),
               ),
             ),
           ],

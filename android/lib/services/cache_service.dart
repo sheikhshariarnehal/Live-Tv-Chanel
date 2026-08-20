@@ -1,3 +1,6 @@
+// `show` is required: flutter/foundation also exports a `Category` annotation
+// class, which would otherwise clash with our Category model.
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:hive_flutter/hive_flutter.dart';
 import '../core/constants.dart';
 import '../models/channel.dart';
@@ -5,101 +8,177 @@ import '../models/event.dart';
 import '../models/category.dart';
 import '../models/announcement.dart';
 
-/// Service for managing local Hive cache operations for channels, categories, events, and sync versions.
+/// Service for managing local Hive cache operations for channels, categories,
+/// events, favorites and sync versions.
+///
+/// Every `getLocal*` call used to re-decode the whole Hive payload into model
+/// objects on the UI isolate. For a multi-thousand channel list that is a
+/// visible frame drop, and it ran again on every `ref.invalidate`. Decoded
+/// results are now memoized in memory and only dropped when the corresponding
+/// `saveLocal*` writes new data.
 class CacheService {
+  List<Channel>? _channelsMemo;
+  List<Category>? _categoriesMemo;
+  List<SportEvent>? _eventsMemo;
+  List<Announcement>? _announcementsMemo;
+  Set<String>? _favoritesMemo;
+
+  /// Drops every memoized decode. Used after a cache wipe.
+  void invalidateMemo() {
+    _channelsMemo = null;
+    _categoriesMemo = null;
+    _eventsMemo = null;
+    _announcementsMemo = null;
+    _favoritesMemo = null;
+  }
+
+  /// Reads a Hive box without throwing when the box failed to open at startup.
+  Box? _boxOrNull(String name) {
+    try {
+      if (!Hive.isBoxOpen(name)) return null;
+      return Hive.box(name);
+    } catch (e) {
+      debugPrint('CacheService: box "$name" unavailable: $e');
+      return null;
+    }
+  }
+
+  List<T> _decodeList<T>(
+    String boxName,
+    String key,
+    T Function(Map<String, dynamic>) fromJson,
+  ) {
+    final box = _boxOrNull(boxName);
+    final List<dynamic>? rawList = box?.get(key) as List<dynamic>?;
+    if (rawList == null) return const [];
+    final out = <T>[];
+    for (final e in rawList) {
+      if (e is! Map) continue;
+      try {
+        out.add(fromJson(Map<String, dynamic>.from(e)));
+      } catch (err) {
+        // A single malformed row must never take down the whole list.
+        debugPrint('CacheService: skipping malformed $T row: $err');
+      }
+    }
+    return out;
+  }
+
   // ─── Channels ───────────────────────────────────────────────
   List<Channel> getLocalChannels() {
-    final box = Hive.box(AppConstants.channelsBox);
-    final List<dynamic>? rawList = box.get('channels');
-    if (rawList == null) return [];
-    return rawList
-        .map((e) => Channel.fromJson(Map<String, dynamic>.from(e as Map)))
-        .toList();
+    return _channelsMemo ??= _decodeList(
+      AppConstants.channelsBox,
+      'channels',
+      Channel.fromJson,
+    );
   }
 
   Future<void> saveLocalChannels(List<Channel> channels) async {
-    final box = Hive.box(AppConstants.channelsBox);
-    final rawList = channels.map((c) => c.toJson()).toList();
-    await box.put('channels', rawList);
+    // Prime rather than clear. SyncService already holds these objects freshly
+    // parsed from Supabase, then invalidates `channelsProvider` — which used to
+    // force a full re-decode of ~15k channels on the main thread immediately
+    // after every sync. Adopting the caller's list skips that entirely.
+    _channelsMemo = List<Channel>.unmodifiable(channels);
+    final box = _boxOrNull(AppConstants.channelsBox);
+    if (box == null) return;
+    await box.put('channels', channels.map((c) => c.toJson()).toList());
   }
 
   // ─── Events ─────────────────────────────────────────────────
   List<SportEvent> getLocalEvents() {
-    final box = Hive.box(AppConstants.eventsBox);
-    final List<dynamic>? rawList = box.get('events');
-    if (rawList == null) return [];
-    final events = rawList
-        .map((e) => SportEvent.fromJson(Map<String, dynamic>.from(e as Map)))
-        .toList();
-    events.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-    return events;
+    return _eventsMemo ??= () {
+      final events = _decodeList(
+        AppConstants.eventsBox,
+        'events',
+        SportEvent.fromJson,
+      ).toList();
+      events.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+      return events;
+    }();
   }
 
   Future<void> saveLocalEvents(List<SportEvent> events) async {
-    final box = Hive.box(AppConstants.eventsBox);
-    final rawList = events.map((e) => e.toJson()).toList();
-    await box.put('events', rawList);
+    // Primed, matching saveLocalChannels. Sorted here so the memo and a later
+    // cold decode agree on ordering.
+    final sorted = events.toList()
+      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    _eventsMemo = List<SportEvent>.unmodifiable(sorted);
+    final box = _boxOrNull(AppConstants.eventsBox);
+    if (box == null) return;
+    await box.put('events', events.map((e) => e.toJson()).toList());
   }
 
   // ─── Categories ─────────────────────────────────────────────
   List<Category> getLocalCategories() {
-    final box = Hive.box(AppConstants.categoriesBox);
-    final List<dynamic>? rawList = box.get('categories');
-    if (rawList == null) return [];
-    return rawList
-        .map((e) => Category.fromJson(Map<String, dynamic>.from(e as Map)))
-        .toList();
+    return _categoriesMemo ??= _decodeList(
+      AppConstants.categoriesBox,
+      'categories',
+      Category.fromJson,
+    );
   }
 
   Future<void> saveLocalCategories(List<Category> categories) async {
-    final box = Hive.box(AppConstants.categoriesBox);
-    final rawList = categories.map((c) => c.toJson()).toList();
-    await box.put('categories', rawList);
+    _categoriesMemo = List<Category>.unmodifiable(categories);
+    final box = _boxOrNull(AppConstants.categoriesBox);
+    if (box == null) return;
+    await box.put('categories', categories.map((c) => c.toJson()).toList());
+  }
+
+  // ─── Favorites ──────────────────────────────────────────────
+  Set<String> getFavoriteChannelIds() {
+    return _favoritesMemo ??= () {
+      final box = _boxOrNull(AppConstants.favoritesBox);
+      final raw = box?.get('channel_ids') as List<dynamic>?;
+      if (raw == null) return <String>{};
+      return raw.whereType<String>().toSet();
+    }();
+  }
+
+  Future<void> saveFavoriteChannelIds(Set<String> ids) async {
+    _favoritesMemo = Set<String>.unmodifiable(ids);
+    final box = _boxOrNull(AppConstants.favoritesBox);
+    if (box == null) return;
+    await box.put('channel_ids', ids.toList(growable: false));
   }
 
   // ─── Sync Versions ──────────────────────────────────────────
-  int? getLocalChannelsVersion() {
-    final box = Hive.box(AppConstants.settingsBox);
-    return box.get('channels_version') as int?;
-  }
+  int? getLocalChannelsVersion() =>
+      _boxOrNull(AppConstants.settingsBox)?.get('channels_version') as int?;
 
   Future<void> saveLocalChannelsVersion(int version) async {
-    final box = Hive.box(AppConstants.settingsBox);
-    await box.put('channels_version', version);
+    await _boxOrNull(AppConstants.settingsBox)?.put('channels_version', version);
   }
 
-  int? getLocalEventsVersion() {
-    final box = Hive.box(AppConstants.settingsBox);
-    return box.get('events_version') as int?;
-  }
+  int? getLocalEventsVersion() =>
+      _boxOrNull(AppConstants.settingsBox)?.get('events_version') as int?;
 
   Future<void> saveLocalEventsVersion(int version) async {
-    final box = Hive.box(AppConstants.settingsBox);
-    await box.put('events_version', version);
+    await _boxOrNull(AppConstants.settingsBox)?.put('events_version', version);
   }
 
   Future<void> clearAllCache() async {
-    await Hive.box(AppConstants.channelsBox).clear();
-    await Hive.box(AppConstants.eventsBox).clear();
-    await Hive.box(AppConstants.categoriesBox).clear();
-    final settingsBox = Hive.box(AppConstants.settingsBox);
-    await settingsBox.delete('channels_version');
-    await settingsBox.delete('events_version');
+    invalidateMemo();
+    await _boxOrNull(AppConstants.channelsBox)?.clear();
+    await _boxOrNull(AppConstants.eventsBox)?.clear();
+    await _boxOrNull(AppConstants.categoriesBox)?.clear();
+    final settingsBox = _boxOrNull(AppConstants.settingsBox);
+    await settingsBox?.delete('channels_version');
+    await settingsBox?.delete('events_version');
   }
 
   // ─── Announcements ──────────────────────────────────────────
   List<Announcement> getLocalAnnouncements() {
-    final box = Hive.box(AppConstants.announcementsBox);
-    final List<dynamic>? rawList = box.get('announcements');
-    if (rawList == null) return [];
-    return rawList
-        .map((e) => Announcement.fromJson(Map<String, dynamic>.from(e as Map)))
-        .toList();
+    return _announcementsMemo ??= _decodeList(
+      AppConstants.announcementsBox,
+      'announcements',
+      Announcement.fromJson,
+    );
   }
 
   Future<void> saveLocalAnnouncements(List<Announcement> announcements) async {
-    final box = Hive.box(AppConstants.announcementsBox);
-    final rawList = announcements.map((a) => a.toJson()).toList();
-    await box.put('announcements', rawList);
+    _announcementsMemo = List<Announcement>.unmodifiable(announcements);
+    final box = _boxOrNull(AppConstants.announcementsBox);
+    if (box == null) return;
+    await box.put('announcements', announcements.map((a) => a.toJson()).toList());
   }
 }

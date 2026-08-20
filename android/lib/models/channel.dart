@@ -27,7 +27,26 @@ class Channel {
   /// Whether the channel uses Widevine DRM (requires license server).
   bool get isWidevine => drm?.type == DrmType.widevine;
 
-  const Channel({
+  /// Lazily built, cached lowercase haystack used by every search path
+  /// (category filter bar and the global search screen).
+  ///
+  /// Building this once per channel replaces three `toLowerCase()` allocations
+  /// per channel *per keystroke* with a single cached `contains` lookup.
+  String? _searchIndex;
+
+  String get searchIndex => _searchIndex ??=
+      '$name\u0000${category ?? ''}\u0000${country ?? ''}\u0000${language ?? ''}'
+          .toLowerCase();
+
+  /// Two-letter avatar initials. Never throws: [name] is guaranteed non-empty
+  /// by [fromJson], but callers may construct channels directly.
+  String get initials {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return '?';
+    return trimmed.substring(0, trimmed.length >= 2 ? 2 : 1).toUpperCase();
+  }
+
+  Channel({
     required this.id,
     required this.name,
     this.logo,
@@ -46,16 +65,22 @@ class Channel {
   });
 
   factory Channel.fromJson(Map<String, dynamic> json) {
+    // Scraped M3U rows regularly carry a blank or missing `name`. An empty
+    // name used to crash the grid via `''.substring(0, 1)` and rendered a
+    // nameless card, so normalise it at the boundary.
+    final rawName = (json['name'] as String?)?.trim() ?? '';
+    final rawQuality = (json['quality'] as String?)?.trim();
+
     return Channel(
       id: json['id'] as String,
-      name: json['name'] as String,
+      name: rawName.isEmpty ? 'Unknown Channel' : rawName,
       logo: json['logo'] as String?,
       category: json['category'] as String?,
       country: json['country'] as String?,
       language: json['language'] as String?,
       isLive: json['is_live'] as bool? ?? true,
       isTrending: json['is_trending'] as bool? ?? false,
-      quality: json['quality'] as String? ?? 'HD',
+      quality: (rawQuality == null || rawQuality.isEmpty) ? 'HD' : rawQuality,
       streamUrl: json['stream_url'] as String? ?? '',
       headers: json['headers'] is Map
           ? Map<String, dynamic>.from(json['headers'] as Map)

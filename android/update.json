@@ -1,0 +1,13 @@
+{
+    "latestVersion": "2.0.0",
+    "minimumVersion": "1.0.0",
+    "forceUpdate": false,
+    "apkUrl": "https://cdn.ntechbd.app/goplay-2.0.0.apk",
+    "releaseNotes": [
+        "Full TV Remote & Mobile Phone responsive UI",
+        "4-Level player focus hierarchy for Smart TV D-Pad remotes",
+        "Continuous 8s player controls auto-hide timer reset",
+        "Updated channels list and performance optimizations"
+    ],
+    "publishedAt": "2026-08-03 21:10:00+06:00"
+}
