@@ -29,6 +29,11 @@ final appRouter = GoRouter(
       builder: (context, state, navigationShell) {
         return ShellScreen(navigationShell: navigationShell);
       },
+      // No navigatorContainerBuilder on purpose: go_router's default container
+      // already wraps each branch in Offstage + TickerMode(enabled: isActive),
+      // so off-screen branches are painted-out and ticker-muted for free.
+      // Overriding it means reimplementing both, and losing either one silently
+      // regresses battery use.
       branches: [
         StatefulShellBranch(
           routes: [
