@@ -154,7 +154,13 @@ void showChannelSelector({
                         ),
                         onTap: () {
                           Navigator.pop(context);
-                          context.push('/player/${channel.id}');
+                          // Scope the player to this event's channels so the
+                          // switcher offers the other feeds for the same match,
+                          // not everything in the channel's category.
+                          context.push(
+                            '/player/${channel.id}',
+                            extra: {'eventChannels': event.channels},
+                          );
                         },
                       ),
                     );

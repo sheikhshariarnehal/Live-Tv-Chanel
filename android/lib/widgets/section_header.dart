@@ -31,51 +31,57 @@ class SectionHeader extends StatelessWidget {
     color: GoPlayTheme.onSurface,
   );
 
-  /// Medium weight, stepped back one tone: the way *out* of a section should
-  /// never compete with the section itself.
+  /// Crisp section action link with accent color.
   static final _actionStyle = GoPlayType.sectionAction.copyWith(
-    color: GoPlayTheme.onSurfaceVariant,
+    color: GoPlayTheme.primary,
   );
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 16, right: 8, top: 0, bottom: 6),
-      child: Row(
-        // Both sides are single-line, so centre alignment reads as balanced.
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, color: GoPlayTheme.onSurface, size: 20),
-            const SizedBox(width: 8),
-          ],
-          // Expanded, not Spacer: the title can come from remote data, so it
-          // has to be allowed to ellipsize rather than overflow the row at
-          // 1.3x text scale.
-          Expanded(
-            child: Text(
-              title,
-              style: _titleStyle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+    final hasAction = onAction != null;
+
+    final headerContent = Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        if (icon != null) ...[
+          Icon(icon, color: GoPlayTheme.onSurface, size: 20),
+          const SizedBox(width: 8),
+        ],
+        Flexible(
+          child: Text(
+            title,
+            style: _titleStyle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          if (actionLabel != null)
-            TvFocusable(
-              borderRadius: BorderRadius.circular(8),
-              onTap: onAction,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Text(
-                  actionLabel!,
-                  style: _actionStyle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+        ),
+        if (hasAction) ...[
+          const SizedBox(width: 6),
+          const Icon(
+            Icons.chevron_right_rounded,
+            size: 24,
+            color: GoPlayTheme.onSurface,
+          ),
+        ],
+      ],
+    );
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: hasAction
+          ? Align(
+              alignment: Alignment.centerLeft,
+              child: TvFocusable(
+                borderRadius: BorderRadius.circular(8),
+                onTap: onAction,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+                  child: headerContent,
                 ),
               ),
-            ),
-        ],
-      ),
+            )
+          : headerContent,
     );
   }
 }

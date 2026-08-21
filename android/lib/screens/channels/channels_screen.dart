@@ -6,13 +6,14 @@ import 'package:flutter/material.dart';
 // class, which would clash with our Category model.
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../core/theme.dart';
 import '../../core/typography.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/cards/channel_card.dart';
 import '../../models/category.dart';
 import '../../models/channel.dart';
+import '../../widgets/app_overflow_menu.dart';
 
 const double _kTabStripHeight = 48.0;
 const double _kToolbarHeight = 56.0;
@@ -67,7 +68,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen>
   /// Source of truth for tab index -> category id. Held as a field (not
   /// captured in a listener closure) so a rebuilt category list can never map a
   /// tab index onto a stale category.
-  List<String> _categoryIds = const <String>['all'];
+  List<String> _categoryIds = const <String>['trending', 'favorite', 'all'];
 
   /// Active index and residency, shared with the pages without rebuilding this
   /// widget. `activeIndex` also distinguishes a re-tap from a new tap, because
@@ -75,7 +76,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen>
   /// `controller.index`.
   final _coordinator = _PageCoordinator();
 
-  final List<String> _recentlyVisited = <String>['all'];
+  final List<String> _recentlyVisited = <String>['trending'];
   final Map<String, ScrollController> _scrollControllers =
       <String, ScrollController>{};
 
@@ -123,7 +124,12 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen>
   // ─── Tab controller lifecycle ───────────────────────────────
 
   void _applyCategories(List<(Category, int)>? categories) {
-    final ids = <String>['all', ...?categories?.map((e) => e.$1.id)];
+    final ids = <String>[
+      'trending',
+      'favorite',
+      'all',
+      ...?categories?.map((e) => e.$1.id),
+    ];
 
     // Keyed on the id list, not its length: two categories swapping in/out in
     // the same sync kept the old controller *and* the old id mapping alive.
@@ -245,7 +251,17 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen>
       final neighbour = index + offset;
       if (neighbour < 0 || neighbour >= _categoryIds.length) continue;
       final id = _categoryIds[neighbour];
-      final channels = id == 'all' ? allChannels : grouped?[id];
+      final List<Channel>? channels;
+      if (id == 'all') {
+        channels = allChannels;
+      } else if (id == 'trending') {
+        channels = allChannels?.where((c) => c.isTrending).toList();
+      } else if (id == 'favorite') {
+        final favIds = ref.read(favoriteChannelIdsProvider);
+        channels = allChannels?.where((c) => favIds.contains(c.id)).toList();
+      } else {
+        channels = grouped?[id];
+      }
       if (channels == null) continue;
       // One screen's worth on the widest phone layout.
       for (final channel in channels.take(12)) {
@@ -388,58 +404,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen>
                             color: cs.onSurface, size: 22),
                         onPressed: _openSearch,
                       ),
-                      PopupMenuButton<String>(
-                        tooltip: 'More options',
-                        icon: Icon(Icons.more_vert_rounded,
-                            color: cs.onSurface, size: 22),
-                        onSelected: (value) {
-                          if (value == 'favorites') {
-                            context.push('/favorites');
-                          } else if (value == 'settings') {
-                            context.push('/settings');
-                          }
-                        },
-                        itemBuilder: (context) => [
-                          PopupMenuItem<String>(
-                            value: 'favorites',
-                            child: Row(
-                              children: [
-                                Icon(Icons.bookmark_rounded,
-                                    color: cs.onSurface, size: 20),
-                                const SizedBox(width: 12),
-                                Text(
-                                  'Favorites',
-                                  style: GoPlayType.body.copyWith(
-                                    color: cs.onSurface,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem<String>(
-                            value: 'settings',
-                            child: Row(
-                              children: [
-                                Icon(Icons.settings_rounded,
-                                    color: cs.onSurface, size: 20),
-                                const SizedBox(width: 12),
-                                Text(
-                                  'App Settings',
-                                  style: GoPlayType.body.copyWith(
-                                    color: cs.onSurface,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                      const AppOverflowMenu(),
                       const SizedBox(width: 8),
                     ],
             ),
@@ -453,8 +418,18 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen>
                   : _CategoryFilterBar(
                       tabController: controller,
                       activeCatsWithCounts: categories,
+                      trendingCount:
+                          (ref.watch(channelsProvider).value ?? const [])
+                              .where((c) => c.isTrending)
+                              .length,
+                      favoriteCount:
+                          (ref.watch(channelsProvider).value ?? const [])
+                              .where((c) => ref
+                                  .watch(favoriteChannelIdsProvider)
+                                  .contains(c.id))
+                              .length,
                       totalCount:
-                          categories.fold<int>(0, (sum, e) => sum + e.$2),
+                          (ref.watch(channelsProvider).value ?? const []).length,
                       onTabTapped: (index) {
                         if (index == _coordinator.activeIndex) _scrollToTop();
                       },
@@ -519,7 +494,7 @@ class _SearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    const radius = BorderRadius.all(Radius.circular(12));
+    const radius = BorderRadius.all(Radius.circular(100));
 
     return SizedBox(
       height: 40,
@@ -538,17 +513,17 @@ class _SearchField extends StatelessWidget {
           hintText: 'Search by name, country, language…',
           hintStyle: GoPlayType.body.copyWith(color: cs.onSurfaceVariant),
           isDense: true,
-          border: OutlineInputBorder(
+          border: const OutlineInputBorder(
             borderRadius: radius,
-            borderSide: BorderSide(color: cs.outline, width: 0.8),
+            borderSide: BorderSide.none,
           ),
-          enabledBorder: OutlineInputBorder(
+          enabledBorder: const OutlineInputBorder(
             borderRadius: radius,
-            borderSide: BorderSide(color: cs.outline, width: 0.8),
+            borderSide: BorderSide.none,
           ),
-          focusedBorder: OutlineInputBorder(
+          focusedBorder: const OutlineInputBorder(
             borderRadius: radius,
-            borderSide: BorderSide(color: cs.primary, width: 1.2),
+            borderSide: BorderSide.none,
           ),
           prefixIcon:
               Icon(Icons.search_rounded, color: cs.onSurfaceVariant, size: 20),
@@ -566,57 +541,173 @@ class _SearchField extends StatelessWidget {
 // ─── Empty State ──────────────────────────────────────────────
 class _EmptyState extends StatelessWidget {
   final bool isSearch;
+  final String categoryId;
   final VoidCallback onAction;
 
-  const _EmptyState({required this.isSearch, required this.onAction});
+  const _EmptyState({
+    required this.isSearch,
+    this.categoryId = 'all',
+    required this.onAction,
+  });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final isFavorite = categoryId == 'favorite';
+    final isTrending = categoryId == 'trending';
+
+    final String title;
+    final String subtitle;
+    final String actionText;
+
+    if (isSearch) {
+      title = 'No channels match your search';
+      subtitle = 'Try checking for spelling errors or searching another keyword.';
+      actionText = 'Clear search';
+    } else if (isFavorite) {
+      title = 'No bookmarks available';
+      subtitle = 'Long press any channel card to add it to your favorites.';
+      actionText = 'Explore channels';
+    } else if (isTrending) {
+      title = 'No trending channels right now';
+      subtitle = 'Check back soon as live streaming activity updates.';
+      actionText = 'View all channels';
+    } else {
+      title = 'No channels in this category';
+      subtitle = 'Browse other categories or check back later.';
+      actionText = 'View all channels';
+    }
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              width: 80,
-              height: 80,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: cs.surfaceContainerHigh,
-                  shape: BoxShape.circle,
-                  border: Border.fromBorderSide(
-                    BorderSide(color: cs.outline, width: 0.8),
+            if (isFavorite && !isSearch)
+              const _BookmarkIllustration()
+            else
+              SizedBox(
+                width: 80,
+                height: 80,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHigh,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    isSearch ? Icons.search_off_rounded : Icons.live_tv_outlined,
+                    size: 36,
+                    color: cs.onSurfaceVariant,
                   ),
                 ),
-                child: Icon(
-                  Icons.live_tv_outlined,
-                  size: 32,
-                  color: cs.onSurfaceVariant,
-                ),
               ),
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
-              isSearch
-                  ? 'No channels match your search'
-                  : 'No channels in this category',
+              title,
               textAlign: TextAlign.center,
-              style: GoPlayType.body.copyWith(
-                color: cs.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
+              style: GoPlayType.subtitle.copyWith(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 8),
-            TextButton(
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: GoPlayType.body.copyWith(
+                color: cs.onSurfaceVariant,
+                fontSize: GoPlayType.sm,
+              ),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 20),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: GoPlayTheme.surfaceContainerHigh,
+                foregroundColor: GoPlayTheme.onSurface,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(100),
+                ),
+              ),
               onPressed: onAction,
-              child: Text(isSearch ? 'Clear search' : 'View all channels'),
+              child: Text(actionText, style: GoPlayType.label),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _BookmarkIllustration extends StatelessWidget {
+  const _BookmarkIllustration();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 90,
+      height: 90,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(
+            left: 14,
+            top: 6,
+            child: Container(
+              width: 52,
+              height: 68,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF7F3E9),
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.fromLTRB(8, 10, 8, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var i = 0; i < 4; i++) ...[
+                    Container(
+                      height: 3.5,
+                      width: i == 0 ? 24 : (i == 2 ? 30 : 20),
+                      margin: const EdgeInsets.only(bottom: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFCBD5E1),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            right: 12,
+            bottom: 12,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: const BoxDecoration(
+                color: Color(0xFF8E8E93),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.favorite_rounded,
+                size: 20,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -701,12 +792,16 @@ class _ErrorState extends StatelessWidget {
 class _CategoryFilterBar extends StatelessWidget {
   final TabController tabController;
   final List<(Category, int)> activeCatsWithCounts;
+  final int trendingCount;
+  final int favoriteCount;
   final int totalCount;
   final ValueChanged<int> onTabTapped;
 
   const _CategoryFilterBar({
     required this.tabController,
     required this.activeCatsWithCounts,
+    required this.trendingCount,
+    required this.favoriteCount,
     required this.totalCount,
     required this.onTabTapped,
   });
@@ -720,11 +815,39 @@ class _CategoryFilterBar extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('All'),
+            const Text('Trending'),
             const SizedBox(width: 6),
             _CountBadge(
               animation: tabController.animation,
               index: 0,
+              count: trendingCount,
+            ),
+          ],
+        ),
+      ),
+      Tab(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Favorite'),
+            const SizedBox(width: 6),
+            _CountBadge(
+              animation: tabController.animation,
+              index: 1,
+              count: favoriteCount,
+            ),
+          ],
+        ),
+      ),
+      Tab(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('All'),
+            const SizedBox(width: 6),
+            _CountBadge(
+              animation: tabController.animation,
+              index: 2,
               count: totalCount,
             ),
           ],
@@ -743,7 +866,7 @@ class _CategoryFilterBar extends StatelessWidget {
               const SizedBox(width: 6),
               _CountBadge(
                 animation: tabController.animation,
-                index: i + 1,
+                index: i + 3,
                 count: activeCatsWithCounts[i].$2,
               ),
             ],
@@ -912,6 +1035,7 @@ class _CountBadgeState extends State<_CountBadge> {
 // ─── Responsive Grid ──────────────────────────────────────────
 class _ResponsiveGrid extends StatefulWidget {
   final List<Channel> channels;
+  final String categoryId;
   final int pageIndex;
   final _PageCoordinator coordinator;
   final ValueNotifier<String> searchQueryNotifier;
@@ -920,6 +1044,7 @@ class _ResponsiveGrid extends StatefulWidget {
 
   const _ResponsiveGrid({
     required this.channels,
+    required this.categoryId,
     required this.pageIndex,
     required this.coordinator,
     required this.searchQueryNotifier,
@@ -997,6 +1122,7 @@ class _ResponsiveGridState extends State<_ResponsiveGrid> {
         hasScrollBody: false,
         child: _EmptyState(
           isSearch: _lastQuery.isNotEmpty,
+          categoryId: widget.categoryId,
           onAction:
               _lastQuery.isNotEmpty ? widget.onClearSearch : widget.onViewAll,
         ),
@@ -1026,6 +1152,7 @@ class _ResponsiveGridState extends State<_ResponsiveGrid> {
               (context, index) => ChannelCard(
                 key: ValueKey(filtered[index].id),
                 channel: filtered[index],
+                scope: filtered,
               ),
               childCount: filtered.length,
               addAutomaticKeepAlives: false,
@@ -1202,6 +1329,7 @@ class _CategoryPageContentState extends ConsumerState<_CategoryPageContent>
           slivers: [
             _ResponsiveGrid(
               channels: channels,
+              categoryId: widget.categoryId,
               pageIndex: widget.pageIndex,
               coordinator: widget.coordinator,
               searchQueryNotifier: widget.searchQueryNotifier,

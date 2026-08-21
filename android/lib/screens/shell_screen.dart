@@ -74,11 +74,11 @@ class _ShellScreenState extends State<ShellScreen> {
             RepaintBoundary(
               child: Container(
                 width: 72,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF0F0F0F),
                   border: Border(
                     right: BorderSide(
-                      color: theme.colorScheme.outline.withValues(alpha: 0.12),
+                      color: Color(0x14FFFFFF),
                       width: 0.5,
                     ),
                   ),
@@ -131,12 +131,12 @@ class _ShellScreenState extends State<ShellScreen> {
         bottomNavigationBar: RepaintBoundary(
           child: Container(
             height: 64 + bottomPadding,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
+            decoration: const BoxDecoration(
+              color: Color(0xFF0F0F0F),
               border: Border(
                 top: BorderSide(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.12),
-                  width: 0.8,
+                  color: Color(0x14FFFFFF),
+                  width: 0.5,
                 ),
               ),
             ),

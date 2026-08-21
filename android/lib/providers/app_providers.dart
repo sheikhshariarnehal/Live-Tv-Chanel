@@ -88,12 +88,18 @@ final channelsByCategoryMapProvider =
 
 const String _uncategorizedKey = 'uncategorized';
 
-/// Channels for one category tab. `'all'` returns the full list unchanged.
-///
-/// `autoDispose` so leaving a category releases its list instead of retaining
-/// one list per category visited.
+/// Channels for one tab.
+/// Supports 'trending', 'favorite', 'all', and specific category IDs.
 final channelsByCategoryProvider = Provider.autoDispose
     .family<AsyncValue<List<Channel>>, String>((ref, categoryId) {
+  if (categoryId == 'trending') {
+    return ref.watch(channelsProvider).whenData(
+          (channels) => channels.where((c) => c.isTrending).toList(),
+        );
+  }
+  if (categoryId == 'favorite') {
+    return ref.watch(favoriteChannelsProvider);
+  }
   if (categoryId == 'all') return ref.watch(channelsProvider);
   return ref
       .watch(channelsByCategoryMapProvider)
@@ -308,7 +314,7 @@ final selectedCategoryProvider =
 
 class SelectedCategoryNotifier extends Notifier<String> {
   @override
-  String build() => 'all';
+  String build() => 'trending';
 
   void select(String category) => state = category;
 }

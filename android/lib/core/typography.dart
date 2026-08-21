@@ -78,7 +78,7 @@ class GoPlayType {
   // ==========================================
 
   /// Tracked-uppercase metadata. The fixtures-board voice.
-  static const double trackingMeta = 0.8;
+  static const double trackingMeta = 0.5;
 
   /// Wide tracking for uppercase callouts (status headlines, not section titles).
   static const double trackingWide = 1.5;
@@ -161,53 +161,38 @@ class GoPlayType {
 
   // ---- The Tracked-Uppercase Label Rule ----
 
-  /// Loud status badges: LIVE, quality, league. Always `toUpperCase()`.
+  /// Status badges: LIVE, quality, league. Always `toUpperCase()`.
   ///
   /// Sits at the [xs] floor rather than the 8–10sp the app used to use — at
   /// 8sp this text was decorative, not readable.
   ///
-  /// This is the *only* remaining uppercase voice in the app. It covers short
-  /// metadata tokens — LIVE, UPCOMING, HD, a league name — where the uppercase
-  /// reads as a status stamp. Anything long enough to be a sentence or a
-  /// heading is set in normal case; see [sectionTitle].
+  /// Balanced at [FontWeight.w600] for crisp, modern readability.
   static const TextStyle meta = TextStyle(
     fontFamily: family,
     fontSize: xs,
-    fontWeight: FontWeight.w800,
+    fontWeight: FontWeight.w600,
     height: leadingFlat,
     letterSpacing: trackingMeta,
   );
 
-  /// Section titles — "Trending Channels", "Today's Schedule".
+  /// Section titles — "Trending Channels", "Today's Matches", "Recently Watched".
   ///
-  /// Normal case, no tracking, [lg]. This replaces the tracked-uppercase
-  /// treatment `DESIGN.md` originally specified. Uppercasing every section
-  /// title made the screen read as all-shouting: with the loud [meta] badges
-  /// already competing for attention, the headings had no quieter register to
-  /// fall back to. Sentence case at [lg] gives the screen an actual top of
-  /// hierarchy, and keeps the uppercase voice meaningful by reserving it for
-  /// the short status tokens in [meta].
-  ///
-  /// Tracking is deliberately 0. Positive tracking on a 20sp heading spreads
-  /// the words far enough apart that they stop reading as a single phrase.
+  /// Clean, modern Medium weight (FontWeight.w500 without bold).
   static const TextStyle sectionTitle = TextStyle(
     fontFamily: family,
     fontSize: lg,
     fontWeight: FontWeight.w500,
-    height: leadingTitle,
-    letterSpacing: 0,
+    height: 1.25,
+    letterSpacing: -0.2,
   );
 
-  /// The quiet action link that sits opposite a [sectionTitle] — "See all".
-  ///
-  /// Medium, not semibold: the link is a way out of the section, never the
-  /// reason to look at it.
+  /// The action link that sits opposite a [sectionTitle] — "See all".
   static const TextStyle sectionAction = TextStyle(
     fontFamily: family,
-    fontSize: base,
-    fontWeight: FontWeight.w500,
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
     height: 1.2,
-    letterSpacing: 0,
+    letterSpacing: 0.1,
   );
 
   // ---- Brand ----

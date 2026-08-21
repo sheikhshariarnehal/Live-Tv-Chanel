@@ -8,6 +8,7 @@ import '../../core/typography.dart';
 import '../../providers/app_providers.dart';
 import '../../models/event.dart';
 import '../../widgets/cards/event_card.dart';
+import '../../widgets/app_overflow_menu.dart';
 
 final groupedUpcomingEventsProvider = Provider.autoDispose<AsyncValue<Map<String, List<SportEvent>>>>((ref) {
   final eventsAsync = ref.watch(upcomingEventsProvider);
@@ -53,72 +54,9 @@ class UpcomingScreen extends ConsumerWidget {
                 letterSpacing: -0.4,
               ),
             ),
-            actions: [
-              PopupMenuButton<String>(
-                icon: const Icon(
-                  Icons.more_vert_rounded,
-                  color: Colors.white,
-                ),
-                color: GoPlayTheme.surfaceContainerHigh,
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: const BorderSide(
-                    color: GoPlayTheme.cardBorder,
-                    width: 0.5,
-                  ),
-                ),
-                onSelected: (value) {
-                  if (value == 'favorites') {
-                    context.push('/favorites');
-                  } else if (value == 'settings') {
-                    context.push('/settings');
-                  }
-                },
-                itemBuilder: (BuildContext context) => [
-                  PopupMenuItem<String>(
-                    value: 'favorites',
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.bookmark_rounded,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Favorites',
-                          style: GoPlayType.body.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem<String>(
-                    value: 'settings',
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.settings_rounded,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'App Settings',
-                          style: GoPlayType.body.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 8),
+            actions: const [
+              AppOverflowMenu(iconColor: Colors.white),
+              SizedBox(width: 8),
             ],
           ),
 

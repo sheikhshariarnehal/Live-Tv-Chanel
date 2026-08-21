@@ -30,7 +30,20 @@ const int _kNameMaxLines = 2;
 class ChannelCard extends ConsumerWidget {
   final Channel channel;
 
-  const ChannelCard({super.key, required this.channel});
+  /// The list this card was rendered from — favorites, a category, a filtered
+  /// search result.
+  ///
+  /// Passed to the player so switching channels there stays inside the list the
+  /// user was actually looking at. When null the player falls back to "every
+  /// channel in this channel's category", which is wrong for any curated or
+  /// filtered grid: opening a favorite would drop the user into the whole
+  /// category on the first channel switch.
+  ///
+  /// Held as the caller's own list and only mapped to IDs on tap, so a grid of
+  /// several thousand cards costs nothing until one is opened.
+  final List<Channel>? scope;
+
+  const ChannelCard({super.key, required this.channel, this.scope});
 
   /// Minimum tile height needed to render this card without overflowing at the
   /// caller's current text scale.
@@ -46,6 +59,21 @@ class ChannelCard extends ConsumerWidget {
   void _toggleFavorite(WidgetRef ref) {
     HapticFeedback.mediumImpact();
     ref.read(favoriteChannelIdsProvider.notifier).toggle(channel.id);
+  }
+
+  void _open(BuildContext context) {
+    final ids = scope;
+    if (ids == null || ids.length < 2) {
+      // Nothing to switch between — let the player use its category fallback.
+      context.push('/player/${channel.id}');
+      return;
+    }
+    context.push(
+      '/player/${channel.id}',
+      extra: {
+        'eventChannels': ids.map((c) => c.id).toList(growable: false),
+      },
+    );
   }
 
   @override
@@ -81,7 +109,7 @@ class ChannelCard extends ConsumerWidget {
 
     return TvFocusable(
       borderRadius: BorderRadius.circular(8),
-      onTap: () => context.push('/player/${channel.id}'),
+      onTap: () => _open(context),
       onLongPress: () => _toggleFavorite(ref),
       // Restores accessibility: the grid used to be wrapped in
       // ExcludeSemantics, hiding every channel from screen readers. One
@@ -92,11 +120,8 @@ class ChannelCard extends ConsumerWidget {
       child: SizedBox.expand(
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: cs.surfaceContainer,
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-            border: Border.fromBorderSide(
-              BorderSide(color: cs.outline, width: 0.8),
-            ),
+            color: cs.surfaceContainerHigh,
+            borderRadius: const BorderRadius.all(Radius.circular(10)),
           ),
           child: Stack(
             alignment: Alignment.center,
@@ -120,9 +145,6 @@ class ChannelCard extends ConsumerWidget {
                           decoration: BoxDecoration(
                             color: cs.onSurface.withValues(alpha: 0.08),
                             shape: BoxShape.circle,
-                            border: Border.fromBorderSide(
-                              BorderSide(color: cs.outline, width: 1.0),
-                            ),
                           ),
                           child: channel.logo != null && channel.logo!.isNotEmpty
                               ? CachedNetworkImage(

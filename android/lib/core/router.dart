@@ -8,7 +8,6 @@ import '../screens/player/player_screen.dart';
 import '../screens/search/search_screen.dart';
 import '../screens/splash/splash_screen.dart';
 import '../screens/settings/settings_screen.dart';
-import '../screens/favorites/favorites_screen.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -25,11 +24,6 @@ final appRouter = GoRouter(
       path: '/settings',
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) => const SettingsScreen(),
-    ),
-    GoRoute(
-      path: '/favorites',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) => const FavoritesScreen(),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {

@@ -10,6 +10,22 @@ import '../../models/event.dart';
 import '../../widgets/team_flag.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+/// Opens [ch] in the player scoped to [scope] — the list the user tapped it in.
+///
+/// Without the scope the player falls back to "every channel in this channel's
+/// category", so tapping a search result would drop the user into the whole
+/// category on the first channel switch instead of walking their results.
+void _openPlayer(BuildContext context, Channel ch, List<Channel> scope) {
+  if (scope.length < 2) {
+    context.push('/player/${ch.id}');
+    return;
+  }
+  context.push(
+    '/player/${ch.id}',
+    extra: {'eventChannels': scope.map((c) => c.id).toList(growable: false)},
+  );
+}
+
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
 
@@ -92,30 +108,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   Expanded(
                     child: Theme(
                       data: Theme.of(context).copyWith(
-                        inputDecorationTheme: InputDecorationTheme(
+                        inputDecorationTheme: const InputDecorationTheme(
                           filled: true,
-                          fillColor: const Color(0xFF222326),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                          fillColor: Color(0xFF272727),
+                          contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: Colors.white.withValues(alpha: 0.08),
-                              width: 1,
-                            ),
+                            borderRadius: BorderRadius.all(Radius.circular(100)),
+                            borderSide: BorderSide.none,
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: Colors.white.withValues(alpha: 0.08),
-                              width: 1,
-                            ),
+                            borderRadius: BorderRadius.all(Radius.circular(100)),
+                            borderSide: BorderSide.none,
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: Colors.white.withValues(alpha: 0.25),
-                              width: 1.0,
-                            ),
+                            borderRadius: BorderRadius.all(Radius.circular(100)),
+                            borderSide: BorderSide.none,
                           ),
                         ),
                       ),
@@ -281,11 +288,15 @@ class _EmptySearchState extends StatelessWidget {
                 );
               }
               return Column(
-                children: fallbacks.map((ch) => buildRecommendationCard(context, ch)).toList(),
+                children: fallbacks
+                    .map((ch) => buildRecommendationCard(context, ch, scope: fallbacks))
+                    .toList(),
               );
             }
             return Column(
-              children: liveList.map((ch) => buildRecommendationCard(context, ch)).toList(),
+              children: liveList
+                  .map((ch) => buildRecommendationCard(context, ch, scope: liveList))
+                  .toList(),
             );
           },
           loading: () => const Center(
@@ -300,9 +311,13 @@ class _EmptySearchState extends StatelessWidget {
     );
   }
 
-  Widget buildRecommendationCard(BuildContext context, Channel ch) {
+  Widget buildRecommendationCard(
+    BuildContext context,
+    Channel ch, {
+    required List<Channel> scope,
+  }) {
     return GestureDetector(
-      onTap: () => context.push('/player/${ch.id}'),
+      onTap: () => _openPlayer(context, ch, scope),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
@@ -397,7 +412,7 @@ class _EmptySearchState extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: GoPlayTheme.liveBadge.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(4),
                   border: Border.all(
                     color: GoPlayTheme.liveBadge.withValues(alpha: 0.3),
                     width: 1,
@@ -561,7 +576,11 @@ class _SearchResultsState extends ConsumerState<_SearchResults> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
-                (context, index) => _buildChannelCard(context, visibleChannels[index]),
+                (context, index) => _buildChannelCard(
+                  context,
+                  visibleChannels[index],
+                  scope: visibleChannels,
+                ),
                 childCount: visibleChannels.length,
               ),
             ),
@@ -636,9 +655,13 @@ class _SearchResultsState extends ConsumerState<_SearchResults> {
     );
   }
 
-  Widget _buildChannelCard(BuildContext context, Channel ch) {
+  Widget _buildChannelCard(
+    BuildContext context,
+    Channel ch, {
+    required List<Channel> scope,
+  }) {
     return GestureDetector(
-      onTap: () => context.push('/player/${ch.id}'),
+      onTap: () => _openPlayer(context, ch, scope),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),

@@ -54,7 +54,7 @@ class _LiveBadgeState extends State<LiveBadge>
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: GoPlayTheme.liveBadge,
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: BorderRadius.circular(4),
           ),
           child: Padding(
             padding: widget.padding,

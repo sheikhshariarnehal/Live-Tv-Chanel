@@ -204,15 +204,15 @@ void main() {
         ),
       );
 
-      // No affordance until favorited — the heart is a state indicator, not a
-      // competing tap target on a ~100dp tile.
-      expect(find.byIcon(Icons.favorite_rounded), findsNothing);
+      // No affordance until favorited — the bookmark is a state indicator, not
+      // a competing tap target on a ~100dp tile.
+      expect(find.byIcon(Icons.bookmark_rounded), findsNothing);
 
       await tester.longPress(find.byType(ChannelCard));
       await tester.pump();
 
       expect(container.read(favoriteChannelIdsProvider), contains(channel.id));
-      expect(find.byIcon(Icons.favorite_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.bookmark_rounded), findsOneWidget);
 
       await tester.longPress(find.byType(ChannelCard));
       await tester.pump();
@@ -221,7 +221,7 @@ void main() {
         container.read(favoriteChannelIdsProvider),
         isNot(contains(channel.id)),
       );
-      expect(find.byIcon(Icons.favorite_rounded), findsNothing);
+      expect(find.byIcon(Icons.bookmark_rounded), findsNothing);
     });
 
     testWidgets('cards are exposed to screen readers', (tester) async {

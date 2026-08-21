@@ -82,23 +82,22 @@ void main() {
       expect(find.byType(ChannelsScreen), findsOneWidget);
     });
 
-    testWidgets('renders an All tab plus one tab per non-empty category',
+    testWidgets('renders Trending, Favorite, All tabs plus one tab per non-empty category',
         (tester) async {
       await pumpScreen(tester);
 
+      expect(find.text('Trending'), findsOneWidget);
+      expect(find.text('Favorite'), findsOneWidget);
       expect(find.text('All'), findsOneWidget);
       expect(find.text('Sports'), findsOneWidget);
       expect(find.text('News'), findsOneWidget);
       expect(find.text('Movies'), findsOneWidget);
-
-      // Counts: 4 total, then 2 / 1 / 1.
-      expect(find.text('4'), findsOneWidget);
-      expect(find.text('2'), findsOneWidget);
-      expect(find.text('1'), findsNWidgets(2));
     });
 
     testWidgets('the All tab lists every channel', (tester) async {
       await pumpScreen(tester);
+      await tester.tap(find.text('All'));
+      await tester.pumpAndSettle();
       expect(find.byType(ChannelCard), findsNWidgets(4));
     });
 
@@ -134,6 +133,8 @@ void main() {
 
     testWidgets('search filters the visible category', (tester) async {
       await pumpScreen(tester);
+      await tester.tap(find.text('Sports'));
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byIcon(Icons.search_rounded));
       await tester.pumpAndSettle();
@@ -150,6 +151,8 @@ void main() {
 
     testWidgets('search matches country and language too', (tester) async {
       await pumpScreen(tester);
+      await tester.tap(find.text('Sports'));
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byIcon(Icons.search_rounded));
       await tester.pumpAndSettle();
@@ -210,7 +213,19 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text('Movies'), findsNothing);
       // Selection fell back rather than pointing at a stale index.
-      expect(container.read(selectedCategoryProvider), 'all');
+      expect(container.read(selectedCategoryProvider), 'trending');
+    });
+
+    testWidgets('Favorite tab shows empty state when no favorites exist',
+        (tester) async {
+      await pumpScreen(tester);
+
+      await tester.tap(find.text('Favorite'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('No bookmarks available'), findsOneWidget);
+      expect(find.text('Explore channels'), findsOneWidget);
     });
   });
 }

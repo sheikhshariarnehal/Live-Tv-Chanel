@@ -16,24 +16,18 @@ enum EventCardVariant {
 
 // ─── Pre-computed static decorations ─────────────────────────────────────────
 const _kLiveCardDecoration = BoxDecoration(
-  color: GoPlayTheme.darkSurfaceContainer,
+  color: Color(0xFF272727),
   borderRadius: BorderRadius.all(Radius.circular(12)),
-  border: Border.fromBorderSide(
-    BorderSide(color: GoPlayTheme.cardBorder, width: 0.8),
-  ),
   boxShadow: [
-    BoxShadow(color: Color(0x1A000000), blurRadius: 6, offset: Offset(0, 2)),
+    BoxShadow(color: Color(0x14000000), blurRadius: 4, offset: Offset(0, 1)),
   ],
 );
 
 const _kUpcomingCardDecoration = BoxDecoration(
-  color: GoPlayTheme.darkSurfaceContainer,
+  color: Color(0xFF272727),
   borderRadius: BorderRadius.all(Radius.circular(12)),
-  border: Border.fromBorderSide(
-    BorderSide(color: GoPlayTheme.cardBorder, width: 0.8),
-  ),
   boxShadow: [
-    BoxShadow(color: Color(0x1A000000), blurRadius: 6, offset: Offset(0, 2)),
+    BoxShadow(color: Color(0x14000000), blurRadius: 4, offset: Offset(0, 1)),
   ],
 );
 
@@ -48,34 +42,25 @@ const _kUpcomingAccentDecoration = BoxDecoration(
 );
 
 const _kUpcomingBadgeDecoration = BoxDecoration(
-  color: Color(0x0FFFFFFF),
-  borderRadius: BorderRadius.all(Radius.circular(20)),
-  border: Border.fromBorderSide(
-    BorderSide(color: GoPlayTheme.cardBorder, width: 0.8),
-  ),
+  color: Color(0x14FFFFFF),
+  borderRadius: BorderRadius.all(Radius.circular(4)),
 );
 
 const _kCompactUpcomingBadgeDecoration = BoxDecoration(
-  color: Color(0x0AFFFFFF),
+  color: Color(0x14FFFFFF),
   borderRadius: BorderRadius.all(Radius.circular(4)),
-  border: Border.fromBorderSide(
-    BorderSide(color: GoPlayTheme.cardBorder, width: 0.5),
-  ),
 );
 
 const _kCompactTimeBadgeDecoration = BoxDecoration(
-  color: Color(0x0DFFFFFF),
-  borderRadius: BorderRadius.all(Radius.circular(8)),
-  border: Border.fromBorderSide(
-    BorderSide(color: GoPlayTheme.cardBorder, width: 0.5),
-  ),
+  color: Color(0x14FFFFFF),
+  borderRadius: BorderRadius.all(Radius.circular(4)),
 );
 
 const _kLeagueStyle = TextStyle(
   fontFamily: GoPlayType.family,
   color: GoPlayTheme.onSurfaceVariant,
   fontSize: GoPlayType.xs,
-  fontWeight: FontWeight.w700,
+  fontWeight: FontWeight.w600,
   height: GoPlayType.leadingFlat,
   letterSpacing: GoPlayType.trackingMeta,
 );
@@ -84,7 +69,7 @@ const _kBadgeStyle = TextStyle(
   fontFamily: GoPlayType.family,
   color: GoPlayTheme.onSurfaceVariant,
   fontSize: GoPlayType.xs,
-  fontWeight: FontWeight.w800,
+  fontWeight: FontWeight.w600,
   height: GoPlayType.leadingFlat,
   letterSpacing: GoPlayType.trackingMeta,
 );

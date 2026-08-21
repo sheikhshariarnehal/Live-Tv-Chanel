@@ -19,6 +19,7 @@ import '../../widgets/team_flag.dart';
 import '../../widgets/channel_avatar.dart';
 import '../../widgets/countdown_timer.dart';
 import '../../widgets/tv_focus_wrapper.dart';
+import '../../widgets/app_overflow_menu.dart';
 
 // ─── Static const text styles ────────────────────────────────────────────
 // Inter comes from the ambient theme (bundled, see pubspec.yaml). Sizes are
@@ -32,7 +33,7 @@ const _kInterLeagueBadge = TextStyle(
   fontFamily: GoPlayType.family,
   color: Colors.white,
   fontSize: GoPlayType.xs,
-  fontWeight: FontWeight.w800,
+  fontWeight: FontWeight.w600,
   height: GoPlayType.leadingFlat,
   letterSpacing: GoPlayType.trackingMeta,
 );
@@ -61,7 +62,7 @@ const _kInterLiveNow = TextStyle(
   fontFamily: GoPlayType.family,
   color: GoPlayTheme.primary,
   fontSize: GoPlayType.xs,
-  fontWeight: FontWeight.w800,
+  fontWeight: FontWeight.w600,
   height: GoPlayType.leadingFlat,
   letterSpacing: GoPlayType.trackingMeta,
 );
@@ -97,14 +98,6 @@ const _kInterSearchHint = TextStyle(
   fontFamily: GoPlayType.family,
   color: GoPlayTheme.onSurfaceMuted,
   fontSize: GoPlayType.base,
-  height: GoPlayType.leadingSnug,
-);
-
-const _kInterMenuLabel = TextStyle(
-  fontFamily: GoPlayType.family,
-  color: Colors.white,
-  fontSize: GoPlayType.base,
-  fontWeight: FontWeight.w500,
   height: GoPlayType.leadingSnug,
 );
 
@@ -292,72 +285,12 @@ class HomeScreen extends ConsumerWidget {
                             ),
                           ),
 
-                        Positioned(
+                        const Positioned(
                           right: 8,
                           top: 0,
                           height: kToolbarHeight,
                           child: Center(
-                            child: Focus(
-                              canRequestFocus: false,
-                              child: PopupMenuButton<String>(
-                                icon: const Icon(
-                                  Icons.more_vert_rounded,
-                                  color: Colors.white,
-                                ),
-                                color: GoPlayTheme.surfaceContainerHigh,
-                                elevation: 4,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  side: const BorderSide(
-                                    color: GoPlayTheme.cardBorder,
-                                    width: 0.5,
-                                  ),
-                                ),
-                                onSelected: (value) {
-                                  if (value == 'favorites') {
-                                    context.push('/favorites');
-                                  } else if (value == 'settings') {
-                                    context.push('/settings');
-                                  }
-                                },
-                                itemBuilder: (BuildContext context) => [
-                                  PopupMenuItem<String>(
-                                    value: 'favorites',
-                                    child: Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.bookmark_rounded,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 12),
-                                        const Text(
-                                          'Favorites',
-                                          style: _kInterMenuLabel,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  PopupMenuItem<String>(
-                                    value: 'settings',
-                                    child: Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.settings_rounded,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 12),
-                                        const Text(
-                                          'App Settings',
-                                          style: _kInterMenuLabel,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            child: AppOverflowMenu(iconColor: Colors.white),
                           ),
                         ),
 
@@ -375,19 +308,15 @@ class HomeScreen extends ConsumerWidget {
                             // height, so the geometry above is unchanged.
                             height: 48,
                             child: TvFocusable(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(100),
                               onTap: () => context.push('/search'),
                               child: Center(
                                 child: Container(
                                   height: 40,
-                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
                                   decoration: BoxDecoration(
-                                    color: GoPlayTheme.surfaceContainer,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: Colors.white.withValues(alpha: 0.06),
-                                      width: 0.5,
-                                    ),
+                                    color: GoPlayTheme.surfaceContainerHigh,
+                                    borderRadius: BorderRadius.circular(100),
                                   ),
                                   child: Row(
                                     children: [
@@ -423,30 +352,33 @@ class HomeScreen extends ConsumerWidget {
           ),
 
           // Trending Channels
-          const SliverToBoxAdapter(child: SizedBox(height: 12)),
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
           SliverToBoxAdapter(
             child: SectionHeader(
               title: 'Trending Channels',
               actionLabel: 'See all',
-              onAction: () => context.go('/channels'),
+              onAction: () {
+                ref.read(selectedCategoryProvider.notifier).select('trending');
+                context.go('/channels');
+              },
             ),
           ),
           const SliverToBoxAdapter(
             child: RepaintBoundary(child: _TrendingChannels()),
           ),
 
-          // Today's Schedule
-          const SliverToBoxAdapter(child: SizedBox(height: 14)),
+          // Today's Matches
+          const SliverToBoxAdapter(child: SizedBox(height: 24)),
           SliverToBoxAdapter(
             child: SectionHeader(
-              title: "Today's Schedule",
+              title: "Today's Matches",
               actionLabel: 'See all',
               onAction: () => context.go('/upcoming'),
             ),
           ),
           const SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.only(bottom: 8),
+              padding: EdgeInsets.only(bottom: 12),
               child: RepaintBoundary(child: _SportCategoryFilterChips()),
             ),
           ),
@@ -961,18 +893,12 @@ class _SportCategoryFilterChips extends ConsumerWidget {
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? Colors.white
-                        : GoPlayTheme.darkSurfaceContainer,
+                        : const Color(0xFF272727),
                     borderRadius: BorderRadius.circular(8),
-                    border: isSelected
-                        ? null
-                        : Border.all(
-                            color: GoPlayTheme.cardBorder,
-                            width: 0.5,
-                          ),
                   ),
                   child: Center(
                     child: Text(
@@ -1151,7 +1077,7 @@ class _RecentlyWatched extends ConsumerWidget {
 
     return Column(
       children: [
-        const SizedBox(height: 14),
+        const SizedBox(height: 24),
         const SectionHeader(title: 'Recently Watched'),
         SizedBox(
           height: 88,
@@ -1194,7 +1120,7 @@ class _AnnouncementsSection extends ConsumerWidget {
 
         return Column(
           children: [
-            const SizedBox(height: 14),
+            const SizedBox(height: 24),
             const SectionHeader(title: 'Announcements'),
             for (final a in announcements) _AnnouncementTile(announcement: a),
           ],
@@ -1248,7 +1174,7 @@ class _UpcomingBadge extends StatelessWidget {
 
   static const _decoration = BoxDecoration(
     color: Color(0x1E00ADB5),
-    borderRadius: BorderRadius.all(Radius.circular(12)),
+    borderRadius: BorderRadius.all(Radius.circular(4)),
     border: Border.fromBorderSide(
       BorderSide(color: Color(0x5000ADB5), width: 0.5),
     ),
@@ -1263,7 +1189,7 @@ class _UpcomingBadge extends StatelessWidget {
     fontFamily: GoPlayType.family,
     color: GoPlayTheme.primary,
     fontSize: GoPlayType.xs,
-    fontWeight: FontWeight.w800,
+    fontWeight: FontWeight.w600,
     height: GoPlayType.leadingFlat,
     letterSpacing: GoPlayType.trackingMeta,
   );
@@ -1343,26 +1269,18 @@ class _AnnouncementTile extends StatelessWidget {
 
   const _AnnouncementTile({required this.announcement});
 
-  static const _warningDecoration = BoxDecoration(
-    color: Color(0x14FFC107),
-    borderRadius: BorderRadius.all(Radius.circular(16)),
-    border: Border.fromBorderSide(
-      BorderSide(color: Color(0x33FFC107), width: 0.8),
-    ),
-  );
-
-  static const _infoDecoration = BoxDecoration(
-    color: Color(0x0AFFFFFF),
-    borderRadius: BorderRadius.all(Radius.circular(16)),
-    border: Border.fromBorderSide(
-      BorderSide(color: Color(0x14FFFFFF), width: 0.8),
-    ),
+  static const _cardDecoration = BoxDecoration(
+    color: Color(0xFF272727),
+    borderRadius: BorderRadius.all(Radius.circular(12)),
+    boxShadow: [
+      BoxShadow(color: Color(0x14000000), blurRadius: 4, offset: Offset(0, 1)),
+    ],
   );
 
   static const _titleStyle = TextStyle(
     fontFamily: GoPlayType.family,
     color: GoPlayTheme.onSurface,
-    fontSize: GoPlayType.base,
+    fontSize: GoPlayType.sm,
     fontWeight: FontWeight.w600,
     height: GoPlayType.leadingSnug,
   );
@@ -1370,27 +1288,41 @@ class _AnnouncementTile extends StatelessWidget {
   static const _bodyStyle = TextStyle(
     fontFamily: GoPlayType.family,
     color: GoPlayTheme.onSurfaceVariant,
-    fontSize: GoPlayType.sm,
+    fontSize: GoPlayType.xs,
     height: GoPlayType.leadingBody,
   );
 
   @override
   Widget build(BuildContext context) {
     final bool isWarning = announcement.type == 'warning';
+    final iconColor = isWarning ? const Color(0xFFFFB020) : GoPlayTheme.primary;
+    final iconBgColor = isWarning
+        ? const Color(0xFFFFB020).withValues(alpha: 0.12)
+        : GoPlayTheme.primary.withValues(alpha: 0.12);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: DecoratedBox(
-        decoration: isWarning ? _warningDecoration : _infoDecoration,
+        decoration: _cardDecoration,
         child: Padding(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(12),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                isWarning
-                    ? Icons.warning_amber_rounded
-                    : Icons.info_outline_rounded,
-                color: isWarning ? Colors.amber : GoPlayTheme.primary,
-                size: 20,
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: iconBgColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  isWarning
+                      ? Icons.warning_amber_rounded
+                      : Icons.info_outline_rounded,
+                  color: iconColor,
+                  size: 18,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1398,7 +1330,7 @@ class _AnnouncementTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(announcement.title, style: _titleStyle),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Text(announcement.body, style: _bodyStyle),
                   ],
                 ),

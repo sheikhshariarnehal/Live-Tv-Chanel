@@ -27,21 +27,17 @@ class GoPlayTheme {
   // ==========================================
   //             DARK MODE PALETTE
   // ==========================================
-  // Neutral, near-black canvas with subtle tonal steps — no muddy color
-  // cast, so the teal accent stays the only thing competing for attention.
-  static const Color darkSurface = Color(0xFF0E0F11); // App background
-  static const Color darkSurfaceContainerLow = Color(0xFF121316);
-  static const Color darkSurfaceContainer = Color(0xFF16171A); // Cards & surfaces
-  static const Color darkSurfaceContainerHigh = Color(0xFF1E1F24); // Elevated
-  static const Color darkSurfaceContainerHighest = Color(0xFF26272E);
-  static const Color darkOnSurface = Color(0xFFF5F5F7); // Primary text
-  static const Color darkOnSurfaceVariant = Color(0xFF9A9CA8); // Secondary text
-  // Tertiary text. Raised from the original #6B6D78, which measured 3.7:1 on
-  // the canvas and 3.3:1 on cards — below the 4.5:1 WCAG AA floor for the
-  // 11-14sp sizes it is actually used at. #8A8C97 measures 5.7:1 / 5.1:1.
-  static const Color darkOnSurfaceMuted = Color(0xFF8A8C97); // Tertiary text
+  // YouTube Dark Theme Palette
+  static const Color darkSurface = Color(0xFF0F0F0F); // App background (#0F0F0F)
+  static const Color darkSurfaceContainerLow = Color(0xFF181818);
+  static const Color darkSurfaceContainer = Color(0xFF272727); // Cards & surfaces (#272727)
+  static const Color darkSurfaceContainerHigh = Color(0xFF272727); // Elevated chips & search (#272727)
+  static const Color darkSurfaceContainerHighest = Color(0xFF383838);
+  static const Color darkOnSurface = Color(0xFFF1F1F1); // Primary text
+  static const Color darkOnSurfaceVariant = Color(0xFFAAAAAA); // Secondary text
+  static const Color darkOnSurfaceMuted = Color(0xFF888888); // Tertiary text
   static const Color darkCardBorder = Color(0x14FFFFFF); // Sleek hairline border
-  static const Color darkDivider = Color(0x12FFFFFF);
+  static const Color darkDivider = Color(0x1AFFFFFF);
   static const Color darkPrimaryContainer = Color(0xFF00363A);
   static const Color darkOnPrimaryContainer = Color(0xFF7FE9EF);
   static const Color darkOnPrimary = Color(0xFF00282B);
@@ -80,13 +76,13 @@ class GoPlayTheme {
   static const LinearGradient heroGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [Colors.transparent, Color(0xCC0E0F11), Color(0xFF0E0F11)],
+    colors: [Colors.transparent, Color(0xCC0F0F0F), Color(0xFF0F0F0F)],
   );
 
   static const LinearGradient cardGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF1A1B20), Color(0xFF141519)],
+    colors: [Color(0xFF272727), Color(0xFF272727)],
   );
 
   static const LinearGradient primaryGradient = LinearGradient(
