@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import '../core/typography.dart';
 import '../widgets/tv_focus_wrapper.dart';
 
 /// Main shell screen with bottom navigation bar.
@@ -249,7 +250,7 @@ class _NavItem extends StatelessWidget {
 
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         child: TvFocusable(
           focusNode: focusNode,
           onTap: () {
@@ -258,7 +259,10 @@ class _NavItem extends StatelessWidget {
           },
           borderRadius: _borderRadius,
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 6),
+            // 8dp of vertical air instead of 6, with a 22dp glyph instead of
+            // 24: the bar keeps its 64dp height but the icon/label pair stops
+            // filling it edge to edge.
+            padding: const EdgeInsets.symmetric(vertical: 8),
             color: Colors.transparent,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -266,9 +270,9 @@ class _NavItem extends StatelessWidget {
                 Icon(
                   isSelected ? selectedIcon : icon,
                   color: isSelected ? activeColor : inactiveColor,
-                  size: 24,
+                  size: 22,
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 4),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 2),
                   child: FittedBox(
@@ -278,10 +282,11 @@ class _NavItem extends StatelessWidget {
                       maxLines: 1,
                       softWrap: false,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: GoPlayType.inter(
                         color: isSelected ? activeColor : inactiveColor,
-                        fontSize: 11,
+                        fontSize: GoPlayType.xs,
                         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                        height: GoPlayType.leadingFlat,
                         letterSpacing: 0.2,
                       ),
                     ),
@@ -343,7 +348,7 @@ class _RailNavItem extends StatelessWidget {
             Icon(
               isSelected ? selectedIcon : icon,
               color: isSelected ? activeColor : inactiveColor,
-              size: 26,
+              size: 24,
             ),
             const SizedBox(height: 4),
             FittedBox(
@@ -353,10 +358,11 @@ class _RailNavItem extends StatelessWidget {
                 maxLines: 1,
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: GoPlayType.inter(
                   color: isSelected ? activeColor : inactiveColor,
-                  fontSize: 11,
+                  fontSize: GoPlayType.xs,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  height: GoPlayType.leadingFlat,
                   letterSpacing: 0.2,
                 ),
               ),

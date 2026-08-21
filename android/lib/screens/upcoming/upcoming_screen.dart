@@ -1,9 +1,10 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme.dart';
+import '../../core/typography.dart';
 import '../../providers/app_providers.dart';
 import '../../models/event.dart';
 import '../../widgets/cards/event_card.dart';
@@ -19,101 +20,107 @@ class UpcomingScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final groupedAsync = ref.watch(groupedUpcomingEventsProvider);
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Material(
-      color: GoPlayTheme.surface,
-      child: Stack(
-        children: [
-          // Solid background — cheapest possible widget.
-          const ColoredBox(
-            color: GoPlayTheme.surface,
-            child: SizedBox.expand(),
-          ),
-
-          // Scroll content
-          CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              SliverAppBar(
-                expandedHeight: 110.0,
-                floating: false,
-                pinned: true,
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                leading: const SizedBox.shrink(),
-                leadingWidth: 0,
-                flexibleSpace: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final double appBarHeight = constraints.biggest.height;
-                    final double statusBarHeight = MediaQuery.of(
-                      context,
-                    ).padding.top;
-                    final double minHeight = kToolbarHeight + statusBarHeight;
-                    final double maxHeight = 110.0 + statusBarHeight;
-
-                    // Calculate collapse ratio: 0.0 (fully expanded) to 1.0 (fully collapsed)
-                    final double collapseRatio =
-                        ((maxHeight - appBarHeight) / (maxHeight - minHeight))
-                            .clamp(0.0, 1.0);
-
-                    return ClipRect(
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(
-                          sigmaX: 16 * collapseRatio,
-                          sigmaY: 16 * collapseRatio,
-                        ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Color.fromARGB(
-                              ((0.4 + (0.45 * collapseRatio)) * 255)
-                                  .round()
-                                  .clamp(0, 255),
-                              0x17,
-                              0x18,
-                              0x1C,
-                            ),
-                            border: Border(
-                              bottom: BorderSide(
-                                color: Color.fromARGB(
-                                  ((0.15 * collapseRatio) * 255).round().clamp(
-                                    0,
-                                    255,
-                                  ),
-                                  0x71,
-                                  0x76,
-                                  0x8E,
-                                ),
-                                width: 0.8,
-                              ),
-                            ),
-                          ),
-                          child: FlexibleSpaceBar(
-                            centerTitle: true,
-                            titlePadding: EdgeInsets.only(
-                              left: 20 - (20 * collapseRatio),
-                              bottom: 14 + (2 * collapseRatio),
-                            ),
-                            title: Align(
-                              alignment: Alignment.lerp(
-                                Alignment.bottomLeft,
-                                Alignment.bottomCenter,
-                                collapseRatio,
-                              )!,
-                              child: Text(
-                                'Upcoming',
-                                style: (Theme.of(context).appBarTheme.titleTextStyle ?? const TextStyle()).copyWith(
-                                  color: Colors.white,
-                                  fontSize: 26 - (6 * collapseRatio),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+      color: cs.surface,
+      child: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            floating: false,
+            pinned: true,
+            backgroundColor: cs.surface,
+            surfaceTintColor: Colors.transparent,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            automaticallyImplyLeading: false,
+            titleSpacing: 16,
+            toolbarHeight: kToolbarHeight,
+            systemOverlayStyle: const SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness: Brightness.light,
+              statusBarBrightness: Brightness.dark,
+            ),
+            title: const Text(
+              'Upcoming',
+              style: TextStyle(
+                fontFamily: GoPlayType.family,
+                color: GoPlayTheme.onSurface,
+                fontSize: GoPlayType.xl,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.4,
               ),
+            ),
+            actions: [
+              PopupMenuButton<String>(
+                icon: const Icon(
+                  Icons.more_vert_rounded,
+                  color: Colors.white,
+                ),
+                color: GoPlayTheme.surfaceContainerHigh,
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(
+                    color: GoPlayTheme.cardBorder,
+                    width: 0.5,
+                  ),
+                ),
+                onSelected: (value) {
+                  if (value == 'favorites') {
+                    context.push('/favorites');
+                  } else if (value == 'settings') {
+                    context.push('/settings');
+                  }
+                },
+                itemBuilder: (BuildContext context) => [
+                  PopupMenuItem<String>(
+                    value: 'favorites',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.bookmark_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Favorites',
+                          style: GoPlayType.body.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'settings',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.settings_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'App Settings',
+                          style: GoPlayType.body.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 8),
+            ],
+          ),
 
               groupedAsync.when(
                 data: (grouped) {
@@ -177,10 +184,8 @@ class UpcomingScreen extends ConsumerWidget {
               const SliverToBoxAdapter(child: SizedBox(height: 120)),
             ],
           ),
-        ],
-      ),
-    );
-  }
+        );
+      }
 
   static Map<String, List<SportEvent>> _groupByDate(List<SportEvent> events) {
     final Map<String, List<SportEvent>> grouped = {};
@@ -235,7 +240,7 @@ class _DateGroup extends StatelessWidget {
     final isDesktopOrTv = MediaQuery.of(context).size.width >= 800;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -248,26 +253,27 @@ class _DateGroup extends StatelessWidget {
                 color: GoPlayTheme.onSurfaceVariant,
               ),
               const SizedBox(width: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w300,
-                  letterSpacing: -0.1,
+              Expanded(
+                child: Text(
+                  label,
+                  style: GoPlayType.label.copyWith(
+                    color: GoPlayTheme.onSurface,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 8),
           // Event tiles — 3 per row on TV/Desktop, 1 per row on mobile
           if (isDesktopOrTv)
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
-                mainAxisExtent: 100,
+                mainAxisExtent: EventCard.tileExtent(context),
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 0,
               ),
@@ -340,20 +346,25 @@ class _EmptyState extends StatelessWidget {
                 Text(
                   'No Upcoming Events',
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
+                    fontFamily: GoPlayType.family,
+                    color: GoPlayTheme.onSurface,
+                    fontSize: GoPlayType.lg,
                     fontWeight: FontWeight.w700,
+                    height: GoPlayType.leadingTitle,
                     letterSpacing: -0.2,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 8),
                 Text(
                   'Check back later for scheduled live streams.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Color(0x80FFFFFF),
-                    fontSize: 14,
+                    fontFamily: GoPlayType.family,
+                    color: GoPlayTheme.onSurfaceVariant,
+                    fontSize: GoPlayType.base,
                     fontWeight: FontWeight.w400,
+                    height: GoPlayType.leadingBody,
                   ),
                 ),
               ],

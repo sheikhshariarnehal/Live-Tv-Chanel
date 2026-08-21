@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../core/theme.dart';
+import '../core/theme.dart';
+import '../core/typography.dart';
 import 'tv_focus_wrapper.dart';
 
 /// Section header with title and optional action
@@ -17,38 +18,60 @@ class SectionHeader extends StatelessWidget {
     this.icon,
   });
 
-  static const _titleStyle = TextStyle(
+  /// The top of the screen's type hierarchy.
+  ///
+  /// Previously this was tracked uppercase in the stepped-back secondary
+  /// colour. Uppercasing the titles alongside the already-uppercase league and
+  /// status badges left the screen with no quiet register — every line shouted
+  /// — and the wide tracking pulled "TRENDING CHANNELS" apart until it stopped
+  /// reading as one phrase. Normal case at [GoPlayType.sectionTitle] in the
+  /// primary text colour makes the heading the anchor it should be, and hands
+  /// the uppercase voice back to the short status tokens that earn it.
+  static final _titleStyle = GoPlayType.sectionTitle.copyWith(
     color: GoPlayTheme.onSurface,
-    fontSize: 16,
-    fontWeight: FontWeight.w300,
-    letterSpacing: 1.5,
   );
 
-  static const _actionStyle = TextStyle(
-    color: Colors.white,
-    fontSize: 12,
-    fontWeight: FontWeight.w600,
+  /// Medium weight, stepped back one tone: the way *out* of a section should
+  /// never compete with the section itself.
+  static final _actionStyle = GoPlayType.sectionAction.copyWith(
+    color: GoPlayTheme.onSurfaceVariant,
   );
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.only(left: 16, right: 8, top: 0, bottom: 6),
       child: Row(
+        // Both sides are single-line, so centre alignment reads as balanced.
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (icon != null) ...[
-            Icon(icon, color: Colors.white, size: 20),
+            Icon(icon, color: GoPlayTheme.onSurface, size: 20),
             const SizedBox(width: 8),
           ],
-          Text(title.toUpperCase(), style: _titleStyle),
-          const Spacer(),
+          // Expanded, not Spacer: the title can come from remote data, so it
+          // has to be allowed to ellipsize rather than overflow the row at
+          // 1.3x text scale.
+          Expanded(
+            child: Text(
+              title,
+              style: _titleStyle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
           if (actionLabel != null)
             TvFocusable(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(8),
               onTap: onAction,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                child: Text(actionLabel!, style: _actionStyle),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Text(
+                  actionLabel!,
+                  style: _actionStyle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
         ],

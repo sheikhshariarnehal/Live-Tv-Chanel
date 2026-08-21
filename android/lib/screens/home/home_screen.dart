@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../core/theme.dart';
+import '../../core/typography.dart';
 import '../../providers/app_providers.dart';
 import '../../models/event.dart';
 import '../../models/channel.dart';
@@ -19,86 +20,108 @@ import '../../widgets/channel_avatar.dart';
 import '../../widgets/countdown_timer.dart';
 import '../../widgets/tv_focus_wrapper.dart';
 
-// ─── Static const text styles (Inter bundled locally) ────────────────────
+// ─── Static const text styles ────────────────────────────────────────────
+// Inter comes from the ambient theme (bundled, see pubspec.yaml). Sizes are
+// steps on the GoPlayType scale — nothing here is hand-picked.
+//
+// The hero styles below keep literal `Colors.white*` rather than the
+// GoPlayTheme text tokens on purpose: they render on top of a cover photo
+// under a scrim, not on a known theme surface, so the three-tier surface
+// ladder does not apply and pure white is the safer contrast choice.
 const _kInterLeagueBadge = TextStyle(
-  fontFamily: 'Inter',
+  fontFamily: GoPlayType.family,
   color: Colors.white,
-  fontSize: 9,
+  fontSize: GoPlayType.xs,
   fontWeight: FontWeight.w800,
-  letterSpacing: 0.5,
+  height: GoPlayType.leadingFlat,
+  letterSpacing: GoPlayType.trackingMeta,
 );
 
+// Team names sit at w600, not w700. On a 68dp info bar a heavier weight put
+// three bold blocks (home team / vs / away team) in a row with nothing quieter
+// between them, and long names like "Antigua And Barbuda Falcons" turned the
+// whole strip into one dense mass.
 const _kInterTeamName = TextStyle(
-  fontFamily: 'Inter',
+  fontFamily: GoPlayType.family,
   color: Colors.white,
-  fontSize: 13,
-  fontWeight: FontWeight.bold,
+  fontSize: GoPlayType.base,
+  fontWeight: FontWeight.w600,
+  height: GoPlayType.leadingSnug,
 );
 
 const _kInterVs = TextStyle(
-  fontFamily: 'Inter',
-  color: Color(0xB3FFFFFF),
-  fontSize: 12,
+  fontFamily: GoPlayType.family,
+  color: Colors.white70,
+  fontSize: GoPlayType.sm,
   fontWeight: FontWeight.w600,
+  height: GoPlayType.leadingFlat,
 );
 
 const _kInterLiveNow = TextStyle(
-  fontFamily: 'Inter',
+  fontFamily: GoPlayType.family,
   color: GoPlayTheme.primary,
-  fontSize: 9,
+  fontSize: GoPlayType.xs,
   fontWeight: FontWeight.w800,
-  letterSpacing: 0.5,
+  height: GoPlayType.leadingFlat,
+  letterSpacing: GoPlayType.trackingMeta,
 );
 
 const _kInterKickoff = TextStyle(
-  fontFamily: 'Inter',
-  color: Color(0x80FFFFFF),
-  fontSize: 9,
+  fontFamily: GoPlayType.family,
+  color: Colors.white70,
+  fontSize: GoPlayType.xs,
   fontWeight: FontWeight.w700,
-  letterSpacing: 0.5,
+  height: GoPlayType.leadingFlat,
+  letterSpacing: GoPlayType.trackingMeta,
 );
 
 const _kInterWatch = TextStyle(
-  fontFamily: 'Inter',
+  fontFamily: GoPlayType.family,
   color: Color(0xFF17181C),
-  fontSize: 10,
+  fontSize: GoPlayType.xs,
   fontWeight: FontWeight.w900,
-  letterSpacing: 0.5,
+  height: GoPlayType.leadingFlat,
+  letterSpacing: GoPlayType.trackingMeta,
 );
 
 const _kInterCountdown = TextStyle(
-  fontFamily: 'Inter',
+  fontFamily: GoPlayType.family,
   color: GoPlayTheme.primary,
-  fontSize: 10,
+  fontSize: GoPlayType.xs,
   fontWeight: FontWeight.w700,
+  height: GoPlayType.leadingFlat,
   letterSpacing: 0.2,
 );
 
 const _kInterSearchHint = TextStyle(
-  fontFamily: 'Inter',
-  color: Color(0x99FFFFFF),
-  fontSize: 14,
+  fontFamily: GoPlayType.family,
+  color: GoPlayTheme.onSurfaceMuted,
+  fontSize: GoPlayType.base,
+  height: GoPlayType.leadingSnug,
 );
 
 const _kInterMenuLabel = TextStyle(
-  fontFamily: 'Inter',
+  fontFamily: GoPlayType.family,
   color: Colors.white,
-  fontSize: 14,
+  fontSize: GoPlayType.base,
   fontWeight: FontWeight.w500,
+  height: GoPlayType.leadingSnug,
 );
 
 const _kInterChipSelected = TextStyle(
-  fontFamily: 'Inter',
+  fontFamily: GoPlayType.family,
   color: Color(0xFF0F0F0F),
-  fontSize: 13,
+  fontSize: GoPlayType.sm,
   fontWeight: FontWeight.w700,
+  height: GoPlayType.leadingSnug,
 );
 
 const _kInterChipUnselected = TextStyle(
-  fontFamily: 'Inter',
+  fontFamily: GoPlayType.family,
   color: Colors.white,
-  fontSize: 13,
+  fontSize: GoPlayType.sm,
   fontWeight: FontWeight.w500,
+  height: GoPlayType.leadingSnug,
 );
 
 class HomeScreen extends ConsumerWidget {
@@ -139,20 +162,22 @@ class HomeScreen extends ConsumerWidget {
                   const SizedBox(height: 20),
                   const Text(
                     'CONNECTION ERROR',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      letterSpacing: 2,
+                      fontFamily: GoPlayType.family,
+                      fontSize: GoPlayType.lg,
+                      fontWeight: FontWeight.w800,
+                      color: GoPlayTheme.onSurface,
+                      height: GoPlayType.leadingTitle,
+                      letterSpacing: GoPlayType.trackingWide,
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
                     error.toString().replaceAll('Exception: ', ''),
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: GoPlayType.body.copyWith(
                       color: GoPlayTheme.onSurfaceVariant,
-                      fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 30),
@@ -237,10 +262,16 @@ class HomeScreen extends ConsumerWidget {
                             alignment: Alignment.centerLeft,
                             child: Text(
                               'GOPLAY',
-                              style: TextStyle(
-                                fontSize: collapseRatio > 0.5 ? 20 : 26,
-                                color: Colors.white,
+                              style: GoPlayType.wordmark.copyWith(
+                                color: GoPlayTheme.onSurface,
+                                // Lerps between two on-scale steps so the
+                                // wordmark shrinks smoothly instead of
+                                // snapping at the halfway point.
+                                fontSize: GoPlayType.xl -
+                                    ((GoPlayType.xl - GoPlayType.lg) *
+                                        collapseRatio),
                               ),
+                              maxLines: 1,
                             ),
                           ),
                         ),
@@ -283,11 +314,30 @@ class HomeScreen extends ConsumerWidget {
                                   ),
                                 ),
                                 onSelected: (value) {
-                                  if (value == 'settings') {
+                                  if (value == 'favorites') {
+                                    context.push('/favorites');
+                                  } else if (value == 'settings') {
                                     context.push('/settings');
                                   }
                                 },
                                 itemBuilder: (BuildContext context) => [
+                                  PopupMenuItem<String>(
+                                    value: 'favorites',
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.bookmark_rounded,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        const Text(
+                                          'Favorites',
+                                          style: _kInterMenuLabel,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                   PopupMenuItem<String>(
                                     value: 'settings',
                                     child: Row(
@@ -315,35 +365,44 @@ class HomeScreen extends ConsumerWidget {
                           Positioned(
                             left: 16,
                             right: 16,
-                            bottom: 8 * (1.0 - collapseRatio),
-                            height: 44,
+                            bottom: 4 * (1.0 - collapseRatio),
+                            // The hit zone is 48dp; the pill it paints is 40dp.
+                            // The field used to be a 44dp box that was both
+                            // heavier than it needed to look and below the
+                            // Android touch-target minimum. Splitting the two
+                            // lets the pill get lighter while the target gets
+                            // bigger. 56 (toolbar) + 48 + 4 = the 108 expanded
+                            // height, so the geometry above is unchanged.
+                            height: 48,
                             child: TvFocusable(
                               borderRadius: BorderRadius.circular(12),
                               onTap: () => context.push('/search'),
-                              child: Container(
-                                height: 44,
-                                padding: const EdgeInsets.symmetric(horizontal: 14),
-                                decoration: BoxDecoration(
-                                  color: GoPlayTheme.surfaceContainer,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.08),
-                                    width: 0.8,
+                              child: Center(
+                                child: Container(
+                                  height: 40,
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  decoration: BoxDecoration(
+                                    color: GoPlayTheme.surfaceContainer,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.white.withValues(alpha: 0.06),
+                                      width: 0.5,
+                                    ),
                                   ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.search_rounded,
-                                      color: Colors.white70,
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 10),
-                                    const Text(
-                                      'Search channels, events...',
-                                      style: _kInterSearchHint,
-                                    ),
-                                  ],
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.search_rounded,
+                                        color: GoPlayTheme.onSurfaceMuted,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      const Text(
+                                        'Search channels, events...',
+                                        style: _kInterSearchHint,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -364,11 +423,11 @@ class HomeScreen extends ConsumerWidget {
           ),
 
           // Trending Channels
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          const SliverToBoxAdapter(child: SizedBox(height: 12)),
           SliverToBoxAdapter(
             child: SectionHeader(
               title: 'Trending Channels',
-              actionLabel: 'See All',
+              actionLabel: 'See all',
               onAction: () => context.go('/channels'),
             ),
           ),
@@ -377,36 +436,34 @@ class HomeScreen extends ConsumerWidget {
           ),
 
           // Today's Schedule
-          const SliverToBoxAdapter(child: SizedBox(height: 20)),
+          const SliverToBoxAdapter(child: SizedBox(height: 14)),
           SliverToBoxAdapter(
             child: SectionHeader(
               title: "Today's Schedule",
-              actionLabel: 'See All',
+              actionLabel: 'See all',
               onAction: () => context.go('/upcoming'),
             ),
           ),
           const SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.only(bottom: 12),
+              padding: EdgeInsets.only(bottom: 8),
               child: RepaintBoundary(child: _SportCategoryFilterChips()),
             ),
           ),
           const _TodaySchedule(),
 
           // Recently Watched
-          const SliverToBoxAdapter(child: SizedBox(height: 20)),
           const SliverToBoxAdapter(
             child: RepaintBoundary(child: _RecentlyWatched()),
           ),
 
           // Announcements
-          const SliverToBoxAdapter(child: SizedBox(height: 20)),
           const SliverToBoxAdapter(
             child: RepaintBoundary(child: _AnnouncementsSection()),
           ),
 
           // Bottom padding
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
+          const SliverToBoxAdapter(child: SizedBox(height: 80)),
         ],
       ),
     );
@@ -635,10 +692,12 @@ class _HeroBannerCardState extends ConsumerState<_HeroBannerCard> {
                         child: Text(
                           event.league.toUpperCase(),
                           style: _kInterLeagueBadge,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       if (event.isLive || _countdownDone)
-                        const LiveBadge(fontSize: 9)
+                        const LiveBadge()
                       else
                         const _UpcomingBadge(),
                     ],
@@ -652,10 +711,10 @@ class _HeroBannerCardState extends ConsumerState<_HeroBannerCard> {
                   height: 68,
                   child: Container(
                     decoration: const BoxDecoration(
-                      color: Color(0xE61F2026),
+                      color: Color(0xE616171A),
                       border: Border(
                         top: BorderSide(
-                          color: Color(0x24FFFFFF),
+                          color: GoPlayTheme.cardBorder,
                           width: 0.8,
                         ),
                       ),
@@ -746,16 +805,20 @@ class _HeroBannerCardState extends ConsumerState<_HeroBannerCard> {
                               else
                                 Row(
                                   children: [
-                                    const Icon(
-                                      Icons.calendar_today_rounded,
-                                      color: Color(0x80FFFFFF),
-                                      size: 10,
-                                    ),
-                                    const SizedBox(width: 5),
-                                    Text(
-                                      _formatKickoff(event.startTime),
-                                      style: _kInterKickoff,
-                                    ),
+                                     const Icon(
+                                       Icons.calendar_today_rounded,
+                                       color: Colors.white70,
+                                       size: 12,
+                                     ),
+                                     const SizedBox(width: 5),
+                                     Flexible(
+                                       child: Text(
+                                         _formatKickoff(event.startTime),
+                                         style: _kInterKickoff,
+                                         maxLines: 1,
+                                         overflow: TextOverflow.ellipsis,
+                                       ),
+                                     ),
                                   ],
                                 ),
                             ],
@@ -904,6 +967,12 @@ class _SportCategoryFilterChips extends ConsumerWidget {
                         ? Colors.white
                         : GoPlayTheme.darkSurfaceContainer,
                     borderRadius: BorderRadius.circular(8),
+                    border: isSelected
+                        ? null
+                        : Border.all(
+                            color: GoPlayTheme.cardBorder,
+                            width: 0.5,
+                          ),
                   ),
                   child: Center(
                     child: Text(
@@ -918,7 +987,7 @@ class _SportCategoryFilterChips extends ConsumerWidget {
         );
       },
       loading: () => const _ChipsSkeleton(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (err, stack) => const SizedBox.shrink(),
     );
   }
 }
@@ -970,9 +1039,9 @@ class _TodaySchedule extends ConsumerWidget {
           return SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             sliver: SliverGrid.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
-                mainAxisExtent: 100,
+                mainAxisExtent: EventCard.tileExtent(context),
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 0,
               ),
@@ -990,7 +1059,7 @@ class _TodaySchedule extends ConsumerWidget {
         }
 
         return SliverFixedExtentList.builder(
-          itemExtent: 100.0,
+          itemExtent: EventCard.tileExtent(context),
           itemCount: todayEvents.length,
           itemBuilder: (context, index) {
             final event = todayEvents[index];
@@ -1016,9 +1085,11 @@ class _TrendingChannels extends ConsumerWidget {
   const _TrendingChannels();
 
   static const _nameStyle = TextStyle(
+    fontFamily: GoPlayType.family,
     color: GoPlayTheme.onSurface,
-    fontSize: 10,
+    fontSize: GoPlayType.xs,
     fontWeight: FontWeight.w500,
+    height: GoPlayType.leadingSnug,
   );
 
   @override
@@ -1029,8 +1100,14 @@ class _TrendingChannels extends ConsumerWidget {
       data: (channels) {
         if (channels.isEmpty) return const SizedBox.shrink();
 
+        // Scope the player's channel switcher to this rail. Without it the
+        // player falls back to "every channel in the same category", so
+        // tapping a trending channel showed the whole category instead of
+        // the trending set the user was looking at.
+        final railIds = channels.map((c) => c.id).toList(growable: false);
+
         return SizedBox(
-          height: 100,
+          height: 88,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1043,7 +1120,10 @@ class _TrendingChannels extends ConsumerWidget {
                 channel: ch,
                 nameStyle: _nameStyle,
                 showBorder: true,
-                onTap: () => context.push('/player/${ch.id}'),
+                onTap: () => context.push(
+                  '/player/${ch.id}',
+                  extra: {'eventChannels': railIds},
+                ),
               );
             },
           ),
@@ -1055,7 +1135,7 @@ class _TrendingChannels extends ConsumerWidget {
   }
 }
 
-// â”€â”€â”€ Recently Watched â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Recently Watched ────────────────────────────────────────────────────────
 class _RecentlyWatched extends ConsumerWidget {
   const _RecentlyWatched();
 
@@ -1065,11 +1145,16 @@ class _RecentlyWatched extends ConsumerWidget {
 
     if (history.isEmpty) return const SizedBox.shrink();
 
+    // Same scoping as the trending rail: switching channels inside the player
+    // walks the history you opened it from, not the whole category.
+    final railIds = history.map((c) => c.id).toList(growable: false);
+
     return Column(
       children: [
+        const SizedBox(height: 14),
         const SectionHeader(title: 'Recently Watched'),
         SizedBox(
-          height: 90,
+          height: 88,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1082,7 +1167,10 @@ class _RecentlyWatched extends ConsumerWidget {
                 channel: ch,
                 nameStyle: _historyNameStyle,
                 showBorder: false,
-                onTap: () => context.push('/player/${ch.id}'),
+                onTap: () => context.push(
+                  '/player/${ch.id}',
+                  extra: {'eventChannels': railIds},
+                ),
               );
             },
           ),
@@ -1092,7 +1180,7 @@ class _RecentlyWatched extends ConsumerWidget {
   }
 }
 
-// â”€â”€â”€ Announcements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Announcements ────────────────────────────────────────────────────────────
 class _AnnouncementsSection extends ConsumerWidget {
   const _AnnouncementsSection();
 
@@ -1106,6 +1194,7 @@ class _AnnouncementsSection extends ConsumerWidget {
 
         return Column(
           children: [
+            const SizedBox(height: 14),
             const SectionHeader(title: 'Announcements'),
             for (final a in announcements) _AnnouncementTile(announcement: a),
           ],
@@ -1121,8 +1210,10 @@ class _AnnouncementsSection extends ConsumerWidget {
 
 // â”€â”€â”€ Cached style â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const TextStyle _historyNameStyle = TextStyle(
+  fontFamily: GoPlayType.family,
   color: GoPlayTheme.onSurface,
-  fontSize: 10,
+  fontSize: GoPlayType.xs,
+  height: GoPlayType.leadingSnug,
 );
 
 // â”€â”€â”€ _HeroBannerSkeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -1169,10 +1260,12 @@ class _UpcomingBadge extends StatelessWidget {
   );
 
   static const _labelStyle = TextStyle(
+    fontFamily: GoPlayType.family,
     color: GoPlayTheme.primary,
-    fontSize: 9,
+    fontSize: GoPlayType.xs,
     fontWeight: FontWeight.w800,
-    letterSpacing: 0.5,
+    height: GoPlayType.leadingFlat,
+    letterSpacing: GoPlayType.trackingMeta,
   );
 
   @override
@@ -1229,7 +1322,7 @@ class _ChannelItem extends StatelessWidget {
                 ChannelAvatar(channel: channel, showBorder: showBorder),
                 const SizedBox(height: 4),
                 Text(
-                  channel.name,
+                  channel.displayName,
                   style: nameStyle,
                   textAlign: TextAlign.center,
                   maxLines: 2,
@@ -1267,14 +1360,18 @@ class _AnnouncementTile extends StatelessWidget {
   );
 
   static const _titleStyle = TextStyle(
+    fontFamily: GoPlayType.family,
     color: GoPlayTheme.onSurface,
-    fontSize: 13,
+    fontSize: GoPlayType.base,
     fontWeight: FontWeight.w600,
+    height: GoPlayType.leadingSnug,
   );
 
   static const _bodyStyle = TextStyle(
+    fontFamily: GoPlayType.family,
     color: GoPlayTheme.onSurfaceVariant,
-    fontSize: 11,
+    fontSize: GoPlayType.sm,
+    height: GoPlayType.leadingBody,
   );
 
   @override
@@ -1333,7 +1430,7 @@ class _TrendingChannelsSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 90,
+      height: 88,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1400,7 +1497,7 @@ class _ChipsSkeleton extends StatelessWidget {
   }
 }
 
-/// 3 grey placeholder cards matching event card height (100px).
+/// 3 grey placeholder cards matching the measured event card extent.
 class _ScheduleSkeleton extends StatelessWidget {
   const _ScheduleSkeleton();
 
@@ -1412,13 +1509,13 @@ class _ScheduleSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverFixedExtentList.builder(
-      itemExtent: 100.0,
+      itemExtent: EventCard.tileExtent(context),
       itemCount: 3,
       itemBuilder: (context, index) {
         return const Padding(
           padding: EdgeInsets.symmetric(horizontal: 16),
           child: Padding(
-            padding: EdgeInsets.only(bottom: 8),
+            padding: EdgeInsets.only(bottom: 4),
             child: DecoratedBox(decoration: _cardDecoration),
           ),
         );

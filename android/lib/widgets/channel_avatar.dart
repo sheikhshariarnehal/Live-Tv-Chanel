@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../core/theme.dart';
+import '../core/typography.dart';
 import '../models/channel.dart';
 
 /// Reusable lightweight channel avatar — extracted to avoid duplicating
@@ -17,17 +18,14 @@ class ChannelAvatar extends StatelessWidget {
     this.showBorder = true,
   });
 
-  static const _initialsStyle = TextStyle(
+  static final _initialsStyle = GoPlayType.label.copyWith(
     color: GoPlayTheme.primary,
-    fontSize: 14,
     fontWeight: FontWeight.w800,
   );
 
   @override
   Widget build(BuildContext context) {
-    final initials = channel.name
-        .substring(0, channel.name.length >= 2 ? 2 : 1)
-        .toUpperCase();
+    final initials = channel.initials;
 
     return DecoratedBox(
       decoration: BoxDecoration(

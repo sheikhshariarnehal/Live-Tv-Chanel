@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../core/typography.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/cards/channel_card.dart';
 import '../../models/category.dart';
@@ -392,9 +393,32 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen>
                         icon: Icon(Icons.more_vert_rounded,
                             color: cs.onSurface, size: 22),
                         onSelected: (value) {
-                          if (value == 'settings') context.push('/settings');
+                          if (value == 'favorites') {
+                            context.push('/favorites');
+                          } else if (value == 'settings') {
+                            context.push('/settings');
+                          }
                         },
                         itemBuilder: (context) => [
+                          PopupMenuItem<String>(
+                            value: 'favorites',
+                            child: Row(
+                              children: [
+                                Icon(Icons.bookmark_rounded,
+                                    color: cs.onSurface, size: 20),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Favorites',
+                                  style: GoPlayType.body.copyWith(
+                                    color: cs.onSurface,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
                           PopupMenuItem<String>(
                             value: 'settings',
                             child: Row(
@@ -404,11 +428,12 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen>
                                 const SizedBox(width: 12),
                                 Text(
                                   'App Settings',
-                                  style: TextStyle(
+                                  style: GoPlayType.body.copyWith(
                                     color: cs.onSurface,
-                                    fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
@@ -504,14 +529,14 @@ class _SearchField extends StatelessWidget {
         onChanged: onChanged,
         textInputAction: TextInputAction.search,
         cursorColor: cs.primary,
-        style: TextStyle(color: cs.onSurface, fontSize: 14),
+        style: GoPlayType.body.copyWith(color: cs.onSurface),
         decoration: InputDecoration(
           filled: true,
           fillColor: cs.surfaceContainerHigh,
           contentPadding:
               const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           hintText: 'Search by name, country, language…',
-          hintStyle: TextStyle(color: cs.onSurfaceVariant, fontSize: 14),
+          hintStyle: GoPlayType.body.copyWith(color: cs.onSurfaceVariant),
           isDense: true,
           border: OutlineInputBorder(
             borderRadius: radius,
@@ -578,11 +603,12 @@ class _EmptyState extends StatelessWidget {
                   ? 'No channels match your search'
                   : 'No channels in this category',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: GoPlayType.body.copyWith(
                 color: cs.onSurfaceVariant,
-                fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 8),
             TextButton(
@@ -622,17 +648,15 @@ class _ErrorState extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: cs.onSurface,
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
+              style: GoPlayType.subtitle.copyWith(color: cs.onSurface),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 6),
             Text(
               'Check your connection and try again.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13),
+              style: GoPlayType.body.copyWith(color: cs.onSurfaceVariant),
             ),
             const SizedBox(height: 16),
             FilledButton.icon(
@@ -646,7 +670,7 @@ class _ErrorState extends StatelessWidget {
               ExpansionTile(
                 title: Text(
                   'Technical details',
-                  style: TextStyle(color: cs.onSurfaceVariant, fontSize: 12),
+                  style: GoPlayType.labelSmall.copyWith(color: cs.onSurfaceVariant),
                 ),
                 tilePadding: EdgeInsets.zero,
                 shape: const Border(),
@@ -654,7 +678,14 @@ class _ErrorState extends StatelessWidget {
                 children: [
                   Text(
                     '$error',
-                    style: TextStyle(color: cs.onSurfaceVariant, fontSize: 11),
+                    style: GoPlayType.inter(
+                      color: cs.onSurfaceVariant,
+                      fontSize: GoPlayType.xs,
+                      height: GoPlayType.leadingBody,
+                    ),
+                    // Raw exception text; keep the sheet from growing forever.
+                    maxLines: 8,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -737,15 +768,9 @@ class _CategoryFilterBar extends StatelessWidget {
       unselectedLabelColor: cs.onSurface.withValues(alpha: 0.6),
       labelPadding: const EdgeInsets.symmetric(horizontal: 12),
       padding: const EdgeInsets.only(left: 4),
-      labelStyle: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.1,
-      ),
-      unselectedLabelStyle: const TextStyle(
-        fontSize: 14,
+      labelStyle: GoPlayType.label,
+      unselectedLabelStyle: GoPlayType.label.copyWith(
         fontWeight: FontWeight.w500,
-        letterSpacing: 0.1,
       ),
       overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {
         if (states.contains(WidgetState.hovered)) {
@@ -871,13 +896,13 @@ class _CountBadgeState extends State<_CountBadge> {
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
         child: Text(
           '${widget.count}',
-          style: TextStyle(
-            color: _selected
-                ? cs.onPrimary
-                : cs.onSurface.withValues(alpha: 0.5),
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
+          style: GoPlayType.inter(
+            color: _selected ? cs.onPrimary : cs.onSurfaceVariant,
+            fontSize: GoPlayType.xs,
+            fontWeight: FontWeight.w700,
+            height: GoPlayType.leadingFlat,
           ),
+          maxLines: 1,
         ),
       ),
     );

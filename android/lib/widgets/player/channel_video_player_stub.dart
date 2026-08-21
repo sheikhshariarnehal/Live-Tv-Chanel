@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/theme.dart';
+import '../../core/typography.dart';
 import '../../models/channel.dart';
 import '../../services/local_proxy.dart';
 import '../../services/playback/playback_state.dart';
@@ -596,7 +597,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
             const SizedBox(width: 8),
             const Text(
               'Auto (Adaptive)',
-              style: TextStyle(color: Colors.white, fontSize: 14),
+              style: TextStyle(color: Colors.white, fontSize: GoPlayType.base),
             ),
           ],
         ),
@@ -615,9 +616,18 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                 size: 18,
               ),
               const SizedBox(width: 8),
-              Text(
-                label,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
+              Flexible(
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    fontFamily: GoPlayType.family,
+                    color: Colors.white,
+                    fontSize: GoPlayType.base,
+                    height: GoPlayType.leadingSnug,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
@@ -1153,8 +1163,8 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                             '$percentage%',
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
+                              fontSize: GoPlayType.xs,
+                              fontWeight: FontWeight.w700,
                               shadows: [Shadow(color: Colors.black87, blurRadius: 4)],
                             ),
                           ),
@@ -1224,8 +1234,8 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                             '$percentage%',
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
+                              fontSize: GoPlayType.xs,
+                              fontWeight: FontWeight.w700,
                               shadows: [Shadow(color: Colors.black87, blurRadius: 4)],
                             ),
                           ),
@@ -1339,7 +1349,7 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                           '${_formatDuration(_position)} · ${_formatDuration(_duration)}',
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 13,
+                            fontSize: GoPlayType.base,
                             fontWeight: FontWeight.w400,
                           ),
                         ),
@@ -1530,19 +1540,33 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
               const SizedBox(height: 14),
               Text(
                 errorTitle,
+                textAlign: TextAlign.center,
                 style: const TextStyle(
+                  fontFamily: GoPlayType.family,
                   color: Colors.white,
-                  fontSize: 16,
+                  fontSize: GoPlayType.md,
                   fontWeight: FontWeight.w700,
+                  height: GoPlayType.leadingSnug,
                 ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
-              Text(
-                widget.channel.name,
-                style: const TextStyle(
-                  color: Colors.white38,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  widget.channel.displayName,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: GoPlayType.family,
+                    color: Colors.white70,
+                    fontSize: GoPlayType.sm,
+                    fontWeight: FontWeight.w400,
+                    height: GoPlayType.leadingSnug,
+                  ),
+                  // Channel names come from the remote catalogue.
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1550,9 +1574,14 @@ class _ChannelVideoPlayerNativeState extends State<ChannelVideoPlayerNative> {
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Text(
                   _errorMessage ?? 'Unable to play this stream',
-                  style: const TextStyle(color: Colors.white54, fontSize: 12),
+                  style: const TextStyle(
+                    fontFamily: GoPlayType.family,
+                    color: Colors.white70,
+                    fontSize: GoPlayType.sm,
+                    height: GoPlayType.leadingBody,
+                  ),
                   textAlign: TextAlign.center,
-                  maxLines: 2,
+                  maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -1731,7 +1760,7 @@ class _StatusPill extends StatelessWidget {
             message,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 12.5,
+              fontSize: GoPlayType.sm,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -1778,7 +1807,7 @@ class _SkipCountdownPill extends StatelessWidget {
             'Skipping in ${secondsRemaining}s',
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 12.5,
+              fontSize: GoPlayType.sm,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -1795,7 +1824,7 @@ class _SkipCountdownPill extends StatelessWidget {
                 'Cancel',
                 style: TextStyle(
                   color: Colors.white70,
-                  fontSize: 11,
+                  fontSize: GoPlayType.xs,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -1814,7 +1843,7 @@ class _SkipCountdownPill extends StatelessWidget {
                 'Skip Now',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 11,
+                  fontSize: GoPlayType.xs,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -2049,7 +2078,7 @@ class _FocusableSeekBarState extends State<_FocusableSeekBar> {
                 SizedBox(width: 2),
                 Text(
                   '← Seek →',
-                  style: TextStyle(color: Colors.white54, fontSize: 10, letterSpacing: 0.5),
+                  style: TextStyle(color: Colors.white70, fontSize: GoPlayType.xs, letterSpacing: GoPlayType.trackingMeta),
                 ),
                 SizedBox(width: 2),
                 Icon(Icons.keyboard_arrow_right, color: Colors.white54, size: 14),
@@ -2270,12 +2299,18 @@ class _TvPlayerOsd extends StatelessWidget {
           children: [
             if (icon != null) Icon(icon, color: GoPlayTheme.primary, size: 24),
             if (icon != null) const SizedBox(width: 10),
-            Text(
-              message!,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
+            Flexible(
+              child: Text(
+                message!,
+                style: const TextStyle(
+                  fontFamily: GoPlayType.family,
+                  color: Colors.white,
+                  fontSize: GoPlayType.md,
+                  fontWeight: FontWeight.w700,
+                  height: GoPlayType.leadingSnug,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

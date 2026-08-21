@@ -335,6 +335,15 @@ class FavoriteNotifier extends Notifier<Set<String>> {
   bool isFavorite(String channelId) => state.contains(channelId);
 }
 
+final favoriteChannelsProvider = Provider<AsyncValue<List<Channel>>>((ref) {
+  final channelsAsync = ref.watch(channelsProvider);
+  final favIds = ref.watch(favoriteChannelIdsProvider);
+
+  return channelsAsync.whenData((channels) {
+    return channels.where((ch) => favIds.contains(ch.id)).toList();
+  });
+});
+
 // ─── Watch History (local) ────────────────────────────────────
 final watchHistoryProvider =
     NotifierProvider<WatchHistoryNotifier, List<Channel>>(

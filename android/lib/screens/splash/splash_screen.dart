@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
+import '../../core/typography.dart';
 import '../../main.dart' show appInitFuture;
 import '../../providers/app_providers.dart';
 
@@ -135,24 +136,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 opacity: _fadeAnimation,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
+                  children: [
                     Text(
                       'GoPlay',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        letterSpacing: 2.0,
+                      style: GoPlayType.wordmark.copyWith(
+                        color: GoPlayTheme.onSurface,
                       ),
                     ),
-                    SizedBox(height: 6),
+                    const SizedBox(height: 6),
                     Text(
                       'LIVE SPORTS STREAMING',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: GoPlayTheme.darkOnSurfaceVariant, // Alabaster Grey #71768E
-                        letterSpacing: 4.0,
+                      style: GoPlayType.tagline.copyWith(
+                        color: GoPlayTheme.onSurfaceVariant,
                       ),
                     ),
                   ],

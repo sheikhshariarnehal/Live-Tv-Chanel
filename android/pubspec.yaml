@@ -35,7 +35,6 @@ dependencies:
   go_router: ^17.3.0
   supabase_flutter: ^2.15.2
   hive_flutter: ^1.1.0
-  google_fonts: ^8.1.0
   intl: ^0.20.3
   device_info_plus: ^13.2.0
   url_launcher: ^6.3.2
@@ -71,6 +70,10 @@ flutter:
     - assets/images/
     - assets/fonts/
 
+  # Inter is bundled, not fetched. Nothing in the app may reference a weight
+  # that is not declared here — an undeclared weight silently snaps to the
+  # nearest declared one. w300 (Light) is deliberately absent; see
+  # GoPlayType.sectionTitle in lib/core/typography.dart.
   fonts:
     - family: Inter
       fonts:

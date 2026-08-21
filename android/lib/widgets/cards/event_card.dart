@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme.dart';
+import '../../core/typography.dart';
 import '../../models/event.dart';
 import '../../providers/app_providers.dart';
 import '../live_badge.dart';
@@ -21,7 +22,7 @@ const _kLiveCardDecoration = BoxDecoration(
     BorderSide(color: GoPlayTheme.cardBorder, width: 0.8),
   ),
   boxShadow: [
-    BoxShadow(color: Color(0x1F000000), blurRadius: 8, offset: Offset(0, 4)),
+    BoxShadow(color: Color(0x1A000000), blurRadius: 6, offset: Offset(0, 2)),
   ],
 );
 
@@ -32,7 +33,7 @@ const _kUpcomingCardDecoration = BoxDecoration(
     BorderSide(color: GoPlayTheme.cardBorder, width: 0.8),
   ),
   boxShadow: [
-    BoxShadow(color: Color(0x1F000000), blurRadius: 8, offset: Offset(0, 4)),
+    BoxShadow(color: Color(0x1A000000), blurRadius: 6, offset: Offset(0, 2)),
   ],
 );
 
@@ -71,57 +72,93 @@ const _kCompactTimeBadgeDecoration = BoxDecoration(
 );
 
 const _kLeagueStyle = TextStyle(
+  fontFamily: GoPlayType.family,
   color: GoPlayTheme.onSurfaceVariant,
-  fontSize: 10,
+  fontSize: GoPlayType.xs,
   fontWeight: FontWeight.w700,
-  letterSpacing: 1.0,
+  height: GoPlayType.leadingFlat,
+  letterSpacing: GoPlayType.trackingMeta,
 );
 
 const _kBadgeStyle = TextStyle(
-  color: Color(0x99FFFFFF),
-  fontSize: 8,
+  fontFamily: GoPlayType.family,
+  color: GoPlayTheme.onSurfaceVariant,
+  fontSize: GoPlayType.xs,
   fontWeight: FontWeight.w800,
-  letterSpacing: 0.5,
+  height: GoPlayType.leadingFlat,
+  letterSpacing: GoPlayType.trackingMeta,
 );
 
 const _kTeamNameStyle = TextStyle(
-  color: Colors.white,
-  fontSize: 10,
-  fontWeight: FontWeight.w700,
-  height: 1.1,
-  letterSpacing: 0.0,
+  fontFamily: GoPlayType.family,
+  color: GoPlayTheme.onSurface,
+  fontSize: GoPlayType.xs,
+  fontWeight: FontWeight.w600,
+  height: GoPlayType.leadingFlat,
 );
 
+// The countdown is supporting information, not the headline. At w800 in full
+// Signal Teal it read as loud as the kickoff time directly above it, so the
+// pair had no hierarchy — two strong lines competing in a 3-line column. Medium
+// weight in a dimmed teal keeps the "this is a clock, it is teal, it is
+// counting" signal while stepping clearly behind the time.
 const _kCountdownStyle = TextStyle(
-  color: GoPlayTheme.primary,
-  fontSize: 10,
-  fontWeight: FontWeight.w800,
+  fontFamily: GoPlayType.family,
+  color: Color(0xB300ADB5), // Signal Teal @ 70%
+  fontSize: GoPlayType.xs,
+  fontWeight: FontWeight.w600,
+  height: GoPlayType.leadingFlat,
 );
 
 const _kTimeInfoStyle = TextStyle(
+  fontFamily: GoPlayType.family,
   color: GoPlayTheme.onSurfaceVariant,
-  fontSize: 10,
+  fontSize: GoPlayType.xs,
   fontWeight: FontWeight.w600,
+  height: GoPlayType.leadingFlat,
 );
 
+// Kickoff numerals. Tracking stays at 0 — the old -0.5 closed the digit
+// counters at this size and made times like "21:45" run together. Weight comes
+// down from w900: the time is already the largest thing in its column, so it
+// does not also need the heaviest stroke in the card.
 const _kLiveTimeStyle = TextStyle(
+  fontFamily: GoPlayType.family,
   color: GoPlayTheme.primary,
-  fontSize: 18,
-  fontWeight: FontWeight.w900,
-  letterSpacing: -0.5,
+  fontSize: GoPlayType.md,
+  fontWeight: FontWeight.w800,
+  height: GoPlayType.leadingFlat,
 );
 
 const _kUpcomingTimeStyle = TextStyle(
-  color: Colors.white,
-  fontSize: 15,
-  fontWeight: FontWeight.w900,
-  letterSpacing: -0.5,
+  fontFamily: GoPlayType.family,
+  color: GoPlayTheme.onSurface,
+  fontSize: GoPlayType.base,
+  fontWeight: FontWeight.w800,
+  height: GoPlayType.leadingFlat,
 );
 
 const _kMonths = [
   'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
   'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
 ];
+
+// ─── Tile geometry ───────────────────────────────────────────────────────────
+// The tile used to be a hard-coded 96dp box. That number only fit at a text
+// scale of 1.0; at the 1.3 ceiling the app allows, the two-line team names
+// pushed the column past the box. Measuring instead of guessing lets the card
+// come down ~12% at the default scale — which is what buys the extra fixture on
+// screen — while still growing when the user scales text up.
+const double _kTilePadV = 7.0;
+const double _kTileBadgePadV = 2.0;
+const double _kTileHeaderGap = 5.0;
+const double _kTileFlagSize = 22.0;
+const double _kTileFlagGap = 2.0;
+const int _kTileNameLines = 2;
+
+/// Vertical gap beneath each tile. Callers driving a fixed-extent list need
+/// [tileExtent], which folds this in.
+const double _kTileGap = 4.0;
 
 /// Single consolidated, stateless EventCard component supporting both tile and compact variants.
 class EventCard extends ConsumerWidget {
@@ -135,6 +172,31 @@ class EventCard extends ConsumerWidget {
     this.onTap,
     this.variant = EventCardVariant.tile,
   });
+
+  /// Painted height of one [EventCardVariant.tile] at the caller's text scale.
+  ///
+  /// ~84dp at scale 1.0, down from the old fixed 96dp.
+  static double tileHeight(BuildContext context) {
+    final metaLine =
+        MediaQuery.textScalerOf(context).scale(GoPlayType.xs) *
+            GoPlayType.leadingFlat;
+
+    // Header: the LIVE / UPCOMING pill is the tallest thing in the row.
+    final header = metaLine + (_kTileBadgePadV * 2);
+
+    // Teams: flag, gap, then the two-line name block. The centre column
+    // (time + countdown) is always shorter than this, so it never sets the row.
+    final teams =
+        _kTileFlagSize + _kTileFlagGap + (metaLine * _kTileNameLines);
+
+    // +1 absorbs sub-pixel rounding so the column can never overflow by a hair.
+    return (_kTilePadV * 2) + header + _kTileHeaderGap + teams + 1;
+  }
+
+  /// [tileHeight] plus the gap beneath it — the value a `SliverFixedExtentList`
+  /// or `mainAxisExtent` needs.
+  static double tileExtent(BuildContext context) =>
+      tileHeight(context) + _kTileGap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -151,20 +213,22 @@ class EventCard extends ConsumerWidget {
     final timeLabel = _formatTime(event.startTime);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: _kTileGap),
       child: RepaintBoundary(
         child: TvFocusable(
           borderRadius: BorderRadius.circular(12),
           onTap: onTap,
           child: SizedBox(
-            height: 96,
+            height: tileHeight(context),
             child: DecoratedBox(
               decoration: isLive ? _kLiveCardDecoration : _kUpcomingCardDecoration,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: _kTilePadV,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                   // Header Row
                   Row(
@@ -183,41 +247,49 @@ class EventCard extends ConsumerWidget {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                event.league.toUpperCase(),
-                                style: _kLeagueStyle,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      if (isLive)
-                        const LiveBadge(
-                          fontSize: 8,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                        )
-                      else
-                        const DecoratedBox(
-                          decoration: _kUpcomingBadgeDecoration,
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            child: Text('UPCOMING', style: _kBadgeStyle),
-                          ),
-                        ),
+                             Expanded(
+                               child: Text(
+                                 event.league.toUpperCase(),
+                                 style: _kLeagueStyle,
+                                 maxLines: 1,
+                                 overflow: TextOverflow.ellipsis,
+                               ),
+                             ),
+                           ],
+                         ),
+                       ),
+                       const SizedBox(width: 8),
+                       if (isLive)
+                         const LiveBadge(
+                           padding: EdgeInsets.symmetric(
+                             horizontal: 6,
+                             vertical: _kTileBadgePadV,
+                           ),
+                         )
+                       else
+                         const DecoratedBox(
+                           decoration: _kUpcomingBadgeDecoration,
+                           child: Padding(
+                             padding: EdgeInsets.symmetric(
+                               horizontal: 7,
+                               vertical: _kTileBadgePadV,
+                             ),
+                             child: Text(
+                               'UPCOMING',
+                               style: _kBadgeStyle,
+                               maxLines: 1,
+                             ),
+                           ),
+                         ),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  // Teams & Time row
-                  Row(
+                  const SizedBox(height: _kTileHeaderGap),
+                  // Teams & Time row. Expanded, not a fixed block: the height
+                  // above is measured from this row's content, and letting it
+                  // flex means any rounding slack lands here instead of
+                  // overflowing the card.
+                  Expanded(
+                    child: Row(
                     children: [
                       // Home team
                       Expanded(
@@ -225,12 +297,15 @@ class EventCard extends ConsumerWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            TeamFlagWidget(flag: event.homeTeam.flag, size: 22),
-                            const SizedBox(height: 2),
+                            TeamFlagWidget(
+                              flag: event.homeTeam.flag,
+                              size: _kTileFlagSize,
+                            ),
+                            const SizedBox(height: _kTileFlagGap),
                             Text(
                               event.homeTeam.name,
                               style: _kTeamNameStyle,
-                              maxLines: 2,
+                              maxLines: _kTileNameLines,
                               textAlign: TextAlign.center,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -248,7 +323,7 @@ class EventCard extends ConsumerWidget {
                               isLive ? 'VS' : timeLabel,
                               style: isLive ? _kLiveTimeStyle : _kUpcomingTimeStyle,
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 2),
                             if (event.isUpcoming && isToday)
                               CountdownTimerWidget(
                                 startTime: event.startTime,
@@ -273,12 +348,15 @@ class EventCard extends ConsumerWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            TeamFlagWidget(flag: event.awayTeam.flag, size: 22),
-                            const SizedBox(height: 2),
+                            TeamFlagWidget(
+                              flag: event.awayTeam.flag,
+                              size: _kTileFlagSize,
+                            ),
+                            const SizedBox(height: _kTileFlagGap),
                             Text(
                               event.awayTeam.name,
                               style: _kTeamNameStyle,
-                              maxLines: 2,
+                              maxLines: _kTileNameLines,
                               textAlign: TextAlign.center,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -286,6 +364,7 @@ class EventCard extends ConsumerWidget {
                         ),
                       ),
                     ],
+                    ),
                   ),
                 ],
               ),
@@ -322,11 +401,10 @@ class EventCard extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       event.league,
-                      style: const TextStyle(
+                      style: _kLeagueStyle.copyWith(
                         color: GoPlayTheme.onSurface,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
                       ),
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -342,12 +420,8 @@ class EventCard extends ConsumerWidget {
                       decoration: _kCompactUpcomingBadgeDecoration,
                       child: const Text(
                         'UPCOMING',
-                        style: TextStyle(
-                          color: GoPlayTheme.onSurfaceVariant,
-                          fontSize: 8,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.5,
-                        ),
+                        style: _kBadgeStyle,
+                        maxLines: 1,
                       ),
                     ),
                 ],
@@ -372,10 +446,8 @@ class EventCard extends ConsumerWidget {
                               Expanded(
                                 child: Text(
                                   event.homeTeam.name,
-                                  style: const TextStyle(
+                                  style: GoPlayType.labelSmall.copyWith(
                                     color: GoPlayTheme.onSurface,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -392,10 +464,8 @@ class EventCard extends ConsumerWidget {
                               Expanded(
                                 child: Text(
                                   event.awayTeam.name,
-                                  style: const TextStyle(
+                                  style: GoPlayType.labelSmall.copyWith(
                                     color: GoPlayTheme.onSurface,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -416,13 +486,13 @@ class EventCard extends ConsumerWidget {
                       decoration: _kCompactTimeBadgeDecoration,
                       child: Text(
                         isLive ? 'VS' : timeLabel,
-                        style: TextStyle(
+                        style: GoPlayType.meta.copyWith(
                           color: isLive
                               ? GoPlayTheme.primary
                               : GoPlayTheme.onSurfaceVariant,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0,
                         ),
+                        maxLines: 1,
                       ),
                     ),
                   ],

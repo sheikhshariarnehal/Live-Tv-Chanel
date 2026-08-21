@@ -1,4 +1,5 @@
 import 'drm_config.dart';
+import '../utils/channel_name.dart';
 
 /// Data model for a TV channel
 class Channel {
@@ -38,10 +39,26 @@ class Channel {
       '$name\u0000${category ?? ''}\u0000${country ?? ''}\u0000${language ?? ''}'
           .toLowerCase();
 
+  String? _displayName;
+
+  /// [name] cleaned up for rendering — see `normalizeChannelName`.
+  ///
+  /// Every surface that shows a channel to the user should read this instead of
+  /// [name]. [name] stays raw so [searchIndex], analytics, and the operator
+  /// dashboard keep matching the source catalog: a user searching the literal
+  /// string they saw in a playlist still finds the channel.
+  ///
+  /// Cached for the same reason [searchIndex] is — the channel grid rebuilds
+  /// these on every scroll frame.
+  String get displayName => _displayName ??= normalizeChannelName(name);
+
   /// Two-letter avatar initials. Never throws: [name] is guaranteed non-empty
   /// by [fromJson], but callers may construct channels directly.
+  ///
+  /// Derived from [displayName] so a scraped `0. Tom and Jerry 2` shows `TO`
+  /// rather than `0.`.
   String get initials {
-    final trimmed = name.trim();
+    final trimmed = displayName.trim();
     if (trimmed.isEmpty) return '?';
     return trimmed.substring(0, trimmed.length >= 2 ? 2 : 1).toUpperCase();
   }

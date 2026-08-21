@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
+import '../../core/typography.dart';
 import '../../providers/app_providers.dart';
 import '../../models/channel.dart';
 import '../../models/event.dart';
@@ -131,16 +132,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                               });
                             });
                           },
-                          cursorColor: Colors.white,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
+                          cursorColor: GoPlayTheme.onSurface,
+                          style: GoPlayType.body.copyWith(
+                            color: GoPlayTheme.onSurface,
                           ),
                           decoration: InputDecoration(
                             hintText: 'Search channels, teams, sports...',
-                            hintStyle: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.5),
-                              fontSize: 14,
+                            hintStyle: GoPlayType.body.copyWith(
+                              color: GoPlayTheme.onSurfaceMuted,
                             ),
                             isDense: true,
                             prefixIcon: const Icon(
@@ -218,12 +217,12 @@ class _EmptySearchState extends StatelessWidget {
         // Section: Popular Tags
         Text(
           'POPULAR SEARCHES',
-          style: TextStyle(
-            color: GoPlayTheme.onSurfaceVariant.withValues(alpha: 0.5),
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.5,
+          style: GoPlayType.meta.copyWith(
+            color: GoPlayTheme.onSurfaceMuted,
+            letterSpacing: GoPlayType.trackingWide,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 16),
         Wrap(
@@ -244,11 +243,9 @@ class _EmptySearchState extends StatelessWidget {
                 ),
                 child: Text(
                   tag.label,
-                  style: const TextStyle(
-                    color: GoPlayTheme.onSurface,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: GoPlayType.label.copyWith(color: GoPlayTheme.onSurface),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             );
@@ -259,12 +256,12 @@ class _EmptySearchState extends StatelessWidget {
         // Section: Recommendations
         Text(
           'RECOMMENDED CHANNELS',
-          style: TextStyle(
-            color: GoPlayTheme.onSurfaceVariant.withValues(alpha: 0.5),
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.5,
+          style: GoPlayType.meta.copyWith(
+            color: GoPlayTheme.onSurfaceMuted,
+            letterSpacing: GoPlayType.trackingWide,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 16),
         channelsAsync.when(
@@ -277,9 +274,8 @@ class _EmptySearchState extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
                     'No channels available right now.',
-                    style: TextStyle(
+                    style: GoPlayType.body.copyWith(
                       color: GoPlayTheme.onSurfaceVariant,
-                      fontSize: 13,
                     ),
                   ),
                 );
@@ -348,20 +344,18 @@ class _EmptySearchState extends StatelessWidget {
                       ),
                       placeholder: (context, url) => Center(
                         child: Text(
-                          ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
-                          style: const TextStyle(
+                          ch.initials,
+                          style: GoPlayType.labelSmall.copyWith(
                             color: GoPlayTheme.primary,
-                            fontSize: 12,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
                       errorWidget: (context, url, error) => Center(
                         child: Text(
-                          ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
-                          style: const TextStyle(
+                          ch.initials,
+                          style: GoPlayType.labelSmall.copyWith(
                             color: GoPlayTheme.primary,
-                            fontSize: 12,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -369,10 +363,9 @@ class _EmptySearchState extends StatelessWidget {
                     )
                   : Center(
                       child: Text(
-                        ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase(),
-                        style: const TextStyle(
+                        ch.initials,
+                        style: GoPlayType.labelSmall.copyWith(
                           color: GoPlayTheme.primary,
-                          fontSize: 12,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -384,20 +377,17 @@ class _EmptySearchState extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    ch.name,
-                    style: TextStyle(
-                      color: GoPlayTheme.onSurface,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    ch.displayName,
+                    style: GoPlayType.label.copyWith(color: GoPlayTheme.onSurface),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '${ch.category ?? 'General'} â€¢ ${ch.country ?? 'Global'}',
-                    style: TextStyle(
-                      color: GoPlayTheme.onSurfaceVariant,
-                      fontSize: 12,
-                    ),
+                    style: GoPlayType.bodySmall.copyWith(color: GoPlayTheme.onSurfaceVariant),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -427,12 +417,8 @@ class _EmptySearchState extends StatelessWidget {
                     const SizedBox(width: 5),
                     Text(
                       'LIVE',
-                      style: TextStyle(
-                        color: GoPlayTheme.liveBadge,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.5,
-                      ),
+                      style: GoPlayType.meta.copyWith(color: GoPlayTheme.liveBadge),
+                      maxLines: 1,
                     ),
                   ],
                 ),
@@ -485,10 +471,11 @@ class _SearchResultsState extends ConsumerState<_SearchResults> {
 
     // Handle error states
     if (channelsAsync.hasError || eventsAsync.hasError) {
-      return const Center(
+      return Center(
         child: Text(
           'An error occurred while searching.',
-          style: TextStyle(color: GoPlayTheme.error),
+          textAlign: TextAlign.center,
+          style: GoPlayType.body.copyWith(color: GoPlayTheme.error),
         ),
       );
     }
@@ -511,12 +498,18 @@ class _SearchResultsState extends ConsumerState<_SearchResults> {
               color: GoPlayTheme.onSurfaceVariant.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 16),
-            Text(
-              'No results found for "${widget.query}"',
-              style: TextStyle(
-                color: GoPlayTheme.onSurfaceVariant,
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                'No results found for "${widget.query}"',
+                textAlign: TextAlign.center,
+                style: GoPlayType.subtitle.copyWith(
+                  color: GoPlayTheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
+                // The query is user-entered and unbounded.
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -542,21 +535,23 @@ class _SearchResultsState extends ConsumerState<_SearchResults> {
                 children: [
                   Text(
                     'CHANNELS',
-                    style: TextStyle(
-                      color: GoPlayTheme.onSurfaceVariant.withValues(alpha: 0.5),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.5,
+                    style: GoPlayType.meta.copyWith(
+                      color: GoPlayTheme.onSurfaceMuted,
+                      letterSpacing: GoPlayType.trackingWide,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '${allChannels.length}',
-                    style: TextStyle(
-                      color: GoPlayTheme.onSurfaceVariant.withValues(alpha: 0.35),
-                      fontSize: 11,
+                    style: GoPlayType.inter(
+                      color: GoPlayTheme.onSurfaceMuted,
+                      fontSize: GoPlayType.xs,
                       fontWeight: FontWeight.w600,
+                      height: GoPlayType.leadingSnug,
                     ),
+                    maxLines: 1,
                   ),
                 ],
               ),
@@ -594,21 +589,23 @@ class _SearchResultsState extends ConsumerState<_SearchResults> {
                 children: [
                   Text(
                     'LIVE EVENTS',
-                    style: TextStyle(
-                      color: GoPlayTheme.onSurfaceVariant.withValues(alpha: 0.5),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.5,
+                    style: GoPlayType.meta.copyWith(
+                      color: GoPlayTheme.onSurfaceMuted,
+                      letterSpacing: GoPlayType.trackingWide,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '${allEvents.length}',
-                    style: TextStyle(
-                      color: GoPlayTheme.onSurfaceVariant.withValues(alpha: 0.35),
-                      fontSize: 11,
+                    style: GoPlayType.inter(
+                      color: GoPlayTheme.onSurfaceMuted,
+                      fontSize: GoPlayType.xs,
                       fontWeight: FontWeight.w600,
+                      height: GoPlayType.leadingSnug,
                     ),
+                    maxLines: 1,
                   ),
                 ],
               ),
@@ -662,20 +659,17 @@ class _SearchResultsState extends ConsumerState<_SearchResults> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    ch.name,
-                    style: const TextStyle(
-                      color: GoPlayTheme.onSurface,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    ch.displayName,
+                    style: GoPlayType.label.copyWith(color: GoPlayTheme.onSurface),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '${ch.category ?? 'General'} â€¢ ${ch.country ?? 'Global'}',
-                    style: const TextStyle(
-                      color: GoPlayTheme.onSurfaceVariant,
-                      fontSize: 12,
-                    ),
+                    style: GoPlayType.bodySmall.copyWith(color: GoPlayTheme.onSurfaceVariant),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -739,19 +733,16 @@ class _SearchResultsState extends ConsumerState<_SearchResults> {
                 children: [
                   Text(
                     '${event.homeTeam.name} vs ${event.awayTeam.name}',
-                    style: const TextStyle(
-                      color: GoPlayTheme.onSurface,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: GoPlayType.label.copyWith(color: GoPlayTheme.onSurface),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '${event.league} â€¢ ${event.sport}',
-                    style: const TextStyle(
-                      color: GoPlayTheme.onSurfaceVariant,
-                      fontSize: 12,
-                    ),
+                    style: GoPlayType.bodySmall.copyWith(color: GoPlayTheme.onSurfaceVariant),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -772,7 +763,7 @@ class _ChannelAvatar extends StatelessWidget {
   const _ChannelAvatar({required this.ch});
 
   String get _initials =>
-      ch.name.substring(0, ch.name.length >= 2 ? 2 : 1).toUpperCase();
+      ch.initials;
 
   @override
   Widget build(BuildContext context) {
@@ -805,9 +796,8 @@ class _ChannelAvatar extends StatelessWidget {
               placeholder: (context, url) => Center(
                 child: Text(
                   _initials,
-                  style: const TextStyle(
+                  style: GoPlayType.labelSmall.copyWith(
                     color: GoPlayTheme.primary,
-                    fontSize: 12,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -815,9 +805,8 @@ class _ChannelAvatar extends StatelessWidget {
               errorWidget: (context, url, error) => Center(
                 child: Text(
                   _initials,
-                  style: const TextStyle(
+                  style: GoPlayType.labelSmall.copyWith(
                     color: GoPlayTheme.primary,
-                    fontSize: 12,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -826,9 +815,8 @@ class _ChannelAvatar extends StatelessWidget {
           : Center(
               child: Text(
                 _initials,
-                style: const TextStyle(
+                style: GoPlayType.labelSmall.copyWith(
                   color: GoPlayTheme.primary,
-                  fontSize: 12,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -865,14 +853,10 @@ class _LiveBadge extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 5),
-          const Text(
+          Text(
             'LIVE',
-            style: TextStyle(
-              color: GoPlayTheme.liveBadge,
-              fontSize: 9,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.5,
-            ),
+            style: GoPlayType.meta.copyWith(color: GoPlayTheme.liveBadge),
+            maxLines: 1,
           ),
         ],
       ),
@@ -919,11 +903,8 @@ class _LoadMoreButton extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 label,
-                style: const TextStyle(
-                  color: GoPlayTheme.primary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: GoPlayType.label.copyWith(color: GoPlayTheme.primary),
+                maxLines: 1,
               ),
             ],
           ),

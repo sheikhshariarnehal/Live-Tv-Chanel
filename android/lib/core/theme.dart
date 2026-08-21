@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
+
+import 'typography.dart';
 
 /// GoPlay design system.
 ///
@@ -29,15 +30,18 @@ class GoPlayTheme {
   // Neutral, near-black canvas with subtle tonal steps — no muddy color
   // cast, so the teal accent stays the only thing competing for attention.
   static const Color darkSurface = Color(0xFF0E0F11); // App background
-  static const Color darkSurfaceContainerLow = Color(0xFF141519);
-  static const Color darkSurfaceContainer = Color(0xFF1B1C20); // Cards
-  static const Color darkSurfaceContainerHigh = Color(0xFF232428); // Elevated
-  static const Color darkSurfaceContainerHighest = Color(0xFF2C2D31);
+  static const Color darkSurfaceContainerLow = Color(0xFF121316);
+  static const Color darkSurfaceContainer = Color(0xFF16171A); // Cards & surfaces
+  static const Color darkSurfaceContainerHigh = Color(0xFF1E1F24); // Elevated
+  static const Color darkSurfaceContainerHighest = Color(0xFF26272E);
   static const Color darkOnSurface = Color(0xFFF5F5F7); // Primary text
   static const Color darkOnSurfaceVariant = Color(0xFF9A9CA8); // Secondary text
-  static const Color darkOnSurfaceMuted = Color(0xFF6B6D78); // Tertiary text
-  static const Color darkCardBorder = Color(0x1FFFFFFF); // Hairline border
-  static const Color darkDivider = Color(0x14FFFFFF);
+  // Tertiary text. Raised from the original #6B6D78, which measured 3.7:1 on
+  // the canvas and 3.3:1 on cards — below the 4.5:1 WCAG AA floor for the
+  // 11-14sp sizes it is actually used at. #8A8C97 measures 5.7:1 / 5.1:1.
+  static const Color darkOnSurfaceMuted = Color(0xFF8A8C97); // Tertiary text
+  static const Color darkCardBorder = Color(0x14FFFFFF); // Sleek hairline border
+  static const Color darkDivider = Color(0x12FFFFFF);
   static const Color darkPrimaryContainer = Color(0xFF00363A);
   static const Color darkOnPrimaryContainer = Color(0xFF7FE9EF);
   static const Color darkOnPrimary = Color(0xFF00282B);
@@ -52,7 +56,8 @@ class GoPlayTheme {
   static const Color lightSurfaceContainerHighest = Color(0xFFE0E1E4);
   static const Color lightOnSurface = Color(0xFF111417);
   static const Color lightOnSurfaceVariant = Color(0xFF4B4F58);
-  static const Color lightOnSurfaceMuted = Color(0xFF7A7E87);
+  // Raised from #7A7E87 (3.9:1 on the light canvas) to clear AA at 4.8:1.
+  static const Color lightOnSurfaceMuted = Color(0xFF6B6F78);
   static const Color lightCardBorder = Color(0x14000000);
   static const Color lightDivider = Color(0x0F000000);
   static const Color lightPrimaryContainer = Color(0xFFD4F4F5);
@@ -66,6 +71,7 @@ class GoPlayTheme {
   static const Color surfaceContainerHighest = darkSurfaceContainerHighest;
   static const Color onSurface = darkOnSurface;
   static const Color onSurfaceVariant = darkOnSurfaceVariant;
+  static const Color onSurfaceMuted = darkOnSurfaceMuted;
   static const Color cardBorder = darkCardBorder;
 
   // ==========================================
@@ -80,7 +86,7 @@ class GoPlayTheme {
   static const LinearGradient cardGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF232428), Color(0xFF1B1C20)],
+    colors: [Color(0xFF1A1B20), Color(0xFF141519)],
   );
 
   static const LinearGradient primaryGradient = LinearGradient(
@@ -92,48 +98,10 @@ class GoPlayTheme {
   // ==========================================
   //               TEXT THEME
   // ==========================================
-  static TextTheme _buildTextTheme(TextTheme base) {
-    return GoogleFonts.interTextTheme(base).copyWith(
-      displayLarge: base.displayLarge?.copyWith(
-        fontWeight: FontWeight.w800,
-        letterSpacing: -1.0,
-      ),
-      headlineLarge: base.headlineLarge?.copyWith(
-        fontWeight: FontWeight.w800,
-        letterSpacing: -0.5,
-      ),
-      headlineMedium: base.headlineMedium?.copyWith(
-        fontWeight: FontWeight.w700,
-        letterSpacing: -0.3,
-      ),
-      headlineSmall: base.headlineSmall?.copyWith(
-        fontWeight: FontWeight.w700,
-      ),
-      titleLarge: base.titleLarge?.copyWith(
-        fontWeight: FontWeight.w700,
-        letterSpacing: -0.2,
-      ),
-      titleMedium: base.titleMedium?.copyWith(
-        fontWeight: FontWeight.w600,
-      ),
-      titleSmall: base.titleSmall?.copyWith(
-        fontWeight: FontWeight.w600,
-      ),
-      labelLarge: base.labelLarge?.copyWith(
-        fontWeight: FontWeight.w600,
-      ),
-      labelMedium: base.labelMedium?.copyWith(
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.3,
-      ),
-      labelSmall: base.labelSmall?.copyWith(
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.5,
-      ),
-      bodyLarge: base.bodyLarge?.copyWith(height: 1.4),
-      bodyMedium: base.bodyMedium?.copyWith(height: 1.4),
-    );
-  }
+  // Sizes, weights, tracking and line heights all live in
+  // `GoPlayType.textTheme()`. Read them with `Theme.of(context).textTheme`
+  // rather than declaring a local `TextStyle`.
+  static TextTheme _buildTextTheme() => GoPlayType.textTheme();
 
   // ==========================================
   //               DARK THEME
@@ -141,8 +109,8 @@ class GoPlayTheme {
   static final ThemeData darkTheme = _buildDarkTheme();
 
   static ThemeData _buildDarkTheme() {
-    final base = ThemeData.dark(useMaterial3: true);
-    final textTheme = _buildTextTheme(base.textTheme).apply(
+    final textTheme = _buildTextTheme().apply(
+      fontFamily: GoPlayType.family,
       bodyColor: darkOnSurface,
       displayColor: darkOnSurface,
     );
@@ -191,8 +159,8 @@ class GoPlayTheme {
         elevation: 0,
         centerTitle: false,
         systemOverlayStyle: SystemUiOverlayStyle.light,
-        titleTextStyle: GoogleFonts.inter(
-          fontSize: 20,
+        titleTextStyle: GoPlayType.inter(
+          fontSize: GoPlayType.lg,
           fontWeight: FontWeight.w600,
           color: darkOnSurface,
           letterSpacing: -0.3,
@@ -209,8 +177,8 @@ class GoPlayTheme {
         indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
-          return GoogleFonts.inter(
-            fontSize: 11,
+          return GoPlayType.inter(
+            fontSize: GoPlayType.xs,
             fontWeight: FontWeight.w600,
             color: selected ? darkOnSurface : darkOnSurfaceMuted,
           );
@@ -228,8 +196,8 @@ class GoPlayTheme {
       tabBarTheme: TabBarThemeData(
         labelColor: darkOnSurface,
         unselectedLabelColor: darkOnSurfaceMuted,
-        labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14),
-        unselectedLabelStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 14),
+        labelStyle: GoPlayType.inter(fontWeight: FontWeight.w600, fontSize: GoPlayType.base),
+        unselectedLabelStyle: GoPlayType.inter(fontWeight: FontWeight.w500, fontSize: GoPlayType.base),
         indicatorColor: primary,
         indicatorSize: TabBarIndicatorSize.label,
         dividerColor: darkDivider,
@@ -257,12 +225,12 @@ class GoPlayTheme {
         backgroundColor: darkSurfaceContainerHigh,
         selectedColor: primary.withAlpha(40),
         disabledColor: darkSurfaceContainer,
-        labelStyle: GoogleFonts.inter(
-          fontSize: 13,
+        labelStyle: GoPlayType.inter(
+          fontSize: GoPlayType.sm,
           fontWeight: FontWeight.w500,
           color: darkOnSurface,
         ),
-        secondaryLabelStyle: GoogleFonts.inter(fontSize: 13, color: primary),
+        secondaryLabelStyle: GoPlayType.inter(fontSize: GoPlayType.sm, color: primary),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         side: const BorderSide(color: darkCardBorder, width: 1),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -296,8 +264,8 @@ class GoPlayTheme {
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: error, width: 1),
         ),
-        hintStyle: GoogleFonts.inter(color: darkOnSurfaceMuted),
-        labelStyle: GoogleFonts.inter(color: darkOnSurfaceVariant),
+        hintStyle: GoPlayType.inter(color: darkOnSurfaceMuted),
+        labelStyle: GoPlayType.inter(color: darkOnSurfaceVariant),
         prefixIconColor: darkOnSurfaceVariant,
         suffixIconColor: darkOnSurfaceVariant,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -313,7 +281,7 @@ class GoPlayTheme {
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 14),
+          textStyle: GoPlayType.inter(fontWeight: FontWeight.w700, fontSize: GoPlayType.base),
         ),
       ),
 
@@ -323,7 +291,7 @@ class GoPlayTheme {
           foregroundColor: darkOnPrimary,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 14),
+          textStyle: GoPlayType.inter(fontWeight: FontWeight.w700, fontSize: GoPlayType.base),
         ),
       ),
 
@@ -333,7 +301,7 @@ class GoPlayTheme {
           side: const BorderSide(color: darkCardBorder, width: 1),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14),
+          textStyle: GoPlayType.inter(fontWeight: FontWeight.w600, fontSize: GoPlayType.base),
         ),
       ),
 
@@ -342,7 +310,7 @@ class GoPlayTheme {
           foregroundColor: primary,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14),
+          textStyle: GoPlayType.inter(fontWeight: FontWeight.w600, fontSize: GoPlayType.base),
         ),
       ),
 
@@ -404,12 +372,12 @@ class GoPlayTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        titleTextStyle: GoogleFonts.inter(
-          fontSize: 18,
+        titleTextStyle: GoPlayType.inter(
+          fontSize: GoPlayType.lg,
           fontWeight: FontWeight.w700,
           color: darkOnSurface,
         ),
-        contentTextStyle: GoogleFonts.inter(fontSize: 14, color: darkOnSurfaceVariant),
+        contentTextStyle: GoPlayType.inter(fontSize: GoPlayType.base, color: darkOnSurfaceVariant),
       ),
 
       bottomSheetTheme: BottomSheetThemeData(
@@ -424,7 +392,7 @@ class GoPlayTheme {
 
       snackBarTheme: SnackBarThemeData(
         backgroundColor: darkSurfaceContainerHighest,
-        contentTextStyle: GoogleFonts.inter(fontSize: 14, color: darkOnSurface),
+        contentTextStyle: GoPlayType.inter(fontSize: GoPlayType.base, color: darkOnSurface),
         actionTextColor: primary,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -436,7 +404,7 @@ class GoPlayTheme {
           color: darkSurfaceContainerHighest,
           borderRadius: BorderRadius.circular(8),
         ),
-        textStyle: GoogleFonts.inter(fontSize: 12, color: darkOnSurface),
+        textStyle: GoPlayType.inter(fontSize: GoPlayType.sm, color: darkOnSurface),
       ),
 
       popupMenuTheme: PopupMenuThemeData(
@@ -444,7 +412,7 @@ class GoPlayTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        textStyle: GoogleFonts.inter(fontSize: 14, color: darkOnSurface),
+        textStyle: GoPlayType.inter(fontSize: GoPlayType.base, color: darkOnSurface),
       ),
 
       dialogBackgroundColor: darkSurfaceContainerHigh,
@@ -459,8 +427,8 @@ class GoPlayTheme {
   static final ThemeData lightTheme = _buildLightTheme();
 
   static ThemeData _buildLightTheme() {
-    final base = ThemeData.light(useMaterial3: true);
-    final textTheme = _buildTextTheme(base.textTheme).apply(
+    final textTheme = _buildTextTheme().apply(
+      fontFamily: GoPlayType.family,
       bodyColor: lightOnSurface,
       displayColor: lightOnSurface,
     );
@@ -507,8 +475,8 @@ class GoPlayTheme {
         elevation: 0,
         centerTitle: false,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
-        titleTextStyle: GoogleFonts.inter(
-          fontSize: 20,
+        titleTextStyle: GoPlayType.inter(
+          fontSize: GoPlayType.lg,
           fontWeight: FontWeight.w600,
           color: lightOnSurface,
           letterSpacing: -0.3,
@@ -525,8 +493,8 @@ class GoPlayTheme {
         indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
-          return GoogleFonts.inter(
-            fontSize: 11,
+          return GoPlayType.inter(
+            fontSize: GoPlayType.xs,
             fontWeight: FontWeight.w600,
             color: selected ? lightOnSurface : lightOnSurfaceMuted,
           );
@@ -544,8 +512,8 @@ class GoPlayTheme {
       tabBarTheme: TabBarThemeData(
         labelColor: lightOnSurface,
         unselectedLabelColor: lightOnSurfaceMuted,
-        labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14),
-        unselectedLabelStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 14),
+        labelStyle: GoPlayType.inter(fontWeight: FontWeight.w600, fontSize: GoPlayType.base),
+        unselectedLabelStyle: GoPlayType.inter(fontWeight: FontWeight.w500, fontSize: GoPlayType.base),
         indicatorColor: primaryDark,
         indicatorSize: TabBarIndicatorSize.label,
         dividerColor: lightDivider,
@@ -572,12 +540,12 @@ class GoPlayTheme {
         backgroundColor: lightSurfaceContainerHigh,
         selectedColor: primaryDark.withAlpha(35),
         disabledColor: lightSurfaceContainer,
-        labelStyle: GoogleFonts.inter(
-          fontSize: 13,
+        labelStyle: GoPlayType.inter(
+          fontSize: GoPlayType.sm,
           fontWeight: FontWeight.w500,
           color: lightOnSurface,
         ),
-        secondaryLabelStyle: GoogleFonts.inter(fontSize: 13, color: primaryDark),
+        secondaryLabelStyle: GoPlayType.inter(fontSize: GoPlayType.sm, color: primaryDark),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         side: const BorderSide(color: lightCardBorder, width: 1),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -610,8 +578,8 @@ class GoPlayTheme {
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: error, width: 1),
         ),
-        hintStyle: GoogleFonts.inter(color: lightOnSurfaceMuted),
-        labelStyle: GoogleFonts.inter(color: lightOnSurfaceVariant),
+        hintStyle: GoPlayType.inter(color: lightOnSurfaceMuted),
+        labelStyle: GoPlayType.inter(color: lightOnSurfaceVariant),
         prefixIconColor: lightOnSurfaceVariant,
         suffixIconColor: lightOnSurfaceVariant,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -626,7 +594,7 @@ class GoPlayTheme {
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 14),
+          textStyle: GoPlayType.inter(fontWeight: FontWeight.w700, fontSize: GoPlayType.base),
         ),
       ),
 
@@ -636,7 +604,7 @@ class GoPlayTheme {
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 14),
+          textStyle: GoPlayType.inter(fontWeight: FontWeight.w700, fontSize: GoPlayType.base),
         ),
       ),
 
@@ -646,7 +614,7 @@ class GoPlayTheme {
           side: const BorderSide(color: lightCardBorder, width: 1),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14),
+          textStyle: GoPlayType.inter(fontWeight: FontWeight.w600, fontSize: GoPlayType.base),
         ),
       ),
 
@@ -655,7 +623,7 @@ class GoPlayTheme {
           foregroundColor: primaryDark,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14),
+          textStyle: GoPlayType.inter(fontWeight: FontWeight.w600, fontSize: GoPlayType.base),
         ),
       ),
 
@@ -715,12 +683,12 @@ class GoPlayTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        titleTextStyle: GoogleFonts.inter(
-          fontSize: 18,
+        titleTextStyle: GoPlayType.inter(
+          fontSize: GoPlayType.lg,
           fontWeight: FontWeight.w700,
           color: lightOnSurface,
         ),
-        contentTextStyle: GoogleFonts.inter(fontSize: 14, color: lightOnSurfaceVariant),
+        contentTextStyle: GoPlayType.inter(fontSize: GoPlayType.base, color: lightOnSurfaceVariant),
       ),
 
       bottomSheetTheme: BottomSheetThemeData(
@@ -735,7 +703,7 @@ class GoPlayTheme {
 
       snackBarTheme: SnackBarThemeData(
         backgroundColor: lightOnSurface,
-        contentTextStyle: GoogleFonts.inter(fontSize: 14, color: lightSurface),
+        contentTextStyle: GoPlayType.inter(fontSize: GoPlayType.base, color: lightSurface),
         actionTextColor: primaryLight,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -747,7 +715,7 @@ class GoPlayTheme {
           color: lightOnSurface,
           borderRadius: BorderRadius.circular(8),
         ),
-        textStyle: GoogleFonts.inter(fontSize: 12, color: lightSurface),
+        textStyle: GoPlayType.inter(fontSize: GoPlayType.sm, color: lightSurface),
       ),
 
       popupMenuTheme: PopupMenuThemeData(
@@ -755,7 +723,7 @@ class GoPlayTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        textStyle: GoogleFonts.inter(fontSize: 14, color: lightOnSurface),
+        textStyle: GoPlayType.inter(fontSize: GoPlayType.base, color: lightOnSurface),
       ),
 
       dialogBackgroundColor: lightSurfaceContainerLow,

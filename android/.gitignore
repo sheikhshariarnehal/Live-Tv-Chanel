@@ -47,3 +47,8 @@ app.*.map.json
 # DevTools profiler dumps
 dart_devtools_*.json
 
+# Local tooling & agents
+.impeccable/
+.kilo/
+.claude/
+graphify-out/

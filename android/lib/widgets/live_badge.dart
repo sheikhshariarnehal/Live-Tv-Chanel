@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
+import '../core/typography.dart';
 
 /// Pulsing LIVE badge — uses FadeTransition (single compositing layer)
 /// instead of rebuilding the entire widget tree on every animation tick.
+///
+/// Deliberately small. On a live event card the badge is the *second* red mark
+/// in the row — the card already carries the red accent bar on its left edge —
+/// so a full-size pulsing pill next to it meant two things shouting the same
+/// word. The pill is now tight enough to read as a stamp rather than a button.
+/// [fontSize] stays at the [GoPlayType.xs] legibility floor; the size comes off
+/// the padding and the dot instead.
 class LiveBadge extends StatefulWidget {
   final double fontSize;
   final EdgeInsets padding;
 
   const LiveBadge({
     super.key,
-    this.fontSize = 10,
-    this.padding = const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+    this.fontSize = GoPlayType.xs,
+    this.padding = const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
   });
 
   @override
@@ -46,7 +54,7 @@ class _LiveBadgeState extends State<LiveBadge>
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: GoPlayTheme.liveBadge,
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(5),
           ),
           child: Padding(
             padding: widget.padding,
@@ -54,8 +62,8 @@ class _LiveBadgeState extends State<LiveBadge>
               mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(
-                  width: 6,
-                  height: 6,
+                  width: 5,
+                  height: 5,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -63,15 +71,14 @@ class _LiveBadgeState extends State<LiveBadge>
                     ),
                   ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 3),
                 Text(
                   'LIVE',
-                  style: TextStyle(
+                  style: GoPlayType.meta.copyWith(
                     color: Colors.white,
                     fontSize: widget.fontSize,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1,
                   ),
+                  maxLines: 1,
                 ),
               ],
             ),

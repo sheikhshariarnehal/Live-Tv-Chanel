@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme.dart';
+import '../../core/typography.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/update_notifier.dart';
 import '../../widgets/tv_focus_wrapper.dart';
@@ -92,10 +93,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: GoPlayTheme.darkSurfaceContainerHigh,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Clear Application Cache?', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text('Clear Application Cache?', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
         content: const Text(
           'This will clear stored channel icons and offline schedule data. Fresh data will be redownloaded automatically.',
-          style: TextStyle(color: GoPlayTheme.darkOnSurfaceVariant, fontSize: 13, height: 1.4),
+          style: TextStyle(color: GoPlayTheme.darkOnSurfaceVariant, fontSize: GoPlayType.base, height: 1.4),
         ),
         actions: [
           TextButton(
@@ -109,7 +110,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('CLEAR CACHE', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: const Text('CLEAR CACHE', style: TextStyle(fontWeight: FontWeight.w700)),
           ),
         ],
       ),
@@ -175,9 +176,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               title: const Text(
                 'Settings',
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                  color: GoPlayTheme.darkOnSurface,
+                  fontSize: GoPlayType.lg,
+                  fontWeight: FontWeight.w700,
                   letterSpacing: -0.3,
                 ),
               ),
@@ -376,7 +377,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               Text(
                                 'Downloading: ${(updateState.downloadProgress * 100).toStringAsFixed(0)}%',
                                 style: const TextStyle(
-                                  fontSize: 12,
+                                  fontSize: GoPlayType.sm,
                                   fontWeight: FontWeight.w700,
                                   color: GoPlayTheme.primary,
                                 ),
@@ -391,7 +392,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 ),
                                 child: const Text(
                                   'CANCEL',
-                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: GoPlayTheme.error),
+                                  style: TextStyle(fontSize: GoPlayType.sm, fontWeight: FontWeight.w700, color: GoPlayTheme.error),
                                 ),
                               ),
                             ],
@@ -401,7 +402,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         // Installing Status
                         if (updateState.status == UpdateStatus.installing) ...[
                           const SizedBox(height: 12),
-                          const Row(
+                          Row(
                             children: [
                               SizedBox(
                                 width: 16,
@@ -414,7 +415,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               SizedBox(width: 12),
                               Text(
                                 'Launching Android installer...',
-                                style: TextStyle(color: GoPlayTheme.darkOnSurfaceVariant, fontSize: 13),
+                                style: GoPlayType.body.copyWith(color: GoPlayTheme.darkOnSurfaceVariant),
                               ),
                             ],
                           ),
@@ -435,9 +436,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         Text(
                           'GOPLAY TV STREAMING',
                           style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: GoPlayTheme.darkOnSurfaceVariant.withValues(alpha: 0.6),
+                            fontSize: GoPlayType.sm,
+                            fontWeight: FontWeight.w700,
+                            color: GoPlayTheme.darkOnSurfaceVariant,
                             letterSpacing: 1.5,
                           ),
                         ),
@@ -446,8 +447,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           'High-Performance IPTV Player • Build v${updateState.currentVersion}',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 11,
-                            color: GoPlayTheme.darkOnSurfaceVariant.withValues(alpha: 0.4),
+                            fontSize: GoPlayType.xs,
+                            color: GoPlayTheme.darkOnSurfaceVariant,
                             height: 1.4,
                           ),
                         ),
@@ -471,7 +472,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       child: Text(
         title,
         style: const TextStyle(
-          fontSize: 11,
+          fontSize: GoPlayType.xs,
           fontWeight: FontWeight.w800,
           color: GoPlayTheme.darkOnSurfaceVariant,
           letterSpacing: 1.5,
@@ -527,16 +528,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  fontSize: GoPlayType.md,
+                  fontWeight: FontWeight.w700,
+                  color: GoPlayTheme.darkOnSurface,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 subtitle,
                 style: const TextStyle(
-                  fontSize: 11,
+                  fontSize: GoPlayType.xs,
                   color: GoPlayTheme.darkOnSurfaceVariant,
                 ),
               ),
@@ -554,14 +555,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         Text(
           label,
           style: const TextStyle(
-            fontSize: 13,
+            fontSize: GoPlayType.base,
             color: GoPlayTheme.darkOnSurfaceVariant,
           ),
         ),
         Text(
           value,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: GoPlayType.base,
             fontWeight: FontWeight.w700,
             color: isHighlight ? GoPlayTheme.primary : Colors.white,
           ),
@@ -589,8 +590,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: Text(
                 error,
                 style: const TextStyle(
-                  color: Color(0xFFFCA5A5),
-                  fontSize: 12,
+                  color: GoPlayTheme.error,
+                  fontSize: GoPlayType.sm,
                   height: 1.3,
                 ),
               ),
@@ -617,16 +618,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: GoPlayType.base,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: GoPlayTheme.darkOnSurface,
                 ),
               ),
               const SizedBox(height: 3),
               Text(
                 subtitle,
                 style: const TextStyle(
-                  fontSize: 11,
+                  fontSize: GoPlayType.xs,
                   color: GoPlayTheme.darkOnSurfaceVariant,
                 ),
               ),
@@ -686,16 +687,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   Text(
                     title,
                     style: const TextStyle(
-                      fontSize: 14,
+                      fontSize: GoPlayType.base,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: GoPlayTheme.darkOnSurface,
                     ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     subtitle,
                     style: const TextStyle(
-                      fontSize: 11,
+                      fontSize: GoPlayType.xs,
                       color: GoPlayTheme.darkOnSurfaceVariant,
                     ),
                   ),
@@ -727,8 +728,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   child: Text(
                     option,
                     style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      fontSize: GoPlayType.sm,
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                       color: isSelected ? Colors.black : Colors.white,
                     ),
                   ),
@@ -775,8 +776,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 label,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
+                  fontSize: GoPlayType.xs,
+                  fontWeight: FontWeight.w700,
                   letterSpacing: 0.5,
                   color: color,
                 ),
@@ -814,8 +815,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Text(
                 'CHECKING FOR UPDATES...',
                 style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+                  fontSize: GoPlayType.sm,
+                  fontWeight: FontWeight.w700,
                   color: GoPlayTheme.darkOnSurfaceVariant,
                   letterSpacing: 1.0,
                 ),
@@ -889,8 +890,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         label: const Text(
           'CHECK FOR UPDATES',
           style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
+            fontSize: GoPlayType.sm,
+            fontWeight: FontWeight.w700,
             letterSpacing: 1.0,
           ),
         ),
@@ -927,8 +928,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           label,
           style: const TextStyle(
             color: Colors.black,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
+            fontSize: GoPlayType.sm,
+            fontWeight: FontWeight.w700,
             letterSpacing: 1.0,
           ),
         ),

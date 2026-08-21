@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme.dart';
+import '../../core/typography.dart';
 import '../../models/channel.dart';
 import '../../providers/app_providers.dart';
 import '../tv_focus_wrapper.dart';
@@ -16,8 +17,8 @@ import '../tv_focus_wrapper.dart';
 const double _kCardVerticalPadding = 8.0;
 const double _kAvatarSize = 54.0;
 const double _kAvatarGap = 8.0;
-const double _kNameFontSize = 11.5;
-const double _kNameLineHeight = 1.2;
+const double _kNameFontSize = GoPlayType.xs;
+const double _kNameLineHeight = GoPlayType.leadingSnug;
 const int _kNameMaxLines = 2;
 
 /// Channel grid card.
@@ -71,7 +72,7 @@ class ChannelCard extends ConsumerWidget {
         channel.initials,
         style: TextStyle(
           color: cs.onSurfaceVariant,
-          fontSize: 14,
+          fontSize: GoPlayType.base,
           fontWeight: FontWeight.w800,
           letterSpacing: 1,
         ),
@@ -86,8 +87,8 @@ class ChannelCard extends ConsumerWidget {
       // ExcludeSemantics, hiding every channel from screen readers. One
       // container node per card keeps the tree small without hiding content.
       semanticLabel: hasQuality
-          ? '${channel.name}, $quality${isFavorite ? ', favorite' : ''}'
-          : '${channel.name}${isFavorite ? ', favorite' : ''}',
+          ? '${channel.displayName}, $quality${isFavorite ? ', favorite' : ''}'
+          : '${channel.displayName}${isFavorite ? ', favorite' : ''}',
       child: SizedBox.expand(
         child: DecoratedBox(
           decoration: BoxDecoration(
@@ -156,8 +157,8 @@ class ChannelCard extends ConsumerWidget {
                     // widths and at any text scale above ~1.15.
                     Flexible(
                       child: Text(
-                        channel.name,
-                        style: TextStyle(
+                        channel.displayName,
+                        style: GoPlayType.inter(
                           color: cs.onSurface,
                           fontSize: _kNameFontSize,
                           fontWeight: FontWeight.w600,
@@ -190,17 +191,13 @@ class ChannelCard extends ConsumerWidget {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 1,
+                        horizontal: 5,
+                        vertical: 2,
                       ),
                       child: Text(
                         quality,
-                        style: TextStyle(
-                          color: badgeText,
-                          fontSize: 8,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.5,
-                        ),
+                        style: GoPlayType.meta.copyWith(color: badgeText),
+                        maxLines: 1,
                       ),
                     ),
                   ),
@@ -215,9 +212,9 @@ class ChannelCard extends ConsumerWidget {
                   top: 5,
                   right: 5,
                   child: Icon(
-                    Icons.favorite_rounded,
-                    size: 13,
-                    color: GoPlayTheme.liveBadge,
+                    Icons.bookmark_rounded,
+                    size: 14,
+                    color: GoPlayTheme.primary,
                   ),
                 ),
             ],

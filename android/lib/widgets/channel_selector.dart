@@ -6,6 +6,7 @@ import '../models/event.dart';
 import '../models/channel.dart';
 import '../providers/app_providers.dart';
 import '../core/theme.dart';
+import '../core/typography.dart';
 
 void showChannelSelector({
   required BuildContext context,
@@ -61,21 +62,22 @@ void showChannelSelector({
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Select Channel',
-                          style: TextStyle(
+                          style: GoPlayType.subtitle.copyWith(
                             color: GoPlayTheme.onSurface,
-                            fontSize: 16,
                             fontWeight: FontWeight.w700,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${event.homeTeam.name} vs ${event.awayTeam.name}',
-                          style: const TextStyle(
+                          style: GoPlayType.bodySmall.copyWith(
                             color: GoPlayTheme.onSurfaceVariant,
-                            fontSize: 12,
                           ),
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
@@ -139,12 +141,12 @@ void showChannelSelector({
                                 ),
                         ),
                         title: Text(
-                          channel.name,
-                          style: const TextStyle(
+                          channel.displayName,
+                          style: GoPlayType.label.copyWith(
                             color: GoPlayTheme.onSurface,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         trailing: const Icon(
                           Icons.play_arrow_rounded,

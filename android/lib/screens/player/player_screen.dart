@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../core/theme.dart';
+import '../../core/typography.dart';
 import '../../providers/app_providers.dart';
 import '../../models/channel.dart';
 import '../../widgets/player/channel_video_player.dart';
@@ -65,10 +66,12 @@ const _kPlayingTagDeco = BoxDecoration(
   ),
 );
 const _kPlayingTagStyle = TextStyle(
+  fontFamily: GoPlayType.family,
   color: GoPlayTheme.primary,
-  fontSize: 8,
+  fontSize: GoPlayType.xs,
   fontWeight: FontWeight.w800,
-  letterSpacing: 0.4,
+  height: GoPlayType.leadingFlat,
+  letterSpacing: GoPlayType.trackingMeta,
 );
 
 // Server chip decorations
@@ -104,39 +107,56 @@ const _kAvatarDeco = BoxDecoration(
 );
 
 const _kSectionLabelStyle = TextStyle(
-  color: Colors.white60,
-  fontSize: 12,
+  fontFamily: GoPlayType.family,
+  color: GoPlayTheme.darkOnSurfaceVariant,
+  fontSize: GoPlayType.sm,
   fontWeight: FontWeight.w700,
-  letterSpacing: 1.5,
+  height: GoPlayType.leadingFlat,
+  letterSpacing: GoPlayType.trackingWide,
 );
 
 const _kTileNameActiveStyle = TextStyle(
+  fontFamily: GoPlayType.family,
+  height: GoPlayType.leadingSnug,
   color: GoPlayTheme.primary,
-  fontSize: 13.5,
+  fontSize: GoPlayType.base,
   fontWeight: FontWeight.w700,
   letterSpacing: 0.1,
 );
 const _kTileNameNormalStyle = TextStyle(
-  color: Colors.white,
-  fontSize: 13.5,
+  fontFamily: GoPlayType.family,
+  height: GoPlayType.leadingSnug,
+  color: GoPlayTheme.darkOnSurface,
+  fontSize: GoPlayType.base,
   fontWeight: FontWeight.w600,
   letterSpacing: 0.1,
 );
 
 const _kTileMetaActiveStyle = TextStyle(
-  color: Color(0xCC00ADB5),
-  fontSize: 10.5,
+  fontFamily: GoPlayType.family,
+  color: GoPlayTheme.primary,
+  fontSize: GoPlayType.xs,
+  height: GoPlayType.leadingSnug,
 );
-const _kTileMetaNormalStyle = TextStyle(color: Colors.white38, fontSize: 10.5);
+const _kTileMetaNormalStyle = TextStyle(
+  fontFamily: GoPlayType.family,
+  color: GoPlayTheme.darkOnSurfaceMuted,
+  fontSize: GoPlayType.xs,
+  height: GoPlayType.leadingSnug,
+);
 const _kChipActiveStyle = TextStyle(
-  color: Colors.black,
-  fontSize: 11.5,
+  fontFamily: GoPlayType.family,
+  height: GoPlayType.leadingSnug,
+  color: GoPlayTheme.darkOnPrimary,
+  fontSize: GoPlayType.sm,
   fontWeight: FontWeight.w700,
   letterSpacing: 0.1,
 );
 const _kChipInactiveStyle = TextStyle(
-  color: Colors.white, // Increased text opacity for maximum readability
-  fontSize: 11.5,
+  fontFamily: GoPlayType.family,
+  height: GoPlayType.leadingSnug,
+  color: GoPlayTheme.darkOnSurface,
+  fontSize: GoPlayType.sm,
   fontWeight: FontWeight.w600,
   letterSpacing: 0.1,
 );
@@ -147,7 +167,21 @@ final _kHoverMatrix = Matrix4.translationValues(0.0, -1.0, 0.0);
 
 class PlayerScreen extends ConsumerStatefulWidget {
   final String channelId;
+
+  /// The ordered channel list this player session is scoped to.
+  ///
+  /// Despite the name this is not only an event's channels — it is "the list
+  /// the user came from", and it drives prev/next, the side panel, and the
+  /// top-bar chips. An event passes its own channels; the Home rails pass the
+  /// rail they were tapped in.
+  ///
+  /// When null, the player falls back to every channel sharing the current
+  /// channel's category. That fallback is right for the category grid and
+  /// search, and wrong for any curated list — a caller that renders a specific
+  /// set of channels must pass that set here, or the user will be dropped into
+  /// the whole category on the first channel switch.
   final List<String>? eventChannels;
+
   final bool forceFullscreen;
 
   const PlayerScreen({
@@ -425,10 +459,10 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
               );
 
               if (channel == null) {
-                return const Center(
+                return Center(
                   child: Text(
                     'Channel not found',
-                    style: TextStyle(color: Colors.white),
+                    style: GoPlayType.body.copyWith(color: GoPlayTheme.darkOnSurface),
                   ),
                 );
               }
@@ -663,7 +697,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
             error: (e, s) => Center(
               child: Text(
                 'Error: $e',
-                style: const TextStyle(color: GoPlayTheme.error),
+                style: GoPlayType.body.copyWith(color: GoPlayTheme.error),
               ),
             ),
           ),
@@ -859,20 +893,22 @@ class _ChannelAvatar extends StatelessWidget {
                 placeholder: (context, url) => Center(
                   child: Text(
                     initials,
-                    style: TextStyle(
-                      color: Colors.white70,
+                    style: GoPlayType.inter(
+                      color: GoPlayTheme.darkOnSurfaceVariant,
                       fontSize: size * 0.28,
                       fontWeight: FontWeight.w800,
+                      height: GoPlayType.leadingFlat,
                     ),
                   ),
                 ),
                 errorWidget: (context, url, err) => Center(
                   child: Text(
                     initials,
-                    style: TextStyle(
-                      color: Colors.white70,
+                    style: GoPlayType.inter(
+                      color: GoPlayTheme.darkOnSurfaceVariant,
                       fontSize: size * 0.28,
                       fontWeight: FontWeight.w800,
+                      height: GoPlayType.leadingFlat,
                     ),
                   ),
                 ),
@@ -880,10 +916,11 @@ class _ChannelAvatar extends StatelessWidget {
             : Center(
                 child: Text(
                   initials,
-                  style: TextStyle(
-                    color: Colors.white70,
+                  style: GoPlayType.inter(
+                    color: GoPlayTheme.darkOnSurfaceVariant,
                     fontSize: size * 0.28,
                     fontWeight: FontWeight.w800,
+                    height: GoPlayType.leadingFlat,
                   ),
                 ),
               ),
@@ -938,12 +975,13 @@ class _RelatedChannelsListState extends ConsumerState<_RelatedChannelsList> {
         }
 
         if (related.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.all(20),
+          return Padding(
+            padding: const EdgeInsets.all(20),
             child: Center(
               child: Text(
                 'No other channels in this category',
-                style: TextStyle(color: Colors.white38, fontSize: 13),
+                textAlign: TextAlign.center,
+                style: GoPlayType.body.copyWith(color: GoPlayTheme.darkOnSurfaceMuted),
               ),
             ),
           );
@@ -1100,7 +1138,7 @@ class _ChannelTileState extends State<_ChannelTile> {
               child: Row(
                 children: [
                   _ChannelAvatar(
-                    name: channel.name,
+                    name: channel.displayName,
                     logo: channel.logo,
                     size: 38,
                   ),
@@ -1114,7 +1152,7 @@ class _ChannelTileState extends State<_ChannelTile> {
                           children: [
                             Expanded(
                               child: Text(
-                                channel.name,
+                                channel.displayName,
                                 style: isCurrent
                                     ? _kTileNameActiveStyle
                                     : _kTileNameNormalStyle,
@@ -1269,7 +1307,7 @@ class _FullscreenTopBar extends ConsumerWidget {
                           final ch = related[index];
                           final isCurrent = ch.id == currentChannelId;
                           return _ServerChip(
-                            label: ch.name,
+                            label: ch.displayName,
                             isCurrent: isCurrent,
                             onTap: () => onChannelSelected(ch.id),
                             onFocusDown: onFocusDown,

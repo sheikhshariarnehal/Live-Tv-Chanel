@@ -1,5 +1,7 @@
 import 'dart:html' as html;
 import 'package:flutter/material.dart';
+import '../../core/theme.dart';
+import '../../core/typography.dart';
 import '../../models/channel.dart';
 import 'channel_video_player.dart';
 
@@ -157,7 +159,13 @@ $streamUrl
           const Center(
             child: Text(
               'Web player — use Android app for best experience',
-              style: TextStyle(color: Colors.white60, fontSize: 14),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: GoPlayType.family,
+                color: GoPlayTheme.darkOnSurfaceVariant,
+                fontSize: GoPlayType.base,
+                height: GoPlayType.leadingBody,
+              ),
             ),
           ),
 
@@ -201,18 +209,22 @@ $streamUrl
                           color: Colors.red,
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: Row(
+                        child: const Row(
                           mainAxisSize: MainAxisSize.min,
-                          children: const [
+                          children: [
                             Icon(Icons.circle, color: Colors.white, size: 6),
                             SizedBox(width: 4),
                             Text(
                               'LIVE',
                               style: TextStyle(
+                                fontFamily: GoPlayType.family,
                                 color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
+                                fontSize: GoPlayType.xs,
+                                fontWeight: FontWeight.w800,
+                                height: GoPlayType.leadingFlat,
+                                letterSpacing: GoPlayType.trackingMeta,
                               ),
+                              maxLines: 1,
                             ),
                           ],
                         ),
